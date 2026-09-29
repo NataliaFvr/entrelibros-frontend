@@ -1,18 +1,21 @@
-import { BrowserRouter } from "react-router-dom";
-import AppRoutes from "./routes/AppRoutes";
-import { LibrosProvider } from "./context/LibrosContext";
-import { ToastProvider } from "./context/ToastContext";
+import { BrowserRouter } from "react-router-dom"
+import AppRoutes from "./routes/AppRoutes"
+import ToastProvider from "./context/ToastContext"
+import AuthProvider from "./context/AuthContext"
+import LibrosProvider from "./context/LibrosContext"
 
-function App() {
+const App = () => {
   return (
     <BrowserRouter>
       <ToastProvider>
-        <LibrosProvider>
-          <AppRoutes />
-        </LibrosProvider>
+        <AuthProvider>
+          <LibrosProvider>
+            <AppRoutes />
+          </LibrosProvider>
+        </AuthProvider>
       </ToastProvider>
     </BrowserRouter>
-  );
+  )
 }
 
-export default App;
+export default App

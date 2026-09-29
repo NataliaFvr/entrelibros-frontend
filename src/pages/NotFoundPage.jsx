@@ -2,10 +2,10 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useLibros } from '../hooks/useLibros'
 import { masVendidos } from '../utils/filtrarLibros'
-import BookCarousel from '../componentes/common/BookCarousel'
-import MiniDeco from '../componentes/home/MiniDeco'
+import BookCarousel from '../componentes/BookCarousel'
+import MiniDeco from '../componentes/MiniDeco'
 
-export default function NotFoundPage({ ruta }) {
+const NotFoundPage = ({ ruta }) => {
   const navigate = useNavigate()
   const { libros } = useLibros()
   const [q, setQ] = useState('')
@@ -40,3 +40,5 @@ export default function NotFoundPage({ ruta }) {
     </main>
   )
 }
+
+export default NotFoundPage

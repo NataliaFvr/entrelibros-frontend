@@ -3,7 +3,7 @@ import { norm } from '../utils/format'
 import { masVendidos } from '../utils/filtrarLibros'
 
 // Sugerencias del buscador: hasta 2 autores + 5 libros + "ver todos"
-export default function useSugerencias(libros, texto) {
+const useSugerencias = (libros, texto) => {
   return useMemo(() => {
     const q = norm(texto.trim())
     if (!q) return []
@@ -27,3 +27,5 @@ export default function useSugerencias(libros, texto) {
     ]
   }, [libros, texto])
 }
+
+export default useSugerencias

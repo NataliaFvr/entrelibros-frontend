@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 
 // Cuántos lomos entran en el ancho de la estantería (~64px cada uno, mínimo 4)
-export default function useShelfCount(max) {
+const useShelfCount = (max) => {
   const ref = useRef(null)
   const [n, setN] = useState(4)
 
@@ -17,3 +17,5 @@ export default function useShelfCount(max) {
 
   return [ref, n]
 }
+
+export default useShelfCount

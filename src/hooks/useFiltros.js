@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { FILTROS_INICIALES } from '../utils/filtrarLibros'
 
 // Estado de los filtros del catálogo. Cualquier cambio de filtro vuelve a la página 1.
-export default function useFiltros(inicial) {
+const useFiltros = (inicial) => {
   const [f, setF] = useState(inicial)
 
   const set = (cambios) => setF((prev) => ({ ...prev, ...cambios, page: 1 }))
@@ -18,3 +18,5 @@ export default function useFiltros(inicial) {
 
   return { f, set, setPage, toggle, limpiar }
 }
+
+export default useFiltros

@@ -2,24 +2,26 @@ import { useMemo } from 'react'
 import { useParams } from 'react-router-dom'
 import { useLibros } from '../hooks/useLibros'
 import useResenias from '../hooks/useResenias'
-import useRequiereLogin from '../hooks/useRequiereLogin'
+import { useAuth } from '../hooks/useAuth'
+import { useToast } from '../hooks/useToast'
 import { masVendidos } from '../utils/filtrarLibros'
-import BookBreadcrumb from '../componentes/book/BookBreadcrumb'
-import Gallery from '../componentes/book/Gallery'
-import BookInfo from '../componentes/book/BookInfo'
-import BuyBox from '../componentes/book/BuyBox'
-import SellerBox from '../componentes/book/SellerBox'
-import SpecSection from '../componentes/book/SpecSection'
-import DescriptionSection from '../componentes/book/DescriptionSection'
-import ReviewsSection from '../componentes/book/ReviewsSection'
-import RelatedSection from '../componentes/book/RelatedSection'
+import BookBreadcrumb from '../componentes/BookBreadcrumb'
+import Gallery from '../componentes/Gallery'
+import BookInfo from '../componentes/BookInfo'
+import BuyBox from '../componentes/BuyBox'
+import SellerBox from '../componentes/SellerBox'
+import SpecSection from '../componentes/SpecSection'
+import DescriptionSection from '../componentes/DescriptionSection'
+import ReviewsSection from '../componentes/ReviewsSection'
+import RelatedSection from '../componentes/RelatedSection'
 import NotFoundPage from './NotFoundPage'
 
 // Stock de ejemplo hasta que el back lo informe
 const stockDe = (l) => (l.stock != null ? l.stock : l.usado ? 1 : 1 + ((l.id * 7) % 30))
 
-function Detalle({ libro, libros }) {
-  const requiereLogin = useRequiereLogin()
+const Detalle = ({ libro, libros }) => {
+  const { requiereLogin, marks, toggleMark, addToCart } = useAuth()
+  const toast = useToast()
   const { resenias, promedio } = useResenias(libro.id)
 
   const { rank, delVendedor, mismoAutor, mismaCategoria } = useMemo(() => {
@@ -32,17 +34,23 @@ function Detalle({ libro, libros }) {
     }
   }, [libros, libro])
 
-  // TODO: guardar en Marcapáginas / agregar al carrito / comprar cuando exista la sesión y el carrito
-  const accion = () => { requiereLogin() }
+  const guardar = () => { if (!requiereLogin('fav')) toggleMark(libro.id) }
+  const alCarrito = () => { if (!requiereLogin('cart')) addToCart(libro) }
+  // TODO: pantalla de pago
+  const comprar = () => {
+    if (requiereLogin('cart')) return
+    addToCart(libro)
+    toast('El pago llega en la próxima etapa')
+  }
 
   return (
     <main className="det">
       <BookBreadcrumb libro={libro} />
       <div className="det-grid">
         <Gallery libro={libro} />
-        <BookInfo libro={libro} rank={rank} resumen={{ promedio, cantidad: resenias.length }} guardado={false} onGuardar={accion} />
+        <BookInfo libro={libro} rank={rank} resumen={{ promedio, cantidad: resenias.length }} guardado={marks.includes(libro.id)} onGuardar={guardar} />
         <div className="buy-col">
-          <BuyBox libro={libro} stock={stockDe(libro)} onComprar={accion} onCarrito={accion} />
+          <BuyBox libro={libro} stock={stockDe(libro)} onComprar={comprar} onCarrito={alCarrito} />
           <SellerBox vendedor={libro.v} cantidad={delVendedor.length} />
         </div>
       </div>
@@ -56,7 +64,7 @@ function Detalle({ libro, libros }) {
   )
 }
 
-export default function BookDetailPage() {
+const BookDetailPage = () => {
   const { id } = useParams()
   const { libros, cargando } = useLibros()
   if (cargando) return <main className="det" />
@@ -65,3 +73,5 @@ export default function BookDetailPage() {
   if (!libro) return <NotFoundPage ruta={`/libro/${id}`} />
   return <Detalle key={libro.id} libro={libro} libros={libros} />
 }
+
+export default BookDetailPage

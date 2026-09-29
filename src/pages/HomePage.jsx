@@ -1,15 +1,15 @@
 import { useMemo } from 'react'
 import { useLibros } from '../hooks/useLibros'
 import { masVendidos } from '../utils/filtrarLibros'
-import Hero from '../componentes/home/Hero'
-import SeccionLibros from '../componentes/common/SeccionLibros'
-import FlashSale from '../componentes/home/FlashSale'
-import Tagline from '../componentes/home/Tagline'
-import CategoryMarquee from '../componentes/home/CategoryMarquee'
-import MiniDeco from '../componentes/home/MiniDeco'
-import AuthorMarquee from '../componentes/home/AuthorMarquee'
+import Hero from '../componentes/Hero'
+import SeccionLibros from '../componentes/SeccionLibros'
+import FlashSale from '../componentes/FlashSale'
+import Tagline from '../componentes/Tagline'
+import CategoryMarquee from '../componentes/CategoryMarquee'
+import MiniDeco from '../componentes/MiniDeco'
+import AuthorMarquee from '../componentes/AuthorMarquee'
 
-export default function HomePage() {
+const HomePage = () => {
   const { libros, categorias } = useLibros()
 
   const { best, conDesc, topDesc, autores } = useMemo(() => {
@@ -37,3 +37,5 @@ export default function HomePage() {
     </>
   )
 }
+
+export default HomePage

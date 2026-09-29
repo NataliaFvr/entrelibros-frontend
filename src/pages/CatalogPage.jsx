@@ -5,13 +5,13 @@ import useFiltros from '../hooks/useFiltros'
 import { PAGE_SIZE, filtrarLibros, masVendidos } from '../utils/filtrarLibros'
 import { filtrosDesdeURL } from '../utils/filtrosURL'
 import { plural } from '../utils/format'
-import SortSelect from '../componentes/catalog/SortSelect'
-import ActiveChips from '../componentes/catalog/ActiveChips'
-import FilterSidebar from '../componentes/catalog/FilterSidebar'
-import ProductGrid from '../componentes/catalog/ProductGrid'
-import Pager from '../componentes/catalog/Pager'
+import SortSelect from '../componentes/SortSelect'
+import ActiveChips from '../componentes/ActiveChips'
+import FilterSidebar from '../componentes/FilterSidebar'
+import ProductGrid from '../componentes/ProductGrid'
+import Pager from '../componentes/Pager'
 
-function Catalogo({ inicial }) {
+const Catalogo = ({ inicial }) => {
   const { libros, categorias } = useLibros()
   const { f, set, setPage, toggle, limpiar } = useFiltros(inicial)
   const [filtrosAbiertos, setFiltrosAbiertos] = useState(false)
@@ -49,9 +49,11 @@ function Catalogo({ inicial }) {
 }
 
 // Al cambiar la URL (menú, buscador, "Ver todo") se reinician los filtros desde la nueva búsqueda
-export default function CatalogPage() {
+const CatalogPage = () => {
   const { search } = useLocation()
   const { categorias, cargando } = useLibros()
   if (cargando) return <main className="cat" />
   return <Catalogo key={search} inicial={filtrosDesdeURL(search, categorias)} />
 }
+
+export default CatalogPage

@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { getResenias } from '../services/librosService'
 
 // Reseñas de un libro + promedio
-export default function useResenias(libroId) {
+const useResenias = (libroId) => {
   const [resenias, setResenias] = useState([])
 
   useEffect(() => {
@@ -17,3 +17,5 @@ export default function useResenias(libroId) {
   )
   return { resenias, promedio }
 }
+
+export default useResenias

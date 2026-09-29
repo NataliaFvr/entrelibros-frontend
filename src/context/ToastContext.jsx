@@ -1,7 +1,7 @@
 import { useCallback, useRef, useState } from 'react'
 import { ToastCtx } from './toastCtx'
 
-export function ToastProvider({ children }) {
+const ToastProvider = ({ children }) => {
   const [msg, setMsg] = useState('')
   const timer = useRef(null)
 
@@ -18,3 +18,5 @@ export function ToastProvider({ children }) {
     </ToastCtx.Provider>
   )
 }
+
+export default ToastProvider
