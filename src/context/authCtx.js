@@ -1,7 +1,7 @@
 import { createContext } from 'react'
 
 export const AuthCtx = createContext({
-  user: null, perfil: {}, cartCount: 0, marks: [], gate: null, verificacion: {},
-  login: () => ({}), registrar: () => {}, logout: () => {}, actualizarPerfil: () => {},
+  user: null, perfil: {}, cartCount: 0, marks: [], direcciones: [], gate: null, verificacion: {},
+  login: () => ({}), registrar: () => {}, logout: () => {}, actualizarPerfil: () => {}, agregarDireccion: () => {}, eliminarDireccion: () => {},
   requiereLogin: () => false, cerrarGate: () => {}, toggleMark: () => {}, addToCart: () => {},
 })

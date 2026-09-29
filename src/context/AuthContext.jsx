@@ -9,6 +9,7 @@ import LoginGate from '../componentes/LoginGate'
 const claveMarks = (u) => `entrelibros_marcapaginas_${u.nombreUsuario}`
 const claveCart = (u) => `entrelibros_cart_${u.nombreUsuario}`
 const clavePerfil = (u) => `entrelibros_perfil_${u.nombreUsuario}` // { avatar, foto }
+const claveDir = (u) => `entrelibros_direcciones_${u.nombreUsuario}` // [{ alias, calle, ciudad, cp, prov }]
 
 const AuthProvider = ({ children }) => {
   const toast = useToast()
@@ -16,6 +17,7 @@ const AuthProvider = ({ children }) => {
   const [marks, setMarks] = useState(() => (user ? leer(claveMarks(user), []) : []))
   const [cart, setCart] = useState(() => (user ? leer(claveCart(user), []) : []))
   const [perfil, setPerfil] = useState(() => (user ? leer(clavePerfil(user), {}) : {}))
+  const [direcciones, setDirecciones] = useState(() => (user ? leer(claveDir(user), []) : []))
   const [gate, setGate] = useState(null) // null = cerrado, si no: 'cart' | 'fav' | 'review' | 'sell'
 
   const entrar = (u, saludo) => {
@@ -23,6 +25,7 @@ const AuthProvider = ({ children }) => {
     setMarks(leer(claveMarks(u), []))
     setCart(leer(claveCart(u), []))
     setPerfil(leer(clavePerfil(u), {}))
+    setDirecciones(leer(claveDir(u), []))
     toast(saludo || `¡Hola, ${u.nombre}!`)
   }
 
@@ -50,6 +53,7 @@ const AuthProvider = ({ children }) => {
     setMarks([])
     setCart([])
     setPerfil({})
+    setDirecciones([])
     toast('Cerraste sesión')
   }
 
@@ -59,12 +63,25 @@ const AuthProvider = ({ children }) => {
     if (v.pw) cambios.contrasena = v.pw
     const nuevo = actualizarUsuario(user.nombreUsuario, cambios)
     if (nuevo.nombreUsuario !== user.nombreUsuario) {
-      ;[claveMarks, claveCart, clavePerfil].forEach((clave) => mover(clave(user), clave(nuevo)))
+      ;[claveMarks, claveCart, clavePerfil, claveDir].forEach((clave) => mover(clave(user), clave(nuevo)))
     }
     guardar(clavePerfil(nuevo), nuevoPerfil)
     setUser(nuevo)
     setPerfil(nuevoPerfil)
     toast('Perfil actualizado')
+  }
+
+  const agregarDireccion = (d) => {
+    const nuevas = [...direcciones, d]
+    setDirecciones(nuevas)
+    guardar(claveDir(user), nuevas)
+    toast('Dirección guardada')
+  }
+
+  const eliminarDireccion = (indice) => {
+    const nuevas = direcciones.filter((_, i) => i !== indice)
+    setDirecciones(nuevas)
+    guardar(claveDir(user), nuevas)
   }
 
   // Corta la acción y muestra el modal si no hay sesión (true = hay que loguearse)
@@ -94,8 +111,8 @@ const AuthProvider = ({ children }) => {
   }
 
   const value = {
-    user, perfil, marks, gate, verificacion, cartCount: cart.reduce((n, c) => n + c.q, 0),
-    login, registrar, logout, actualizarPerfil, requiereLogin, cerrarGate: () => setGate(null), toggleMark, addToCart,
+    user, perfil, marks, direcciones, gate, verificacion, cartCount: cart.reduce((n, c) => n + c.q, 0),
+    login, registrar, logout, actualizarPerfil, agregarDireccion, eliminarDireccion, requiereLogin, cerrarGate: () => setGate(null), toggleMark, addToCart,
   }
 
   return (

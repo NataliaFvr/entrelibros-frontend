@@ -5,11 +5,13 @@ import UserHead from '../componentes/UserHead'
 import AccountTabs from '../componentes/AccountTabs'
 import ProfileCard from '../componentes/ProfileCard'
 import EditProfileForm from '../componentes/EditProfileForm'
+import SavedBooks from '../componentes/SavedBooks'
+import AddressPanel from '../componentes/AddressPanel'
 import ComingSoon from '../componentes/ComingSoon'
 
-const PROXIMAS = { marcapaginas: 'Marcapáginas', compras: 'Historial de Compras', direcciones: 'Direcciones' }
+const PESTANIAS = ['perfil', 'editar', 'marcapaginas', 'compras', 'direcciones']
 
-// /cuenta = perfil · /cuenta/editar = editar perfil · las demás pestañas llegan en la próxima etapa
+// /cuenta = perfil · /cuenta/editar · /cuenta/marcapaginas · /cuenta/direcciones · /cuenta/compras (próxima etapa)
 const AccountPage = () => {
   const { user, perfil, logout, actualizarPerfil } = useAuth()
   const { tab = 'perfil' } = useParams()
@@ -27,7 +29,7 @@ const AccountPage = () => {
   }
 
   if (!user) return saliendo ? null : <Navigate to="/ingresar" replace state={{ from: '/cuenta' }} />
-  if (tab !== 'perfil' && tab !== 'editar' && !PROXIMAS[tab]) return <Navigate to="/cuenta" replace />
+  if (!PESTANIAS.includes(tab)) return <Navigate to="/cuenta" replace />
 
   const pestania = tab === 'editar' ? 'perfil' : tab
   const irA = (t) => navigate(t === 'perfil' ? '/cuenta' : `/cuenta/${t}`)
@@ -39,7 +41,9 @@ const AccountPage = () => {
       <AccountTabs tab={pestania} onIr={irA} />
       {tab === 'perfil' && <ProfileCard user={user} onEditar={() => navigate('/cuenta/editar')} />}
       {tab === 'editar' && <EditProfileForm user={user} perfil={perfil} onGuardar={guardar} onCancelar={() => navigate('/cuenta')} />}
-      {PROXIMAS[tab] && <ComingSoon titulo={PROXIMAS[tab]} />}
+      {tab === 'marcapaginas' && <SavedBooks />}
+      {tab === 'direcciones' && <AddressPanel />}
+      {tab === 'compras' && <ComingSoon titulo="Historial de Compras" />}
     </main>
   )
 }
