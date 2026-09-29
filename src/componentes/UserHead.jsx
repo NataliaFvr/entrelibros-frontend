@@ -1,9 +1,9 @@
 import Avatar from './Avatar'
 
-const UserHead = ({ user, onLogout }) => {
+const UserHead = ({ user, perfil, onLogout }) => {
   return (
     <div className="u-head card">
-      <Avatar user={user} />
+      <Avatar user={user} perfil={perfil} />
       <div className="u-id">
         <h1 className="fr">{user.nombre} {user.apellido}</h1>
         <p>@{user.nombreUsuario} · {user.email}</p>

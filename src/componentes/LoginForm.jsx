@@ -3,15 +3,16 @@ import useFormulario from '../hooks/useFormulario'
 import Field from './Field'
 import PasswordField from './PasswordField'
 
-const LoginForm = ({ onListo, onIrARegistro }) => {
+const LoginForm = ({ onListo, onPendiente, onIrARegistro }) => {
   const { login } = useAuth()
   const { valores, cambiar, error, setError } = useFormulario({ ident: '', pw: '' })
 
   const enviar = (e) => {
     e.preventDefault()
     if (!valores.ident.trim() || !valores.pw) return setError('Completá tu usuario y contraseña.')
-    const mensaje = login(valores.ident, valores.pw)
-    if (mensaje) return setError(mensaje)
+    const r = login(valores.ident, valores.pw)
+    if (r.error) return setError(r.error)
+    if (r.pendiente) return onPendiente()
     onListo()
   }
 

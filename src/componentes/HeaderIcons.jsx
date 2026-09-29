@@ -12,7 +12,7 @@ const alTeclear = (accion) => (e) => {
 const HeaderIcons = () => {
   const navigate = useNavigate()
   const toast = useToast()
-  const { user, cartCount, requiereLogin } = useAuth()
+  const { user, perfil, cartCount, requiereLogin } = useAuth()
 
   const irACuenta = () => navigate(user ? '/cuenta' : '/ingresar')
   // TODO: pantalla del carrito
@@ -24,7 +24,7 @@ const HeaderIcons = () => {
   return (
     <>
       <div className="icon-btn" role="button" tabIndex={0} aria-label="Mi cuenta" onClick={irACuenta} onKeyDown={alTeclear(irACuenta)}>
-        {user ? <Avatar user={user} size={30} /> : <UserIcon />}
+        {user ? <Avatar user={user} perfil={perfil} size={30} /> : <UserIcon />}
       </div>
       <div className="icon-btn" role="button" tabIndex={0} aria-label="Carrito" onClick={abrirCarrito} onKeyDown={alTeclear(abrirCarrito)}>
         <CartIcon />

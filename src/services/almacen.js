@@ -15,3 +15,14 @@ export const guardar = (clave, valor) => {
     /* sin espacio o bloqueado: se ignora */
   }
 }
+
+// Mueve un valor de una clave a otra (por ejemplo, si cambia el nombre de usuario)
+export const mover = (desde, hasta) => {
+  try {
+    const v = localStorage.getItem(desde)
+    if (v !== null) localStorage.setItem(hasta, v)
+    localStorage.removeItem(desde)
+  } catch {
+    /* sin acceso a localStorage: se ignora */
+  }
+}

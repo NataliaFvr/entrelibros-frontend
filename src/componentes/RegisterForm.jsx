@@ -1,22 +1,22 @@
 import { useAuth } from '../hooks/useAuth'
 import useFormulario from '../hooks/useFormulario'
 import { getUsuarios } from '../services/authService'
-import { validarRegistro } from '../utils/validaciones'
+import { validarCuenta } from '../utils/validaciones'
 import Field from './Field'
 import PasswordField from './PasswordField'
 
 const INICIAL = { nombre: '', apellido: '', nombreUsuario: '', email: '', pw: '', pw2: '' }
 
-const RegisterForm = ({ onListo, onIrALogin }) => {
+const RegisterForm = ({ onPendiente, onIrALogin }) => {
   const { registrar } = useAuth()
   const { valores, cambiar, error, setError } = useFormulario(INICIAL)
 
   const enviar = (e) => {
     e.preventDefault()
-    const mensaje = validarRegistro(valores, getUsuarios())
+    const mensaje = validarCuenta(valores, getUsuarios())
     if (mensaje) return setError(mensaje)
     registrar(valores)
-    onListo()
+    onPendiente()
   }
 
   return (

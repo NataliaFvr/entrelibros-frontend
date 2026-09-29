@@ -2,10 +2,16 @@
 import { guardar, leer } from './almacen'
 
 // Cuentas de ejemplo guardadas SOLO en este navegador (misma forma que el prototipo HTML).
-// Cuando esté el back: login -> endpoint de login, register -> POST /api/v1/auth/register,
-// y el JWT que devuelvan se guarda en localStorage("token"), que es lo que lee axiosConfig.
+// Cuando esté el back:
+//   register        -> POST /api/v1/auth/register  (la cuenta queda PENDIENTE_CONFIRMACION)
+//   confirmar       -> POST /api/v1/auth/confirmar {email, codigo}  (devuelve los tokens)
+//   reenviar código -> POST /api/v1/auth/reenviar-codigo {email}
+//   login sin confirmar -> 403 CUENTA_NO_CONFIRMADA
+// El JWT se guarda en localStorage("token"), que es lo que lee axiosConfig.
 const CLAVE_USUARIOS = 'entrelibros_users'
 const CLAVE_SESION = 'entrelibros_session'
+const VIDA_CODIGO = 15 * 60000
+const MAX_INTENTOS = 5
 
 const cuenta = (nombreUsuario, nombre, apellido, rol) => ({
   nombreUsuario, email: `${nombreUsuario}@mail.com`, contrasena: 'Clave123!',
@@ -25,33 +31,75 @@ export const getUsuarios = () => {
   return SEMILLA
 }
 
-export const getSesion = () => {
-  const nombre = leer(CLAVE_SESION, null)
-  const u = nombre && getUsuarios().find((x) => x.nombreUsuario === nombre)
-  return u && u.estado !== 'DADO_DE_BAJA' ? u : null
+const buscar = (nombreUsuario) => getUsuarios().find((x) => x.nombreUsuario === nombreUsuario)
+
+// Aplica cambios a un usuario y devuelve el usuario actualizado
+const modificar = (nombreUsuario, cambios) => {
+  const lista = getUsuarios().map((u) => (u.nombreUsuario === nombreUsuario ? { ...u, ...cambios } : u))
+  guardar(CLAVE_USUARIOS, lista)
+  return lista.find((u) => u.nombreUsuario === (cambios.nombreUsuario || nombreUsuario))
 }
 
-// Devuelve { user } o { error }
+export const getSesion = () => {
+  const nombre = leer(CLAVE_SESION, null)
+  const u = nombre && buscar(nombre)
+  return u && u.estado !== 'DADO_DE_BAJA' && u.verificado !== false ? u : null
+}
+
+// Devuelve { user }, { pendiente } (falta confirmar el mail) o { error }
 export const iniciarSesion = (ident, contrasena) => {
   const i = ident.trim().toLowerCase()
   const u = getUsuarios().find((x) => x.nombreUsuario.toLowerCase() === i || x.email.toLowerCase() === i)
   if (!u || u.contrasena !== contrasena) return { error: 'Usuario o contraseña incorrectos.' }
   if (u.estado === 'DADO_DE_BAJA') return { error: 'Tu cuenta fue dada de baja. Contactá a un administrador.' }
+  if (u.verificado === false) return { pendiente: u }
   guardar(CLAVE_SESION, u.nombreUsuario)
   return { user: u }
 }
 
-// TODO: el prototipo confirma la cuenta con un código por mail; acá entra directo.
+// La cuenta nace sin confirmar: no inicia sesión hasta ingresar el código
 export const registrar = (v) => {
-  const usuarios = getUsuarios()
   const nuevo = {
     nombreUsuario: v.nombreUsuario, email: v.email.trim(), contrasena: v.pw,
     nombre: v.nombre.trim(), apellido: v.apellido.trim(),
-    verificado: true, rol: 'COMPRADOR', estado: 'ACTIVO',
+    verificado: false, rol: 'COMPRADOR', estado: 'ACTIVO',
   }
-  guardar(CLAVE_USUARIOS, [...usuarios, nuevo])
-  guardar(CLAVE_SESION, nuevo.nombreUsuario)
+  guardar(CLAVE_USUARIOS, [...getUsuarios(), nuevo])
   return nuevo
+}
+
+export const generarCodigo = (nombreUsuario) =>
+  modificar(nombreUsuario, {
+    codigo: String(Math.floor(100000 + Math.random() * 900000)),
+    vence: Date.now() + VIDA_CODIGO,
+    intentos: 0,
+  })
+
+export const marcarVerificada = (nombreUsuario) => {
+  const u = modificar(nombreUsuario, { verificado: true, codigo: undefined, vence: undefined, intentos: undefined })
+  guardar(CLAVE_SESION, nombreUsuario)
+  return u
+}
+
+// Devuelve { user } o { error }
+export const confirmarCodigo = (nombreUsuario, codigo) => {
+  const u = buscar(nombreUsuario)
+  const c = codigo.trim()
+  if (!/^\d{6}$/.test(c)) return { error: 'Ingresá los 6 dígitos del código.' }
+  if (!u.codigo || u.vence < Date.now()) return { error: 'El código venció. Pedí uno nuevo.' }
+  if (u.intentos >= MAX_INTENTOS) return { error: 'Demasiados intentos. Pedí un código nuevo.' }
+  if (c !== u.codigo) {
+    const intentos = u.intentos + 1
+    modificar(nombreUsuario, { intentos })
+    return { error: intentos >= MAX_INTENTOS ? 'Demasiados intentos. Pedí un código nuevo.' : `Código incorrecto. Te quedan ${MAX_INTENTOS - intentos} intentos.` }
+  }
+  return { user: marcarVerificada(nombreUsuario) }
+}
+
+export const actualizarUsuario = (viejoNombre, cambios) => {
+  const u = modificar(viejoNombre, cambios)
+  guardar(CLAVE_SESION, u.nombreUsuario)
+  return u
 }
 
 export const cerrarSesion = () => guardar(CLAVE_SESION, null)
