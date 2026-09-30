@@ -19,7 +19,7 @@ const Footer = () => {
         <Col titulo="Explorar">
           <Link to="/libros">Categorías</Link>
           <a href="#" onClick={sinNavegar}>Sobre nosotros</a>
-          <a href="#" onClick={sinNavegar}>Vender mis libros</a>
+          <Link to="/vender">Vender mis libros</Link>
         </Col>
         <Col titulo="Mi Entrelibros">
           <a href="#" onClick={sinNavegar}>Mi cuenta</a>

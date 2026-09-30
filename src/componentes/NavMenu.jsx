@@ -1,7 +1,6 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useLibros } from '../hooks/useLibros'
 import { useAuth } from '../hooks/useAuth'
-import { useToast } from '../hooks/useToast'
 import { ChevronDown } from './Icons'
 
 const sinNavegar = (e) => e.preventDefault()
@@ -53,12 +52,10 @@ const MenuAyuda = () => {
 const NavMenu = () => {
   const { pathname } = useLocation()
   const enLibros = pathname.startsWith('/libro')
-  const toast = useToast()
+  const navigate = useNavigate()
   const { requiereLogin } = useAuth()
-  // TODO: pantalla de vendedor
   const vender = () => {
-    if (requiereLogin('sell')) return
-    toast('Vender libros llega en la próxima etapa')
+    if (!requiereLogin('sell')) navigate('/vender')
   }
 
   return (

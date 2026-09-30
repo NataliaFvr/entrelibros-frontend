@@ -13,7 +13,10 @@ const LibrosProvider = ({ children }) => {
       .finally(() => setCargando(false))
   }, [])
 
-  const value = useMemo(() => ({ libros, categorias, cargando }), [libros, categorias, cargando])
+  // Vuelve a leer el catálogo (por ejemplo, cuando un vendedor publica o da de baja un libro)
+  const recargar = () => getLibros().then(setLibros)
+
+  const value = useMemo(() => ({ libros, categorias, cargando, recargar }), [libros, categorias, cargando])
   return <LibrosCtx.Provider value={value}>{children}</LibrosCtx.Provider>
 }
 

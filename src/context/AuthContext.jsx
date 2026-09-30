@@ -4,18 +4,13 @@ import { useToast } from '../hooks/useToast'
 import useVerificacion from '../hooks/useVerificacion'
 import { guardar, leer, mover } from '../services/almacen'
 import { actualizarUsuario, cerrarSesion, getSesion, iniciarSesion, registrar as crearCuenta } from '../services/authService'
+import { claveCart, claveDir, claveMarks, clavePedidos, clavePerfil, claveVendedor } from '../services/claves'
 import LoginGate from '../componentes/LoginGate'
-
-const claveMarks = (u) => `entrelibros_marcapaginas_${u.nombreUsuario}`
-const claveCart = (u) => `entrelibros_cart_${u.nombreUsuario}`
-const clavePerfil = (u) => `entrelibros_perfil_${u.nombreUsuario}` // { avatar, foto }
-const claveDir = (u) => `entrelibros_direcciones_${u.nombreUsuario}` // [{ alias, calle, ciudad, cp, prov }]
 
 const AuthProvider = ({ children }) => {
   const toast = useToast()
   const [user, setUser] = useState(getSesion)
   const [marks, setMarks] = useState(() => (user ? leer(claveMarks(user), []) : []))
-  const [cart, setCart] = useState(() => (user ? leer(claveCart(user), []) : []))
   const [perfil, setPerfil] = useState(() => (user ? leer(clavePerfil(user), {}) : {}))
   const [direcciones, setDirecciones] = useState(() => (user ? leer(claveDir(user), []) : []))
   const [gate, setGate] = useState(null) // null = cerrado, si no: 'cart' | 'fav' | 'review' | 'sell'
@@ -23,7 +18,6 @@ const AuthProvider = ({ children }) => {
   const entrar = (u, saludo) => {
     setUser(u)
     setMarks(leer(claveMarks(u), []))
-    setCart(leer(claveCart(u), []))
     setPerfil(leer(clavePerfil(u), {}))
     setDirecciones(leer(claveDir(u), []))
     toast(saludo || `¡Hola, ${u.nombre}!`)
@@ -51,19 +45,18 @@ const AuthProvider = ({ children }) => {
     cerrarSesion()
     setUser(null)
     setMarks([])
-    setCart([])
     setPerfil({})
     setDirecciones([])
     toast('Cerraste sesión')
   }
 
-  // Guarda los datos del perfil; si cambió el usuario, lleva marcapáginas, carrito y avatar a la clave nueva
+  // Guarda los datos del perfil; si cambió el usuario, lleva todo lo suyo a la clave nueva
   const actualizarPerfil = (v, nuevoPerfil) => {
     const cambios = { nombre: v.nombre.trim(), apellido: v.apellido.trim(), nombreUsuario: v.nombreUsuario, email: v.email.trim() }
     if (v.pw) cambios.contrasena = v.pw
     const nuevo = actualizarUsuario(user.nombreUsuario, cambios)
     if (nuevo.nombreUsuario !== user.nombreUsuario) {
-      ;[claveMarks, claveCart, clavePerfil, claveDir].forEach((clave) => mover(clave(user), clave(nuevo)))
+      ;[claveMarks, claveCart, clavePerfil, claveDir, clavePedidos, claveVendedor].forEach((clave) => mover(clave(user), clave(nuevo)))
     }
     guardar(clavePerfil(nuevo), nuevoPerfil)
     setUser(nuevo)
@@ -98,21 +91,10 @@ const AuthProvider = ({ children }) => {
     toast(marks.includes(id) ? 'Quitado de tu Marcapáginas' : 'Guardado en tu Marcapáginas')
   }
 
-  // Los usados tienen 1 unidad; los nuevos, hasta 10 por compra
-  const addToCart = (libro) => {
-    const tope = libro.usado ? 1 : 10
-    const hay = cart.find((c) => c.id === libro.id)
-    const nuevo = hay
-      ? cart.map((c) => (c.id === libro.id ? { ...c, q: Math.min(c.q + 1, tope) } : c))
-      : [...cart, { id: libro.id, q: 1 }]
-    setCart(nuevo)
-    guardar(claveCart(user), nuevo)
-    toast('Agregado al carrito')
-  }
-
   const value = {
-    user, perfil, marks, direcciones, gate, verificacion, cartCount: cart.reduce((n, c) => n + c.q, 0),
-    login, registrar, logout, actualizarPerfil, agregarDireccion, eliminarDireccion, requiereLogin, cerrarGate: () => setGate(null), toggleMark, addToCart,
+    user, perfil, marks, direcciones, gate, verificacion,
+    login, registrar, logout, actualizarPerfil, agregarDireccion, eliminarDireccion,
+    requiereLogin, cerrarGate: () => setGate(null), toggleMark,
   }
 
   return (

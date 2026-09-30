@@ -7,11 +7,11 @@ import ProfileCard from '../componentes/ProfileCard'
 import EditProfileForm from '../componentes/EditProfileForm'
 import SavedBooks from '../componentes/SavedBooks'
 import AddressPanel from '../componentes/AddressPanel'
-import ComingSoon from '../componentes/ComingSoon'
+import OrdersPanel from '../componentes/OrdersPanel'
 
 const PESTANIAS = ['perfil', 'editar', 'marcapaginas', 'compras', 'direcciones']
 
-// /cuenta = perfil · /cuenta/editar · /cuenta/marcapaginas · /cuenta/direcciones · /cuenta/compras (próxima etapa)
+// /cuenta = perfil · /cuenta/editar · /cuenta/marcapaginas · /cuenta/compras · /cuenta/direcciones
 const AccountPage = () => {
   const { user, perfil, logout, actualizarPerfil } = useAuth()
   const { tab = 'perfil' } = useParams()
@@ -43,7 +43,7 @@ const AccountPage = () => {
       {tab === 'editar' && <EditProfileForm user={user} perfil={perfil} onGuardar={guardar} onCancelar={() => navigate('/cuenta')} />}
       {tab === 'marcapaginas' && <SavedBooks />}
       {tab === 'direcciones' && <AddressPanel />}
-      {tab === 'compras' && <ComingSoon titulo="Historial de Compras" />}
+      {tab === 'compras' && <OrdersPanel />}
     </main>
   )
 }

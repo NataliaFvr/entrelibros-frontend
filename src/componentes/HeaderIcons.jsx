@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
-import { useToast } from '../hooks/useToast'
+import { useCompra } from '../hooks/useCompra'
 import { CartIcon, UserIcon } from './Icons'
 import Avatar from './Avatar'
 
@@ -11,14 +11,13 @@ const alTeclear = (accion) => (e) => {
 
 const HeaderIcons = () => {
   const navigate = useNavigate()
-  const toast = useToast()
-  const { user, perfil, cartCount, requiereLogin } = useAuth()
+  const { user, perfil, requiereLogin } = useAuth()
+  const { cartCount } = useCompra()
 
   const irACuenta = () => navigate(user ? '/cuenta' : '/ingresar')
-  // TODO: pantalla del carrito
   const abrirCarrito = () => {
     if (requiereLogin('cart')) return
-    toast('El carrito todavía no está disponible')
+    navigate('/carrito')
   }
 
   return (

@@ -1,9 +1,10 @@
 import { useMemo } from 'react'
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { useLibros } from '../hooks/useLibros'
 import useResenias from '../hooks/useResenias'
 import { useAuth } from '../hooks/useAuth'
 import { useToast } from '../hooks/useToast'
+import { useCompra } from '../hooks/useCompra'
 import { masVendidos } from '../utils/filtrarLibros'
 import BookBreadcrumb from '../componentes/BookBreadcrumb'
 import Gallery from '../componentes/Gallery'
@@ -20,9 +21,11 @@ import NotFoundPage from './NotFoundPage'
 const stockDe = (l) => (l.stock != null ? l.stock : l.usado ? 1 : 1 + ((l.id * 7) % 30))
 
 const Detalle = ({ libro, libros }) => {
-  const { requiereLogin, marks, toggleMark, addToCart } = useAuth()
+  const navigate = useNavigate()
   const toast = useToast()
-  const { resenias, promedio } = useResenias(libro.id)
+  const { user, requiereLogin, marks, toggleMark } = useAuth()
+  const { agregar } = useCompra()
+  const { resenias, promedio, publicar } = useResenias(libro.id)
 
   const { rank, delVendedor, mismoAutor, mismaCategoria } = useMemo(() => {
     const otros = libros.filter((x) => x.id !== libro.id)
@@ -35,12 +38,15 @@ const Detalle = ({ libro, libros }) => {
   }, [libros, libro])
 
   const guardar = () => { if (!requiereLogin('fav')) toggleMark(libro.id) }
-  const alCarrito = () => { if (!requiereLogin('cart')) addToCart(libro) }
-  // TODO: pantalla de pago
+  const alCarrito = () => { if (!requiereLogin('cart')) agregar(libro) }
+  const publicarOpinion = (st, texto) => {
+    publicar({ st, i: -Date.now(), u: `${user.nombre} ${user.apellido[0]}.`, t: texto, w: new Date().toLocaleDateString('es-AR') })
+    toast('¡Gracias por tu opinión!')
+  }
   const comprar = () => {
     if (requiereLogin('cart')) return
-    addToCart(libro)
-    toast('El pago llega en la próxima etapa')
+    agregar(libro)
+    navigate('/carrito')
   }
 
   return (
@@ -56,7 +62,7 @@ const Detalle = ({ libro, libros }) => {
       </div>
       <SpecSection libro={libro} />
       <DescriptionSection libro={libro} />
-      {resenias.length > 0 && <ReviewsSection resenias={resenias} promedio={promedio} />}
+      {resenias.length > 0 && <ReviewsSection libroId={libro.id} resenias={resenias} promedio={promedio} onPublicar={publicarOpinion} />}
       <RelatedSection titulo={`Más de ${libro.a}`} libros={mismoAutor} />
       <RelatedSection titulo={`Más de ${libro.cat}`} libros={mismaCategoria} />
       <RelatedSection titulo={`Más libros de ${libro.v}`} libros={delVendedor.filter((x) => x.id !== libro.id)} />

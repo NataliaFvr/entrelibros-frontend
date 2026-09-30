@@ -6,6 +6,9 @@ import BookDetailPage from "../pages/BookDetailPage"
 import AuthPage from "../pages/AuthPage"
 import AccountPage from "../pages/AccountPage"
 import VerifyPage from "../pages/VerifyPage"
+import CartPage from "../pages/CartPage"
+import PayPage from "../pages/PayPage"
+import SellerPage from "../pages/SellerPage"
 import NotFoundPage from "../pages/NotFoundPage"
 
 const AppRoutes = () => {
@@ -18,6 +21,11 @@ const AppRoutes = () => {
         <Route path="/ingresar" element={<AuthPage tab="login" />} />
         <Route path="/registrarse" element={<AuthPage tab="register" />} />
         <Route path="/confirmar" element={<VerifyPage />} />
+        <Route path="/carrito" element={<CartPage />} />
+        <Route path="/pago/:n" element={<PayPage />} />
+        <Route path="/vender" element={<SellerPage />} />
+        <Route path="/vender/:tab" element={<SellerPage />} />
+        <Route path="/vender/:tab/:id" element={<SellerPage />} />
         <Route path="/cuenta" element={<AccountPage />} />
         <Route path="/cuenta/:tab" element={<AccountPage />} />
         <Route path="*" element={<NotFoundPage />} />

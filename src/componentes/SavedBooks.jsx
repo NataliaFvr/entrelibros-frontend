@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
+import { useCompra } from '../hooks/useCompra'
 import { useLibros } from '../hooks/useLibros'
 import EmptyBlock from './EmptyBlock'
 import SavedBook from './SavedBook'
@@ -7,7 +8,8 @@ import SavedBook from './SavedBook'
 // Pestaña Marcapáginas: los libros guardados, en el orden en que se guardaron
 const SavedBooks = () => {
   const navigate = useNavigate()
-  const { marks, toggleMark, addToCart } = useAuth()
+  const { marks, toggleMark } = useAuth()
+  const { agregar } = useCompra()
   const { libros } = useLibros()
 
   const guardados = marks.map((id) => libros.find((l) => l.id === id)).filter(Boolean)
@@ -22,7 +24,7 @@ const SavedBooks = () => {
   return (
     <div className="grid">
       {guardados.map((l) => (
-        <SavedBook key={l.id} libro={l} onAlCarrito={() => addToCart(l)} onQuitar={() => toggleMark(l.id)} />
+        <SavedBook key={l.id} libro={l} onAlCarrito={() => agregar(l)} onQuitar={() => toggleMark(l.id)} />
       ))}
     </div>
   )

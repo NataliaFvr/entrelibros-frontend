@@ -3,6 +3,7 @@ import AppRoutes from "./routes/AppRoutes"
 import ToastProvider from "./context/ToastContext"
 import AuthProvider from "./context/AuthContext"
 import LibrosProvider from "./context/LibrosContext"
+import CompraProvider from "./context/CompraContext"
 
 const App = () => {
   return (
@@ -10,7 +11,9 @@ const App = () => {
       <ToastProvider>
         <AuthProvider>
           <LibrosProvider>
-            <AppRoutes />
+            <CompraProvider>
+              <AppRoutes />
+            </CompraProvider>
           </LibrosProvider>
         </AuthProvider>
       </ToastProvider>
