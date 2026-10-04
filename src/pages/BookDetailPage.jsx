@@ -26,7 +26,7 @@ const Detalle = ({ libro, libros }) => {
   const navigate = useNavigate()
   const toast = useToast()
   const { user, requiereLogin, marks, toggleMark } = useAuth()
-  const { agregar } = useCompra()
+  const { agregar, compro } = useCompra()
   const { resenias, promedio, publicar } = useResenias(libro.id)
 
   const { esPropio, rutaEdicion, enRevision } = useLibroPropio()
@@ -81,7 +81,7 @@ const Detalle = ({ libro, libros }) => {
       
       {/* Las opiniones son de la obra: un ejemplar usado no tiene sección de opiniones */}
       {!esUsado && (
-        <ReviewsSection libroId={libro.id} resenias={resenias} promedio={promedio} onPublicar={publicarOpinion} />
+        <ReviewsSection resenias={resenias} promedio={promedio} haComprado={Boolean(user) && compro(libro.id)} onPublicar={publicarOpinion} />
       )}
 
       <RelatedSection titulo={`Más de ${libro.a}`} libros={mismoAutor} />

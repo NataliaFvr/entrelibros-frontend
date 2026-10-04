@@ -6,11 +6,12 @@ import { MIN_FOTOS } from '../utils/imagen'
 import { mensajeError } from '../utils/errorApi'
 import Field from './Field'
 import SelectField from './SelectField'
+import TextAreaField from './TextAreaField'
 import ImageUploader from './ImageUploader'
 
 const desdeLibro = (p) => ({
   t: p.t || '', a: p.a || '', ed: p.ed || '', cat: p.cat || '', idioma: p.idioma || 'Español', anio: String(p.anio || ''),
-  estado: p.usado ? 'Usado' : 'Nuevo', base: String(p.base || ''), d: String(p.d || 0), stock: String(p.usado ? 1 : p.stock || 1),
+  estado: p.usado ? 'Usado' : 'Nuevo', descripcion: p.descripcion || '', base: String(p.base || ''), d: String(p.d || 0), stock: String(p.usado ? 1 : p.stock || 1),
 })
 
 // Publicar o editar (`libro`). Al guardar entra en revisión del administrador.
@@ -44,7 +45,7 @@ const BookForm = ({ libro = {}, onGuardar, onCancelar }) => {
       // `onGuardar` puede devolver { error } (validación del servidor) o lanzar un error de red/HTTP
       const respuesta = await onGuardar({
         t: valores.t.trim(), a: valores.a.trim(), ed: valores.ed.trim(), cat: valores.cat, idioma: valores.idioma,
-        anio, usado, base, d, stock, imgs: imagenes.fotos,
+        anio, usado, base, d, stock, imgs: imagenes.fotos, descripcion: valores.descripcion.trim(),
       })
       if (respuesta && respuesta.error) setError(respuesta.error)
     } catch (err) {
@@ -75,6 +76,9 @@ const BookForm = ({ libro = {}, onGuardar, onCancelar }) => {
         <Field label="Descuento (%)" name="d" type="number" min="0" max="90" value={valores.d} onChange={alCambiar} />
       </div>
       <Field label="Stock (los usados: 1 unidad)" name="stock" type="number" min="1" value={valores.stock} onChange={alCambiar} readOnly={usado} />
+      <TextAreaField label="Descripción (opcional)" name="descripcion" value={valores.descripcion} onChange={alCambiar} maxLength={1000} rows={5}
+        placeholder="Contá de qué trata el libro y, si es usado, en qué estado está. Si la dejás vacía, la ficha no muestra descripción." />
+      <small className="iu-hint" style={{ marginTop: -8 }}>{valores.descripcion.length} / 1000</small>
       <ImageUploader imagenes={imagenes} />
       <p className="ferr" role="alert">{error}</p>
       <div className="rvf-b">

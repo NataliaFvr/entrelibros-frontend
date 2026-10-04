@@ -33,8 +33,8 @@ const libro = (id, datos) => {
 
 // Catálogo del vendedor. Entran también al catálogo general (librosService), para poder comprarlos.
 export const LIBROS_PRUEBA = [
-  libro(9001, { t: 'Noche de vidrio', a: 'Marta Soler', ed: 'Alfaguara', anio: 2021, base: 280, d: 15, usado: false, stock: 8, cat: 'Misterio' }),
-  libro(9002, { t: 'El relojero', a: 'Hugo Salas', ed: 'Tusquets', anio: 2009, base: 150, d: 0, usado: true, stock: 1, cat: 'Terror' }),
+  libro(9001, { descripcion: 'Una historia de memorias y secretos familiares contada con una prosa clara y envolvente.', t: 'Noche de vidrio', a: 'Marta Soler', ed: 'Alfaguara', anio: 2021, base: 280, d: 15, usado: false, stock: 8, cat: 'Misterio' }),
+  libro(9002, { descripcion: 'Ejemplar usado con lomo gastado y dedicatoria en la primera página. Todas las páginas completas.', t: 'El relojero', a: 'Hugo Salas', ed: 'Tusquets', anio: 2009, base: 150, d: 0, usado: true, stock: 1, cat: 'Terror' }),
   libro(9003, { t: 'Sombras del río', a: 'Lucía Ferro', ed: 'Planeta', anio: 2014, base: 120, d: 0, usado: true, stock: 1, cat: 'Thriller' }),
 ]
 
@@ -58,8 +58,8 @@ const publicacion = (id, datos) => ({
 // Publicaciones activas. Las 4 primeras son las que tienen ventas; las otras 2 completan los "6 publicados".
 export const PUBLICACIONES_ALEPH = [
   publicacion(3, { t: 'Noche de vidrio', a: 'Tomás Vega', ed: 'Penguin', cat: 'Biografía', idioma: 'Portugués', anio: 2018, usado: false, base: 220, d: 15, stock: 22 }),
-  publicacion(7, { t: 'La biblioteca oculta', a: 'Hugo Salas', ed: 'Planeta', cat: 'Ciencia ficción', idioma: 'Inglés', anio: 2009, usado: true, base: 240, d: 0, stock: 1 }),
-  publicacion(12, { t: 'Puerto de niebla', a: 'Ana Ríos', ed: 'Planeta', cat: 'Biografía', idioma: 'Inglés', anio: 2017, usado: false, base: 370, d: 0, stock: 25 }),
+  publicacion(7, { descripcion: 'Ejemplar usado en buen estado: tapa con leves marcas de uso, páginas limpias y sin subrayados.', t: 'La biblioteca oculta', a: 'Hugo Salas', ed: 'Planeta', cat: 'Ciencia ficción', idioma: 'Inglés', anio: 2009, usado: true, base: 240, d: 0, stock: 1 }),
+  publicacion(12, { descripcion: 'Relato biográfico ambientado en un pequeño pueblo costero. Edición nueva, sellada.', t: 'Puerto de niebla', a: 'Ana Ríos', ed: 'Planeta', cat: 'Biografía', idioma: 'Inglés', anio: 2017, usado: false, base: 370, d: 0, stock: 25 }),
   publicacion(19, { t: 'El relojero', a: 'Ana Ríos', ed: 'Planeta', cat: 'Autocuidado', anio: 2014, usado: true, base: 70, d: 0, stock: 1 }),
   publicacion(21, { t: 'Hilos de ceniza', a: 'Lucía Ferro', ed: 'Planeta', cat: 'Ciencia ficción', anio: 2014, usado: false, base: 470, d: 30, stock: 28 }),
   publicacion(33, { t: 'La hora azul', a: 'Elena Cruz', ed: 'Anagrama', cat: 'Biografía', anio: 2023, usado: false, base: 410, d: 0, stock: 22 }),

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useLibros } from './useLibros'
 import { useToast } from './useToast'
-import { enRevision, getVendedor, guardarVendedor } from '../services/vendedorService'
+import { enRevision, getVendedor, guardarVendedor, nuevoIdPublicacion } from '../services/vendedorService'
 
 // Estado y acciones del vendedor de la cuenta `user`. Cada cambio se guarda y refresca el catálogo.
 const useVendedor = (user) => {
@@ -31,7 +31,7 @@ const useVendedor = (user) => {
   // Un libro ya aceptado conserva su versión aprobada (sigue en el catálogo) y los cambios quedan en `revision`.
   const guardarLibro = (datos, idEditado) => {
     if (!idEditado) {
-      return cambiarLibros((pub) => [{ id: Date.now(), ...datos, estado: 'activo', mod: 'EN_REVISION' }, ...pub],
+      return cambiarLibros((pub) => [{ id: nuevoIdPublicacion(), ...datos, estado: 'activo', mod: 'EN_REVISION' }, ...pub],
         'Libro enviado a revisión del administrador')
     }
     const actual = vendedor.pub.find((p) => p.id === idEditado)

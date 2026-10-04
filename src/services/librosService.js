@@ -18,7 +18,11 @@ export async function getCategorias() {
   return CATEGORIAS
 }
 
+// Ids de los libros de ejemplo del catálogo: solo ellos traen reseñas ficticias.
+// Una publicación nueva de un vendedor arranca SIN opiniones (antes cualquier id recibía reseñas inventadas).
+const IDS_EJEMPLO = new Set([...generarLibros().map((l) => l.id), ...LIBROS_PRUEBA.map((l) => l.id)])
+
 export async function getResenias(libroId) {
-  // return (await api.get(`/libros/${libroId}/resenias`)).data
-  return generarResenias(libroId)
+  // return (await api.get(`/libros/${libroId}/resenias`)).data  (ResenaLibroController; un libro nuevo devuelve [])
+  return IDS_EJEMPLO.has(libroId) ? generarResenias(libroId) : []
 }

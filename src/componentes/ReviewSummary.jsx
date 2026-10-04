@@ -12,7 +12,7 @@ const ReviewSummary = ({ resenias, promedio }) => {
         return (
           <div key={k} className="drow">
             <span>{k} ★</span>
-            <div className="bar"><i style={{ width: `${(c / n) * 100}%` }} /></div>
+            <div className="bar"><i style={{ width: `${n ? (c / n) * 100 : 0}%` }} /></div>
             <span>{c}</span>
           </div>
         )

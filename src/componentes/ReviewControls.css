@@ -1,0 +1,2 @@
+/* Botón "Opinar" deshabilitado para quien no compró el libro */
+.rev-ctl .more:disabled{opacity:.45;cursor:not-allowed;border-color:rgba(4,42,43,.15);color:var(--evergreen)}

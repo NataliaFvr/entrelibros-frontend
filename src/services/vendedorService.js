@@ -30,7 +30,7 @@ export const guardarVendedor = (u, v) => guardar(claveVendedor(u), v) // true si
 const aLibro = (p, v) => ({
   id: p.id, t: p.t, a: p.a, ed: p.ed, idioma: p.idioma, anio: p.anio, base: p.base, d: p.d, p: precioFinal(p),
   usado: p.usado, cat: p.cat, v: v.tienda, envio: v.prov === 'Buenos Aires' ? 'misma' : 'distinta',
-  ventas: 0.5, stock: p.stock, imgs: p.imgs || [], c: TONES[(p.t.length + p.a.length) % TONES.length],
+  ventas: 0.5, stock: p.stock, imgs: p.imgs || [], descripcion: p.descripcion || '', c: TONES[(p.t.length + p.a.length) % TONES.length],
 })
 
 // Tienda de la cuenta si ya es vendedor aprobado; si no, null
@@ -57,6 +57,13 @@ export const esLibroPropio = (u, libro) => {
 // del vendedor y no se pueden editar: ahí se lo lleva a "Mis libros".
 export const rutaEdicion = (u, libro) =>
   getVendedor(u).pub.some((p) => p.id === libro.id) ? `/vender/editar/${libro.id}` : '/vender'
+
+// Id nuevo y único para una publicación: mayor que cualquier id ya usado (propias de cualquier vendedor y de ejemplo),
+// así /libro/:id nunca apunta a un libro o a reseñas preexistentes. Back: lo asigna la base de datos.
+export const nuevoIdPublicacion = () => {
+  const usados = getUsuarios().flatMap((u) => getVendedor(u).pub.map((p) => p.id))
+  return Math.max(Date.now(), ...usados) + 1
+}
 
 // Libros de todos los vendedores que están activos y aceptados: entran al catálogo
 export const librosPublicados = () =>
