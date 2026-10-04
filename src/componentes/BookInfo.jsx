@@ -23,7 +23,7 @@ const Etiquetas = ({ libro, rank }) => {
   )
 }
 
-// `resumen` = { promedio, cantidad } de las opiniones
+// `resumen` = { promedio, cantidad } de las opiniones. Sin `onGuardar` no se muestra el botón de Marcapáginas.
 const BookInfo = ({ libro, rank, resumen, guardado, onGuardar }) => {
   const { promedio, cantidad } = resumen
   const usado = esUsado(libro) // un usado no muestra calificación del producto (opiniones solo de la obra)
@@ -31,9 +31,11 @@ const BookInfo = ({ libro, rank, resumen, guardado, onGuardar }) => {
     <div className="d-info">
       <div className="d-row">
         <Etiquetas libro={libro} rank={rank} />
-        <button className={`fav${guardado ? ' on' : ''}`} type="button" aria-pressed={guardado} onClick={onGuardar}>
-          <BookmarkIcon /><span>{guardado ? 'En mi Marcapáginas' : 'Guardar en Marcapáginas'}</span>
-        </button>
+        {onGuardar && (
+          <button className={`fav${guardado ? ' on' : ''}`} type="button" aria-pressed={guardado} onClick={onGuardar}>
+            <BookmarkIcon /><span>{guardado ? 'En mi Marcapáginas' : 'Guardar en Marcapáginas'}</span>
+          </button>
+        )}
       </div>
       <h1 className="d-title fr">{libro.t}</h1>
       <p className="d-author">de <Link to={`/libros?autor=${encodeURIComponent(libro.a)}`}>{libro.a}</Link></p>

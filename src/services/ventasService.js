@@ -2,11 +2,14 @@ import { leer } from './almacen'
 import { clavePedidos } from './claves'
 import { getUsuarios } from './authService'
 import { estadoPago } from '../utils/pedidos'
+import { VENDEDOR_ALEPH, VENTAS_ALEPH } from '../data/vendedorPruebaMock'
 
 // Ventas de una tienda = libros suyos dentro de pedidos pagados de cualquier cuenta.
-// Back: GET /ventas del vendedor.
+// "Librería El Aleph" suma además su historial de ejemplo. Back: GET /ventas del vendedor.
+const deEjemplo = (tienda) => (tienda === VENDEDOR_ALEPH.tienda ? VENTAS_ALEPH : [])
+
 export const ventasDe = (tienda, libros) =>
-  getUsuarios()
+  [...getUsuarios()
     .flatMap((u) => leer(clavePedidos(u), [])
       .filter((o) => estadoPago(o) === 'SIMULADO_APROBADO')
       .map((o) => {
@@ -18,5 +21,5 @@ export const ventasDe = (tienda, libros) =>
           .filter(Boolean)
         return its.length ? { n: o.n, date: o.date, est: o.est, its, comprador: `${u.nombre} ${u.apellido}` } : null
       })
-      .filter(Boolean))
+      .filter(Boolean)), ...deEjemplo(tienda)]
     .sort((a, b) => b.date.localeCompare(a.date))

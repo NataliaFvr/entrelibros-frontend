@@ -1,12 +1,16 @@
 import { guardar, leer } from './almacen'
-import { RESENIAS_PRUEBA, VENDEDOR_PRUEBA } from '../data/vendedorPruebaMock'
+import { RESENIAS_ALEPH, RESENIAS_PRUEBA, VENDEDOR_ALEPH, VENDEDOR_PRUEBA } from '../data/vendedorPruebaMock'
 
 // Reseñas que los compradores le dejan a un vendedor: { id, v: tienda, u: usuario, nc, st: 1-5, t, libro, date }
 // Misma clave que usa el HTML de referencia. Back: ResenaVendedor.
 const CLAVE = 'entrelibros_resenas_vend'
 
 // Reseñas de ejemplo que vienen con el vendedor de prueba
-const deEjemplo = (tienda) => (tienda === VENDEDOR_PRUEBA.tienda ? RESENIAS_PRUEBA : [])
+const deEjemplo = (tienda) => {
+  if (tienda === VENDEDOR_PRUEBA.tienda) return RESENIAS_PRUEBA
+  if (tienda === VENDEDOR_ALEPH.tienda) return RESENIAS_ALEPH
+  return []
+}
 
 // Todas las reseñas de un vendedor, la más reciente primero. Back: GET /vendedores/{id}/resenias
 export const getResenasVendedor = (tienda) =>

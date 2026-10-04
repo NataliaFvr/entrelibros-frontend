@@ -14,11 +14,12 @@ import SellerBooks from '../componentes/SellerBooks'
 import BookForm from '../componentes/BookForm'
 import SellerSales from '../componentes/SellerSales'
 import SellerStats from '../componentes/SellerStats'
+import SellerReputation from '../componentes/SellerReputation'
 
-const TABS = ['libros', 'nuevo', 'editar', 'ventas', 'estadisticas']
+const TABS = ['libros', 'nuevo', 'editar', 'ventas', 'estadisticas', 'reputacion']
 const Migas = () => <div className="crumbs"><Link to="/">Inicio</Link> › <span>Vender</span></div>
 
-// /vender · /vender/nuevo · /vender/editar/:id · /vender/ventas · /vender/estadisticas
+// /vender · /vender/nuevo · /vender/editar/:id · /vender/ventas · /vender/estadisticas · /vender/reputacion
 const Vendedor = ({ user }) => {
   const navigate = useNavigate()
   const { tab = 'libros', id } = useParams()
@@ -45,7 +46,7 @@ const Vendedor = ({ user }) => {
 
   const ventas = ventasDe(vendedor.tienda, libros)
   const vendido = ventas.reduce((suma, v) => suma + v.its.reduce((s, i) => s + i.p * i.q, 0), 0)
-  const pestanias = [['libros', 'Mis libros'], ['nuevo', editado ? 'Editar libro' : 'Publicar libro'], ['ventas', 'Historial de ventas'], ['estadisticas', 'Estadísticas']]
+  const pestanias = [['libros', 'Mis libros'], ['nuevo', editado ? 'Editar libro' : 'Publicar libro'], ['ventas', 'Historial de ventas'], ['estadisticas', 'Estadísticas'], ['reputacion', 'Reputación']]
   const guardar = (datos) => { guardarLibro(datos, editado && editado.id); navigate('/vender') }
 
   return (
@@ -61,6 +62,7 @@ const Vendedor = ({ user }) => {
       )}
       {tab === 'ventas' && <SellerSales ventas={ventas} />}
       {tab === 'estadisticas' && <SellerStats ventas={ventas} />}
+      {tab === 'reputacion' && <SellerReputation tienda={vendedor.tienda} />}
     </main>
   )
 }

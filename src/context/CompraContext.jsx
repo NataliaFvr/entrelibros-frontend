@@ -5,6 +5,7 @@ import { useLibros } from '../hooks/useLibros'
 import { useToast } from '../hooks/useToast'
 import { guardar, leer } from '../services/almacen'
 import { claveCart, clavePedidos } from '../services/claves'
+import { esLibroPropio } from '../services/vendedorService'
 import { costoEnvio } from '../utils/envio'
 import { RESERVA_MS, estadoPago, subtotal } from '../utils/pedidos'
 
@@ -48,6 +49,10 @@ const CompraProvider = ({ children }) => {
 
   // Los usados tienen 1 unidad; los nuevos, hasta 10 por compra
   const agregar = (libro) => {
+    if (esLibroPropio(user, libro)) {
+      toast('No podés comprar tus propios libros')
+      return
+    }
     const tope = libro.usado ? 1 : 10
     setCarrito((prev) => (prev.some((c) => c.id === libro.id)
       ? prev.map((c) => (c.id === libro.id ? { ...c, q: Math.min(c.q + 1, tope) } : c))

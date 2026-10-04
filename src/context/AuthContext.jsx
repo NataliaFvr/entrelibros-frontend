@@ -4,7 +4,7 @@ import { useToast } from '../hooks/useToast'
 import useVerificacion from '../hooks/useVerificacion'
 import { guardar, leer, mover } from '../services/almacen'
 import { actualizarUsuario, cerrarSesion, getSesion, iniciarSesion, registrar as crearCuenta } from '../services/authService'
-import { claveCart, claveDir, claveMarks, clavePedidos, clavePerfil, claveVendedor } from '../services/claves'
+import { claveCart, claveDir, claveMarks, claveNotifs, clavePedidos, clavePerfil, claveVendedor } from '../services/claves'
 import LoginGate from '../componentes/LoginGate'
 import { conPrincipal } from '../utils/direcciones'
 
@@ -58,7 +58,7 @@ const AuthProvider = ({ children }) => {
     if (v.pw) cambios.contrasena = v.pw
     const nuevo = actualizarUsuario(user.nombreUsuario, cambios)
     if (nuevo.nombreUsuario !== user.nombreUsuario) {
-      ;[claveMarks, claveCart, clavePerfil, claveDir, clavePedidos, claveVendedor].forEach((clave) => mover(clave(user), clave(nuevo)))
+      ;[claveMarks, claveCart, clavePerfil, claveDir, clavePedidos, claveVendedor, claveNotifs].forEach((clave) => mover(clave(user), clave(nuevo)))
     }
     guardar(clavePerfil(nuevo), nuevoPerfil)
     setUser(nuevo)

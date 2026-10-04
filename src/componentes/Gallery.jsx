@@ -1,24 +1,34 @@
-import { useState } from 'react'
 import CoverArt from './CoverArt'
+import useCarrusel from '../hooks/useCarrusel'
+import './Gallery.css'
 
 const VISTAS = ['Portada', 'Contraportada', 'Lomo']
 
+// Galería de la ficha como carrusel: con fotos reales muestra las del vendedor; sin fotos, portada / contraportada / lomo.
 const Gallery = ({ libro }) => {
-  const [vista, setVista] = useState(0)
-  const fotos = libro.imgs && libro.imgs.length ? libro.imgs.length : VISTAS.length
-  const etiqueta = (i) => (libro.imgs && libro.imgs.length ? `Foto ${i + 1}` : VISTAS[i])
+  const reales = Boolean(libro.imgs && libro.imgs.length)
+  const total = reales ? libro.imgs.length : VISTAS.length
+  const { indice, ir, siguiente, anterior, gestos } = useCarrusel(total)
+  const etiqueta = (i) => (reales ? `Foto ${i + 1}` : VISTAS[i])
 
   return (
     <div className="gal">
       <div className="thumbs">
-        {Array.from({ length: fotos }, (_, i) => (
-          <button key={i} className={`thumb${i === vista ? ' on' : ''}`} type="button" aria-label={etiqueta(i)} onClick={() => setVista(i)}>
+        {Array.from({ length: total }, (_, i) => (
+          <button key={i} className={`thumb${i === indice ? ' on' : ''}`} type="button" aria-label={etiqueta(i)} aria-current={i === indice} onClick={() => ir(i)}>
             <CoverArt libro={libro} k={i} />
           </button>
         ))}
       </div>
-      <div className="gmain" style={{ cursor: 'pointer' }} title="Siguiente imagen" onClick={() => setVista((vista + 1) % fotos)}>
-        <CoverArt libro={libro} k={vista} />
+      <div className="gmain" role="group" aria-roledescription="carrusel" aria-label={`Imágenes de ${libro.t}`} tabIndex={0} {...gestos}>
+        <CoverArt libro={libro} k={indice} />
+        {total > 1 && (
+          <>
+            <button className="gnav prev" type="button" aria-label="Imagen anterior" onClick={anterior}>‹</button>
+            <button className="gnav next" type="button" aria-label="Imagen siguiente" onClick={siguiente}>›</button>
+            <span className="gcount" aria-live="polite">{indice + 1} / {total}</span>
+          </>
+        )}
       </div>
     </div>
   )

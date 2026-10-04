@@ -1,0 +1,23 @@
+/* Subida de fotos del libro: vista previa grande + miniaturas. Se adapta de 390 px a escritorio. */
+.iu{display:flex;flex-direction:column;gap:12px;min-width:0}
+.iu-lead{font-size:.78rem;font-weight:600}
+.iu-hint{display:block;font-size:.75rem;font-weight:500;opacity:.65;line-height:1.4}
+.iu-stage{display:grid;grid-template-columns:minmax(0,clamp(150px,34%,230px)) minmax(0,1fr);gap:16px;align-items:start}
+.iu-big{position:relative;aspect-ratio:3/4;border-radius:10px;overflow:hidden;background:var(--cream);box-shadow:0 8px 18px rgba(4,42,43,.15)}
+.iu-big img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.iu-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center;padding:16px;border:2px dashed rgba(4,42,43,.3);border-radius:10px;aspect-ratio:3/4;color:var(--burnt);font-weight:700;font-size:.85rem;cursor:pointer}
+.iu-empty b{font-size:2rem;line-height:1}
+.iu-empty:focus-within,.iu-empty:hover{border-color:var(--burnt)}
+.iu-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(76px,1fr));gap:10px}
+.iu-th{position:relative;aspect-ratio:3/4;border-radius:8px;overflow:hidden;background:var(--cream);box-shadow:0 4px 10px rgba(4,42,43,.12);border:2px solid transparent;padding:0;cursor:pointer}
+.iu-th.on{border-color:var(--burnt)}
+.iu-th img{width:100%;height:100%;object-fit:cover;display:block}
+.iu-th .iu-cv{position:absolute;left:4px;top:4px;background:var(--burnt);color:#fff;font-size:.6rem;font-weight:700;border-radius:4px;padding:1px 5px}
+.iu-add{display:flex;align-items:center;justify-content:center;aspect-ratio:3/4;border-radius:8px;border:2px dashed rgba(4,42,43,.3);color:var(--burnt);font-size:1.8rem;cursor:pointer}
+.iu-add:hover,.iu-add:focus-within{border-color:var(--burnt)}
+.iu-tools{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;font-size:.8rem;font-weight:600}
+.iu-tools .lnk:disabled{opacity:.35;cursor:default;text-decoration:none}
+.iu-count{font-size:.78rem;font-weight:600;opacity:.7}
+.iu-err{color:var(--burnt);font-size:.8rem;font-weight:600;line-height:1.4}.iu-err:empty{display:none}
+.iu input[type=file]{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+@media (max-width:600px){.iu-stage{grid-template-columns:minmax(0,1fr)}.iu-big,.iu-empty{max-width:240px;margin:0 auto;width:100%}}

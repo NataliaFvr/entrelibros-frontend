@@ -18,5 +18,5 @@ export const CUENTA_VENDEDOR_DEMO = {
 // Botones del panel: `destino` es la ruta a la que va cada uno al entrar (null = la de siempre)
 export const INGRESOS_DEMO = [
   { id: 'comprador', texto: 'Entrar como comprador de prueba', ident: 'usuario_prueba', contrasena: 'Clave123!', destino: null },
-  { id: 'vendedor', texto: 'Entrar como vendedor de prueba', ident: CUENTA_VENDEDOR_DEMO.nombreUsuario, contrasena: CUENTA_VENDEDOR_DEMO.contrasena, destino: '/vender' },
+  { id: 'vendedor', texto: 'Entrar como vendedor de prueba', ident: 'vendedor_prueba', contrasena: 'Clave123!', destino: '/vender' },
 ]

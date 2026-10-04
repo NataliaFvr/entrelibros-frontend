@@ -1,0 +1,36 @@
+/* ===== Campanita de notificaciones =====
+   >= 1024px: el panel cuelga de la campanita. < 1024px: ocupa todo el ancho, justo debajo del header
+   (el <header> es sticky, así que sirve de referencia para position:absolute). */
+.notif{position:relative}
+.notif-btn{background:none;border:0;padding:0;color:inherit;font:inherit}
+.notif-btn svg{display:block;width:100%;height:100%}
+.notif-btn:focus-visible{outline:2px solid var(--blue);outline-offset:4px;border-radius:50%}
+.notif-back{position:fixed;inset:0;z-index:1;background:transparent}
+.notif-panel{position:absolute;z-index:2;top:calc(100% + 17px);right:0;width:min(380px,calc(100vw - 24px));max-height:min(70vh,480px);max-height:min(70dvh,480px);display:flex;flex-direction:column;background:#fff;border:1px solid rgba(4,42,43,.12);border-radius:10px;box-shadow:0 12px 28px rgba(4,42,43,.18);color:var(--evergreen)}
+.notif-head{display:flex;align-items:center;flex-wrap:wrap;gap:6px 12px;padding:14px 16px;border-bottom:1px solid rgba(4,42,43,.1)}
+.notif-head h3{flex:1 1 auto;font-size:1.05rem;font-weight:600}
+.notif-head .lnk{font-size:.78rem}
+.notif-head .lnk:disabled{opacity:.4;cursor:default;text-decoration:none}
+.notif-x,.notif-del{display:flex;align-items:center;justify-content:center;flex-shrink:0;width:30px;height:30px;border:0;border-radius:50%;background:none;color:var(--evergreen);cursor:pointer}
+.notif-x:hover,.notif-del:hover{background:var(--cyan)}
+.notif-x svg,.notif-del svg{width:14px;height:14px}
+.notif-list{list-style:none;overflow-y:auto;overscroll-behavior:contain}
+.notif-item{display:flex;align-items:flex-start;gap:4px;padding:2px 8px 2px 0;border-bottom:1px solid rgba(4,42,43,.08)}
+.notif-item:last-child{border-bottom:0}
+.notif-item.nueva{background:rgba(239,123,69,.08)}
+.notif-body{flex:1;min-width:0;display:flex;align-items:flex-start;gap:10px;padding:12px 8px 12px 16px;border:0;background:none;color:inherit;font:inherit;text-align:left;cursor:pointer}
+.notif-dot{flex-shrink:0;width:8px;height:8px;margin-top:6px;border-radius:50%;background:transparent}
+.notif-item.nueva .notif-dot{background:var(--burnt)}
+.notif-txt{display:flex;flex-direction:column;gap:4px;min-width:0}
+.notif-msg{font-size:.86rem;line-height:1.4;overflow-wrap:anywhere}
+.notif-item.nueva .notif-msg{font-weight:600}
+.notif-txt small{font-size:.72rem;opacity:.6}
+.notif-del{margin-top:8px}
+.notif-empty{padding:28px 16px;text-align:center;font-size:.9rem;opacity:.7}
+.tg.mine{background:var(--blue);color:var(--evergreen)}
+
+@media (max-width:1023px){
+  .notif{position:static}
+  .notif-back{background:rgba(4,42,43,.35)}
+  .notif-panel{top:100%;left:0;right:0;width:auto;border-radius:0 0 12px 12px;border-width:0 0 1px}
+}

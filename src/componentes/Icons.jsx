@@ -19,6 +19,12 @@ export const ShelfIcon = () => (
   </svg>
 )
 
+export const BellIcon = () => (
+  <svg {...base} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 01-3.4 0" />
+  </svg>
+)
+
 // Menú hamburguesa clásico (tres líneas, equivalente al `Menu` de Lucide). Toma el color con currentColor.
 export const MenuIcon = () => (
   <svg {...base} viewBox="0 0 24 24" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">

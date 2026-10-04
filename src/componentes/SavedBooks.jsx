@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { useCompra } from '../hooks/useCompra'
 import { useLibros } from '../hooks/useLibros'
+import useLibroPropio from '../hooks/useLibroPropio'
 import EmptyBlock from './EmptyBlock'
 import SavedBook from './SavedBook'
 
@@ -11,6 +12,7 @@ const SavedBooks = () => {
   const { marks, toggleMark } = useAuth()
   const { agregar } = useCompra()
   const { libros } = useLibros()
+  const { esPropio } = useLibroPropio()
 
   const guardados = marks.map((id) => libros.find((l) => l.id === id)).filter(Boolean)
 
@@ -24,7 +26,7 @@ const SavedBooks = () => {
   return (
     <div className="grid">
       {guardados.map((l) => (
-        <SavedBook key={l.id} libro={l} onAlCarrito={() => agregar(l)} onQuitar={() => toggleMark(l.id)} />
+        <SavedBook key={l.id} libro={l} propio={esPropio(l)} onAlCarrito={() => agregar(l)} onQuitar={() => toggleMark(l.id)} />
       ))}
     </div>
   )

@@ -11,8 +11,9 @@ export const leer = (clave, defecto) => {
 export const guardar = (clave, valor) => {
   try {
     localStorage.setItem(clave, JSON.stringify(valor))
+    return true
   } catch {
-    /* sin espacio o bloqueado: se ignora */
+    return false // sin espacio o bloqueado: quien necesite avisar puede revisar el resultado
   }
 }
 

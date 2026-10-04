@@ -5,6 +5,7 @@ import useResenias from '../hooks/useResenias'
 import { useAuth } from '../hooks/useAuth'
 import { useToast } from '../hooks/useToast'
 import { useCompra } from '../hooks/useCompra'
+import useLibroPropio from '../hooks/useLibroPropio'
 import { posicionBestseller } from '../utils/filtrarLibros'
 import { esUsado as libroUsado } from '../utils/libro'
 import BookBreadcrumb from '../componentes/BookBreadcrumb'
@@ -28,7 +29,10 @@ const Detalle = ({ libro, libros }) => {
   const { agregar } = useCompra()
   const { resenias, promedio, publicar } = useResenias(libro.id)
 
+  const { esPropio, rutaEdicion } = useLibroPropio()
+
   const esUsado = libroUsado(libro)
+  const propio = esPropio(libro) // el vendedor ve su propia publicación: no la compra ni la guarda
 
   const { rank, delVendedor, mismoAutor, mismaCategoria } = useMemo(() => {
     const otros = libros.filter((x) => x.id !== libro.id)
@@ -40,8 +44,8 @@ const Detalle = ({ libro, libros }) => {
     }
   }, [libros, libro])
 
-  const guardar = () => { if (!requiereLogin('fav')) toggleMark(libro.id) }
-  const alCarrito = () => { if (!requiereLogin('cart')) agregar(libro) }
+  const guardar = () => { if (!propio && !requiereLogin('fav')) toggleMark(libro.id) }
+  const alCarrito = () => { if (!propio && !requiereLogin('cart')) agregar(libro) }
 
   const publicarOpinion = (st, texto) => {
     publicar({ st, i: -Date.now(), u: `${user.nombre} ${user.apellido[0]}.`, t: texto, w: new Date().toLocaleDateString('es-AR') })
@@ -49,7 +53,7 @@ const Detalle = ({ libro, libros }) => {
   }
 
   const comprar = () => {
-    if (requiereLogin('cart')) return
+    if (propio || requiereLogin('cart')) return
     agregar(libro) // Solo lo suma al carrito: el Marcapáginas se limpia recién cuando el pago se aprueba
     navigate('/carrito')
   }
@@ -64,10 +68,11 @@ const Detalle = ({ libro, libros }) => {
           rank={rank} 
           resumen={{ promedio, cantidad: resenias.length }} 
           guardado={marks.includes(libro.id)} 
-          onGuardar={guardar} 
+          onGuardar={propio ? undefined : guardar}
         />
         <div className="buy-col">
-          <BuyBox libro={libro} stock={stockDe(libro)} onComprar={comprar} onCarrito={alCarrito} />
+          <BuyBox libro={libro} stock={stockDe(libro)} onComprar={comprar} onCarrito={alCarrito}
+            propio={propio} onEditar={() => navigate(rutaEdicion(libro))} />
           <SellerBox vendedor={libro.v} cantidad={delVendedor.length} destacarReputacion={esUsado} />
         </div>
       </div>

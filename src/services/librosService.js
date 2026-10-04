@@ -2,14 +2,15 @@
 import { CATEGORIAS, generarLibros } from '../data/mockLibros'
 import { generarResenias } from '../data/mockResenias'
 import { LIBROS_PRUEBA } from '../data/vendedorPruebaMock'
-import { librosPublicados } from './vendedorService'
+import { idsGestionados, librosPublicados } from './vendedorService'
 
 // Punto único de acceso a datos. Hoy devuelve los datos de ejemplo;
 // cuando estén los endpoints, cada función pasa a usar `api.get(...)` sin tocar los componentes.
 
 export async function getLibros() {
   // return (await api.get('/libros')).data
-  return [...generarLibros(), ...librosPublicados(), ...LIBROS_PRUEBA]
+  const gestionados = idsGestionados()
+  return [...generarLibros().filter((l) => !gestionados.has(l.id)), ...librosPublicados(), ...LIBROS_PRUEBA]
 }
 
 export async function getCategorias() {

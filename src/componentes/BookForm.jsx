@@ -1,7 +1,10 @@
 import { useLibros } from '../hooks/useLibros'
 import useFormulario from '../hooks/useFormulario'
+import useImagenesLibro from '../hooks/useImagenesLibro'
+import { MIN_FOTOS } from '../utils/imagen'
 import Field from './Field'
 import SelectField from './SelectField'
+import ImageUploader from './ImageUploader'
 
 const desdeLibro = (p) => ({
   t: p.t || '', a: p.a || '', ed: p.ed || '', cat: p.cat || '', idioma: p.idioma || 'Español', anio: String(p.anio || ''),
@@ -12,6 +15,7 @@ const desdeLibro = (p) => ({
 const BookForm = ({ libro = {}, onGuardar, onCancelar }) => {
   const { categorias } = useLibros()
   const { valores, cambiar, error, setError } = useFormulario({ ...desdeLibro(libro), cat: libro.cat || categorias[0] || '' })
+  const imagenes = useImagenesLibro(libro.imgs || [])
   const usado = valores.estado === 'Usado'
 
   const alCambiar = (nombre, valor) => {
@@ -30,9 +34,10 @@ const BookForm = ({ libro = {}, onGuardar, onCancelar }) => {
     if (!(base > 0)) return setError('El precio debe ser mayor a 0.')
     if (!(d >= 0 && d <= 90)) return setError('El descuento debe estar entre 0 y 90.')
     if (!(stock >= 1)) return setError('El stock debe ser al menos 1.')
+    if (imagenes.fotos.length < MIN_FOTOS) return setError('Subí al menos una foto del libro.')
     onGuardar({
       t: valores.t.trim(), a: valores.a.trim(), ed: valores.ed.trim(), cat: valores.cat, idioma: valores.idioma,
-      anio, usado, base, d, stock,
+      anio, usado, base, d, stock, imgs: imagenes.fotos,
     })
   }
 
@@ -57,6 +62,7 @@ const BookForm = ({ libro = {}, onGuardar, onCancelar }) => {
         <Field label="Descuento (%)" name="d" type="number" min="0" max="90" value={valores.d} onChange={alCambiar} />
       </div>
       <Field label="Stock (los usados: 1 unidad)" name="stock" type="number" min="1" value={valores.stock} onChange={alCambiar} readOnly={usado} />
+      <ImageUploader imagenes={imagenes} />
       <p className="ferr" role="alert">{error}</p>
       <div className="rvf-b">
         <button className="btn main" type="submit">{libro.id ? 'Guardar cambios' : 'Publicar'}</button>

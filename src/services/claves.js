@@ -5,3 +5,4 @@ export const clavePerfil = (u) => `entrelibros_perfil_${u.nombreUsuario}` // { a
 export const claveDir = (u) => `entrelibros_direcciones_${u.nombreUsuario}` // [{ alias, calle, ciudad, cp, prov }]
 export const clavePedidos = (u) => `entrelibros_pedidos_${u.nombreUsuario}`
 export const claveVendedor = (u) => `entrelibros_vendedor_${u.nombreUsuario}` // { estado, tienda, prov, tel, desc, pub: [] }
+export const claveNotifs = (u) => `entrelibros_notifs_${u.nombreUsuario}` // [{ id, texto, fecha, leida }]

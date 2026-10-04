@@ -11,9 +11,11 @@ const useVendedor = (user) => {
 
   const cambiar = (nuevo, mensaje) => {
     setVendedor(nuevo)
-    guardarVendedor(user, nuevo)
+    const guardado = guardarVendedor(user, nuevo)
     recargar()
-    if (mensaje) toast(mensaje)
+    // Las fotos viajan en base64 dentro de localStorage (~5 MB): si no entran, avisamos en vez de perderlas en silencio
+    const texto = guardado ? mensaje : 'No pudimos guardar: sin espacio en el navegador. Probá con menos fotos.'
+    if (texto) toast(texto)
   }
   const cambiarLibros = (fn, mensaje) => cambiar({ ...vendedor, pub: fn(vendedor.pub) }, mensaje)
 
