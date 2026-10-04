@@ -9,11 +9,12 @@ const MENSAJES = {
   fav: 'Para guardar libros en tu Marcapáginas, entrá a tu cuenta.',
   review: 'Para opinar sobre un libro, entrá a tu cuenta.',
   sell: 'Para vender primero tenés que entrar a tu cuenta de comprador.',
+  account: 'Para ver tu perfil y tus compras, entrá a tu cuenta.',
 }
 
 // Modal "¿Empezamos un nuevo capítulo?": aparece al intentar una acción que pide sesión
 const LoginGate = () => {
-  const { gate, cerrarGate } = useAuth()
+  const { gate, gateDestino, cerrarGate } = useAuth()
   const navigate = useNavigate()
   const { pathname, search } = useLocation()
 
@@ -26,10 +27,11 @@ const LoginGate = () => {
 
   if (!gate) return null
 
-  // Al entrar, el login te devuelve a la página desde la que llegaste
+  // Al entrar, el login te lleva al destino pedido o, si no hay, a la página desde la que llegaste
   const ir = (ruta) => {
+    const from = gateDestino || pathname + search
     cerrarGate()
-    navigate(ruta, { state: { from: pathname + search } })
+    navigate(ruta, { state: { from } })
   }
 
   return (

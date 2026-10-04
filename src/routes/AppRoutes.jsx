@@ -13,6 +13,8 @@ import HelpPage from "../pages/HelpPage"
 import FaqPage from "../pages/FaqPage"
 import ContactPage from "../pages/ContactPage"
 import ShippingPolicyPage from "../pages/ShippingPolicyPage"
+import TermsPage from "../pages/TermsPage"
+import PrivacyPolicyPage from "../pages/PrivacyPolicyPage"
 import NotFoundPage from "../pages/NotFoundPage"
 
 const AppRoutes = () => {
@@ -36,6 +38,8 @@ const AppRoutes = () => {
         <Route path="/ayuda/preguntas-frecuentes" element={<FaqPage />} />
         <Route path="/ayuda/contacto" element={<ContactPage />} />
         <Route path="/ayuda/envios" element={<ShippingPolicyPage />} />
+        <Route path="/terminos" element={<TermsPage />} />
+        <Route path="/privacidad" element={<PrivacyPolicyPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Route>
     </Routes>

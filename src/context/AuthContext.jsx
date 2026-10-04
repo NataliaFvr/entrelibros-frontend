@@ -13,7 +13,8 @@ const AuthProvider = ({ children }) => {
   const [marks, setMarks] = useState(() => (user ? leer(claveMarks(user), []) : []))
   const [perfil, setPerfil] = useState(() => (user ? leer(clavePerfil(user), {}) : {}))
   const [direcciones, setDirecciones] = useState(() => (user ? leer(claveDir(user), []) : []))
-  const [gate, setGate] = useState(null) // null = cerrado, si no: 'cart' | 'fav' | 'review' | 'sell'
+  const [gate, setGate] = useState(null) // null = cerrado, si no: 'cart' | 'fav' | 'review' | 'sell' | 'account'
+  const [gateDestino, setGateDestino] = useState(null) // adónde ir al entrar (null = volver a la página actual)
 
   const entrar = (u, saludo) => {
     setUser(u)
@@ -77,11 +78,18 @@ const AuthProvider = ({ children }) => {
     guardar(claveDir(user), nuevas)
   }
 
-  // Corta la acción y muestra el modal si no hay sesión (true = hay que loguearse)
-  const requiereLogin = (tipo) => {
+  // Corta la acción y muestra el modal si no hay sesión (true = hay que loguearse).
+  // `destino` (opcional): ruta a la que ir después de entrar.
+  const requiereLogin = (tipo, destino = null) => {
     if (user) return false
     setGate(tipo)
+    setGateDestino(destino)
     return true
+  }
+
+  const cerrarGate = () => {
+    setGate(null)
+    setGateDestino(null)
   }
 
   const toggleMark = (id) => {
@@ -100,9 +108,9 @@ const AuthProvider = ({ children }) => {
   }
 
   const value = {
-    user, perfil, marks, direcciones, gate, verificacion,
+    user, perfil, marks, direcciones, gate, gateDestino, verificacion,
     login, registrar, logout, actualizarPerfil, agregarDireccion, eliminarDireccion,
-    requiereLogin, cerrarGate: () => setGate(null), toggleMark, quitarMarks,
+    requiereLogin, cerrarGate, toggleMark, quitarMarks,
   }
 
   return (

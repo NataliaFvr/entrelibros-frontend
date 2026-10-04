@@ -18,3 +18,20 @@ export const ShelfIcon = () => (
     <path d={SHELF_PATH} />
   </svg>
 )
+
+// Tres libros (dos parados y uno inclinado): reemplaza las tres rayas del menú hamburguesa
+export const BooksMenuIcon = () => (
+  <svg {...base} viewBox="0 0 32 26" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <rect x="3" y="6" width="6" height="17" rx="1.3" />
+    <path d="M3 10h6" />
+    <rect x="11" y="3" width="6" height="20" rx="1.3" />
+    <path d="M11 7h6" />
+    <rect x="19" y="7" width="6" height="16" rx="1.3" transform="rotate(14 19 23)" />
+  </svg>
+)
+
+export const CloseIcon = () => (
+  <svg {...base} viewBox="0 0 32 26" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+    <path d="M9 4l14 18M23 4L9 22" />
+  </svg>
+)

@@ -1,6 +1,6 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useLibros } from '../hooks/useLibros'
-import { useAuth } from '../hooks/useAuth'
+import useIrAVender from '../hooks/useIrAVender'
 import { AYUDA_LINKS, AYUDA_RAIZ } from '../data/ayuda'
 import { ChevronDown } from './Icons'
 
@@ -53,11 +53,7 @@ const NavMenu = () => {
   const { pathname } = useLocation()
   const enLibros = pathname.startsWith('/libro')
   const enAyuda = pathname.startsWith(AYUDA_RAIZ)
-  const navigate = useNavigate()
-  const { requiereLogin } = useAuth()
-  const vender = () => {
-    if (!requiereLogin('sell')) navigate('/vender')
-  }
+  const vender = useIrAVender()
 
   return (
     <nav>

@@ -21,7 +21,7 @@ const HeaderIcons = () => {
   }
 
   return (
-    <>
+    <div className="header-icons">
       <div className="icon-btn" role="button" tabIndex={0} aria-label="Mi cuenta" onClick={irACuenta} onKeyDown={alTeclear(irACuenta)}>
         {user ? <Avatar user={user} perfil={perfil} size={30} /> : <UserIcon />}
       </div>
@@ -29,7 +29,7 @@ const HeaderIcons = () => {
         <ShelfIcon />
         <span className="cart-badge" hidden={cartCount === 0}>{cartCount > 99 ? '99+' : cartCount}</span>
       </div>
-    </>
+    </div>
   )
 }
 
