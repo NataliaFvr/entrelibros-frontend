@@ -21,12 +21,10 @@ const useCalificacionesRecibidas = (tienda, publicaciones) => {
     return () => { vigente = false }
   }, [tienda, publicaciones])
 
-  const todas = [...atencion, ...delLibro]
   return {
     cargando,
     atencion: { resenias: atencion, promedio: promedio(atencion) },
     libros: { resenias: delLibro, promedio: promedio(delLibro) },
-    global: { cantidad: todas.length, promedio: promedio(todas) },
   }
 }
 

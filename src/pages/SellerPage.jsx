@@ -16,7 +16,6 @@ import BookForm from '../componentes/BookForm'
 import SellerSales from '../componentes/SellerSales'
 import SellerStats from '../componentes/SellerStats'
 import SellerReputation from '../componentes/SellerReputation'
-import SellerRatingWidget from '../componentes/SellerRatingWidget'
 
 const TABS = ['libros', 'nuevo', 'editar', 'ventas', 'estadisticas', 'reputacion']
 const Migas = () => <div className="crumbs"><Link to="/">Inicio</Link> › <span>Vender</span></div>
@@ -61,7 +60,6 @@ const Vendedor = ({ user }) => {
       <Migas />
       <SellerHead tienda={vendedor.tienda} publicados={vendedor.pub.filter((p) => p.estado === 'activo').length}
         ventas={ventas.length} vendido={vendido} onMiCuenta={() => navigate('/cuenta')} />
-      <SellerRatingWidget calificaciones={calificaciones} />
       <AccountTabs pestanias={pestanias} tab={tab === 'editar' ? 'nuevo' : tab} onIr={(t) => navigate(t === 'libros' ? '/vender' : `/vender/${t}`)} />
       {tab === 'libros' && <SellerBooks libros={vendedor.pub} onBaja={alternarBaja} onAprobar={aprobarLibro} onRechazar={rechazarLibro} />}
       {(tab === 'nuevo' || tab === 'editar') && (
