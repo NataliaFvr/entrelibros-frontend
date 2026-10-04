@@ -4,10 +4,11 @@ import { useCompra } from './useCompra'
 import { useLibros } from './useLibros'
 import { useToast } from './useToast'
 import { agregarResenaVendedor, getResenasVendedor } from '../services/resenasVendedorService'
+import { tiendaDe } from '../services/vendedorService'
 import { estadoPago } from '../utils/pedidos'
 
-// Reseñas de compradores de un vendedor + promedio. Solo puede reseñarlo quien le compró (pedido pagado);
-// cada comprador tiene una única reseña por vendedor: si vuelve a publicar, se reemplaza.
+// Reseñas de compradores de un vendedor + promedio. Solo puede reseñarlo un usuario con rol COMPRADOR que ya le compró
+// (pedido pagado) y que no sea el dueño de la tienda. Cada comprador tiene una única reseña por vendedor: si vuelve a publicar, se reemplaza.
 const useResenasVendedor = (tienda) => {
   const { user } = useAuth()
   const { pedidos } = useCompra()
@@ -29,6 +30,11 @@ const useResenasVendedor = (tienda) => {
     [pedidos, libros, tienda],
   )
 
+  // ¿Es la tienda de la cuenta con sesión? (el vendedor mirando su propia vista pública)
+  const miTienda = useMemo(() => tiendaDe(user), [user])
+  const esPropio = Boolean(miTienda) && miTienda === tienda
+  const puedeResenar = Boolean(user) && user.rol === 'COMPRADOR' && !esPropio && comprados.length > 0
+
   const miResena = user ? resenias.find((r) => r.u === user.nombreUsuario) || null : null
   const libroComprado = comprados.length ? comprados[0].t : ''
 
@@ -40,7 +46,7 @@ const useResenasVendedor = (tienda) => {
     toast(miResena ? 'Reseña actualizada' : '¡Gracias por calificar al vendedor!')
   }
 
-  return { resenias, promedio, miResena, libroComprado, puedeResenar: comprados.length > 0, publicar }
+  return { resenias, promedio, miResena, libroComprado, esPropio, puedeResenar, publicar }
 }
 
 export default useResenasVendedor

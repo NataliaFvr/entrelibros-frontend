@@ -1,7 +1,5 @@
 import { useState } from 'react'
 import { useParams, useSearchParams } from 'react-router-dom'
-import { useAuth } from '../hooks/useAuth'
-import { useToast } from '../hooks/useToast'
 import useVendedorPublico from '../hooks/useVendedorPublico'
 import useResenasVendedor from '../hooks/useResenasVendedor'
 import AccountTabs from '../componentes/AccountTabs'
@@ -14,19 +12,13 @@ import SellerCatalog from '../componentes/SellerCatalog'
 import NotFoundPage from './NotFoundPage'
 
 const Perfil = ({ vendedor, libros }) => {
-  const { requiereLogin } = useAuth()
-  const toast = useToast()
-  const { resenias, promedio, miResena, libroComprado, puedeResenar, publicar } = useResenasVendedor(vendedor.tienda)
+  const { resenias, promedio, miResena, libroComprado, esPropio, puedeResenar, publicar } = useResenasVendedor(vendedor.tienda)
   const [modal, setModal] = useState(false)
   const [params, setParams] = useSearchParams()
   const tab = params.get('tab') === 'resenias' ? 'resenias' : 'libros' // /vendedor/:id?tab=resenias
   const pestanias = [['libros', `Libros publicados (${libros.length})`], ['resenias', `Reputación y reseñas (${resenias.length})`]]
 
-  const escribir = () => {
-    if (requiereLogin('review')) return
-    if (!puedeResenar) return toast('Solo podés calificar a vendedores a los que ya les compraste')
-    setModal(true)
-  }
+  const escribir = () => { if (puedeResenar) setModal(true) } // el botón solo existe si puede; esto es una red de seguridad
   const enviar = (puntos, texto) => {
     publicar(puntos, texto)
     setModal(false)
@@ -39,9 +31,9 @@ const Perfil = ({ vendedor, libros }) => {
       <AccountTabs pestanias={pestanias} tab={tab} onIr={(t) => setParams(t === 'libros' ? {} : { tab: t }, { replace: true })} />
       {tab === 'libros'
         ? <SellerCatalog tienda={vendedor.tienda} libros={libros} />
-        : <SellerReviews resenias={resenias} promedio={promedio} miResena={miResena} onEscribir={escribir} />}
+        : <SellerReviews resenias={resenias} promedio={promedio} miResena={miResena} esPropio={esPropio} puedeResenar={puedeResenar} onEscribir={escribir} />}
       <MiniDeco />
-      {modal && (
+      {modal && puedeResenar && (
         <SellerReviewModal tienda={vendedor.tienda} libro={libroComprado} inicial={miResena} onPublicar={enviar} onCerrar={() => setModal(false)} />
       )}
     </main>

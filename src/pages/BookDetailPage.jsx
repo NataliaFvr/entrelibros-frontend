@@ -73,7 +73,7 @@ const Detalle = ({ libro, libros }) => {
         <div className="buy-col">
           <BuyBox libro={libro} stock={stockDe(libro)} onComprar={comprar} onCarrito={alCarrito}
             propio={propio} onEditar={() => navigate(rutaEdicion(libro))} editarDeshabilitado={propio && enRevision(libro)} />
-          <SellerBox vendedor={libro.v} cantidad={delVendedor.length} destacarReputacion={esUsado} />
+          <SellerBox vendedor={libro.v} cantidad={delVendedor.length} destacarReputacion={esUsado} propio={propio} />
         </div>
       </div>
       <SpecSection libro={libro} />
