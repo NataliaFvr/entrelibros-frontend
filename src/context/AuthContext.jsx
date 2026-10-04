@@ -1,12 +1,14 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { AuthCtx } from './authCtx'
 import { useToast } from '../hooks/useToast'
 import useVerificacion from '../hooks/useVerificacion'
 import { guardar, leer, mover } from '../services/almacen'
 import { actualizarUsuario, cerrarSesion, getSesion, iniciarSesion, registrar as crearCuenta } from '../services/authService'
+import { EVENTO_SESION_EXPIRADA } from '../api/axiosConfig'
 import { claveCart, claveDir, claveMarks, claveNotifs, clavePedidos, clavePerfil, claveVendedor } from '../services/claves'
 import LoginGate from '../componentes/LoginGate'
 import { conPrincipal } from '../utils/direcciones'
+import { normalizarError } from '../utils/errorApi'
 
 const AuthProvider = ({ children }) => {
   const toast = useToast()
@@ -27,20 +29,34 @@ const AuthProvider = ({ children }) => {
 
   const verificacion = useVerificacion((u) => entrar(u, `¡Cuenta confirmada! Hola, ${u.nombre}`))
 
-  // Devuelve { error }, { pendiente: true } (hay que confirmar el mail) o {} si entró bien
-  const login = (ident, contrasena) => {
-    const r = iniciarSesion(ident, contrasena)
-    if (r.error) return { error: r.error }
-    if (r.pendiente) {
-      verificacion.iniciar(r.pendiente, 'Tu cuenta todavía no está confirmada. Te mandamos un código nuevo.')
-      return { pendiente: true }
+  // Devuelve { error, tipo, campos }, { pendiente: true } (hay que confirmar el mail) o {} si entró bien.
+  // Es async: hoy `iniciarSesion` responde al instante (demo), pero cuando llame a la API cualquier error HTTP
+  // (400, 401, 403, 404…) llega acá como excepción y se traduce con normalizarError().
+  const login = async (ident, contrasena) => {
+    try {
+      const r = await iniciarSesion(ident, contrasena)
+      if (r.error) return { error: r.error, tipo: r.tipo }
+      if (r.pendiente) {
+        verificacion.iniciar(r.pendiente, 'Tu cuenta todavía no está confirmada. Te mandamos un código nuevo.')
+        return { pendiente: true }
+      }
+      entrar(r.user)
+      return {}
+    } catch (err) {
+      const info = normalizarError(err, 'login')
+      return { error: info.mensaje, tipo: info.tipo, campos: info.campos }
     }
-    entrar(r.user)
-    return {}
   }
 
-  const registrar = (v) => {
-    verificacion.iniciar(crearCuenta(v), 'Te creamos la cuenta. Falta un paso: confirmá tu e-mail.')
+  // Devuelve {} si la cuenta se creó (queda pendiente de confirmar) o { error, tipo, campos }
+  const registrar = async (v) => {
+    try {
+      verificacion.iniciar(await crearCuenta(v), 'Te creamos la cuenta. Falta un paso: confirmá tu e-mail.')
+      return {}
+    } catch (err) {
+      const info = normalizarError(err, 'registro')
+      return { error: info.mensaje, tipo: info.tipo, campos: info.campos }
+    }
   }
 
   const logout = () => {
@@ -51,6 +67,20 @@ const AuthProvider = ({ children }) => {
     setDirecciones([])
     toast('Cerraste sesión')
   }
+
+  // axiosConfig avisa cuando la API responde 401 con un token guardado: se cierra la sesión y se avisa
+  useEffect(() => {
+    const alVencer = () => {
+      cerrarSesion()
+      setUser(null)
+      setMarks([])
+      setPerfil({})
+      setDirecciones([])
+      toast('Tu sesión venció. Volvé a ingresar para continuar.')
+    }
+    window.addEventListener(EVENTO_SESION_EXPIRADA, alVencer)
+    return () => window.removeEventListener(EVENTO_SESION_EXPIRADA, alVencer)
+  }, [toast])
 
   // Guarda los datos del perfil; si cambió el usuario, lleva todo lo suyo a la clave nueva
   const actualizarPerfil = (v, nuevoPerfil) => {

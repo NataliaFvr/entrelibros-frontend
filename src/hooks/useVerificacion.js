@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { normalizarError } from '../utils/errorApi'
 import { confirmarCodigo, generarCodigo, getUsuarios, marcarVerificada } from '../services/authService'
 
 // Cuenta que está confirmando su e-mail. `alConfirmar(usuario)` se llama cuando queda confirmada.
@@ -17,13 +18,18 @@ const useVerificacion = (alConfirmar) => {
     setVerif({ id: verif.id, nota: 'Te enviamos un código nuevo.' })
   }
 
-  // Devuelve el mensaje de error, o '' si quedó confirmada
-  const confirmar = (codigo) => {
-    const r = confirmarCodigo(verif.id, codigo)
-    if (r.error) return r.error
-    setVerif(null)
-    alConfirmar(r.user)
-    return ''
+  // Devuelve { error, tipo, campos } (código inválido, vencido, usuario inexistente…) o {} si quedó confirmada
+  const confirmar = async (codigo) => {
+    try {
+      const r = await confirmarCodigo(verif.id, codigo)
+      if (r.error) return { error: r.error, tipo: r.tipo }
+      setVerif(null)
+      alConfirmar(r.user)
+      return {}
+    } catch (err) {
+      const info = normalizarError(err, 'verificacion')
+      return { error: info.mensaje, tipo: info.tipo, campos: info.campos }
+    }
   }
 
   const confirmarDesdeMail = () => {

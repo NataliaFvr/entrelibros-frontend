@@ -1,23 +1,43 @@
 import { useState } from 'react'
 import useCuentaRegresiva from '../hooks/useCuentaRegresiva'
+import useFormulario from '../hooks/useFormulario'
+import { normalizarError } from '../utils/errorApi'
 import { enmascararMail } from '../utils/format'
+import { validarCodigo } from '../utils/validaciones'
+import Aviso from './Aviso'
+import Field from './Field'
 
+const VALIDADORES = { codigo: validarCodigo }
+
+// `onConfirmar(codigo)` devuelve { error, tipo } si falló (código inválido, vencido, demasiados intentos…) o {} si quedó confirmada
 const VerifyForm = ({ usuario, nota, onConfirmar, onReenviar, onVolver }) => {
-  const [codigo, setCodigo] = useState('')
-  const [error, setError] = useState('')
-  const [restante, reiniciar] = useCuentaRegresiva(30)
+  const { valores, cambiar, errores, alSalir, validarTodo, error, tipoError, setError, reiniciar } = useFormulario({ codigo: '' }, VALIDADORES)
+  const [restante, reiniciarCuenta] = useCuentaRegresiva(30)
+  const [enviando, setEnviando] = useState(false)
 
-  const enviar = (e) => {
+  const enviar = async (e) => {
     e.preventDefault()
-    const mensaje = onConfirmar(codigo)
-    if (mensaje) setError(mensaje)
+    if (enviando) return
+    if (Object.keys(validarTodo(e.currentTarget)).length) return
+    setError('')
+    setEnviando(true)
+    try {
+      const r = await onConfirmar(valores.codigo)
+      if (r && r.error) setError(r.error, r.tipo)
+    } finally {
+      setEnviando(false)
+    }
   }
 
-  const reenviar = () => {
-    onReenviar()
-    reiniciar()
-    setCodigo('')
-    setError('')
+  const reenviar = async () => {
+    try {
+      await onReenviar()
+      reiniciarCuenta()
+      reiniciar()
+    } catch (err) {
+      const info = normalizarError(err, 'verificacion')
+      setError(info.mensaje, info.tipo)
+    }
   }
 
   return (
@@ -27,13 +47,13 @@ const VerifyForm = ({ usuario, nota, onConfirmar, onReenviar, onVolver }) => {
       <p className="sell-note">
         Te enviamos un código de 6 dígitos a <b>{enmascararMail(usuario.email)}</b>. Revisá también la carpeta de spam.
       </p>
-      <label className="fld">
-        Código de confirmación
-        <input className="code-in" type="text" name="codigo" value={codigo} inputMode="numeric" autoComplete="one-time-code"
-          maxLength={6} placeholder="000000" onChange={(e) => setCodigo(e.target.value.replace(/\D/g, ''))} />
-      </label>
-      <p className="ferr" role="alert">{error}</p>
-      <button className="btn main" type="submit">Confirmar cuenta</button>
+      <Field
+        label="Código de confirmación" name="codigo" className="code-in" value={valores.codigo}
+        onChange={(n, v) => cambiar(n, v.replace(/\D/g, ''))} onBlur={alSalir} error={errores.codigo}
+        inputMode="numeric" autoComplete="one-time-code" maxLength={6} placeholder="000000"
+      />
+      <Aviso mensaje={error} tipo={tipoError} />
+      <button className="btn main" type="submit" disabled={enviando}>{enviando ? 'Confirmando…' : 'Confirmar cuenta'}</button>
       <button className="btn alt" type="button" disabled={restante > 0} onClick={reenviar}>
         {restante > 0 ? `Reenviar código (${restante} s)` : 'Reenviar código'}
       </button>

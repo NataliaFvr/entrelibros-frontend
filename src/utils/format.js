@@ -1,4 +1,5 @@
-export const fmt = (n) => '$' + n.toLocaleString('es-AR')
+// $1.500 · $1.500,50 (los centavos solo aparecen si el precio los tiene)
+export const fmt = (n) => '$' + n.toLocaleString('es-AR', { minimumFractionDigits: Number.isInteger(n) ? 0 : 2, maximumFractionDigits: 2 })
 
 // Normaliza para búsquedas sin tildes ni mayúsculas
 export const norm = (s) =>

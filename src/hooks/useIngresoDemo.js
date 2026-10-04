@@ -8,9 +8,9 @@ const useIngresoDemo = (elegirDestino) => {
   const { login } = useAuth()
   const toast = useToast()
 
-  return ({ ident, contrasena, destino }) => {
+  return async ({ ident, contrasena, destino }) => {
     elegirDestino(destino)
-    const r = login(ident, contrasena)
+    const r = await login(ident, contrasena)
     if (r.error) {
       elegirDestino(null)
       toast('No se pudo entrar con la cuenta de prueba. Probá ingresando a mano.')

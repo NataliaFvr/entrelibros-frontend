@@ -13,7 +13,8 @@ import { SEMILLA_VENDEDOR_ALEPH, VENDEDOR_ALEPH } from '../data/vendedorPruebaMo
 // los datos ya aprobados. Back: EstadoModeracion = PENDIENTE (HistorialModeracion registra la decisión).
 export const enRevision = (p) => p.mod === 'EN_REVISION' || Boolean(p.revision)
 
-export const precioFinal = (p) => Math.round(p.base * (1 - p.d / 100))
+// Precio con descuento, redondeado a centavos (el precio admite hasta 2 decimales)
+export const precioFinal = (p) => Math.round(p.base * (1 - p.d / 100) * 100) / 100
 
 // La cuenta con rol VENDEDOR ya viene aprobada; el resto empieza sin solicitud
 // y @vendedor_prueba ("Librería El Aleph") arranca con sus publicaciones de ejemplo

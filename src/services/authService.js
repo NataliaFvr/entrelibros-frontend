@@ -55,12 +55,12 @@ export const getSesion = () => {
   return u && u.estado !== 'DADO_DE_BAJA' && u.verificado !== false ? u : null
 }
 
-// Devuelve { user }, { pendiente } (falta confirmar el mail) o { error }
+// Devuelve { user }, { pendiente } (falta confirmar el mail) o { error, tipo }. `tipo` es el mismo que arma errorApi.js con la API.
 export const iniciarSesion = (ident, contrasena) => {
   const i = ident.trim().toLowerCase()
   const u = getUsuarios().find((x) => x.nombreUsuario.toLowerCase() === i || x.email.toLowerCase() === i)
-  if (!u || u.contrasena !== contrasena) return { error: 'Usuario o contraseña incorrectos.' }
-  if (u.estado === 'DADO_DE_BAJA') return { error: 'Tu cuenta fue dada de baja. Contactá a un administrador.' }
+  if (!u || u.contrasena !== contrasena) return { error: 'Usuario o contraseña incorrectos.', tipo: 'CREDENCIALES' }
+  if (u.estado === 'DADO_DE_BAJA') return { error: 'Tu cuenta fue dada de baja. Contactá a un administrador.', tipo: 'PERMISO' }
   if (u.verificado === false) return { pendiente: u }
   guardar(CLAVE_SESION, u.nombreUsuario)
   return { user: u }
@@ -94,13 +94,15 @@ export const marcarVerificada = (nombreUsuario) => {
 export const confirmarCodigo = (nombreUsuario, codigo) => {
   const u = buscar(nombreUsuario)
   const c = codigo.trim()
-  if (!/^\d{6}$/.test(c)) return { error: 'Ingresá los 6 dígitos del código.' }
-  if (!u.codigo || u.vence < Date.now()) return { error: 'El código venció. Pedí uno nuevo.' }
-  if (u.intentos >= MAX_INTENTOS) return { error: 'Demasiados intentos. Pedí un código nuevo.' }
+  if (!/^\d{6}$/.test(c)) return { error: 'Ingresá los 6 dígitos del código.', tipo: 'VALIDACION' }
+  if (!u.codigo || u.vence < Date.now()) return { error: 'El código venció. Pedí uno nuevo.', tipo: 'CODIGO_VENCIDO' }
+  if (u.intentos >= MAX_INTENTOS) return { error: 'Demasiados intentos. Pedí un código nuevo.', tipo: 'DEMASIADOS_INTENTOS' }
   if (c !== u.codigo) {
     const intentos = u.intentos + 1
     modificar(nombreUsuario, { intentos })
-    return { error: intentos >= MAX_INTENTOS ? 'Demasiados intentos. Pedí un código nuevo.' : `Código incorrecto. Te quedan ${MAX_INTENTOS - intentos} intentos.` }
+    return intentos >= MAX_INTENTOS
+      ? { error: 'Demasiados intentos. Pedí un código nuevo.', tipo: 'DEMASIADOS_INTENTOS' }
+      : { error: `Código incorrecto. Te quedan ${MAX_INTENTOS - intentos} intentos.`, tipo: 'CODIGO_INVALIDO' }
   }
   return { user: marcarVerificada(nombreUsuario) }
 }

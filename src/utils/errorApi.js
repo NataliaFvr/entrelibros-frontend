@@ -1,30 +1,134 @@
-// Convierte cualquier error (axios o común) en un texto claro para mostrarle a la persona.
-// Cubre los formatos habituales de Spring Boot: { message }, { error }, { errors: { campo: msg } } y
-// { errors: [{ field, defaultMessage }] } (Bean Validation).
-const POR_ESTADO = {
-  400: 'Revisá los datos ingresados: hay información inválida.',
-  401: 'Tu sesión venció. Volvé a ingresar para continuar.',
-  403: 'No tenés permiso para realizar esta acción.',
-  404: 'No encontramos lo que buscabas. Puede que ya no exista.',
-  409: 'Este libro ya tiene una modificación pendiente de revisión.',
-  422: 'Revisá los datos ingresados: hay información inválida.',
+// Manejo centralizado de errores de la API. Convierte cualquier error (axios o común) en un objeto simple
+// que los formularios saben mostrar:
+//   { tipo, status, mensaje, campos }
+// - tipo: qué pasó (ver MENSAJES). Sale de la excepción que devolvió el back o, si no la identificamos, del status HTTP.
+// - mensaje: texto claro, en español, para la persona.
+// - campos: errores por campo { nombreDelCampoEnElBack: mensaje } (Bean Validation), para pintarlos en cada input.
+// El `contexto` ('login' | 'registro' | 'verificacion' | 'libro' | ...) desambigua códigos HTTP que significan
+// cosas distintas según la pantalla (un 401 en el login son credenciales incorrectas; en cualquier otro lado, sesión vencida).
+
+// Excepciones del back (nombre de la clase o código) -> tipo. Se busca en cualquier campo del cuerpo de la respuesta.
+// El orden importa: lo más específico va primero.
+const FIRMAS = [
+  ['CUENTA_NO_CONFIRMADA', /CuentaNoConfirmada|CuentaNoVerificada|CUENTA_NO_(CONFIRMADA|VERIFICADA)|PENDIENTE_CONFIRMACION|DisabledException/i],
+  ['CODIGO_VENCIDO', /CodigoVerificacion(Expirad|Venc)|CODIGO(_VERIFICACION)?_(EXPIRADO|VENCIDO)/i],
+  ['CODIGO_INVALIDO', /CodigoVerificacionInvalido|CODIGO(_VERIFICACION)?_INVALIDO/i],
+  ['USUARIO_NO_ENCONTRADO', /UsuarioNoEncontrado|USUARIO_NO_ENCONTRADO/i],
+  ['CREDENCIALES', /BadCredentials|CredencialesInvalidas|CREDENCIALES_INVALIDAS|Bad credentials/i],
+  ['DUPLICADO', /UsuarioYaExiste|EmailYaRegistrado|EmailDuplicado|YaExiste|YA_EXISTE|DUPLICAD|already exists/i],
+  ['DEMASIADOS_INTENTOS', /DemasiadosIntentos|TooManyAttempts|DEMASIADOS_INTENTOS/i],
+]
+
+export const MENSAJES = {
+  CUENTA_NO_CONFIRMADA: 'Tu cuenta todavía no está confirmada. Revisá tu e-mail y confirmala con el código que te enviamos.',
+  CODIGO_VENCIDO: 'El código venció. Pedí uno nuevo.',
+  CODIGO_INVALIDO: 'El código ingresado no es correcto. Revisalo e intentá de nuevo.',
+  USUARIO_NO_ENCONTRADO: 'No encontramos una cuenta con ese usuario o e-mail.',
+  CREDENCIALES: 'Usuario o contraseña incorrectos.',
+  DUPLICADO: 'Ese usuario o e-mail ya tiene una cuenta.',
+  DEMASIADOS_INTENTOS: 'Demasiados intentos. Esperá un momento o pedí un código nuevo.',
+  SESION_EXPIRADA: 'Tu sesión venció. Volvé a ingresar para continuar.',
+  PERMISO: 'No tenés permiso para realizar esta acción.',
+  NO_ENCONTRADO: 'No encontramos lo que buscabas. Puede que ya no exista.',
+  CONFLICTO: 'No se pudo completar la acción porque hay un conflicto con el estado actual. Actualizá la página e intentá de nuevo.',
+  VALIDACION: 'Revisá los datos ingresados: hay información inválida.',
+  RED: 'No pudimos conectarnos con el servidor. Revisá tu conexión e intentá de nuevo.',
+  TIMEOUT: 'El servidor tardó demasiado en responder. Intentá de nuevo en un momento.',
+  SERVIDOR: 'El servidor tuvo un problema. Intentá de nuevo en unos minutos.',
+  DESCONOCIDO: 'Ocurrió un error inesperado. Intentá de nuevo.',
 }
 
-const textoDe = (d) => d.message || d.mensaje || d.error || ''
+// Título corto del aviso visual
+export const TITULOS = {
+  CUENTA_NO_CONFIRMADA: 'Cuenta sin confirmar',
+  CODIGO_VENCIDO: 'El código venció',
+  CODIGO_INVALIDO: 'Código incorrecto',
+  USUARIO_NO_ENCONTRADO: 'Cuenta no encontrada',
+  CREDENCIALES: 'No pudimos iniciar sesión',
+  DUPLICADO: 'Datos ya registrados',
+  DEMASIADOS_INTENTOS: 'Demasiados intentos',
+  SESION_EXPIRADA: 'Sesión vencida',
+  PERMISO: 'Sin permiso',
+  NO_ENCONTRADO: 'No encontrado',
+  CONFLICTO: 'Hay un conflicto',
+  VALIDACION: 'Revisá los datos',
+  RED: 'Sin conexión',
+  TIMEOUT: 'El servidor no responde',
+  SERVIDOR: 'Problema en el servidor',
+  DESCONOCIDO: 'Algo salió mal',
+}
 
-export const mensajeError = (err) => {
+// 'warning' = hay un paso que completar; 'info' = aviso neutro; el resto, 'error'
+export const severidad = (tipo) => {
+  if (['CUENTA_NO_CONFIRMADA', 'CODIGO_VENCIDO', 'DEMASIADOS_INTENTOS'].includes(tipo)) return 'warning'
+  return 'error'
+}
+
+const esTextoUtil = (t) => typeof t === 'string' && t.trim() && !/Exception|^\s*at\s|\bnull\b/.test(t)
+
+// Errores por campo: { campo: mensaje } desde { errors: {…} } o { errors: [{ field, defaultMessage }] }
+const camposDe = (d) => {
+  const crudo = d.errors || d.errores || d.fieldErrors || d.campos
+  if (!crudo || typeof crudo !== 'object') return {}
+  const pares = Array.isArray(crudo)
+    ? crudo.map((c) => (typeof c === 'string' ? [null, c] : [c.field || c.campo, c.defaultMessage || c.message || c.mensaje]))
+    : Object.entries(crudo).map(([k, v]) => [k, Array.isArray(v) ? v.join(' ') : String(v)])
+  const campos = {}
+  pares.forEach(([campo, mensaje]) => { if (campo && mensaje) campos[campo] = mensaje })
+  return campos
+}
+
+// Mensajes sueltos (sin campo) que vengan en la lista de errores
+const mensajesSueltos = (d) => {
+  const crudo = d.errors || d.errores
+  return Array.isArray(crudo) ? crudo.map((c) => (typeof c === 'string' ? c : c.defaultMessage || c.message)).filter(Boolean) : []
+}
+
+const porEstado = (status, contexto, hayCampos) => {
+  if (status === 401) return contexto === 'login' ? 'CREDENCIALES' : 'SESION_EXPIRADA'
+  // Spring responde 403 (sin cuerpo) a una cuenta deshabilitada, que es una cuenta sin confirmar
+  if (status === 403) return contexto === 'login' ? 'CUENTA_NO_CONFIRMADA' : 'PERMISO'
+  if (status === 404) return ['login', 'verificacion'].includes(contexto) ? 'USUARIO_NO_ENCONTRADO' : 'NO_ENCONTRADO'
+  if (status === 409) return contexto === 'registro' ? 'DUPLICADO' : 'CONFLICTO'
+  if (status === 429) return 'DEMASIADOS_INTENTOS'
+  if (status === 400 && contexto === 'verificacion' && !hayCampos) return 'CODIGO_INVALIDO'
+  if (status === 400 || status === 422) return 'VALIDACION'
+  if (status >= 500) return 'SERVIDOR'
+  return 'DESCONOCIDO'
+}
+
+export const normalizarError = (err, contexto = '') => {
   const r = err && err.response
+
+  // Sin respuesta del servidor: timeout, caída de red, o un Error común lanzado por el propio front
   if (!r) {
-    if (err && err.request) return 'No pudimos conectarnos con el servidor. Revisá tu conexión e intentá de nuevo.'
-    return (err && err.message) || 'Ocurrió un error inesperado. Intentá de nuevo.'
+    if (err && (err.code === 'ECONNABORTED' || /timeout/i.test(err.message || ''))) return { tipo: 'TIMEOUT', status: 0, mensaje: MENSAJES.TIMEOUT, campos: {} }
+    if (err && err.request) return { tipo: 'RED', status: 0, mensaje: MENSAJES.RED, campos: {} }
+    return { tipo: 'DESCONOCIDO', status: 0, mensaje: (err && err.message) || MENSAJES.DESCONOCIDO, campos: {} }
   }
+
   const d = r.data && typeof r.data === 'object' ? r.data : {}
-  const campos = d.errors || d.errores
-  if (campos) {
-    const lista = Array.isArray(campos)
-      ? campos.map((c) => (typeof c === 'string' ? c : c.defaultMessage || c.message || c.mensaje)).filter(Boolean)
-      : Object.values(campos).map(String)
-    if (lista.length) return lista.join(' ')
+  const campos = camposDe(d)
+  const hayCampos = Object.keys(campos).length > 0
+  const firma = [d.exception, d.error, d.code, d.codigo, d.type, d.tipo, d.title, d.message, d.mensaje, d.detail, typeof r.data === 'string' ? r.data : '']
+    .filter((x) => typeof x === 'string').join(' ')
+  const encontrada = FIRMAS.find(([, re]) => re.test(firma))
+  const tipo = encontrada ? encontrada[0] : porEstado(r.status, contexto, hayCampos)
+
+  // Para los tipos que conocemos usamos nuestro texto (claro y en español); si no, el del back cuando sirve
+  let mensaje = MENSAJES[tipo]
+  if (tipo === 'VALIDACION' || tipo === 'DESCONOCIDO' || tipo === 'CONFLICTO') {
+    const lista = [...Object.values(campos), ...mensajesSueltos(d)]
+    const delBack = [d.message, d.mensaje, d.detail, d.error].find(esTextoUtil)
+    const conPunto = (m) => (/[.!?]$/.test(m.trim()) ? m.trim() : `${m.trim()}.`)
+    mensaje = lista.length ? [...new Set(lista)].map(conPunto).join(' ') : (delBack || mensaje)
   }
-  return textoDe(d) || POR_ESTADO[r.status] || (r.status >= 500 ? 'El servidor tuvo un problema. Intentá de nuevo en unos minutos.' : 'No pudimos completar la acción.')
+  return { tipo, status: r.status, mensaje, campos }
 }
+
+// Atajo: solo el texto
+export const mensajeError = (err, contexto = '') => normalizarError(err, contexto).mensaje
+
+// { anioPublicacion: '…' } + { anioPublicacion: 'anio' } -> { anio: '…' } (campos del back -> inputs del formulario)
+export const mapearCampos = (campos = {}, mapa = {}) =>
+  Object.fromEntries(Object.entries(campos).map(([k, v]) => [mapa[k] || k, v]))
