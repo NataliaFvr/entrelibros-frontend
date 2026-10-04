@@ -2,6 +2,13 @@ import { useState } from 'react'
 import { useLibros } from './useLibros'
 import { useToast } from './useToast'
 import { enRevision, getVendedor, guardarVendedor, nuevoIdPublicacion } from '../services/vendedorService'
+import { esModeracionError, modificarLibro } from '../services/moderacionService'
+import { aLibroRequest } from '../utils/libroRequest'
+
+// Mientras el resto de la app trabaja con datos de ejemplo (ids y sesión locales), las ediciones solo pueden ir
+// al back si éste está activo: VITE_API_LIBROS=true en .env. Sin eso se mantiene el comportamiento de demostración.
+const USAR_API = import.meta.env.VITE_API_LIBROS === 'true'
+const MENSAJE_REVISION = 'Tus cambios han sido enviados a revisión por un administrador'
 
 // Estado y acciones del vendedor de la cuenta `user`. Cada cambio se guarda y refresca el catálogo.
 const useVendedor = (user) => {
@@ -29,7 +36,7 @@ const useVendedor = (user) => {
 
   // Sin `idEditado` publica uno nuevo; con `idEditado` lo modifica. Devuelve { ok } o { error }.
   // Un libro ya aceptado conserva su versión aprobada (sigue en el catálogo) y los cambios quedan en `revision`.
-  const guardarLibro = (datos, idEditado) => {
+  const guardarLibro = async (datos, idEditado) => {
     if (!idEditado) {
       return cambiarLibros((pub) => [{ id: nuevoIdPublicacion(), ...datos, estado: 'activo', mod: 'EN_REVISION' }, ...pub],
         'Libro enviado a revisión del administrador')
@@ -38,13 +45,27 @@ const useVendedor = (user) => {
     if (!actual) return { error: 'No encontramos ese libro. Puede que ya no exista.' }
     if (enRevision(actual)) return { error: 'Este libro ya tiene una revisión pendiente. Esperá a que un administrador la resuelva.' }
 
+    // PATCH /libros/{id}. El estado que manda el back es la verdad: solo si vuelve EN_REVISION se muestra como pendiente.
+    let enviadoARevision = true
+    if (USAR_API) {
+      try {
+        const libro = await modificarLibro(idEditado, aLibroRequest(datos))
+        enviadoARevision = libro.estadoModeracion === 'EN_REVISION'
+      } catch (err) {
+        const mensaje = esModeracionError(err) ? err.message : 'No pudimos guardar los cambios. Intentá de nuevo.'
+        toast(mensaje)
+        return { error: mensaje } // el formulario lo muestra en pantalla y no pierde lo escrito
+      }
+    }
+
     const aceptado = (actual.mod || 'ACEPTADO') === 'ACEPTADO'
     return cambiarLibros(
       (pub) => pub.map((p) => {
         if (p.id !== idEditado) return p
+        if (!enviadoARevision) return { ...p, ...datos, modC: '' } // el back ya aplicó los cambios: no hay nada que revisar
         return aceptado ? { ...p, revision: datos, modC: '' } : { ...p, ...datos, mod: 'EN_REVISION', modC: '' }
       }),
-      'Tus cambios han sido enviados a revisión por un administrador',
+      enviadoARevision ? MENSAJE_REVISION : 'Cambios guardados',
     )
   }
 

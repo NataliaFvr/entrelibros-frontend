@@ -23,8 +23,8 @@ const SellerBookRow = ({ libro, onEditar, onBaja, onAprobar, onRechazar }) => {
         <small>Stock: {libro.stock}{libro.mod === 'RECHAZADO' && libro.modC ? ` · Motivo: ${libro.modC}` : ''}</small>
         {modificacion && (
           <>
-            <span className="tg rev">Modificación en revisión</span>
-            <small className="rev-note">Mientras tanto se muestra la versión ya aprobada.</small>
+            <span className="tg rev" role="status">Modificación en revisión</span>
+            <small className="rev-note" id={`rev-${libro.id}`}>Mientras tanto se muestra la versión ya aprobada.</small>
           </>
         )}
         {!pendiente && aceptado && libro.modC && <small className="rev-note">Tu última modificación fue rechazada: {libro.modC}</small>}
@@ -33,8 +33,9 @@ const SellerBookRow = ({ libro, onEditar, onBaja, onAprobar, onRechazar }) => {
       <span className={`tg${activo && aceptado ? '' : ' off'}`}>{!activo ? 'DE BAJA' : ETIQUETAS[libro.mod] || 'ACTIVO'}</span>
       <div className="ac">
         <button className="lnk" type="button" onClick={onEditar} disabled={pendiente}
+          aria-describedby={modificacion ? `rev-${libro.id}` : undefined}
           title={pendiente ? 'Tenés una revisión pendiente: podés volver a editar cuando un administrador la resuelva' : undefined}>
-          Editar
+          {pendiente ? 'Editar nuevamente' : 'Editar'}
         </button>
         <button className="lnk" type="button" onClick={onBaja}>{activo ? 'Dar de baja' : 'Reactivar'}</button>
         {pendiente && <button className="lnk" type="button" onClick={onAprobar}>Simular aprobación (demo)</button>}

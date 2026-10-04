@@ -10,7 +10,7 @@ import { SEMILLA_VENDEDOR_ALEPH, VENDEDOR_ALEPH } from '../data/vendedorPruebaMo
 // Back: la solicitud y la moderación de libros las resuelve un administrador.
 // Una publicación está "en revisión" si es nueva y aún no fue aceptada, o si ya aceptada tiene una modificación
 // pendiente (`revision` = datos nuevos a la espera del administrador). Mientras tanto el catálogo sigue mostrando
-// los datos ya aprobados. Back: EstadoModeracion = PENDIENTE (HistorialModeracion registra la decisión).
+// los datos ya aprobados. Back: EstadoModeracion = EN_REVISION (HistorialModeracion registra la decisión del administrador).
 export const enRevision = (p) => p.mod === 'EN_REVISION' || Boolean(p.revision)
 
 // Precio con descuento, redondeado a centavos (el precio admite hasta 2 decimales)

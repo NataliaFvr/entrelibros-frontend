@@ -49,8 +49,8 @@ const Vendedor = ({ user }) => {
   const ventas = ventasDe(vendedor.tienda, libros)
   const vendido = ventas.reduce((suma, v) => suma + v.its.reduce((s, i) => s + i.p * i.q, 0), 0)
   const pestanias = [['libros', 'Mis libros'], ['nuevo', editado ? 'Editar libro' : 'Publicar libro'], ['ventas', 'Historial de ventas'], ['estadisticas', 'Estadísticas'], ['reputacion', 'Reputación']]
-  const guardar = (datos) => {
-    const respuesta = guardarLibro(datos, editado && editado.id)
+  const guardar = async (datos) => {
+    const respuesta = await guardarLibro(datos, editado && editado.id)
     if (respuesta.ok) navigate('/vender')
     return respuesta // si trae { error }, el formulario lo muestra
   }

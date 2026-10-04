@@ -1,23 +1,32 @@
 import api from '../api/axiosConfig'
 import { normalizarError } from '../utils/errorApi'
 import type {
-  AccionModeracionRequest,
   ErrorApiNormalizado,
+  EstadoModeracion,
+  HistorialModeracion,
   LibroResponse,
-  ModeracionPendientesResponse,
+  ModeracionRequest,
   ModificarLibroRequest,
+  Pagina,
 } from '../types/moderacion'
 
-// Cliente de moderación. Usa el axios compartido (api/axiosConfig): ya manda el JWT y cierra la sesión si vence.
-// Las rutas son relativas a su baseURL (hoy termina en /api/v1): si el back expone estos endpoints en /api/...
-// sin versión, se cambian acá o en VITE_API_URL, sin tocar el resto del código.
+// Cliente de libros y moderación contra el back real. Usa el axios compartido (api/axiosConfig):
+// ya manda el JWT y cierra la sesión si vence.
+//
+// OJO con la URL: en el back solo /auth cuelga de /api/v1; los controllers de libros están en la raíz
+// (@RequestMapping("libros")). Por eso acá se reemplaza la baseURL por la raíz del servidor
+// (VITE_API_URL sin el sufijo /api/v1). Si el back cambia de prefijo, se ajusta RAIZ y listo.
+const RAIZ = (import.meta.env.VITE_API_URL || 'http://localhost:8080/api/v1').replace(/\/api\/v1\/?$/, '')
+
 const RUTAS = {
   libro: (id: number) => `/libros/${id}`,
-  pendientes: '/admin/moderacion/pendientes',
-  accion: (id: number) => `/admin/moderacion/${id}/accion`,
+  moderar: (id: number) => `/libros/${id}/moderacion`,
+  porEstado: '/libros/moderacion',
+  historial: '/libros/historial-moderacion',
+  historialLibro: (id: number) => `/libros/${id}/historial-moderacion`,
 } as const
 
-const CONTEXTO = 'moderacion'
+const CONTEXTO = 'libro'
 const MIN_MOTIVO = 3 // mismo mínimo que pide el panel de administración al rechazar
 
 /** Único tipo de error que lanza este servicio: la UI solo necesita mostrar `mensaje` (o `campos` en formularios). */
@@ -43,40 +52,74 @@ const fallar = (err: unknown): never => {
   throw new ModeracionError(normalizarError(err, CONTEXTO) as ErrorApiNormalizado)
 }
 
-/** PUT /libros/{id} — el libro vuelve a moderación (estadoModeracion: "PENDIENTE"). */
+const paginaVacia = <T>(size: number, number: number): Pagina<T> => ({
+  content: [], totalElements: 0, totalPages: 0, number, size, first: true, last: true, empty: true,
+})
+
+/**
+ * PATCH /libros/{id} — solo VENDEDOR dueño del libro. Devuelve el libro con su `estadoModeracion` actual:
+ * la UI decide qué mostrar según ese valor (no asume que quedó EN_REVISION).
+ */
 export async function modificarLibro(id: number, datos: ModificarLibroRequest): Promise<LibroResponse> {
   try {
-    const { data } = await api.put<LibroResponse>(RUTAS.libro(id), datos)
+    const { data } = await api.patch<LibroResponse>(RUTAS.libro(id), datos, { baseURL: RAIZ })
     return data
   } catch (err) {
     return fallar(err)
   }
 }
 
-/** GET /admin/moderacion/pendientes */
-export async function obtenerPendientes(): Promise<ModeracionPendientesResponse> {
+/**
+ * GET /libros/moderacion?estado=… — solo ADMIN. EN_REVISION = cola de pendientes.
+ * El back responde 404 cuando no hay libros en ese estado (ListaVaciaException): acá eso es una página vacía.
+ */
+export async function obtenerLibrosPorEstado(estado: EstadoModeracion, page = 0, size = 20): Promise<Pagina<LibroResponse>> {
   try {
-    const { data } = await api.get<ModeracionPendientesResponse>(RUTAS.pendientes)
+    const { data } = await api.get<Pagina<LibroResponse>>(RUTAS.porEstado, { baseURL: RAIZ, params: { estado, page, size } })
     return data
   } catch (err) {
+    if ((err as { response?: { status?: number } })?.response?.status === 404) return paginaVacia(size, page)
     return fallar(err)
   }
 }
 
-/** POST /admin/moderacion/{id}/accion — aprobar o rechazar una solicitud. */
-export async function resolverModeracion(id: number, accion: AccionModeracionRequest): Promise<void> {
-  const motivo = accion.motivoRechazo?.trim() ?? ''
-  if (!accion.aprobado && motivo.length < MIN_MOTIVO) {
+export const obtenerPendientes = (page = 0, size = 20) => obtenerLibrosPorEstado('EN_REVISION', page, size)
+
+/** PATCH /libros/{id}/moderacion — solo ADMIN. Aprobar = ACEPTADO, rechazar = RECHAZADO (con motivo). */
+export async function moderarLibro(id: number, decision: ModeracionRequest): Promise<LibroResponse> {
+  const comentario = decision.comentario?.trim() ?? ''
+  if (decision.estadoModeracion === 'RECHAZADO' && comentario.length < MIN_MOTIVO) {
     const mensaje = 'Explicale al vendedor por qué rechazás el libro.'
-    throw new ModeracionError({ tipo: 'VALIDACION', status: 0, mensaje, campos: { motivoRechazo: mensaje } })
+    throw new ModeracionError({ tipo: 'VALIDACION', status: 0, mensaje, campos: { comentario: mensaje } })
   }
-  const body: AccionModeracionRequest = accion.aprobado ? { aprobado: true } : { aprobado: false, motivoRechazo: motivo }
+  const body: ModeracionRequest = comentario ? { ...decision, comentario } : { estadoModeracion: decision.estadoModeracion }
   try {
-    await api.post(RUTAS.accion(id), body)
+    const { data } = await api.patch<LibroResponse>(RUTAS.moderar(id), body, { baseURL: RAIZ })
+    return data
   } catch (err) {
-    fallar(err)
+    return fallar(err)
   }
 }
 
-export const aprobarSolicitud = (id: number) => resolverModeracion(id, { aprobado: true })
-export const rechazarSolicitud = (id: number, motivoRechazo: string) => resolverModeracion(id, { aprobado: false, motivoRechazo })
+export const aprobarLibro = (id: number, comentario?: string) => moderarLibro(id, { estadoModeracion: 'ACEPTADO', comentario })
+export const rechazarLibro = (id: number, comentario: string) => moderarLibro(id, { estadoModeracion: 'RECHAZADO', comentario })
+
+/** GET /libros/historial-moderacion — solo ADMIN. */
+export async function obtenerHistorial(page = 0, size = 20): Promise<Pagina<HistorialModeracion>> {
+  try {
+    const { data } = await api.get<Pagina<HistorialModeracion>>(RUTAS.historial, { baseURL: RAIZ, params: { page, size } })
+    return data
+  } catch (err) {
+    return fallar(err)
+  }
+}
+
+/** GET /libros/{id}/historial-moderacion — solo ADMIN. */
+export async function obtenerHistorialDeLibro(id: number, page = 0, size = 20): Promise<Pagina<HistorialModeracion>> {
+  try {
+    const { data } = await api.get<Pagina<HistorialModeracion>>(RUTAS.historialLibro(id), { baseURL: RAIZ, params: { page, size } })
+    return data
+  } catch (err) {
+    return fallar(err)
+  }
+}
