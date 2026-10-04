@@ -90,3 +90,18 @@ export const RESENIAS_ALEPH = [
   { id: 'ra-3', st: 4, nc: 'Sofía L.', t: 'Buen libro y buen precio. El envío tardó un día más de lo previsto.', libro: 'Puerto de niebla', date: '2026-08-17' },
   { id: 'ra-4', st: 5, nc: 'Diego F.', t: 'Muy recomendable, ya les compré otra vez.', libro: 'El relojero', date: '2026-07-27' },
 ]
+
+// Opiniones sobre los LIBROS vendidos: una por venta, así que tienen que ser exactamente 4.
+// Comprador y libro salen de VENTAS_ALEPH (no se escriben a mano) para que no se desfasen.
+// Promedio: (5 + 5 + 4 + 5) / 4 = 4,75 -> 4,8, igual que las reseñas a la atención.
+// Las fechas van en formato ISO; en pantalla se muestran como "18/9/2026".
+const opinion = (n, ventaIdx, st, t, date) => ({
+  id: `oa-${n}`, st, u: VENTAS_ALEPH[ventaIdx].comprador, libro: VENTAS_ALEPH[ventaIdx].its[0].t, t, date,
+})
+
+export const OPINIONES_ALEPH = [
+  opinion(1, 0, 5, 'Una historia que te atrapa desde el primer capítulo. La edición es hermosa.', '2026-09-18'),
+  opinion(2, 1, 5, 'Una ciencia ficción original, con ideas que te dejan pensando varios días.', '2026-09-04'),
+  opinion(3, 2, 4, 'Un relato muy humano y un pueblo costero que se siente real. El ritmo es algo lento.', '2026-08-17'),
+  opinion(4, 3, 5, 'Breve y práctico, de esos libros que se releen. Totalmente recomendable.', '2026-07-27'),
+]

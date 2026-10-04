@@ -21,3 +21,6 @@ export const mmss = (ms) => {
   const s = Math.max(0, Math.ceil(ms / 1000))
   return `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`
 }
+
+// "2026-09-18" (o fecha ISO completa) -> "18/9/2026". Las fechas de solo día se leen como locales para que no se corran un día.
+export const fechaCorta = (d) => new Date(d.length === 10 ? `${d}T00:00` : d).toLocaleDateString('es-AR')

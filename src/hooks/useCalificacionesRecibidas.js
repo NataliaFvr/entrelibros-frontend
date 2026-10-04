@@ -1,28 +1,25 @@
 import { useEffect, useMemo, useState } from 'react'
-import { getResenias } from '../services/librosService'
-import { getOpiniones } from '../services/opinionesService'
+import { getOpinionesVendedor } from '../services/opinionesService'
 import { getResenasVendedor } from '../services/resenasVendedorService'
 
 const promedio = (lista) => (lista.length ? lista.reduce((a, r) => a + r.st, 0) / lista.length : 0)
 
-// Todo lo que le calificaron a un vendedor: su atención (reseñas al vendedor) y sus libros (opiniones de cada libro).
-// Los ejemplares usados no tienen opiniones de la obra, así que solo cuentan los libros nuevos.
-// Back: GET /vendedores/{id}/resenias (ResenaVendedorController) y GET /libros/{id}/resenias (ResenaLibroController).
+// Todo lo que le calificaron a un vendedor: su atención (reseñas al vendedor) y sus libros (opiniones de lo que vendió).
+// Las opiniones de libros ya no se generan al azar por publicación: son las reales de este navegador + las de ejemplo del vendedor de prueba.
+// Back: GET /vendedores/{id}/resenias (ResenaVendedorController) y GET /vendedores/{id}/opiniones-libros.
 const useCalificacionesRecibidas = (tienda, publicaciones) => {
   const atencion = useMemo(() => getResenasVendedor(tienda), [tienda])
-  const nuevos = useMemo(() => publicaciones.filter((p) => !p.usado), [publicaciones])
   const [delLibro, setDelLibro] = useState([])
   const [cargando, setCargando] = useState(true)
 
   useEffect(() => {
     let vigente = true
-    Promise.all(nuevos.map((p) => getResenias(p.id).then((base) =>
-      [...getOpiniones(p.id), ...base].map((r) => ({ ...r, libro: p.t, clave: `${p.id}-${r.u}-${r.i}` })))))
-      .then((listas) => { if (vigente) setDelLibro(listas.flat().sort((a, b) => a.i - b.i)) })
+    getOpinionesVendedor(tienda, publicaciones)
+      .then((lista) => { if (vigente) setDelLibro(lista) })
       .catch(() => { if (vigente) setDelLibro([]) })
       .finally(() => { if (vigente) setCargando(false) })
     return () => { vigente = false }
-  }, [nuevos])
+  }, [tienda, publicaciones])
 
   const todas = [...atencion, ...delLibro]
   return {
