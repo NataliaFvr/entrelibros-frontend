@@ -1,7 +1,7 @@
 import AddressList from './AddressList'
 import AddressForm from './AddressForm'
 
-// Pestaña Direcciones: lista a la izquierda, formulario a la derecha
+// Pestaña Direcciones: ocupa todo el ancho; primero las tarjetas y debajo el formulario
 const AddressPanel = () => {
   return (
     <div className="addr-wrap">

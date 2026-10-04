@@ -1,12 +1,15 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useLibros } from '../hooks/useLibros'
 import { masVendidos } from '../utils/filtrarLibros'
 import BookCarousel from '../componentes/BookCarousel'
 import MiniDeco from '../componentes/MiniDeco'
+import NotFoundArt from '../componentes/NotFoundArt'
 
-const NotFoundPage = ({ ruta }) => {
+// Ruta comodín (path="*"): cualquier URL que no exista cae acá
+const NotFoundPage = () => {
   const navigate = useNavigate()
+  const { pathname } = useLocation()
   const { libros } = useLibros()
   const [q, setQ] = useState('')
 
@@ -19,14 +22,13 @@ const NotFoundPage = ({ ruta }) => {
   return (
     <main className="usr">
       <section className="nf">
-        <svg className="nf-art" viewBox="0 0 520 220" aria-hidden="true">
-          <text className="nf-n" x="260" y="190">404</text>
-        </svg>
-        <h1 className="fr nf-t">Esta página se perdió entre los estantes</h1>
+        <NotFoundArt />
+        <span className="nf-eyebrow">Capítulo 404</span>
+        <h1 className="fr nf-t">Página o capítulo no encontrado</h1>
         <p className="nf-p">
-          Error 404. {ruta && <>No encontramos <code>{ruta}</code>. </>}
-          Puede que el link esté mal escrito, que el libro ya se haya vendido o que la página ya no exista.
+          No encontramos <code>{pathname}</code>. Puede que el link esté mal escrito, que el libro ya se haya vendido o que esta página se haya perdido entre los estantes.
         </p>
+        <Link to="/" className="nf-home">Volver al inicio</Link>
         <form className="nf-s" role="search" onSubmit={buscar}>
           <input type="search" placeholder="Buscar libros, autores..." aria-label="Buscar libros o autores" value={q} onChange={(e) => setQ(e.target.value)} />
           <button className="btn main" type="submit">Buscar</button>

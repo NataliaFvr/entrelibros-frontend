@@ -6,6 +6,7 @@ import SelectField from './SelectField'
 
 const INICIAL = { alias: '', calle: '', ciudad: '', cp: '', prov: PROVINCIAS[0] }
 
+// Formulario a todo el ancho: los campos se acomodan en una grilla que se adapta al contenedor
 const AddressForm = () => {
   const { agregarDireccion } = useAuth()
   const { valores, cambiar, error, setError, reiniciar } = useFormulario(INICIAL)
@@ -21,14 +22,12 @@ const AddressForm = () => {
   }
 
   return (
-    <form className="card aform" noValidate onSubmit={enviar}>
+    <form className="card aform addr-form" noValidate onSubmit={enviar}>
       <h3 className="fr">Nueva dirección</h3>
       <Field label="Nombre (Casa, Trabajo…)" name="alias" value={valores.alias} onChange={cambiar} />
-      <Field label="Calle y número" name="calle" value={valores.calle} onChange={cambiar} autoComplete="street-address" />
-      <div className="two">
-        <Field label="Ciudad" name="ciudad" value={valores.ciudad} onChange={cambiar} />
-        <Field label="Código postal" name="cp" value={valores.cp} onChange={cambiar} autoComplete="postal-code" />
-      </div>
+      <Field label="Calle, número, piso y depto" name="calle" value={valores.calle} onChange={cambiar} autoComplete="street-address" />
+      <Field label="Ciudad / localidad" name="ciudad" value={valores.ciudad} onChange={cambiar} />
+      <Field label="Código postal" name="cp" value={valores.cp} onChange={cambiar} autoComplete="postal-code" />
       <SelectField label="Provincia" name="prov" value={valores.prov} onChange={cambiar} opciones={PROVINCIAS} />
       <p className="ferr" role="alert">{error}</p>
       <button className="btn main" type="submit">Guardar dirección</button>

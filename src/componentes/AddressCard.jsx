@@ -1,14 +1,23 @@
-const AddressCard = ({ direccion, usos = 0, onEliminar }) => {
+const AddressCard = ({ direccion, usos = 0, onEliminar, onPrincipal }) => {
+  const { alias, calle, ciudad, prov, cp, principal } = direccion
+
   return (
-    <div className="card adr">
-      <div>
-        <b className="fr">{direccion.alias}</b>
-        <p>{direccion.calle}, {direccion.ciudad}</p>
-        <small>{direccion.prov}{direccion.cp ? ` · CP ${direccion.cp}` : ''}</small>
-        {usos > 0 && <small> · usada en {usos} {usos === 1 ? 'compra' : 'compras'}</small>}
+    <article className={`card adr${principal ? ' adr-main' : ''}`}>
+      <header className="adr-h">
+        <b className="fr">{alias}</b>
+        {principal && <span className="tg adr-badge">Dirección principal</span>}
+      </header>
+      <div className="adr-body">
+        <p>{calle}</p>
+        <p>{ciudad}, {prov}</p>
+        {cp && <small>CP {cp}</small>}
+        {usos > 0 && <small>Usada en {usos} {usos === 1 ? 'compra' : 'compras'}</small>}
       </div>
-      <button className="lnk" type="button" onClick={onEliminar}>Eliminar</button>
-    </div>
+      <footer className="adr-f">
+        {!principal && <button className="lnk" type="button" onClick={onPrincipal}>Marcar como principal</button>}
+        <button className="lnk" type="button" onClick={onEliminar}>Eliminar</button>
+      </footer>
+    </article>
   )
 }
 

@@ -6,6 +6,7 @@ import { guardar, leer, mover } from '../services/almacen'
 import { actualizarUsuario, cerrarSesion, getSesion, iniciarSesion, registrar as crearCuenta } from '../services/authService'
 import { claveCart, claveDir, claveMarks, clavePedidos, clavePerfil, claveVendedor } from '../services/claves'
 import LoginGate from '../componentes/LoginGate'
+import { conPrincipal } from '../utils/direcciones'
 
 const AuthProvider = ({ children }) => {
   const toast = useToast()
@@ -66,16 +67,23 @@ const AuthProvider = ({ children }) => {
   }
 
   const agregarDireccion = (d) => {
-    const nuevas = [...direcciones, d]
+    const nuevas = conPrincipal([...direcciones, d])
     setDirecciones(nuevas)
     guardar(claveDir(user), nuevas)
     toast('Dirección guardada')
   }
 
   const eliminarDireccion = (indice) => {
-    const nuevas = direcciones.filter((_, i) => i !== indice)
+    const nuevas = conPrincipal(direcciones.filter((_, i) => i !== indice))
     setDirecciones(nuevas)
     guardar(claveDir(user), nuevas)
+  }
+
+  const marcarPrincipal = (indice) => {
+    const nuevas = direcciones.map((d, i) => ({ ...d, principal: i === indice }))
+    setDirecciones(nuevas)
+    guardar(claveDir(user), nuevas)
+    toast('Dirección principal actualizada')
   }
 
   // Corta la acción y muestra el modal si no hay sesión (true = hay que loguearse).
@@ -109,7 +117,7 @@ const AuthProvider = ({ children }) => {
 
   const value = {
     user, perfil, marks, direcciones, gate, gateDestino, verificacion,
-    login, registrar, logout, actualizarPerfil, agregarDireccion, eliminarDireccion,
+    login, registrar, logout, actualizarPerfil, agregarDireccion, eliminarDireccion, marcarPrincipal,
     requiereLogin, cerrarGate, toggleMark, quitarMarks,
   }
 
