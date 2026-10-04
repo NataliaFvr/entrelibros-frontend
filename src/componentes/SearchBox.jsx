@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useLibros } from '../hooks/useLibros'
 import useSugerencias from '../hooks/useSugerencias'
+import { rutaVendedor } from '../utils/vendedor'
 import SearchSuggestions from './SearchSuggestions'
 
 const SearchBox = () => {
@@ -25,6 +26,7 @@ const SearchBox = () => {
     cerrar()
     if (it.tipo === 'autor') navigate(`/libros?autor=${encodeURIComponent(it.nombre)}`)
     else if (it.tipo === 'libro') navigate(`/libro/${it.libro.id}`)
+    else if (it.tipo === 'vendedor') navigate(rutaVendedor(it.tienda))
     else buscar(texto)
   }
 
@@ -43,13 +45,13 @@ const SearchBox = () => {
   return (
     <div className="search">
       <input
-        type="search" placeholder="Buscar libros, autores..." autoComplete="off"
-        aria-label="Buscar libros o autores" value={texto}
+        type="search" placeholder="Buscar libros, autores, tiendas..." autoComplete="off"
+        aria-label="Buscar libros, autores o vendedores" value={texto}
         onChange={(e) => { setTexto(e.target.value); setAbierto(true); setActivo(-1) }}
         onFocus={() => setAbierto(true)} onBlur={cerrar} onKeyDown={onKeyDown}
       />
       {abierto && hayTexto && (
-        <SearchSuggestions items={items} texto={texto.trim()} activo={activo} onElegir={elegir} />
+        <SearchSuggestions items={items} texto={texto.trim()} activo={activo} onElegir={elegir} onCerrar={cerrar} />
       )}
     </div>
   )

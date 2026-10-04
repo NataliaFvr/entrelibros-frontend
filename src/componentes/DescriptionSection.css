@@ -1,0 +1,5 @@
+/* Descripción del libro: el texto usa todo el ancho de la tarjeta (antes `.card p` lo limitaba a 75ch).
+   pre-line respeta los saltos de línea que escribió el vendedor. */
+.card.desc-card{width:100%;padding:clamp(16px,3vw,28px)}
+.card.desc-card p{max-width:none;width:100%;line-height:1.75;white-space:pre-line;overflow-wrap:anywhere}
+.card.desc-card p+p{margin-top:16px}

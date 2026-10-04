@@ -37,7 +37,7 @@ const SellerBox = ({ vendedor, cantidad, destacarReputacion = false, propio = fa
       <div className="sv-meta">{cantidad} {plural(cantidad, 'libro publicado', 'libros publicados')}</div>
       {propio ? (
         <>
-          <p className="note sv-preview">Estás viendo la vista previa de tu propia publicación.</p>
+          <p className="note sv-preview">Estás viendo la vista de tu propia publicación.</p>
           <button className="btn main" type="button" onClick={() => navigate('/vender')}>Ir a gestionar mi tienda</button>
         </>
       ) : (

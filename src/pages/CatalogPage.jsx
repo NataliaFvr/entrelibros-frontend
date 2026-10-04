@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { useLibros } from '../hooks/useLibros'
 import useFiltros from '../hooks/useFiltros'
+import useResultadoBusqueda from '../hooks/useResultadoBusqueda'
 import { PAGE_SIZE, filtrarLibros, masVendidos } from '../utils/filtrarLibros'
 import { filtrosDesdeURL } from '../utils/filtrosURL'
 import { plural } from '../utils/format'
@@ -9,6 +10,8 @@ import SortSelect from '../componentes/SortSelect'
 import ActiveChips from '../componentes/ActiveChips'
 import FilterSidebar from '../componentes/FilterSidebar'
 import ProductGrid from '../componentes/ProductGrid'
+import SellerMatches from '../componentes/SellerMatches'
+import SearchNoResults from '../componentes/SearchNoResults'
 import Pager from '../componentes/Pager'
 
 const Catalogo = ({ inicial }) => {
@@ -17,6 +20,7 @@ const Catalogo = ({ inicial }) => {
   const [filtrosAbiertos, setFiltrosAbiertos] = useState(false)
 
   const resultado = useMemo(() => filtrarLibros(libros, f), [libros, f])
+  const { termino, tiendas, sinCoincidencias, destacados } = useResultadoBusqueda(libros, f.q)
   const topIds = useMemo(() => new Set(masVendidos(libros).slice(0, 6).map((l) => l.id)), [libros])
 
   const pages = Math.max(1, Math.ceil(resultado.length / PAGE_SIZE))
@@ -40,8 +44,15 @@ const Catalogo = ({ inicial }) => {
       <div className="cat-layout">
         <FilterSidebar f={f} set={set} toggle={toggle} libros={libros} categorias={categorias} abierto={filtrosAbiertos} />
         <div>
-          <ProductGrid libros={items} topIds={topIds} ordenPorVentas={f.sort === 'best'} onLimpiar={limpiar} />
-          <Pager page={page} pages={pages} onChange={cambiarPagina} />
+          <SellerMatches tiendas={tiendas} />
+          {sinCoincidencias ? (
+            <SearchNoResults termino={termino} destacados={destacados} onLimpiar={limpiar} />
+          ) : (
+            <>
+              <ProductGrid libros={items} topIds={topIds} ordenPorVentas={f.sort === 'best'} onLimpiar={limpiar} />
+              <Pager page={page} pages={pages} onChange={cambiarPagina} />
+            </>
+          )}
         </div>
       </div>
     </main>

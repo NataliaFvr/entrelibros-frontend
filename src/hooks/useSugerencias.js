@@ -1,8 +1,9 @@
 import { useMemo } from 'react'
 import { norm } from '../utils/format'
 import { ordenarPorVentas } from '../utils/filtrarLibros'
+import { buscarTiendas } from '../utils/vendedor'
 
-// Sugerencias del buscador: hasta 2 autores + 5 libros + "ver todos"
+// Sugerencias del buscador: hasta 2 autores + 5 libros + 3 vendedores + "ver todos"
 const useSugerencias = (libros, texto) => {
   return useMemo(() => {
     const q = norm(texto.trim())
@@ -18,11 +19,13 @@ const useSugerencias = (libros, texto) => {
         libs.push(l)
       }
     }
-    if (!autores.length && !libs.length) return []
+    const tiendas = buscarTiendas(libros, texto).slice(0, 3)
+    if (!autores.length && !libs.length && !tiendas.length) return []
 
     return [
       ...autores.map((a) => ({ tipo: 'autor', key: `a-${a}`, nombre: a })),
       ...libs.map((l) => ({ tipo: 'libro', key: `l-${l.id}`, libro: l })),
+      ...tiendas.map((t) => ({ tipo: 'vendedor', key: `v-${t.tienda}`, ...t })),
       { tipo: 'todos', key: 'todos' },
     ]
   }, [libros, texto])

@@ -32,7 +32,7 @@ export function filtrarLibros(libros, f) {
     (!f.ed || l.ed === f.ed) && (!f.autor || l.a === f.autor) &&
     (!f.idioma || l.idioma === f.idioma) && (!f.vendedor || l.v === f.vendedor) &&
     (f.anio === '' || (f.anio === '0' ? l.anio < 2000 : l.anio >= +f.anio)) &&
-    (!f.q || norm(`${l.t} ${l.a} ${l.ed} ${l.cat}`).includes(norm(f.q))))
+    (!f.q || norm(`${l.t} ${l.a} ${l.ed} ${l.cat} ${l.v}`).includes(norm(f.q))))
   return r.sort(ORDEN[f.sort])
 }
 
