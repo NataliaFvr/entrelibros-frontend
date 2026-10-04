@@ -1,16 +1,16 @@
 import { useEffect, useRef, useState } from 'react'
+import { COLORES_LETRA } from '../utils/colors'
 
-const COLORES = ['#5EB1BF', '#EF7B45', '#D84727', '#2f7d89']
-
-// Una letra del tagline: cambia de color al pasar el cursor y vuelve a su color base
-const Letra = ({ children }) => {
+// Una letra: cambia de color al pasar el cursor y vuelve a su color base.
+// `colores` permite usar solo los que se leen sobre el fondo donde está la letra.
+const Letra = ({ children, colores = COLORES_LETRA }) => {
   const [color, setColor] = useState('')
   const timer = useRef(null)
   useEffect(() => () => clearTimeout(timer.current), [])
 
   const entrar = () => {
     clearTimeout(timer.current)
-    setColor(COLORES[Math.floor(Math.random() * COLORES.length)])
+    setColor(colores[Math.floor(Math.random() * colores.length)])
   }
   const salir = () => { timer.current = setTimeout(() => setColor(''), 700) }
 

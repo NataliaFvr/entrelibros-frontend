@@ -9,6 +9,10 @@ import VerifyPage from "../pages/VerifyPage"
 import CartPage from "../pages/CartPage"
 import PayPage from "../pages/PayPage"
 import SellerPage from "../pages/SellerPage"
+import HelpPage from "../pages/HelpPage"
+import FaqPage from "../pages/FaqPage"
+import ContactPage from "../pages/ContactPage"
+import ShippingPolicyPage from "../pages/ShippingPolicyPage"
 import NotFoundPage from "../pages/NotFoundPage"
 
 const AppRoutes = () => {
@@ -28,6 +32,10 @@ const AppRoutes = () => {
         <Route path="/vender/:tab/:id" element={<SellerPage />} />
         <Route path="/cuenta" element={<AccountPage />} />
         <Route path="/cuenta/:tab" element={<AccountPage />} />
+        <Route path="/ayuda" element={<HelpPage />} />
+        <Route path="/ayuda/preguntas-frecuentes" element={<FaqPage />} />
+        <Route path="/ayuda/contacto" element={<ContactPage />} />
+        <Route path="/ayuda/envios" element={<ShippingPolicyPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Route>
     </Routes>

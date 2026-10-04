@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { AYUDA_LINKS } from '../data/ayuda'
 
 const sinNavegar = (e) => e.preventDefault()
 
@@ -12,9 +13,7 @@ const Footer = () => {
     <footer>
       <div className="footer-main">
         <Col titulo="Ayuda">
-          <a href="#" onClick={sinNavegar}>Contáctanos</a>
-          <a href="#" onClick={sinNavegar}>Preguntas frecuentes</a>
-          <a href="#" onClick={sinNavegar}>Políticas de envío</a>
+          {AYUDA_LINKS.map(({ to, label }) => <Link key={to} to={to}>{label}</Link>)}
         </Col>
         <Col titulo="Explorar">
           <Link to="/libros">Categorías</Link>

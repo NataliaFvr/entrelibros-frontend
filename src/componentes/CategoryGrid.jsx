@@ -1,13 +1,14 @@
 import { Link } from 'react-router-dom'
 import { TONES, textOn } from '../utils/colors'
-import Marquee from './Marquee'
+import ItemGrid from './ItemGrid'
 
-const CategoryMarquee = ({ categorias }) => {
+// `categorias`: nombres, ordenadas de más a menos libros
+const CategoryGrid = ({ categorias }) => {
   return (
     <div className="cat-wrap">
       <h2>Categorías</h2>
-      <Marquee>
-        {categorias.map((c, i) => {
+      <ItemGrid items={categorias} verMasTo="/libros"
+        render={(c, i) => {
           const col = TONES[i % TONES.length]
           return (
             <Link key={c} to={`/libros?cat=${encodeURIComponent(c)}`} className="cat-item">
@@ -15,10 +16,9 @@ const CategoryMarquee = ({ categorias }) => {
               <span>{c}</span>
             </Link>
           )
-        })}
-      </Marquee>
+        }} />
     </div>
   )
 }
 
-export default CategoryMarquee
+export default CategoryGrid

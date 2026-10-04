@@ -16,7 +16,7 @@ import PayApproved from '../componentes/PayApproved'
 import PayFailed from '../componentes/PayFailed'
 
 const Migas = () => (
-  <div className="crumbs"><Link to="/">Inicio</Link> › <Link to="/carrito">Mi carrito</Link> › <span>Pago</span></div>
+  <div className="crumbs"><Link to="/">Inicio</Link> › <Link to="/carrito">Mi Estantería de Lectura</Link> › <span>Pago</span></div>
 )
 
 // /pago/:n — pasarela simulada. Back: POST /pagos {idOrden, proveedor}

@@ -14,7 +14,8 @@ const ORDEN = {
 }
 const POR_PAGINA = 5
 
-// Solo puede opinar quien compró el libro (pedido pagado)
+// Solo puede opinar quien compró el libro (pedido pagado).
+// No se renderiza para ejemplares usados: las opiniones son de la obra, no de la publicación de un vendedor.
 const ReviewsSection = ({ libroId, resenias, promedio, onPublicar }) => {
   const { requiereLogin } = useAuth()
   const { compro } = useCompra()

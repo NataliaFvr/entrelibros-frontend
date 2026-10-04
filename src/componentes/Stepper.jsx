@@ -1,4 +1,4 @@
-const PASOS = ['Carrito', 'Pago', 'Confirmación']
+const PASOS = ['Estantería', 'Pago', 'Confirmación']
 
 // `actual` = índice del paso en curso (3 = todo completado)
 const Stepper = ({ actual }) => {

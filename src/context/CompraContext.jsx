@@ -16,7 +16,7 @@ const cargar = (user) => ({
 // Carrito y pedidos de la cuenta que tiene la sesión. Se guardan solos en localStorage.
 // Back: POST /carrito/checkout {provinciaDestino} -> orden PENDIENTE (reserva 1 h), POST /pagos, PATCH /ordenes/{id}/cancelar
 const CompraProvider = ({ children }) => {
-  const { user } = useAuth()
+  const { user, quitarMarks } = useAuth()
   const { libros } = useLibros()
   const toast = useToast()
   const nombre = user ? user.nombreUsuario : null
@@ -52,7 +52,7 @@ const CompraProvider = ({ children }) => {
     setCarrito((prev) => (prev.some((c) => c.id === libro.id)
       ? prev.map((c) => (c.id === libro.id ? { ...c, q: Math.min(c.q + 1, tope) } : c))
       : [...prev, { id: libro.id, q: 1 }]))
-    toast('Agregado al carrito')
+    toast('Añadido a tu estantería')
   }
 
   const cambiarCantidad = (libro, delta) => {
@@ -79,9 +79,14 @@ const CompraProvider = ({ children }) => {
   }
 
   // Back: POST /pagos {idOrden, proveedor}
-  const pagarPedido = (n, proveedor) =>
+  // Al aprobarse el pago, los libros dejan de ser un deseo: se sacan del Marcapáginas
+  const pagarPedido = (n, proveedor) => {
+    const pedido = pedidos.find((o) => o.n === n)
+    if (!pedido || estadoPago(pedido) !== 'PENDIENTE') return
     setPedidos((prev) => prev.map((o) => (o.n === n && estadoPago(o) === 'PENDIENTE'
       ? { ...o, pago: 'SIMULADO_APROBADO', est: 'Confirmada', proveedor, reserva: undefined } : o)))
+    quitarMarks(pedido.its.map((i) => i.id))
+  }
 
   const cancelarPedido = (n) => {
     setPedidos((prev) => prev.map((o) => (o.n === n && estadoPago(o) === 'PENDIENTE'

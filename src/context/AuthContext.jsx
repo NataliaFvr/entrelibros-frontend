@@ -91,10 +91,18 @@ const AuthProvider = ({ children }) => {
     toast(marks.includes(id) ? 'Quitado de tu Marcapáginas' : 'Guardado en tu Marcapáginas')
   }
 
+  // Al comprar, el libro deja de ser un deseo: se saca del Marcapáginas sin avisar con toast
+  const quitarMarks = (ids) => {
+    const nuevo = marks.filter((x) => !ids.includes(x))
+    if (nuevo.length === marks.length) return
+    setMarks(nuevo)
+    guardar(claveMarks(user), nuevo)
+  }
+
   const value = {
     user, perfil, marks, direcciones, gate, verificacion,
     login, registrar, logout, actualizarPerfil, agregarDireccion, eliminarDireccion,
-    requiereLogin, cerrarGate: () => setGate(null), toggleMark,
+    requiereLogin, cerrarGate: () => setGate(null), toggleMark, quitarMarks,
   }
 
   return (

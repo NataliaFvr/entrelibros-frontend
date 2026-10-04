@@ -31,11 +31,11 @@ const CartPage = () => {
 
   return (
     <main className="usr">
-      <div className="crumbs"><Link to="/">Inicio</Link> › <span>Mi carrito</span></div>
+      <div className="crumbs"><Link to="/">Inicio</Link> › <span>Mi Estantería de Lectura</span></div>
       <Stepper actual={0} />
-      <h1 className="fr cart-t">Mi carrito</h1>
+      <h1 className="fr cart-t">Mi Estantería de Lectura</h1>
       {items.length === 0 ? (
-        <EmptyBlock titulo="Tu carrito está vacío" texto="Sumá libros desde el catálogo." boton="Ver libros" onClick={() => navigate('/libros')} />
+        <EmptyBlock titulo="Tu estantería está vacía" texto="Sumá libros desde el catálogo para llenarla." boton="Ver libros" onClick={() => navigate('/libros')} />
       ) : (
         <div className="cart-grid">
           <CartList items={items} libros={libros} />

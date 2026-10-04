@@ -18,3 +18,12 @@ export const validarCuenta = (v, usuarios, { actual = '', pwObligatoria = true }
   if (repetido('email')) return 'Ese e-mail ya tiene una cuenta.'
   return ''
 }
+
+// Formulario de Contáctanos: nombre, apellido, e-mail válido y mensaje son obligatorios.
+// Devuelve el mensaje del primer error, o '' si está todo bien.
+export const validarContacto = (v) => {
+  if (!v.nombre.trim() || !v.apellido.trim()) return 'Completá tu nombre y apellido.'
+  if (!RE_MAIL.test(v.email.trim())) return 'Ingresá un e-mail válido.'
+  if (!v.msg.trim()) return 'Escribí tu mensaje.'
+  return ''
+}

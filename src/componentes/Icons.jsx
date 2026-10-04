@@ -10,9 +10,11 @@ export const UserIcon = (props) => (
   </svg>
 )
 
-export const CartIcon = () => (
-  <svg {...base} strokeWidth="1.8">
-    <circle cx="9" cy="21" r="1" /><circle cx="20" cy="21" r="1" />
-    <path d="M1 1h4l2.7 13.4a2 2 0 002 1.6h9.7a2 2 0 002-1.6L23 6H6" />
+// Estante con libros: dos repisas y libros apoyados encima (NO es el marcapáginas, que es de Favoritos)
+export const SHELF_PATH = 'M3 10h18M3 20h18M5 10V5h3v5M10 10V4h3v6M15 10V6h4v4M5 20v-5h4v5M11 20v-7h3v7M16 20v-4h3v4'
+
+export const ShelfIcon = () => (
+  <svg {...base} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d={SHELF_PATH} />
   </svg>
 )

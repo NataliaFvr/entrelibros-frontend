@@ -1,9 +1,8 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useLibros } from '../hooks/useLibros'
 import { useAuth } from '../hooks/useAuth'
+import { AYUDA_LINKS, AYUDA_RAIZ } from '../data/ayuda'
 import { ChevronDown } from './Icons'
-
-const sinNavegar = (e) => e.preventDefault()
 
 const SubItem = ({ estado, etiqueta, categorias }) => {
   return (
@@ -35,15 +34,16 @@ const MenuLibros = ({ activo }) => {
   )
 }
 
-const MenuAyuda = () => {
+const MenuAyuda = ({ activo }) => {
+  const navigate = useNavigate()
+  // Click en "Ayuda" abre el Centro de ayuda; los links del desplegable navegan por su cuenta
+  const abrir = (e) => { if (!e.target.closest('.dropdown')) navigate(AYUDA_RAIZ) }
+
   return (
-    <div className="nav-item">
+    <div className={`nav-item${activo ? ' on' : ''}`} onClick={abrir}>
       Ayuda <ChevronDown />
       <div className="dropdown">
-        {/* TODO: rutas de las páginas de ayuda */}
-        <a href="#" onClick={sinNavegar}>Contáctanos</a>
-        <a href="#" onClick={sinNavegar}>Preguntas frecuentes</a>
-        <a href="#" onClick={sinNavegar}>Políticas de envío</a>
+        {AYUDA_LINKS.map(({ to, label }) => <Link key={to} to={to}>{label}</Link>)}
       </div>
     </div>
   )
@@ -52,6 +52,7 @@ const MenuAyuda = () => {
 const NavMenu = () => {
   const { pathname } = useLocation()
   const enLibros = pathname.startsWith('/libro')
+  const enAyuda = pathname.startsWith(AYUDA_RAIZ)
   const navigate = useNavigate()
   const { requiereLogin } = useAuth()
   const vender = () => {
@@ -63,7 +64,7 @@ const NavMenu = () => {
       <MenuLibros activo={enLibros} />
       <div className="nav-item" onClick={vender}>Vender</div>
       <div className="nav-item">Sobre nosotros</div>
-      <MenuAyuda />
+      <MenuAyuda activo={enAyuda} />
     </nav>
   )
 }

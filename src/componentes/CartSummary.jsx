@@ -3,7 +3,7 @@ import { fmt } from '../utils/format'
 import SummaryRow from './SummaryRow'
 import AddressSelect from './AddressSelect'
 
-// Resumen del carrito + dirección de envío + botón para pasar al pago
+// Resumen de la estantería + dirección de envío + botón para pasar al pago
 const CartSummary = ({ sub, envio, direcciones, elegida, onElegir, onFinalizar }) => {
   const navigate = useNavigate()
   return (
@@ -15,7 +15,7 @@ const CartSummary = ({ sub, envio, direcciones, elegida, onElegir, onFinalizar }
       {direcciones.length ? (
         <>
           <AddressSelect direcciones={direcciones} elegida={elegida} onElegir={onElegir} />
-          <button className="btn main" type="button" onClick={onFinalizar}>Finalizar compra</button>
+          <button className="btn main" type="button" onClick={onFinalizar}>Procesar compra de la estantería</button>
         </>
       ) : (
         <>

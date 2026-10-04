@@ -2,9 +2,10 @@ import { useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import GateColumn from './GateColumn'
+import { SHELF_PATH } from './Icons'
 
 const MENSAJES = {
-  cart: 'Para ver tu carrito y comprar, entrá a tu cuenta.',
+  cart: 'Para ver tu estantería y comprar, entrá a tu cuenta.',
   fav: 'Para guardar libros en tu Marcapáginas, entrá a tu cuenta.',
   review: 'Para opinar sobre un libro, entrá a tu cuenta.',
   sell: 'Para vender primero tenés que entrar a tu cuenta de comprador.',
@@ -39,7 +40,7 @@ const LoginGate = () => {
         <p className="modal-msg">{MENSAJES[gate] || MENSAJES.cart}</p>
         <div className="modal-cols">
           <GateColumn color="#EF7B45" glyph="M6 3h12v18l-6-4-6 4z" negrita="Guardá" resto="tus libros en tu Marcapáginas." />
-          <GateColumn color="#5EB1BF" glyph="M3 3h2l2.5 12h10L20 7H6M9 20h.01M18 20h.01" negrita="Armá tu carrito" resto="y comprá." />
+          <GateColumn color="#5EB1BF" glyph={SHELF_PATH} negrita="Armá tu estantería" resto="y comprá." />
           <GateColumn color="#CDEDF6" glyph="M21 12a8 8 0 01-11.5 7.2L4 20l1-4.5A8 8 0 1121 12z" negrita="Opiná y puntuá" resto="lo que leíste." />
         </div>
         <div className="modal-btns">

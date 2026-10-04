@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import Stars from './Stars'
 import { fmt, plural } from '../utils/format'
+import { esUsado } from '../utils/libro'
 
 const BookmarkIcon = () => {
   return (
@@ -8,13 +9,16 @@ const BookmarkIcon = () => {
   )
 }
 
+// `rank` = posición en bestsellers; 0 significa que no participa (los usados nunca lo hacen)
 const Etiquetas = ({ libro, rank }) => {
+  const usado = esUsado(libro)
+  const enRanking = !usado && rank > 0
   return (
     <div className="d-tags">
-      <span className="d-state">{libro.usado ? 'Usado' : 'Nuevo'}</span>
-      {rank <= 6 && <span className="tg">MÁS VENDIDO</span>}
+      <span className="d-state">{usado ? 'Usado' : 'Nuevo'}</span>
+      {enRanking && rank <= 6 && <span className="tg">MÁS VENDIDO</span>}
       {libro.d > 0 && <span className="tg off">{libro.d}% OFF</span>}
-      {rank <= 10 && <span className="d-rank">Nº {rank} en Bestsellers</span>}
+      {enRanking && rank <= 10 && <span className="d-rank">Nº {rank} en Bestsellers</span>}
     </div>
   )
 }
@@ -22,6 +26,7 @@ const Etiquetas = ({ libro, rank }) => {
 // `resumen` = { promedio, cantidad } de las opiniones
 const BookInfo = ({ libro, rank, resumen, guardado, onGuardar }) => {
   const { promedio, cantidad } = resumen
+  const usado = esUsado(libro) // un usado no muestra calificación del producto (opiniones solo de la obra)
   return (
     <div className="d-info">
       <div className="d-row">
@@ -32,10 +37,12 @@ const BookInfo = ({ libro, rank, resumen, guardado, onGuardar }) => {
       </div>
       <h1 className="d-title fr">{libro.t}</h1>
       <p className="d-author">de <Link to={`/libros?autor=${encodeURIComponent(libro.a)}`}>{libro.a}</Link></p>
-      <a className="d-rate" href="#rev">
-        <Stars value={promedio} /><span>{promedio.toFixed(1)}</span>
-        <span className="dim">({cantidad} {plural(cantidad, 'opinión', 'opiniones')})</span>
-      </a>
+      {!usado && (
+        <a className="d-rate" href="#rev">
+          <Stars value={promedio} /><span>{promedio.toFixed(1)}</span>
+          <span className="dim">({cantidad} {plural(cantidad, 'opinión', 'opiniones')})</span>
+        </a>
+      )}
       <div className="d-price">
         <b>{fmt(libro.p)}</b>
         {libro.d > 0 && <><s>{fmt(libro.base)}</s><em>{libro.d}% OFF</em></>}

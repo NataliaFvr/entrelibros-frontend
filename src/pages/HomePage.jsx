@@ -1,26 +1,35 @@
 import { useMemo } from 'react'
 import { useLibros } from '../hooks/useLibros'
-import { masVendidos } from '../utils/filtrarLibros'
+import { masVendidos, ordenarPorVentas } from '../utils/filtrarLibros'
+import { esUsado } from '../utils/libro'
 import Hero from '../componentes/Hero'
 import SeccionLibros from '../componentes/SeccionLibros'
 import FlashSale from '../componentes/FlashSale'
 import Tagline from '../componentes/Tagline'
-import CategoryMarquee from '../componentes/CategoryMarquee'
+import CategoryGrid from '../componentes/CategoryGrid'
 import MiniDeco from '../componentes/MiniDeco'
-import AuthorMarquee from '../componentes/AuthorMarquee'
+import AuthorGrid from '../componentes/AuthorGrid'
 
 const HomePage = () => {
   const { libros, categorias } = useLibros()
 
-  const { best, conDesc, topDesc, autores } = useMemo(() => {
-    const best = masVendidos(libros)
-    const conDesc = best.filter((l) => l.d > 0)
+  const { best, usados, conDesc, topDesc, autores, topCategorias } = useMemo(() => {
+    const best = masVendidos(libros) // solo nuevos: los usados no son bestsellers
+    const ordenados = ordenarPorVentas(libros)
+    const usados = ordenados.filter(esUsado)
+    const conDesc = ordenados.filter((l) => l.d > 0)
     const topDesc = [...conDesc].sort((a, b) => b.d - a.d)
-    const cuenta = new Map()
-    libros.forEach((l) => cuenta.set(l.a, (cuenta.get(l.a) || 0) + 1))
-    const autores = [...cuenta].slice(0, 8).map(([nombre, cantidad]) => ({ nombre, cantidad }))
-    return { best, conDesc, topDesc, autores }
-  }, [libros])
+    const porMasLibros = (a, b) => b.cantidad - a.cantidad
+    const cuentaAutores = new Map()
+    const cuentaCats = new Map(categorias.map((c) => [c, 0]))
+    libros.forEach((l) => {
+      cuentaAutores.set(l.a, (cuentaAutores.get(l.a) || 0) + 1)
+      if (cuentaCats.has(l.cat)) cuentaCats.set(l.cat, cuentaCats.get(l.cat) + 1)
+    })
+    const autores = [...cuentaAutores].map(([nombre, cantidad]) => ({ nombre, cantidad })).sort(porMasLibros)
+    const topCategorias = [...cuentaCats].map(([nombre, cantidad]) => ({ nombre, cantidad })).sort(porMasLibros).map((c) => c.nombre)
+    return { best, usados, conDesc, topDesc, autores, topCategorias }
+  }, [libros, categorias])
 
   return (
     <>
@@ -28,12 +37,12 @@ const HomePage = () => {
       <SeccionLibros titulo="Bestsellers" to="/libros?sort=best" libros={best} />
       <SeccionLibros titulo="En Oferta" to="/libros?desc=1" libros={conDesc} />
       <FlashSale libros={topDesc} />
-      <SeccionLibros titulo="Libros Nuevos" to="/libros?estado=nuevos" libros={best.filter((l) => !l.usado)} />
-      <SeccionLibros titulo="Libros Usados" to="/libros?estado=usados" libros={best.filter((l) => l.usado)} />
+      <SeccionLibros titulo="Libros Nuevos" to="/libros?estado=nuevos" libros={best} />
+      <SeccionLibros titulo="Libros Usados" to="/libros?estado=usados" libros={usados} />
       <Tagline />
-      <CategoryMarquee categorias={categorias} />
+      <CategoryGrid categorias={topCategorias} />
       <MiniDeco />
-      <AuthorMarquee autores={autores} />
+      <AuthorGrid autores={autores} />
     </>
   )
 }
