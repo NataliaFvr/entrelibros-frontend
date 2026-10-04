@@ -1,7 +1,6 @@
-// Documentos legales: una sola fuente para las rutas, el footer y el contenido de cada página.
-// `corto` es el texto del link del footer.
+// Documentos legales: una sola fuente para el footer y el contenido de cada pop-up.
+// `corto` es el texto del botón del footer.
 export const TERMINOS = {
-  to: '/terminos',
   corto: 'Términos',
   label: 'Términos y condiciones',
   sub: 'Las condiciones para usar Entrelibros',
@@ -15,7 +14,6 @@ export const TERMINOS = {
 }
 
 export const PRIVACIDAD = {
-  to: '/privacidad',
   corto: 'Privacidad',
   label: 'Política de privacidad',
   sub: 'Cómo cuidamos tus datos',

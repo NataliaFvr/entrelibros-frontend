@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { useLibros } from '../hooks/useLibros'
 import useIrAVender from '../hooks/useIrAVender'
 import { AYUDA_LINKS, AYUDA_RAIZ } from '../data/ayuda'
+import { NOSOTROS } from '../data/nosotros'
 
 const ESTADOS = [['nuevos', 'Nuevos'], ['usados', 'Usados']]
 
@@ -35,6 +36,7 @@ const MobileMenu = ({ abierto, onCerrar }) => {
           </div>
         </details>
         <button className="mm-link" type="button" onClick={vender}>Vender</button>
+        <Link to={NOSOTROS.to} className="mm-link" onClick={onCerrar}>{NOSOTROS.label}</Link>
         <details>
           <summary>Ayuda</summary>
           <div className="mm-body">

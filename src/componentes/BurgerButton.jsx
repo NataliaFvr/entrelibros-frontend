@@ -1,6 +1,6 @@
-import { BooksMenuIcon, CloseIcon } from './Icons'
+import { MenuIcon, CloseIcon } from './Icons'
 
-// Botón del menú móvil: tres libros cerrado, cruz abierto. Solo se ve en pantallas angostas (CSS).
+// Botón del menú móvil: tres líneas (hamburguesa) cerrado, cruz abierto, en el celeste de la marca. Solo se ve en pantallas angostas (CSS).
 const BurgerButton = ({ abierto, onClick }) => {
   return (
     <button
@@ -8,7 +8,7 @@ const BurgerButton = ({ abierto, onClick }) => {
       aria-label={abierto ? 'Cerrar menú' : 'Abrir menú'}
       aria-expanded={abierto} aria-controls={abierto ? 'menu-movil' : undefined}
     >
-      {abierto ? <CloseIcon /> : <BooksMenuIcon />}
+      {abierto ? <CloseIcon /> : <MenuIcon />}
     </button>
   )
 }

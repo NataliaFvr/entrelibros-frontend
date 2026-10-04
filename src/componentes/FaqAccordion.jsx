@@ -1,9 +1,9 @@
 import useAcordeon from '../hooks/useAcordeon'
 import FaqItem from './FaqItem'
 
-// Preguntas agrupadas por categoría; una sola abierta a la vez (arranca la primera).
+// Preguntas agrupadas por categoría; una sola abierta a la vez. Al entrar están todas cerradas (+).
 const FaqAccordion = ({ categorias }) => {
-  const { abierto, alternar } = useAcordeon(categorias[0]?.items[0]?.id ?? null)
+  const { abierto, alternar } = useAcordeon()
 
   return categorias.map((cat) => (
     <section key={cat.titulo}>

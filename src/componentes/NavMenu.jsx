@@ -2,6 +2,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useLibros } from '../hooks/useLibros'
 import useIrAVender from '../hooks/useIrAVender'
 import { AYUDA_LINKS, AYUDA_RAIZ } from '../data/ayuda'
+import { NOSOTROS } from '../data/nosotros'
 import { ChevronDown } from './Icons'
 
 const SubItem = ({ estado, etiqueta, categorias }) => {
@@ -53,13 +54,14 @@ const NavMenu = () => {
   const { pathname } = useLocation()
   const enLibros = pathname.startsWith('/libro')
   const enAyuda = pathname.startsWith(AYUDA_RAIZ)
+  const enNosotros = pathname === NOSOTROS.to
   const vender = useIrAVender()
 
   return (
     <nav>
       <MenuLibros activo={enLibros} />
       <div className="nav-item" onClick={vender}>Vender</div>
-      <div className="nav-item">Sobre nosotros</div>
+      <Link className={`nav-item${enNosotros ? ' on' : ''}`} to={NOSOTROS.to}>{NOSOTROS.label}</Link>
       <MenuAyuda activo={enAyuda} />
     </nav>
   )
