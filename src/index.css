@@ -428,7 +428,11 @@
   .adr{display:flex;flex-direction:column;gap:10px;margin:0;min-width:0}.adr p{font-size:.9rem;margin-top:4px;overflow-wrap:anywhere}.adr small{display:block;font-size:.75rem;opacity:.65;margin-top:4px}
   .adr-h{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
   .adr-body{flex:1;min-width:0}
-  .adr-f{display:flex;gap:16px;flex-wrap:wrap}
+  .adr-f{display:flex;align-items:center;gap:8px 16px;flex-wrap:wrap}
+  .adr-del{display:inline-flex;align-items:center;gap:6px;margin-left:auto;padding:4px 6px;border:0;border-radius:6px;background:none;color:#ef4444;font:inherit;font-size:.82rem;font-weight:600;cursor:pointer;transition:color .2s,background-color .2s}
+  .adr-del svg{width:16px;height:16px;flex-shrink:0}
+  .adr-del:hover{color:#b91c1c;text-decoration:underline}
+  .adr-del:focus-visible{outline:2px solid #ef4444;outline-offset:2px}
   .adr-main{border-left:4px solid var(--tangerine)}
   .rvf{background:var(--cream);border-radius:8px;padding:14px;margin:8px 0 10px;display:flex;flex-direction:column;gap:10px}
   .rvf textarea{font-family:inherit;font-size:.9rem;padding:10px;border:1px solid rgba(4,42,43,.2);border-radius:8px;resize:vertical}
@@ -536,6 +540,10 @@
   .header-icons .icon-btn>svg{width:20px;height:20px;flex-shrink:0}
   .header-icons .icon-btn:has(.uav){width:30px;height:30px}
   .header-icons .notif-btn svg{width:20px;height:20px}
+  /* Resaltado naranja suave (igual al estado activo de la campanita): hover, foco por teclado y página activa */
+  .header-icons .icon-btn{border-radius:50%;transition:color .2s ease,background-color .2s ease}
+  .header-icons .icon-btn.on,.header-icons .icon-btn:focus-visible{color:var(--burnt);background-color:rgba(239,123,69,.16);box-shadow:none}
+  @media (hover:hover){.header-icons .icon-btn:not(:has(.uav)):hover{color:var(--burnt);background-color:rgba(239,123,69,.16)}}
   .search input{width:clamp(150px,19vw,230px)}
   .burger,.mmenu,.mmenu-back{display:none}
 
