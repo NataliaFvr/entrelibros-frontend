@@ -1,9 +1,9 @@
 /* ===== Campanita de notificaciones =====
    >= 1024px: el panel cuelga de la campanita. < 1024px: ocupa todo el ancho, justo debajo del header
    (el <header> es sticky, así que sirve de referencia para position:absolute). */
-.notif{position:relative}
+.notif{position:relative;display:flex;align-items:center}
 .notif-btn{background:none;border:0;padding:0;color:inherit;font:inherit}
-.notif-btn svg{display:block;width:100%;height:100%}
+.notif-btn svg{display:block}
 .notif-btn:focus-visible{outline:2px solid var(--blue);outline-offset:4px;border-radius:50%}
 .notif-back{position:fixed;inset:0;z-index:1;background:transparent}
 .notif-panel{position:absolute;z-index:2;top:calc(100% + 17px);right:0;width:min(380px,calc(100vw - 24px));max-height:min(70vh,480px);max-height:min(70dvh,480px);display:flex;flex-direction:column;background:#fff;border:1px solid rgba(4,42,43,.12);border-radius:10px;box-shadow:0 12px 28px rgba(4,42,43,.18);color:var(--evergreen)}
