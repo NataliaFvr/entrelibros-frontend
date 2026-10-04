@@ -15,6 +15,7 @@ import HelpPage from "../pages/HelpPage"
 import FaqPage from "../pages/FaqPage"
 import ContactPage from "../pages/ContactPage"
 import ShippingPolicyPage from "../pages/ShippingPolicyPage"
+import PublicSellerProfile from "../pages/PublicSellerProfile"
 import NotFoundPage from "../pages/NotFoundPage"
 
 const AppRoutes = () => {
@@ -32,6 +33,7 @@ const AppRoutes = () => {
         <Route path="/vender" element={<SellerPage />} />
         <Route path="/vender/:tab" element={<SellerPage />} />
         <Route path="/vender/:tab/:id" element={<SellerPage />} />
+        <Route path="/vendedor/:id" element={<PublicSellerProfile />} />
         <Route path="/cuenta" element={<AccountPage />} />
         <Route path="/cuenta/:tab" element={<AccountPage />} />
         <Route path={NOSOTROS.to} element={<AboutPage />} />

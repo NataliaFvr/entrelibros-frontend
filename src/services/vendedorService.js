@@ -11,7 +11,7 @@ export const precioFinal = (p) => Math.round(p.base * (1 - p.d / 100))
 
 // La cuenta con rol VENDEDOR ya viene aprobada; el resto empieza sin solicitud
 const inicial = (u) => (u.rol === 'VENDEDOR'
-  ? { estado: 'aprobado', tienda: `${u.nombre} ${u.apellido}`, prov: 'Buenos Aires', pub: [] }
+  ? { estado: 'aprobado', tienda: u.tienda || `${u.nombre} ${u.apellido}`, prov: u.prov || 'Buenos Aires', pub: [] }
   : { estado: 'ninguno', pub: [] })
 
 export const getVendedor = (u) => leer(claveVendedor(u), null) || inicial(u)

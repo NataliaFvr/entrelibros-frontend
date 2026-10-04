@@ -1,7 +1,8 @@
 import { useMemo } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { initials } from '../utils/colors'
 import { plural } from '../utils/format'
+import { rutaVendedor } from '../utils/vendedor'
 import { reputacionVendedor } from '../services/resenasVendedorService'
 import Stars from './Stars'
 
@@ -28,7 +29,7 @@ const SellerBox = ({ vendedor, cantidad, destacarReputacion = false }) => {
     <div className="buy">
       <div className="sv-head">
         <span className="sv-av">{initials(vendedor, 2)}</span>
-        <div><small>Vendido por</small><b>{vendedor}</b></div>
+        <div><small>Vendido por</small><b><Link to={rutaVendedor(vendedor)} className="lnk">{vendedor}</Link></b></div>
       </div>
       <Reputacion {...rep} destacar={destacarReputacion} />
       <div className="sv-meta">{cantidad} {plural(cantidad, 'libro publicado', 'libros publicados')}</div>

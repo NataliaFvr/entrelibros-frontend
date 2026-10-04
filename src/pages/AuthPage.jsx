@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import AuthHero from '../componentes/AuthHero'
@@ -12,7 +13,8 @@ const AuthPage = ({ tab }) => {
   const { user } = useAuth()
   const navigate = useNavigate()
   const { state } = useLocation()
-  const destino = state?.from || '/cuenta'
+  const [destinoDemo, setDestinoDemo] = useState(null) // ruta propia de la cuenta demo (ej. el vendedor va a /vender)
+  const destino = destinoDemo || state?.from || '/cuenta'
 
   if (user) return <Navigate to={destino} replace />
 
@@ -24,7 +26,7 @@ const AuthPage = ({ tab }) => {
     <main className="usr">
       <AuthHero titulo="Bienvenido a Entrelibros" sub="Entrá o creá tu cuenta para guardar, comprar y opinar" />
       <div className="au-card">
-        <DemoBox onListo={listo} />
+        <DemoBox onElegirDestino={setDestinoDemo} />
         <div className="au-main">
           <AuthTabs tab={tab} onCambiar={irATab} />
           {tab === 'login'

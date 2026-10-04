@@ -1,5 +1,6 @@
 // import api from '../api/axiosConfig'
 import { guardar, leer } from './almacen'
+import { CUENTA_VENDEDOR_DEMO } from '../data/cuentasDemo'
 
 // Cuentas de ejemplo guardadas SOLO en este navegador (misma forma que el prototipo HTML).
 // Cuando esté el back:
@@ -22,13 +23,21 @@ const SEMILLA = [
   cuenta('usuario_prueba', 'Usuario', 'Prueba', 'COMPRADOR'),
   cuenta('vendedor_prueba', 'Librería', 'El Aleph', 'VENDEDOR'),
   cuenta('admin_prueba', 'Admin', 'Prueba', 'ADMIN'),
+  CUENTA_VENDEDOR_DEMO,
 ]
 
 export const getUsuarios = () => {
   const guardados = leer(CLAVE_USUARIOS, null)
-  if (guardados) return guardados
-  guardar(CLAVE_USUARIOS, SEMILLA)
-  return SEMILLA
+  if (!guardados) {
+    guardar(CLAVE_USUARIOS, SEMILLA)
+    return SEMILLA
+  }
+  // Un navegador que ya tenía usuarios guardados no recibiría las cuentas de ejemplo nuevas: se las sumamos
+  const faltan = SEMILLA.filter((s) => !guardados.some((u) => u.nombreUsuario === s.nombreUsuario))
+  if (!faltan.length) return guardados
+  const lista = [...guardados, ...faltan]
+  guardar(CLAVE_USUARIOS, lista)
+  return lista
 }
 
 const buscar = (nombreUsuario) => getUsuarios().find((x) => x.nombreUsuario === nombreUsuario)

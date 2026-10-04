@@ -1,6 +1,7 @@
 // import api from '../api/axiosConfig'
 import { CATEGORIAS, generarLibros } from '../data/mockLibros'
 import { generarResenias } from '../data/mockResenias'
+import { LIBROS_PRUEBA } from '../data/vendedorPruebaMock'
 import { librosPublicados } from './vendedorService'
 
 // Punto único de acceso a datos. Hoy devuelve los datos de ejemplo;
@@ -8,7 +9,7 @@ import { librosPublicados } from './vendedorService'
 
 export async function getLibros() {
   // return (await api.get('/libros')).data
-  return [...generarLibros(), ...librosPublicados()]
+  return [...generarLibros(), ...librosPublicados(), ...LIBROS_PRUEBA]
 }
 
 export async function getCategorias() {
