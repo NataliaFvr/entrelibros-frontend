@@ -5,6 +5,7 @@ import { TONES } from '../utils/colors'
 
 export const VENDEDOR_PRUEBA = {
   tienda: 'Librería El Resplandor',
+  usuario: 'libreria_el_resplandor',
   ubicacion: 'Rosario, Santa Fe',
   prov: 'Santa Fe',
   desde: 2023,

@@ -1,7 +1,9 @@
+import { useState } from 'react'
 import { useLibros } from '../hooks/useLibros'
 import useFormulario from '../hooks/useFormulario'
 import useImagenesLibro from '../hooks/useImagenesLibro'
 import { MIN_FOTOS } from '../utils/imagen'
+import { mensajeError } from '../utils/errorApi'
 import Field from './Field'
 import SelectField from './SelectField'
 import ImageUploader from './ImageUploader'
@@ -16,6 +18,7 @@ const BookForm = ({ libro = {}, onGuardar, onCancelar }) => {
   const { categorias } = useLibros()
   const { valores, cambiar, error, setError } = useFormulario({ ...desdeLibro(libro), cat: libro.cat || categorias[0] || '' })
   const imagenes = useImagenesLibro(libro.imgs || [])
+  const [enviando, setEnviando] = useState(false)
   const usado = valores.estado === 'Usado'
 
   const alCambiar = (nombre, valor) => {
@@ -23,7 +26,7 @@ const BookForm = ({ libro = {}, onGuardar, onCancelar }) => {
     if (nombre === 'estado' && valor === 'Usado') cambiar('stock', '1') // los usados tienen 1 unidad
   }
 
-  const enviar = (e) => {
+  const enviar = async (e) => {
     e.preventDefault()
     const base = +valores.base
     const d = +valores.d
@@ -35,10 +38,20 @@ const BookForm = ({ libro = {}, onGuardar, onCancelar }) => {
     if (!(d >= 0 && d <= 90)) return setError('El descuento debe estar entre 0 y 90.')
     if (!(stock >= 1)) return setError('El stock debe ser al menos 1.')
     if (imagenes.fotos.length < MIN_FOTOS) return setError('Subí al menos una foto del libro.')
-    onGuardar({
-      t: valores.t.trim(), a: valores.a.trim(), ed: valores.ed.trim(), cat: valores.cat, idioma: valores.idioma,
-      anio, usado, base, d, stock, imgs: imagenes.fotos,
-    })
+    setError('')
+    setEnviando(true)
+    try {
+      // `onGuardar` puede devolver { error } (validación del servidor) o lanzar un error de red/HTTP
+      const respuesta = await onGuardar({
+        t: valores.t.trim(), a: valores.a.trim(), ed: valores.ed.trim(), cat: valores.cat, idioma: valores.idioma,
+        anio, usado, base, d, stock, imgs: imagenes.fotos,
+      })
+      if (respuesta && respuesta.error) setError(respuesta.error)
+    } catch (err) {
+      setError(mensajeError(err))
+    } finally {
+      setEnviando(false)
+    }
   }
 
   return (
@@ -65,7 +78,7 @@ const BookForm = ({ libro = {}, onGuardar, onCancelar }) => {
       <ImageUploader imagenes={imagenes} />
       <p className="ferr" role="alert">{error}</p>
       <div className="rvf-b">
-        <button className="btn main" type="submit">{libro.id ? 'Guardar cambios' : 'Publicar'}</button>
+        <button className="btn main" type="submit" disabled={enviando}>{enviando ? 'Enviando…' : libro.id ? 'Guardar cambios' : 'Publicar'}</button>
         {libro.id && <button className="btn alt" type="button" onClick={onCancelar}>Cancelar</button>}
       </div>
     </form>

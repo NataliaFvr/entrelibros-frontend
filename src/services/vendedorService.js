@@ -8,6 +8,11 @@ import { SEMILLA_VENDEDOR_ALEPH, VENDEDOR_ALEPH } from '../data/vendedorPruebaMo
 // estado: 'ninguno' | 'pendiente' | 'aprobado'. Cada libro: { id, t, a, ed, cat, idioma, anio, usado, base, d, stock,
 // estado: 'activo' | 'baja', mod: 'EN_REVISION' | 'ACEPTADO' | 'RECHAZADO' }.
 // Back: la solicitud y la moderación de libros las resuelve un administrador.
+// Una publicación está "en revisión" si es nueva y aún no fue aceptada, o si ya aceptada tiene una modificación
+// pendiente (`revision` = datos nuevos a la espera del administrador). Mientras tanto el catálogo sigue mostrando
+// los datos ya aprobados. Back: EstadoModeracion = PENDIENTE (HistorialModeracion registra la decisión).
+export const enRevision = (p) => p.mod === 'EN_REVISION' || Boolean(p.revision)
+
 export const precioFinal = (p) => Math.round(p.base * (1 - p.d / 100))
 
 // La cuenta con rol VENDEDOR ya viene aprobada; el resto empieza sin solicitud
@@ -33,6 +38,13 @@ export const tiendaDe = (u) => {
   if (!u) return null
   const v = getVendedor(u)
   return v.estado === 'aprobado' ? v.tienda : null
+}
+
+// ¿La publicación de la cuenta que corresponde a este libro del catálogo está en revisión?
+export const libroEnRevision = (u, libro) => {
+  if (!u || !libro) return false
+  const p = getVendedor(u).pub.find((x) => x.id === libro.id)
+  return Boolean(p && enRevision(p))
 }
 
 // ¿Este libro del catálogo es una publicación de la cuenta? (libro.v = nombre de la tienda)

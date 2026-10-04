@@ -1,31 +1,23 @@
 import { useState } from 'react'
-import useResenasVendedor from '../hooks/useResenasVendedor'
-import { plural } from '../utils/format'
-import EmptyBlock from './EmptyBlock'
-import ReviewSummary from './ReviewSummary'
-import SellerReviewItem from './SellerReviewItem'
+import RatingsBlock from './RatingsBlock'
 
 const POR_PAGINA = 5
 
-// Pestaña "Reputación" del panel: promedio de estrellas + listado de reseñas de compradores
-const SellerReputation = ({ tienda }) => {
-  const { resenias, promedio } = useResenasVendedor(tienda)
-  const [cantidad, setCantidad] = useState(POR_PAGINA)
+// Pestaña "Reputación" (Mis calificaciones): lo recibido por la atención y por cada libro
+const SellerReputation = ({ calificaciones }) => {
+  const { atencion, libros, cargando } = calificaciones
+  const [cantAtencion, setCantAtencion] = useState(POR_PAGINA)
+  const [cantLibros, setCantLibros] = useState(POR_PAGINA)
 
-  if (!resenias.length) {
-    return <EmptyBlock titulo="Todavía no tenés reseñas" texto="Los compradores pueden calificarte desde su historial de compras." />
-  }
   return (
-    <div className="rev-wrap">
-      <ReviewSummary resenias={resenias} promedio={promedio} />
-      <div className="rev-list">
-        <small className="dim">{resenias.length} {plural(resenias.length, 'reseña', 'reseñas')} de compradores</small>
-        {resenias.slice(0, cantidad).map((r) => <SellerReviewItem key={r.id} resenia={r} />)}
-        {resenias.length > cantidad && (
-          <button className="more" type="button" onClick={() => setCantidad(cantidad + POR_PAGINA)}>Ver más reseñas</button>
-        )}
-      </div>
-    </div>
+    <>
+      <RatingsBlock titulo="Calificaciones a tu atención" vacio="Todavía no tenés reseñas. Los compradores pueden calificarte desde su historial de compras."
+        resenias={atencion.resenias} promedio={atencion.promedio} cantidad={cantAtencion} onMas={() => setCantAtencion(cantAtencion + POR_PAGINA)} />
+      {cargando
+        ? <p className="sell-note" role="status">Cargando opiniones de tus libros…</p>
+        : <RatingsBlock titulo="Opiniones de tus libros" vacio="Tus libros todavía no tienen opiniones." deLibros
+            resenias={libros.resenias} promedio={libros.promedio} cantidad={cantLibros} onMas={() => setCantLibros(cantLibros + POR_PAGINA)} />}
+    </>
   )
 }
 

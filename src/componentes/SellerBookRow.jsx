@@ -1,13 +1,17 @@
-import { coverBg } from '../utils/colors'
+import { coverBg, TONES } from '../utils/colors'
 import { fmt } from '../utils/format'
-import { precioFinal } from '../services/vendedorService'
-import { TONES } from '../utils/colors'
+import { enRevision, precioFinal } from '../services/vendedorService'
+import './SellerPanel.css'
 
 const ETIQUETAS = { EN_REVISION: 'EN REVISIÓN', RECHAZADO: 'RECHAZADO' }
 
-const SellerBookRow = ({ libro, onEditar, onBaja, onAprobar }) => {
+// Fila de "Mis libros". Con una revisión pendiente el libro sigue publicado con sus datos aprobados,
+// se marca "Modificación en revisión" y no se puede volver a editar hasta que el administrador responda.
+const SellerBookRow = ({ libro, onEditar, onBaja, onAprobar, onRechazar }) => {
   const activo = libro.estado === 'activo'
   const aceptado = (libro.mod || 'ACEPTADO') === 'ACEPTADO'
+  const pendiente = enRevision(libro)
+  const modificacion = Boolean(libro.revision)
   const color = TONES[(libro.t.length + libro.a.length) % TONES.length]
 
   return (
@@ -17,13 +21,24 @@ const SellerBookRow = ({ libro, onEditar, onBaja, onAprobar }) => {
         <b>{libro.t}</b>
         <small>{libro.a} · {libro.cat} · {libro.usado ? 'Usado' : 'Nuevo'}</small>
         <small>Stock: {libro.stock}{libro.mod === 'RECHAZADO' && libro.modC ? ` · Motivo: ${libro.modC}` : ''}</small>
+        {modificacion && (
+          <>
+            <span className="tg rev">Modificación en revisión</span>
+            <small className="rev-note">Mientras tanto se muestra la versión ya aprobada.</small>
+          </>
+        )}
+        {!pendiente && aceptado && libro.modC && <small className="rev-note">Tu última modificación fue rechazada: {libro.modC}</small>}
       </div>
       <div className="cprice">{fmt(precioFinal(libro))}</div>
       <span className={`tg${activo && aceptado ? '' : ' off'}`}>{!activo ? 'DE BAJA' : ETIQUETAS[libro.mod] || 'ACTIVO'}</span>
       <div className="ac">
-        <button className="lnk" type="button" onClick={onEditar}>Editar</button>
+        <button className="lnk" type="button" onClick={onEditar} disabled={pendiente}
+          title={pendiente ? 'Tenés una revisión pendiente: podés volver a editar cuando un administrador la resuelva' : undefined}>
+          Editar
+        </button>
         <button className="lnk" type="button" onClick={onBaja}>{activo ? 'Dar de baja' : 'Reactivar'}</button>
-        {libro.mod === 'EN_REVISION' && <button className="lnk" type="button" onClick={onAprobar}>Simular aprobación (demo)</button>}
+        {pendiente && <button className="lnk" type="button" onClick={onAprobar}>Simular aprobación (demo)</button>}
+        {pendiente && <button className="lnk" type="button" onClick={onRechazar}>Simular rechazo (demo)</button>}
       </div>
     </div>
   )

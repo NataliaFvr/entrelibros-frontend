@@ -1,7 +1,7 @@
 import { esUsado } from '../utils/libro'
 
 // `propio`: es una publicación de quien mira la ficha -> en lugar de comprar, puede editarla
-const BuyBox = ({ libro, stock, onComprar, onCarrito, propio = false, onEditar }) => {
+const BuyBox = ({ libro, stock, onComprar, onCarrito, propio = false, onEditar, editarDeshabilitado = false }) => {
   // Un usado es una pieza única: ahí no corresponde la alerta de "¡Última unidad!"
   const ultima = stock === 1 && !esUsado(libro)
   return (
@@ -11,7 +11,8 @@ const BuyBox = ({ libro, stock, onComprar, onCarrito, propio = false, onEditar }
       {propio ? (
         <>
           <small className="sv-meta">Esta publicación es tuya, por eso no podés comprarla ni guardarla.</small>
-          <button className="btn main" type="button" onClick={onEditar}>Editar mi publicación</button>
+          {editarDeshabilitado && <small className="sv-meta">Tenés una modificación en revisión. Podrás editar de nuevo cuando un administrador la resuelva.</small>}
+          <button className="btn main" type="button" onClick={onEditar} disabled={editarDeshabilitado}>Editar mi publicación</button>
         </>
       ) : (
         <>

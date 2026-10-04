@@ -29,7 +29,7 @@ const Detalle = ({ libro, libros }) => {
   const { agregar } = useCompra()
   const { resenias, promedio, publicar } = useResenias(libro.id)
 
-  const { esPropio, rutaEdicion } = useLibroPropio()
+  const { esPropio, rutaEdicion, enRevision } = useLibroPropio()
 
   const esUsado = libroUsado(libro)
   const propio = esPropio(libro) // el vendedor ve su propia publicación: no la compra ni la guarda
@@ -72,7 +72,7 @@ const Detalle = ({ libro, libros }) => {
         />
         <div className="buy-col">
           <BuyBox libro={libro} stock={stockDe(libro)} onComprar={comprar} onCarrito={alCarrito}
-            propio={propio} onEditar={() => navigate(rutaEdicion(libro))} />
+            propio={propio} onEditar={() => navigate(rutaEdicion(libro))} editarDeshabilitado={propio && enRevision(libro)} />
           <SellerBox vendedor={libro.v} cantidad={delVendedor.length} destacarReputacion={esUsado} />
         </div>
       </div>

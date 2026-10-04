@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom'
 import EmptyBlock from './EmptyBlock'
 import SellerBookRow from './SellerBookRow'
 
-const SellerBooks = ({ libros, onBaja, onAprobar }) => {
+const SellerBooks = ({ libros, onBaja, onAprobar, onRechazar }) => {
   const navigate = useNavigate()
 
   if (!libros.length) {
@@ -11,7 +11,7 @@ const SellerBooks = ({ libros, onBaja, onAprobar }) => {
   return (
     <>
       {libros.map((p) => (
-        <SellerBookRow key={p.id} libro={p} onEditar={() => navigate(`/vender/editar/${p.id}`)} onBaja={() => onBaja(p.id)} onAprobar={() => onAprobar(p.id)} />
+        <SellerBookRow key={p.id} libro={p} onEditar={() => navigate(`/vender/editar/${p.id}`)} onBaja={() => onBaja(p.id)} onAprobar={() => onAprobar(p.id)} onRechazar={() => onRechazar(p.id)} />
       ))}
       <p className="sell-note">Dar de baja oculta el libro del catálogo pero conserva su historial: las compras y opiniones anteriores no se pierden.</p>
     </>

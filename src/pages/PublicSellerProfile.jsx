@@ -1,9 +1,10 @@
 import { useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { useToast } from '../hooks/useToast'
 import useVendedorPublico from '../hooks/useVendedorPublico'
 import useResenasVendedor from '../hooks/useResenasVendedor'
+import AccountTabs from '../componentes/AccountTabs'
 import Migas from '../componentes/Migas'
 import MiniDeco from '../componentes/MiniDeco'
 import SellerPublicHeader from '../componentes/SellerPublicHeader'
@@ -17,6 +18,9 @@ const Perfil = ({ vendedor, libros }) => {
   const toast = useToast()
   const { resenias, promedio, miResena, libroComprado, puedeResenar, publicar } = useResenasVendedor(vendedor.tienda)
   const [modal, setModal] = useState(false)
+  const [params, setParams] = useSearchParams()
+  const tab = params.get('tab') === 'resenias' ? 'resenias' : 'libros' // /vendedor/:id?tab=resenias
+  const pestanias = [['libros', `Libros publicados (${libros.length})`], ['resenias', `Reputación y reseñas (${resenias.length})`]]
 
   const escribir = () => {
     if (requiereLogin('review')) return
@@ -32,8 +36,10 @@ const Perfil = ({ vendedor, libros }) => {
     <main className="usr">
       <Migas items={[{ label: 'Libros', to: '/libros' }, { label: vendedor.tienda }]} />
       <SellerPublicHeader vendedor={vendedor} promedio={promedio} cantidad={resenias.length} publicados={libros.length} />
-      <SellerCatalog tienda={vendedor.tienda} libros={libros} />
-      <SellerReviews resenias={resenias} promedio={promedio} miResena={miResena} onEscribir={escribir} />
+      <AccountTabs pestanias={pestanias} tab={tab} onIr={(t) => setParams(t === 'libros' ? {} : { tab: t }, { replace: true })} />
+      {tab === 'libros'
+        ? <SellerCatalog tienda={vendedor.tienda} libros={libros} />
+        : <SellerReviews resenias={resenias} promedio={promedio} miResena={miResena} onEscribir={escribir} />}
       <MiniDeco />
       {modal && (
         <SellerReviewModal tienda={vendedor.tienda} libro={libroComprado} inicial={miResena} onPublicar={enviar} onCerrar={() => setModal(false)} />

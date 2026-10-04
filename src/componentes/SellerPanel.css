@@ -1,0 +1,15 @@
+/* Panel del vendedor y perfil público: revisión de cambios, widget de reputación y usuario */
+.tg.rev{align-self:flex-start;white-space:normal;background:var(--blue);color:var(--evergreen)}
+.rev-note{font-size:.74rem;opacity:.75;line-height:1.35}
+.lnk:disabled{opacity:.4;cursor:not-allowed;text-decoration:none}
+.prow .cinfo{min-width:0;overflow-wrap:anywhere}
+.rating-w{display:flex;flex-wrap:wrap;align-items:center;gap:12px 24px;margin-bottom:16px}
+.rating-w .rw-score{display:flex;align-items:center;gap:12px}
+.rating-w b.fr{font-size:2.4rem;line-height:1;color:var(--burnt)}
+.rating-w .rw-txt{flex:1 1 220px;min-width:0;font-size:.85rem;line-height:1.5}
+.rating-w .rw-txt small{display:block;opacity:.7}
+.rating-w .btn{width:auto;padding:10px 22px;text-decoration:none;text-align:center}
+.sp-user{font-size:.9rem;font-weight:600;opacity:.65;margin-top:2px}
+.rb{margin-bottom:22px}.rb>h3{margin-bottom:10px}
+.rv-book{display:block;font-size:.75rem;opacity:.65;margin-top:2px}
+@media (max-width:600px){.rating-w .btn{width:100%}}
