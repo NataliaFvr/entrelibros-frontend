@@ -92,3 +92,30 @@
 .adm-modal h2{font-size:clamp(1.3rem,4vw,1.6rem)}
 .adm-modal .modal-btns{flex-wrap:wrap;margin-top:6px}
 .adm-modal .modal-btns .btn{width:auto;flex:1 1 140px;padding:11px 22px}
+
+/* ---- Categorías ---- */
+.adm-split{display:grid;grid-template-columns:minmax(0,1fr) minmax(260px,340px);gap:24px;align-items:start}
+.adm-split>*{min-width:0}
+@media (max-width:900px){.adm-split{grid-template-columns:minmax(0,1fr)}}
+.adm-chips{display:flex;flex-wrap:wrap;gap:8px;list-style:none}
+.adm-chip{background:#fff;border-radius:999px;padding:8px 16px;font-weight:600;font-size:.85rem;box-shadow:0 4px 14px rgba(4,42,43,.08);overflow-wrap:anywhere}
+
+/* ---- Tarifas de envío (las tarjetas son las mismas de Políticas de envío) ---- */
+.adm-shell .ship-c .adm-sm{margin-top:14px}
+.adm-shell .card.ship-once{background:var(--cyan);box-shadow:none}
+
+/* ---- Órdenes y Pagos ---- */
+.adm-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.adm-kpi-fijo{cursor:default}
+.adm-kpi-fijo:hover{transform:none}
+.adm-modal .adm-tags{display:flex;flex-wrap:wrap;gap:6px}
+.adm-modal .adm-card-t{margin-bottom:4px}
+
+/* Tres números en una sola fila, también en celular */
+.adm-kpis-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+@media (max-width:520px){
+  .adm-kpis-3{gap:8px}
+  .adm-kpis-3 .adm-kpi{padding:16px 6px}
+  .adm-kpis-3 .adm-kpi b{font-size:1.15rem}
+  .adm-kpis-3 .adm-kpi small{font-size:.7rem}
+}

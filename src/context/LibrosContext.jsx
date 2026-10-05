@@ -15,8 +15,10 @@ const LibrosProvider = ({ children }) => {
 
   // Vuelve a leer el catálogo (por ejemplo, cuando un vendedor publica o da de baja un libro)
   const recargar = () => getLibros().then(setLibros)
+  // Vuelve a leer las categorías (cuando el administrador crea una nueva)
+  const recargarCategorias = () => getCategorias().then(setCategorias)
 
-  const value = useMemo(() => ({ libros, categorias, cargando, recargar }), [libros, categorias, cargando])
+  const value = useMemo(() => ({ libros, categorias, cargando, recargar, recargarCategorias }), [libros, categorias, cargando])
   return <LibrosCtx.Provider value={value}>{children}</LibrosCtx.Provider>
 }
 

@@ -1,5 +1,6 @@
 // import api from '../api/axiosConfig'
 import { CATEGORIAS, generarLibros } from '../data/mockLibros'
+import { leer } from './almacen'
 import { generarResenias } from '../data/mockResenias'
 import { LIBROS_PRUEBA } from '../data/vendedorPruebaMock'
 import { idsGestionados, librosPublicados } from './vendedorService'
@@ -13,9 +14,14 @@ export async function getLibros() {
   return [...generarLibros().filter((l) => !gestionados.has(l.id)), ...librosPublicados(), ...LIBROS_PRUEBA]
 }
 
+// Las categorías que crea el administrador se guardan en este navegador (la lista completa, en orden de creación)
+export const CLAVE_CATEGORIAS = 'entrelibros_cats'
+
 export async function getCategorias() {
   // return (await api.get('/categorias')).data
-  return CATEGORIAS
+  const guardadas = leer(CLAVE_CATEGORIAS, null)
+  const ok = Array.isArray(guardadas) && guardadas.length > 0 && guardadas.every((c) => typeof c === 'string' && c.trim())
+  return ok ? guardadas : CATEGORIAS
 }
 
 // Ids de los libros de ejemplo del catálogo: solo ellos traen reseñas ficticias.

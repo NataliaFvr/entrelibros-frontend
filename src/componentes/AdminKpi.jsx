@@ -1,13 +1,15 @@
 import { Link } from 'react-router-dom'
 
-// Número grande del resumen; al tocarlo lleva a la sección correspondiente.
+// Número grande del panel. Con `to` es un acceso a esa sección; sin `to` solo informa.
 const AdminKpi = ({ to, valor, etiqueta }) => {
-  return (
-    <Link className="card adm-kpi" to={to}>
+  const contenido = (
+    <>
       <b>{valor}</b>
       <small>{etiqueta}</small>
-    </Link>
+    </>
   )
+  if (!to) return <div className="card adm-kpi adm-kpi-fijo">{contenido}</div>
+  return <Link className="card adm-kpi" to={to}>{contenido}</Link>
 }
 
 export default AdminKpi

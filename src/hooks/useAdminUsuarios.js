@@ -3,10 +3,9 @@ import { useAuth } from './useAuth'
 import { useLibros } from './useLibros'
 import { useToast } from './useToast'
 import * as admin from '../services/adminService'
-import { ETIQUETA_ROL } from '../data/admin'
+import { ETIQUETA_ROL, POR_PAGINA } from '../data/admin'
 import { norm } from '../utils/format'
 
-export const POR_PAGINA = 8
 const mensajeDe = (err) => (err && err.message) || 'No pudimos completar la acción. Intentá de nuevo.'
 
 // Lista de usuarios con búsqueda, filtros, paginación y las acciones del administrador.

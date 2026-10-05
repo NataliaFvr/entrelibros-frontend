@@ -1,5 +1,11 @@
-// Costo fijo por vendedor: misma provincia o provincia distinta
-export const COSTO_ENVIO = { misma: 1800, distinta: 3500 }
+import { getTarifas } from '../services/enviosService'
+
+// Costo fijo por vendedor: misma provincia o provincia distinta. Lo define el administrador (Tarifas de envío),
+// por eso se lee de lo guardado cada vez que se consulta y no queda fijo al cargar la app.
+export const COSTO_ENVIO = {
+  get misma() { return getTarifas().misma },
+  get distinta() { return getTarifas().distinta },
+}
 
 // Un envío por vendedor, aunque compres varios libros suyos: [{ vendedor, tipo, costo }]
 export const envioPorVendedor = (items, libros) => {

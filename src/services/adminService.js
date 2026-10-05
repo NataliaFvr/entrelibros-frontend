@@ -1,8 +1,11 @@
-import { leer, mover } from './almacen'
+import { guardar, leer, mover } from './almacen'
 import { getUsuarios, guardarUsuarios } from './authService'
 import { claveCart, claveDir, claveMarks, claveNotifs, clavePedidos, clavePerfil, claveVendedor } from './claves'
+import { guardarTarifa } from './enviosService'
+import { CLAVE_CATEGORIAS, getCategorias } from './librosService'
 import { getNotificaciones, guardarNotificaciones } from './notificacionesService'
 import { getVendedor, guardarVendedor } from './vendedorService'
+import { norm } from '../utils/format'
 import { estadoPago } from '../utils/pedidos'
 
 // Servicio del panel de administración en modo demostración: usuarios y pedidos guardados en este navegador.
@@ -88,9 +91,36 @@ export const resolverSolicitudVenta = (id, aprobada) => {
   notificar(u, 'Tu solicitud para ser vendedor fue rechazada. Podés volver a enviarla desde "Vender".')
 }
 
-// Todos los pedidos de todas las cuentas: [{ n, fecha, comprador, total, estadoPago }]
+// Provincia de destino: lo que va entre la última coma y el código postal de "Casa — calle, ciudad, Provincia (CP)"
+const provinciaDe = (direccion = '') => (direccion.split(', ').pop() || '').replace(/ \(.*\)$/, '')
+
+// Todas las órdenes de todas las cuentas (solo lectura). Back: GET /ordenes
 export const listarOrdenes = () =>
   getUsuarios().flatMap((u) =>
     leer(clavePedidos(u), []).map((o) => ({
-      n: o.n, fecha: o.date, comprador: `${u.nombre} ${u.apellido}`, total: o.sub + o.env, estadoPago: estadoPago(o),
+      n: o.n, fecha: o.date, comprador: `${u.nombre} ${u.apellido}`, provincia: provinciaDe(o.addr),
+      subtotal: o.sub, envio: o.env, total: o.sub + o.env, estadoPago: estadoPago(o),
+      proveedor: o.proveedor || 'tarjeta', items: o.its,
     })))
+
+// Pagos registrados: una orden pagada o con pago rechazado es un pago. Se numeran de la más vieja a la más nueva.
+// Back: GET /pagos
+export const listarPagos = () =>
+  listarOrdenes()
+    .filter((o) => o.estadoPago === 'SIMULADO_APROBADO' || o.estadoPago === 'RECHAZADO')
+    .sort((a, b) => a.fecha.localeCompare(b.fecha) || a.n.localeCompare(b.n))
+    .map((o, i) => ({ id: i + 1, n: o.n, proveedor: o.proveedor, monto: o.total, resultado: o.estadoPago }))
+
+// Categorías: solo se pueden crear (no editar ni borrar). El nombre no puede repetirse, sin importar mayúsculas ni tildes.
+// Back: POST /categorias {nombre}
+export const crearCategoria = async (nombre) => {
+  const limpio = nombre.trim().replace(/\s+/g, ' ')
+  const actuales = await getCategorias()
+  if (actuales.some((c) => norm(c) === norm(limpio))) throw new Error('Esa categoría ya existe.')
+  if (!guardar(CLAVE_CATEGORIAS, [...actuales, limpio])) throw new Error(SIN_ESPACIO)
+}
+
+// Tarifas de envío. `tipo`: 'misma' | 'distinta'. Back: POST /envios {zona, costoFijo}
+export const cambiarTarifaEnvio = (tipo, costo) => {
+  if (!guardarTarifa(tipo, costo)) throw new Error(SIN_ESPACIO)
+}

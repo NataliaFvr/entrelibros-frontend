@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { AYUDA, AYUDA_RAIZ } from '../data/ayuda'
 import { COSTO_ENVIO } from '../utils/envio'
 import { fmt } from '../utils/format'
+import { TIPOS_ENVIO } from '../data/envios'
 import InfoLayout from '../componentes/InfoLayout'
 import ShipCard from '../componentes/ShipCard'
 import TruckLane from '../componentes/TruckLane'
@@ -12,12 +13,9 @@ const ShippingPolicyPage = () => {
     <InfoLayout titulo={label} sub={sub} migas={[{ label: 'Ayuda', to: AYUDA_RAIZ }, { label }]} pie={<TruckLane />}>
       <div className="info-wrap">
         <div className="ship-grid" style={{ marginTop: 0 }}>
-          <ShipCard titulo="Misma provincia que el vendedor" precio={fmt(COSTO_ENVIO.misma)}>
-            Si vivís en la misma provincia que quien vende el libro, el envío tiene este precio.
-          </ShipCard>
-          <ShipCard titulo="Distinta provincia" precio={fmt(COSTO_ENVIO.distinta)} variante="d">
-            Si el vendedor está en otra provincia, el envío tiene este precio.
-          </ShipCard>
+          {TIPOS_ENVIO.map(({ tipo, titulo, variante, texto }) => (
+            <ShipCard key={tipo} titulo={titulo} precio={fmt(COSTO_ENVIO[tipo])} variante={variante}>{texto}</ShipCard>
+          ))}
         </div>
         <div className="card ship-once">
           <h3 className="fr">Varios libros, un solo envío</h3>

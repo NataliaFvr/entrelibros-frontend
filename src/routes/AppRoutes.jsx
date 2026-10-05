@@ -13,7 +13,10 @@ import AdminLayout from "../componentes/AdminLayout"
 import AdminResumenPage from "../pages/AdminResumenPage"
 import AdminModeracionPage from "../pages/AdminModeracionPage"
 import AdminUsuariosPage from "../pages/AdminUsuariosPage"
-import AdminProximamentePage from "../pages/AdminProximamentePage"
+import AdminCategoriasPage from "../pages/AdminCategoriasPage"
+import AdminEnviosPage from "../pages/AdminEnviosPage"
+import AdminOrdenesPage from "../pages/AdminOrdenesPage"
+import AdminPagosPage from "../pages/AdminPagosPage"
 import AboutPage from "../pages/AboutPage"
 import { NOSOTROS } from "../data/nosotros"
 import HelpPage from "../pages/HelpPage"
@@ -30,10 +33,10 @@ const AppRoutes = () => {
         <Route index element={<AdminResumenPage />} />
         <Route path="moderacion" element={<AdminModeracionPage />} />
         <Route path="usuarios" element={<AdminUsuariosPage />} />
-        <Route path="categorias" element={<AdminProximamentePage seccion="Categorías" />} />
-        <Route path="envios" element={<AdminProximamentePage seccion="Tarifas de envío" />} />
-        <Route path="ordenes" element={<AdminProximamentePage seccion="Órdenes" />} />
-        <Route path="pagos" element={<AdminProximamentePage seccion="Pagos" />} />
+        <Route path="categorias" element={<AdminCategoriasPage />} />
+        <Route path="envios" element={<AdminEnviosPage />} />
+        <Route path="ordenes" element={<AdminOrdenesPage />} />
+        <Route path="pagos" element={<AdminPagosPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Route>
       <Route element={<Layout />}>

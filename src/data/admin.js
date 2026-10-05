@@ -17,3 +17,6 @@ export const ETIQUETA_ROL = Object.fromEntries(ROLES)
 
 // [valor del back (enum EstadoUsuario), etiqueta del filtro]
 export const ESTADOS_USUARIO = [['ACTIVO', 'Activos'], ['DADO_DE_BAJA', 'Dados de baja']]
+
+// Filas por página en las tablas del panel (Usuarios, Órdenes y Pagos)
+export const POR_PAGINA = 8
