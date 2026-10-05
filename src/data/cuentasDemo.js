@@ -19,4 +19,5 @@ export const CUENTA_VENDEDOR_DEMO = {
 export const INGRESOS_DEMO = [
   { id: 'comprador', texto: 'Entrar como comprador de prueba', ident: 'usuario_prueba', contrasena: 'Clave123!', destino: null },
   { id: 'vendedor', texto: 'Entrar como vendedor de prueba', ident: 'vendedor_prueba', contrasena: 'Clave123!', destino: '/vender' },
+  { id: 'admin', texto: 'Entrar como administrador de prueba', ident: 'admin_prueba', contrasena: 'Clave123!', destino: '/admin' },
 ]

@@ -81,6 +81,45 @@ export interface HistorialModeracion {
   fecha: string
 }
 
+/** Datos de un libro que el panel de moderación muestra y compara (subconjunto de LibroResponse + imagen). */
+export interface DatosLibro {
+  titulo: string
+  autor: string | null
+  editorial: string | null
+  anio: number | null
+  idioma: string | null
+  estadoLibro: EstadoLibro | null
+  precio: number | null
+  descuentoPct: number | null
+  stock: number | null
+  descripcion: string | null
+  /** El back todavía no expone imagen en LibroResponse (van por /imagenes-libro); solo la trae el modo demo. */
+  imagenUrl?: string | null
+}
+
+/** NUEVO = publicación recién creada; MODIFICACION = edición de un libro ya aceptado (hoy solo existe en el modo demo). */
+export type TipoModeracion = 'NUEVO' | 'MODIFICACION'
+
+/** Un elemento de la cola del panel de moderación. `id` es el id del libro: el back modera por libro. */
+export interface SolicitudModeracion {
+  id: number
+  tipoModeracion: TipoModeracion
+  /** El back no guarda cuándo se pidió la revisión: null hasta que lo agregue. */
+  fechaSolicitud: string | null
+  libroId: number
+  nombreVendedor: string | null
+  /** null en una publicación nueva (no hay versión previa aprobada). */
+  datosActuales: DatosLibro | null
+  datosPropuestos: DatosLibro
+}
+
+/** Decisión del admin sobre una solicitud. */
+export interface AccionSolicitud {
+  aprobado: boolean
+  /** Obligatorio al rechazar. */
+  motivoRechazo?: string
+}
+
 /** Error ya normalizado por utils/errorApi.js (normalizarError). */
 export interface ErrorApiNormalizado {
   tipo: string

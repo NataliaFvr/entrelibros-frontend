@@ -1,0 +1,94 @@
+/* Panel de administración (Resumen y Usuarios; la moderación tiene su propio AdminModeracion.css).
+   Mobile primero: ~390px una columna, 768px+ dos columnas, 1280px ancho completo. Sin anchos fijos. */
+
+/* ---- Marco: barra superior, contenido y pie ---- */
+.adm-shell{min-height:100vh;min-height:100dvh;display:flex;flex-direction:column}
+.adm-shell>.usr{flex:1 0 auto;width:100%}
+.adm-navbar{display:grid;grid-template-columns:auto minmax(0,1fr);align-items:stretch;border-bottom:1px solid rgba(4,42,43,.1)}
+.adm-bar{display:contents}
+.adm-who{grid-row:1;grid-column:2;justify-self:end;display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:4px 12px;padding:8px clamp(12px,3vw,32px);font-size:.82rem;font-weight:600}
+.adm-who .tg,.adm-who .lnk{white-space:nowrap}
+.adm-nav{grid-row:2;grid-column:1/-1;display:flex;gap:22px;padding:0 clamp(16px,3vw,32px);border-top:1px solid rgba(4,42,43,.08);font-size:.85rem;font-weight:700;overflow-x:auto;scrollbar-width:none}
+.adm-nav::-webkit-scrollbar{display:none}
+.adm-ni{flex-shrink:0;padding:14px 0;white-space:nowrap}
+.adm-ni:hover{color:var(--burnt)}
+.adm-ni.on{color:var(--burnt);box-shadow:inset 0 -3px 0 var(--burnt)}
+.adm-ni:focus-visible,.adm-who a:focus-visible,.adm-who button:focus-visible{outline:2px solid var(--blue);outline-offset:3px;border-radius:4px}
+.adm-footer{flex-shrink:0;display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 16px;padding:18px clamp(20px,4vw,56px);font-size:.78rem;font-weight:700}
+@media (max-width:520px){.adm-user{display:none}}
+@media (min-width:1024px){
+  .adm-navbar{display:flex}
+  .adm-bar{display:flex;flex:1;min-width:0;align-items:center;justify-content:space-between;gap:20px;padding:0 clamp(16px,3vw,32px)}
+  .adm-who{padding:0;white-space:nowrap;flex-wrap:nowrap}
+  .adm-nav{padding:0;border-top:0;gap:24px;min-width:0}
+  .adm-ni{padding:18px 0}
+}
+
+/* ---- Cabecera de pantalla ---- */
+.adm-top{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:12px 16px;margin-bottom:18px}
+.adm-top h1{font-size:clamp(1.8rem,4vw,2.6rem);font-weight:700;font-style:italic;overflow-wrap:anywhere}
+.adm-top p{font-size:.9rem;opacity:.65;margin-top:2px}
+.adm-top .btn{width:auto;padding:11px 22px;font-size:.88rem}
+@media (max-width:480px){.adm-top>div{flex:1 1 100%}.adm-top .btn{width:100%}}
+.adm-stack>*+*{margin-top:16px}
+.adm-card-t{font-size:1.1rem;font-weight:600;margin-bottom:12px}
+.adm .btn.adm-sm,.btn.adm-sm{display:inline-block;width:auto;padding:8px 16px;font-size:.8rem;flex-shrink:0}
+.tg.b{background:var(--blue);color:var(--evergreen)}
+
+/* ---- Resumen ---- */
+.adm-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(150px,100%),1fr));gap:14px}
+.adm-kpi{display:block;text-align:center;padding:22px 12px;transition:transform .2s}
+.adm-kpi b{display:block;font-family:'Fraunces',serif;font-size:clamp(1.5rem,5vw,1.9rem);color:var(--burnt);overflow-wrap:anywhere}
+.adm-kpi small{font-size:.78rem;opacity:.65}
+.adm-kpi:hover{transform:translateY(-3px)}
+.adm-kpi:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.adm-two{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(320px,100%),1fr));gap:16px}
+.adm-two>.card{min-width:0}
+.adm-pend{align-items:center}
+.adm-pend>span{min-width:0;overflow-wrap:anywhere}
+.adm-barra{display:grid;grid-template-columns:minmax(80px,120px) minmax(0,1fr) auto;align-items:center;gap:10px;margin-top:10px;font-size:.88rem}
+.adm-barra-n{text-align:right;min-width:1.2em}
+@media (prefers-reduced-motion:reduce){.adm-kpi{transition:none}.adm-kpi:hover{transform:none}}
+
+/* ---- Usuarios: filtros y tabla ---- */
+.adm-filters{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px}
+.adm-filters input{flex:1 1 220px;min-width:0;padding:9px 14px;border-radius:999px;border:1px solid rgba(4,42,43,.2);font-family:inherit;font-size:.85rem;background:#fff;color:var(--evergreen)}
+.adm-filters input:focus{outline:2px solid var(--blue);outline-offset:1px}
+.adm-filters .fsel{flex:0 1 190px;width:auto;min-width:0}
+@media (max-width:600px){.adm-filters .fsel{flex:1 1 140px}}
+.adm-tw{padding:6px 22px;overflow-x:auto}
+.adm-table{width:100%;border-collapse:collapse;font-size:.86rem}
+.adm-table th{text-align:left;font-size:.74rem;opacity:.6;font-weight:700;padding:12px 10px 8px}
+.adm-table td{padding:12px 10px;border-top:1px solid rgba(4,42,43,.08);vertical-align:middle}
+.adm-table td small{display:block;opacity:.6;font-size:.74rem}
+.adm-table .r{text-align:right}
+.adm-c-mail{overflow-wrap:break-word;word-break:normal}
+.adm-tags{display:inline-flex;flex-wrap:wrap;gap:4px}
+.adm-tw .tg{display:inline-block}
+.adm-acts{display:flex;flex-wrap:wrap;justify-content:flex-end;align-items:center;gap:4px 20px}
+.adm-acts>*+*{position:relative}
+.adm-acts>*+*::before{content:'·';position:absolute;left:-12px;top:50%;transform:translateY(-52%);color:var(--evergreen);font-weight:400}
+.adm-acts .lnk:focus-visible{outline:2px solid var(--blue);outline-offset:2px;border-radius:3px}
+
+/* Celular y tablet: cada fila es una tarjeta, sin scroll horizontal */
+@media (max-width:899px){
+  .adm-tw{padding:4px 16px}
+  .adm-table,.adm-table tbody{display:block}
+  .adm-table thead{display:none}
+  .adm-table tr{display:grid;gap:8px;padding:14px 0;border-top:1px solid rgba(4,42,43,.08)}
+  .adm-table tr:first-child{border-top:0}
+  .adm-table td{display:flex;justify-content:space-between;align-items:center;gap:12px;border:0;padding:0;text-align:right;min-width:0}
+  .adm-table td::before{content:attr(data-label);flex-shrink:0;font-size:.72rem;font-weight:700;opacity:.6;text-align:left}
+  .adm-table td.adm-c-user,.adm-table td.adm-c-acc{display:block;text-align:left}
+  .adm-table td.adm-c-user::before,.adm-table td.adm-c-acc::before{display:none}
+  .adm-table td.adm-c-user b{font-size:.95rem}
+  .adm-acts{justify-content:flex-start;gap:6px 18px;padding-top:4px}
+  .adm-acts>*+*::before{display:none}
+  .adm-acts .lnk{padding:4px 0}
+}
+
+/* ---- Pop-ups ---- */
+.adm-modal{max-width:560px;display:flex;flex-direction:column;gap:12px;padding:clamp(20px,5vw,32px);outline:none}
+.adm-modal h2{font-size:clamp(1.3rem,4vw,1.6rem)}
+.adm-modal .modal-btns{flex-wrap:wrap;margin-top:6px}
+.adm-modal .modal-btns .btn{width:auto;flex:1 1 140px;padding:11px 22px}

@@ -9,6 +9,11 @@ import VerifyPage from "../pages/VerifyPage"
 import CartPage from "../pages/CartPage"
 import PayPage from "../pages/PayPage"
 import SellerPage from "../pages/SellerPage"
+import AdminLayout from "../componentes/AdminLayout"
+import AdminResumenPage from "../pages/AdminResumenPage"
+import AdminModeracionPage from "../pages/AdminModeracionPage"
+import AdminUsuariosPage from "../pages/AdminUsuariosPage"
+import AdminProximamentePage from "../pages/AdminProximamentePage"
 import AboutPage from "../pages/AboutPage"
 import { NOSOTROS } from "../data/nosotros"
 import HelpPage from "../pages/HelpPage"
@@ -21,6 +26,16 @@ import NotFoundPage from "../pages/NotFoundPage"
 const AppRoutes = () => {
   return (
     <Routes>
+      <Route path="/admin" element={<AdminLayout />}>
+        <Route index element={<AdminResumenPage />} />
+        <Route path="moderacion" element={<AdminModeracionPage />} />
+        <Route path="usuarios" element={<AdminUsuariosPage />} />
+        <Route path="categorias" element={<AdminProximamentePage seccion="Categorías" />} />
+        <Route path="envios" element={<AdminProximamentePage seccion="Tarifas de envío" />} />
+        <Route path="ordenes" element={<AdminProximamentePage seccion="Órdenes" />} />
+        <Route path="pagos" element={<AdminProximamentePage seccion="Pagos" />} />
+        <Route path="*" element={<NotFoundPage />} />
+      </Route>
       <Route element={<Layout />}>
         <Route path="/" element={<HomePage />} />
         <Route path="/libros" element={<CatalogPage />} />

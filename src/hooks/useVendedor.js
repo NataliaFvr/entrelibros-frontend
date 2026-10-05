@@ -4,10 +4,8 @@ import { useToast } from './useToast'
 import { enRevision, getVendedor, guardarVendedor, nuevoIdPublicacion } from '../services/vendedorService'
 import { esModeracionError, modificarLibro } from '../services/moderacionService'
 import { aLibroRequest } from '../utils/libroRequest'
+import { USAR_API_LIBROS } from '../utils/modoApi'
 
-// Mientras el resto de la app trabaja con datos de ejemplo (ids y sesión locales), las ediciones solo pueden ir
-// al back si éste está activo: VITE_API_LIBROS=true en .env. Sin eso se mantiene el comportamiento de demostración.
-const USAR_API = import.meta.env.VITE_API_LIBROS === 'true'
 const MENSAJE_REVISION = 'Tus cambios han sido enviados a revisión por un administrador'
 
 // Estado y acciones del vendedor de la cuenta `user`. Cada cambio se guarda y refresca el catálogo.
@@ -47,7 +45,7 @@ const useVendedor = (user) => {
 
     // PATCH /libros/{id}. El estado que manda el back es la verdad: solo si vuelve EN_REVISION se muestra como pendiente.
     let enviadoARevision = true
-    if (USAR_API) {
+    if (USAR_API_LIBROS) {
       try {
         const libro = await modificarLibro(idEditado, aLibroRequest(datos))
         enviadoARevision = libro.estadoModeracion === 'EN_REVISION'

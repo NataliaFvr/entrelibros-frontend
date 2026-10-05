@@ -40,6 +40,9 @@ export const getUsuarios = () => {
   return lista
 }
 
+// Reemplaza la lista completa de cuentas (la usa el panel de administración). Devuelve false si no hay espacio.
+export const guardarUsuarios = (lista) => guardar(CLAVE_USUARIOS, lista)
+
 const buscar = (nombreUsuario) => getUsuarios().find((x) => x.nombreUsuario === nombreUsuario)
 
 // Aplica cambios a un usuario y devuelve el usuario actualizado

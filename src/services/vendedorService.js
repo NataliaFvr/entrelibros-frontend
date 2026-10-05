@@ -70,7 +70,8 @@ export const nuevoIdPublicacion = () => {
 export const librosPublicados = () =>
   getUsuarios().flatMap((u) => {
     const v = getVendedor(u)
-    if (v.estado !== 'aprobado') return []
+    // Un vendedor dado de baja por el administrador deja de mostrar sus libros
+    if (v.estado !== 'aprobado' || u.estado === 'DADO_DE_BAJA') return []
     return v.pub.filter((p) => p.estado === 'activo' && p.mod === 'ACEPTADO').map((p) => aLibro(p, v))
   })
 

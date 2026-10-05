@@ -1,6 +1,8 @@
 import api from '../api/axiosConfig'
 import { normalizarError } from '../utils/errorApi'
 import type {
+  AccionSolicitud,
+  DatosLibro,
   ErrorApiNormalizado,
   EstadoModeracion,
   HistorialModeracion,
@@ -8,6 +10,7 @@ import type {
   ModeracionRequest,
   ModificarLibroRequest,
   Pagina,
+  SolicitudModeracion,
 } from '../types/moderacion'
 
 // Cliente de libros y moderación contra el back real. Usa el axios compartido (api/axiosConfig):
@@ -122,4 +125,31 @@ export async function obtenerHistorialDeLibro(id: number, page = 0, size = 20): 
   } catch (err) {
     return fallar(err)
   }
+}
+
+const aDatos = (l: LibroResponse): DatosLibro => ({
+  titulo: l.titulo, autor: l.autor, editorial: l.editorial, anio: l.anio, idioma: l.idioma, estadoLibro: l.estadoLibro,
+  precio: l.precio, descuentoPct: l.descuentoPct, stock: l.stock, descripcion: l.descripcion,
+})
+
+/**
+ * Cola del panel de moderación: todos los libros EN_REVISION (se recorren las páginas del back).
+ * El back de hoy solo distingue libros nuevos: todo lo que llega es tipo NUEVO, sin versión previa que comparar.
+ * Cuando el back registre modificaciones pendientes, solo cambia este adaptador.
+ */
+export async function obtenerSolicitudes(): Promise<SolicitudModeracion[]> {
+  const solicitudes: SolicitudModeracion[] = []
+  for (let page = 0; ; page++) {
+    const pagina = await obtenerPendientes(page, 50)
+    solicitudes.push(...pagina.content.map((l): SolicitudModeracion => ({
+      id: l.id, tipoModeracion: 'NUEVO', fechaSolicitud: null, libroId: l.id, nombreVendedor: l.nombreVendedor,
+      datosActuales: null, datosPropuestos: aDatos(l),
+    })))
+    if (pagina.last || pagina.empty) return solicitudes
+  }
+}
+
+/** Aprobar (ACEPTADO) o rechazar (RECHAZADO + motivo) una solicitud. Rechazar sin motivo lanza ModeracionError. */
+export async function moderarSolicitud(id: number, accion: AccionSolicitud): Promise<void> {
+  await (accion.aprobado ? aprobarLibro(id) : rechazarLibro(id, accion.motivoRechazo ?? ''))
 }
