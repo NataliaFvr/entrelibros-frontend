@@ -9,9 +9,9 @@ const RolModal = ({ usuario, onGuardar, onCerrar }) => {
   const [rol, setRol] = useState(usuario.rol)
   const [error, setError] = useState('')
 
-  const enviar = (e) => {
+  const enviar = async (e) => {
     e.preventDefault()
-    const r = onGuardar(rol)
+    const r = await onGuardar(rol) // con el back es async
     if (r.error) setError(r.error)
     else onCerrar()
   }

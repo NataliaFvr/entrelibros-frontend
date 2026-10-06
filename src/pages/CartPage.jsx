@@ -3,6 +3,7 @@ import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { useCompra } from '../hooks/useCompra'
 import { useLibros } from '../hooks/useLibros'
+import { useToast } from '../hooks/useToast'
 import { costoEnvio } from '../utils/envio'
 import { direccionTexto } from '../utils/format'
 import { subtotal } from '../utils/pedidos'
@@ -16,7 +17,9 @@ const CartPage = () => {
   const { user, direcciones } = useAuth()
   const { carrito, crearPedido } = useCompra()
   const { libros, cargando } = useLibros()
+  const toast = useToast()
   const [elegida, setElegida] = useState(0)
+  const [enviando, setEnviando] = useState(false)
 
   if (!user) return <Navigate to="/ingresar" replace state={{ from: '/carrito' }} />
   if (cargando) return <main className="usr" />
@@ -24,9 +27,19 @@ const CartPage = () => {
   const items = carrito.map((c) => ({ libro: libros.find((l) => l.id === c.id), q: c.q })).filter((i) => i.libro)
   const precios = items.map(({ libro, q }) => ({ id: libro.id, q, p: libro.p }))
 
-  const finalizar = () => {
-    const n = crearPedido(direccionTexto(direcciones[Math.min(elegida, direcciones.length - 1)]))
-    navigate(`/pago/${n}`)
+  const finalizar = async () => {
+    if (enviando) return
+    const direccion = direcciones[Math.min(elegida, direcciones.length - 1)]
+    setEnviando(true)
+    try {
+      // Con el back crearPedido es async (checkout) y puede fallar: sin stock, libro no disponible, etc.
+      const n = await crearPedido(direccionTexto(direccion), direccion.prov)
+      navigate(`/pago/${n}`)
+    } catch (err) {
+      toast(err.message)
+    } finally {
+      setEnviando(false)
+    }
   }
 
   return (

@@ -26,10 +26,10 @@ const UsuarioFormModal = ({ usuario, onGuardar, onCerrar }) => {
     validadores(editando),
   )
 
-  const enviar = (e) => {
+  const enviar = async (e) => {
     e.preventDefault()
     if (Object.keys(f.validarTodo(e.currentTarget)).length) return
-    const r = onGuardar(f.valores)
+    const r = await onGuardar(f.valores) // con el back es async
     if (r.error) f.setError(r.error, 'DUPLICADO')
     else onCerrar()
   }

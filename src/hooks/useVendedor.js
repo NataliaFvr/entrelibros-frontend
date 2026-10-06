@@ -1,14 +1,25 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useLibros } from './useLibros'
 import { useToast } from './useToast'
 import { enRevision, getVendedor, guardarVendedor, nuevoIdPublicacion } from '../services/vendedorService'
 import { esModeracionError, modificarLibro } from '../services/moderacionService'
+import { darDeBajaApi, crearLibroApi, getImagenesApi, getLibroApi, reactivarApi, subirImagenApi } from '../api/librosApi'
+import { idsDeCategorias } from '../api/categoriasApi'
+import { actualizarUsuarioApi, solicitarVendedorApi } from '../api/usuariosApi'
+import { dataUrlAFile, publicacionAFront } from '../utils/adaptadores'
+import { mensajeError } from '../utils/errorApi'
 import { aLibroRequest } from '../utils/libroRequest'
-import { USAR_API_LIBROS } from '../utils/modoApi'
+import { USAR_API } from '../utils/modoApi'
 
 const MENSAJE_REVISION = 'Tus cambios han sido enviados a revisión por un administrador'
 
+const esFotoNueva = (foto) => typeof foto === 'string' && foto.startsWith('data:')
+
 // Estado y acciones del vendedor de la cuenta `user`. Cada cambio se guarda y refresca el catálogo.
+// Con el back (VITE_API=true): las publicaciones se crean con POST /libros (+ fotos por /imagenes-libro), se dan de baja con
+// PATCH /libros/{id}/baja|reactivar, y la solicitud de vendedor va por POST /usuarios/solicitud-vendedor.
+// El back no tiene "mis libros" con los pendientes: la lista del panel se guarda acá con los ids reales y su estado
+// (moderación, baja) se vuelve a leer del back (GET /libros/{id}) al abrir el panel.
 const useVendedor = (user) => {
   const toast = useToast()
   const { recargar } = useLibros()
@@ -29,13 +40,78 @@ const useVendedor = (user) => {
   }
   const cambiarLibros = (fn, mensaje) => cambiar({ ...vendedor, pub: fn(vendedor.pub) }, mensaje)
 
-  const solicitar = (datos) => cambiar({ ...vendedor, ...datos, estado: 'pendiente' }, 'Solicitud enviada')
+  // Con el back: estado de moderación y de publicación de cada libro, según el servidor
+  useEffect(() => {
+    if (!USAR_API || vendedor.estado !== 'aprobado' || !vendedor.pub.length) return undefined
+    let vigente = true
+    Promise.all(vendedor.pub.map((p) => getLibroApi(p.id).catch(() => null))).then((libros) => {
+      if (!vigente) return
+      const porId = new Map(libros.filter(Boolean).map((l) => [l.id, l]))
+      if (!porId.size) return
+      const pub = vendedor.pub.map((p) => {
+        const l = porId.get(p.id)
+        if (!l) return p
+        const { revision, ...resto } = p // eslint-disable-line no-unused-vars
+        return {
+          ...resto, t: l.t, a: l.a, ed: l.ed, idioma: l.idioma, anio: l.anio, usado: l.usado, base: l.base, d: l.d, stock: l.stock,
+          descripcion: l.descripcion, mod: l.estadoModeracion || p.mod, estado: publicacionAFront(l.estadoPublicacion),
+        }
+      })
+      if (JSON.stringify(pub) !== JSON.stringify(vendedor.pub)) cambiar({ ...vendedor, pub })
+    })
+    return () => { vigente = false }
+    // Solo al abrir el panel
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  const solicitar = async (datos) => {
+    if (USAR_API) {
+      try {
+        await solicitarVendedorApi(datos.tienda)
+        if (datos.prov && datos.prov !== user.provincia) await actualizarUsuarioApi(user.id, { provincia: datos.prov })
+      } catch (err) {
+        toast(mensajeError(err, 'libro'))
+        return
+      }
+    }
+    cambiar({ ...vendedor, ...datos, estado: 'pendiente' }, 'Solicitud enviada')
+  }
   const aprobarSolicitud = () => cambiar({ ...vendedor, estado: 'aprobado', pub: [] }, '¡Solicitud aprobada!')
+
+  // Sube a /imagenes-libro las fotos nuevas (las que todavía son base64) y devuelve las URLs finales del libro
+  const subirFotos = async (idLibro, fotos = []) => {
+    for (let i = 0; i < fotos.length; i++) {
+      if (esFotoNueva(fotos[i])) await subirImagenApi(idLibro, await dataUrlAFile(fotos[i], `foto-${i + 1}`), i)
+    }
+    return getImagenesApi(idLibro)
+  }
+
+  // Publica un libro nuevo en el back: POST /libros (queda EN_REVISION) y después las fotos
+  const crearEnApi = async (datos) => {
+    let creado
+    try {
+      creado = await crearLibroApi(aLibroRequest(datos, await idsDeCategorias([datos.cat])))
+    } catch (err) {
+      const mensaje = mensajeError(err, 'libro')
+      toast(mensaje)
+      return { error: mensaje }
+    }
+    let imgs = []
+    let fallaronFotos = false
+    try { imgs = await subirFotos(creado.id, datos.imgs) } catch { fallaronFotos = true }
+    const resultado = cambiarLibros(
+      (pub) => [{ ...datos, id: creado.id, imgs, estado: 'activo', mod: creado.estadoModeracion || 'EN_REVISION' }, ...pub],
+      'Libro enviado a revisión del administrador',
+    )
+    if (fallaronFotos) toast('El libro se creó, pero no pudimos subir las fotos. Editalo para volver a intentarlo.')
+    return resultado
+  }
 
   // Sin `idEditado` publica uno nuevo; con `idEditado` lo modifica. Devuelve { ok } o { error }.
   // Un libro ya aceptado conserva su versión aprobada (sigue en el catálogo) y los cambios quedan en `revision`.
   const guardarLibro = async (datos, idEditado) => {
     if (!idEditado) {
+      if (USAR_API) return crearEnApi(datos)
       return cambiarLibros((pub) => [{ id: nuevoIdPublicacion(), ...datos, estado: 'activo', mod: 'EN_REVISION' }, ...pub],
         'Libro enviado a revisión del administrador')
     }
@@ -45,35 +121,47 @@ const useVendedor = (user) => {
 
     // PATCH /libros/{id}. El estado que manda el back es la verdad: solo si vuelve EN_REVISION se muestra como pendiente.
     let enviadoARevision = true
-    if (USAR_API_LIBROS) {
+    let imgs = datos.imgs
+    if (USAR_API) {
       try {
-        const libro = await modificarLibro(idEditado, aLibroRequest(datos))
+        const ids = await idsDeCategorias([datos.cat])
+        const libro = await modificarLibro(idEditado, aLibroRequest(datos, ids.length ? ids : undefined))
         enviadoARevision = libro.estadoModeracion === 'EN_REVISION'
+        imgs = await subirFotos(idEditado, datos.imgs)
       } catch (err) {
-        const mensaje = esModeracionError(err) ? err.message : 'No pudimos guardar los cambios. Intentá de nuevo.'
+        const mensaje = esModeracionError(err) ? err.message : mensajeError(err, 'libro')
         toast(mensaje)
         return { error: mensaje } // el formulario lo muestra en pantalla y no pierde lo escrito
       }
     }
+    const nuevosDatos = { ...datos, imgs }
 
     const aceptado = (actual.mod || 'ACEPTADO') === 'ACEPTADO'
     return cambiarLibros(
       (pub) => pub.map((p) => {
         if (p.id !== idEditado) return p
-        if (!enviadoARevision) return { ...p, ...datos, modC: '' } // el back ya aplicó los cambios: no hay nada que revisar
-        return aceptado ? { ...p, revision: datos, modC: '' } : { ...p, ...datos, mod: 'EN_REVISION', modC: '' }
+        if (!enviadoARevision) return { ...p, ...nuevosDatos, modC: '' } // el back ya aplicó los cambios: no hay nada que revisar
+        return aceptado ? { ...p, revision: nuevosDatos, modC: '' } : { ...p, ...nuevosDatos, mod: 'EN_REVISION', modC: '' }
       }),
       enviadoARevision ? MENSAJE_REVISION : 'Cambios guardados',
     )
   }
 
-  const alternarBaja = (id) => {
+  const alternarBaja = async (id) => {
     const p = vendedor.pub.find((x) => x.id === id)
+    if (USAR_API) {
+      try {
+        await (p.estado === 'activo' ? darDeBajaApi(id) : reactivarApi(id))
+      } catch (err) {
+        toast(mensajeError(err, 'libro'))
+        return
+      }
+    }
     cambiarLibros((pub) => pub.map((x) => (x.id === id ? { ...x, estado: x.estado === 'activo' ? 'baja' : 'activo' } : x)),
       p.estado === 'activo' ? 'Libro dado de baja' : 'Libro reactivado')
   }
 
-  // Simulan la decisión del administrador (demo). Back: PATCH /libros/{id}/moderacion { estadoModeracion, comentario }
+  // Simulan la decisión del administrador (solo modo demo). Con el back la decide el panel de moderación: PATCH /libros/{id}/moderacion
   const aprobarLibro = (id) => cambiarLibros((pub) => pub.map((p) => {
     if (p.id !== id) return p
     const { revision, ...resto } = p

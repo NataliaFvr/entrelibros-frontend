@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, Navigate, useNavigate, useParams } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
+import { useToast } from '../hooks/useToast'
 import UserHead from '../componentes/UserHead'
 import AccountTabs from '../componentes/AccountTabs'
 import ProfileCard from '../componentes/ProfileCard'
@@ -16,6 +17,7 @@ const AccountPage = () => {
   const { user, perfil, logout, actualizarPerfil } = useAuth()
   const { tab = 'perfil' } = useParams()
   const navigate = useNavigate()
+  const toast = useToast()
   const [saliendo, setSaliendo] = useState(false)
 
   const salir = () => {
@@ -23,9 +25,13 @@ const AccountPage = () => {
     logout()
     navigate('/')
   }
-  const guardar = (valores, nuevoPerfil) => {
-    actualizarPerfil(valores, nuevoPerfil)
-    navigate('/cuenta')
+  const guardar = async (valores, nuevoPerfil) => {
+    try {
+      await actualizarPerfil(valores, nuevoPerfil)
+      navigate('/cuenta')
+    } catch (err) {
+      toast(err.message) // con el back: duplicado, validación, etc.
+    }
   }
 
   if (!user) return saliendo ? null : <Navigate to="/ingresar" replace state={{ from: '/cuenta' }} />

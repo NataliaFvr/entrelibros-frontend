@@ -47,9 +47,13 @@ const Detalle = ({ libro, libros }) => {
   const guardar = () => { if (!propio && !requiereLogin('fav')) toggleMark(libro.id) }
   const alCarrito = () => { if (!propio && !requiereLogin('cart')) agregar(libro) }
 
-  const publicarOpinion = (st, texto) => {
-    publicar({ st, i: -Date.now(), u: `${user.nombre} ${user.apellido[0]}.`, t: texto, w: new Date().toLocaleDateString('es-AR') })
-    toast('¡Gracias por tu opinión!')
+  const publicarOpinion = async (st, texto) => {
+    try {
+      await publicar({ st, i: -Date.now(), u: `${user.nombre} ${user.apellido[0]}.`, t: texto, w: new Date().toLocaleDateString('es-AR') })
+      toast('¡Gracias por tu opinión!')
+    } catch (err) {
+      toast(err.message) // con el back: ya reseñaste este ejemplar, compra sin pagar, etc.
+    }
   }
 
   const comprar = () => {

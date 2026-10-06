@@ -1,5 +1,7 @@
 import { guardar, leer } from './almacen'
 import { OPINIONES_ALEPH, VENDEDOR_ALEPH } from '../data/vendedorPruebaMock'
+import { getResenasLibroApi } from '../api/resenasApi'
+import { USAR_API } from '../utils/modoApi'
 
 // Opiniones que dejó la gente sobre cada libro, guardadas en este navegador ({ [idLibro]: [...] }).
 // Back: POST /libros/{id}/resenias (solo quien compró el libro)
@@ -22,6 +24,11 @@ const deEjemplo = (tienda) => (tienda === VENDEDOR_ALEPH.tienda ? OPINIONES_ALEP
 // Todas las opiniones que recibieron los libros de un vendedor, la más reciente primero.
 // Back: GET /vendedores/{id}/opiniones-libros (hoy: las propias de este navegador + las de ejemplo)
 export const getOpinionesVendedor = async (tienda, publicaciones) => {
+  if (USAR_API) {
+    // GET /resenas-libro/libro/{id} por cada publicación del vendedor (la más reciente primero)
+    const listas = await Promise.all(publicaciones.map(async (p) => (await getResenasLibroApi(p.id).catch(() => [])).map((r) => ({ ...r, libro: p.t, clave: `${p.id}-${r.id}` }))))
+    return listas.flat().sort((a, b) => String(b.date).localeCompare(String(a.date)))
+  }
   const propias = publicaciones.flatMap((p) =>
     getOpiniones(p.id).map((r) => ({ ...r, libro: p.t, clave: `${p.id}-${r.u}-${r.i}` })))
   const ejemplo = deEjemplo(tienda).map((r) => ({ ...r, clave: r.id }))

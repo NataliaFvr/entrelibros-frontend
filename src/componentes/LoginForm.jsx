@@ -1,14 +1,15 @@
 import { useState } from 'react'
 import { useAuth } from '../hooks/useAuth'
 import useFormulario from '../hooks/useFormulario'
-import { validadoresLogin } from '../utils/validaciones'
+import { validadoresLogin, validadoresLoginApi } from '../utils/validaciones'
+import { USAR_API } from '../utils/modoApi'
 import Aviso from './Aviso'
 import Field from './Field'
 import PasswordField from './PasswordField'
 
 const LoginForm = ({ onListo, onPendiente, onIrARegistro }) => {
   const { login } = useAuth()
-  const { valores, cambiar, errores, alSalir, validarTodo, error, tipoError, setError } = useFormulario({ ident: '', pw: '' }, validadoresLogin)
+  const { valores, cambiar, errores, alSalir, validarTodo, error, tipoError, setError } = useFormulario({ ident: '', pw: '' }, USAR_API ? validadoresLoginApi : validadoresLogin)
   const [enviando, setEnviando] = useState(false)
 
   const enviar = async (e) => {
@@ -31,7 +32,7 @@ const LoginForm = ({ onListo, onPendiente, onIrARegistro }) => {
 
   return (
     <form className="aform" noValidate onSubmit={enviar}>
-      <Field label="Usuario o e-mail" name="ident" value={valores.ident} onChange={cambiar} onBlur={alSalir} error={errores.ident} autoComplete="username" />
+      <Field label={USAR_API ? 'E-mail' : 'Usuario o e-mail'} name="ident" type={USAR_API ? 'email' : 'text'} value={valores.ident} onChange={cambiar} onBlur={alSalir} error={errores.ident} autoComplete={USAR_API ? 'email' : 'username'} />
       <PasswordField label="Contraseña" name="pw" value={valores.pw} onChange={cambiar} onBlur={alSalir} error={errores.pw} autoComplete="current-password" />
       <Aviso mensaje={error} tipo={tipoError} />
       <button className="btn main" type="submit" disabled={enviando}>{enviando ? 'Entrando…' : 'Entrar'}</button>

@@ -29,9 +29,10 @@ const PayPage = () => {
   const { libros } = useLibros()
   const [error, setError] = useState('')
   const form = useFormulario({ pm: 'tarjeta', sim: 'APROBADO', numero: '', titular: '', venc: '', cvv: '' })
-  const { procesando, nota, pagar } = useProcesoPago((proveedor) => {
-    pagarPedido(n, proveedor)
-    toast('¡Pago aprobado!')
+  const { procesando, nota, pagar } = useProcesoPago(async (proveedor) => {
+    const resultado = await pagarPedido(n, proveedor) // con el back: 'SIMULADO_APROBADO' | 'RECHAZADO'
+    if (resultado !== 'RECHAZADO') toast('¡Pago aprobado!')
+    return resultado
   })
 
   if (!user) return <Navigate to="/ingresar" replace state={{ from: `/pago/${n}` }} />

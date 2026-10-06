@@ -1,6 +1,7 @@
 import { coverBg, TONES } from '../utils/colors'
 import { fmt } from '../utils/format'
 import { enRevision, precioFinal } from '../services/vendedorService'
+import { USAR_API } from '../utils/modoApi'
 import './SellerPanel.css'
 
 const ETIQUETAS = { EN_REVISION: 'EN REVISIÓN', RECHAZADO: 'RECHAZADO' }
@@ -38,8 +39,8 @@ const SellerBookRow = ({ libro, onEditar, onBaja, onAprobar, onRechazar }) => {
           {pendiente ? 'Editar nuevamente' : 'Editar'}
         </button>
         <button className="lnk" type="button" onClick={onBaja}>{activo ? 'Dar de baja' : 'Reactivar'}</button>
-        {pendiente && <button className="lnk" type="button" onClick={onAprobar}>Simular aprobación (demo)</button>}
-        {pendiente && <button className="lnk" type="button" onClick={onRechazar}>Simular rechazo (demo)</button>}
+        {pendiente && !USAR_API && <button className="lnk" type="button" onClick={onAprobar}>Simular aprobación (demo)</button>}
+        {pendiente && !USAR_API && <button className="lnk" type="button" onClick={onRechazar}>Simular rechazo (demo)</button>}
       </div>
     </div>
   )

@@ -1,10 +1,11 @@
-import { useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useAuth } from './useAuth'
 import { useLibros } from './useLibros'
 import { useToast } from './useToast'
 import * as admin from '../services/adminService'
 import { ETIQUETA_ROL, POR_PAGINA } from '../data/admin'
 import { norm } from '../utils/format'
+import { USAR_API } from '../utils/modoApi'
 
 const mensajeDe = (err) => (err && err.message) || 'No pudimos completar la acción. Intentá de nuevo.'
 
@@ -14,7 +15,14 @@ const useAdminUsuarios = () => {
   const { user, perfil, actualizarPerfil } = useAuth()
   const toast = useToast()
   const { recargar } = useLibros()
-  const [usuarios, setUsuarios] = useState(admin.listarUsuarios)
+  const [usuarios, setUsuarios] = useState(() => (USAR_API ? [] : admin.listarUsuarios()))
+  const refrescar = useCallback(async () => setUsuarios(await admin.cargarUsuarios()), [])
+  useEffect(() => { // GET /usuarios
+    if (!USAR_API) return undefined
+    let vigente = true
+    admin.cargarUsuarios().then((lista) => { if (vigente) setUsuarios(lista) }).catch(() => {})
+    return () => { vigente = false }
+  }, [])
   const [filtros, setFiltros] = useState({ q: '', rol: '', est: '' })
   const [pagina, setPagina] = useState(1)
 
@@ -38,10 +46,11 @@ const useAdminUsuarios = () => {
   }
 
   // Corre la acción, refresca la lista y el catálogo (un vendedor dado de baja deja de mostrar sus libros)
-  const ejecutar = (accion, mensaje) => {
+  // (con el back las acciones son async: se espera la respuesta antes de refrescar)
+  const ejecutar = async (accion, mensaje) => {
     try {
-      accion()
-      setUsuarios(admin.listarUsuarios())
+      await accion()
+      await refrescar()
       recargar()
       if (mensaje) toast(mensaje)
       return { ok: true }
@@ -53,11 +62,11 @@ const useAdminUsuarios = () => {
   const crear = (v) => ejecutar(() => admin.crearUsuario(v), 'Usuario creado')
 
   // Editar la propia cuenta pasa por AuthContext: así la sesión sigue al día si cambia el usuario
-  const editar = (u, v) => ejecutar(() => {
+  const editar = (u, v) => ejecutar(async () => {
     if (!u.propio) return admin.editarUsuario(u.id, v)
     const duplicado = admin.mensajeDuplicado(v, u.nombreUsuario)
     if (duplicado) throw new Error(duplicado)
-    actualizarPerfil(v, perfil)
+    return actualizarPerfil(v, perfil)
   }, u.propio ? '' : 'Cambios guardados')
 
   const cambiarRol = (u, rol) => {

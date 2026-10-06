@@ -6,8 +6,8 @@ import Aviso from './Aviso'
 const ConfirmarBajaModal = ({ usuario, onConfirmar, onCerrar }) => {
   const [error, setError] = useState('')
 
-  const confirmar = () => {
-    const r = onConfirmar()
+  const confirmar = async () => {
+    const r = await onConfirmar() // con el back es async
     if (r.error) setError(r.error)
     else onCerrar()
   }

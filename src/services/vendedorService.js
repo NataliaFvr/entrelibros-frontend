@@ -3,6 +3,8 @@ import { claveVendedor } from './claves'
 import { getUsuarios } from './authService'
 import { TONES } from '../utils/colors'
 import { SEMILLA_VENDEDOR_ALEPH, VENDEDOR_ALEPH } from '../data/vendedorPruebaMock'
+import { solicitudAFront } from '../utils/adaptadores'
+import { USAR_API } from '../utils/modoApi'
 
 // Datos de vendedor por cuenta, guardados en este navegador.
 // estado: 'ninguno' | 'pendiente' | 'aprobado'. Cada libro: { id, t, a, ed, cat, idioma, anio, usado, base, d, stock,
@@ -25,7 +27,19 @@ const inicial = (u) => {
     : { estado: 'ninguno', pub: [] }
 }
 
-export const getVendedor = (u) => leer(claveVendedor(u), null) || inicial(u)
+// Con el back, el estado de la tienda sale del usuario (rol VENDEDOR / estadoSolicitudVendedor PENDIENTE) y no de lo guardado acá.
+// Lo que el back no guarda (teléfono, descripción) y la lista de publicaciones del panel sí se conservan en este navegador.
+const conEstadoDelBack = (g, u) => ({
+  ...g,
+  estado: u.rol === 'VENDEDOR' ? 'aprobado' : solicitudAFront(u.estadoSolicitud) === 'pendiente' ? 'pendiente' : 'ninguno',
+  tienda: u.tienda || g.tienda || `${u.nombre} ${u.apellido}`,
+  prov: u.provincia || g.prov || 'Buenos Aires',
+})
+
+export const getVendedor = (u) => {
+  const guardado = leer(claveVendedor(u), null) || inicial(u)
+  return USAR_API ? conEstadoDelBack(guardado, u) : guardado
+}
 export const guardarVendedor = (u, v) => guardar(claveVendedor(u), v) // true si se pudo guardar
 
 const aLibro = (p, v) => ({
@@ -50,6 +64,8 @@ export const libroEnRevision = (u, libro) => {
 
 // ¿Este libro del catálogo es una publicación de la cuenta? (libro.v = nombre de la tienda)
 export const esLibroPropio = (u, libro) => {
+  // Con el back el dueño se identifica por id (LibroResponse.idVendedor): el nombre que informa el back es el del vendedor, no el de la tienda
+  if (USAR_API) return Boolean(u && libro && libro.vId != null && libro.vId === u.id)
   const tienda = tiendaDe(u)
   return Boolean(tienda && libro && libro.v === tienda)
 }

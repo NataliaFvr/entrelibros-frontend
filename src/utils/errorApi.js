@@ -10,12 +10,15 @@
 // Excepciones del back (nombre de la clase o código) -> tipo. Se busca en cualquier campo del cuerpo de la respuesta.
 // El orden importa: lo más específico va primero.
 const FIRMAS = [
-  ['CUENTA_NO_CONFIRMADA', /CuentaNoConfirmada|CuentaNoVerificada|CUENTA_NO_(CONFIRMADA|VERIFICADA)|PENDIENTE_CONFIRMACION|DisabledException/i],
+  // El back responde 403 { error, codigo: "email_no_verificado" } al login de una cuenta sin verificar (GlobalExceptionHandler)
+  ['CUENTA_NO_CONFIRMADA', /CuentaNoConfirmada|CuentaNoVerificada|CUENTA_NO_(CONFIRMADA|VERIFICADA)|PENDIENTE_CONFIRMACION|DisabledException|email_no_verificado/i],
   ['CODIGO_VENCIDO', /CodigoVerificacion(Expirad|Venc)|CODIGO(_VERIFICACION)?_(EXPIRADO|VENCIDO)/i],
-  ['CODIGO_INVALIDO', /CodigoVerificacionInvalido|CODIGO(_VERIFICACION)?_INVALIDO/i],
-  ['USUARIO_NO_ENCONTRADO', /UsuarioNoEncontrado|USUARIO_NO_ENCONTRADO/i],
-  ['CREDENCIALES', /BadCredentials|CredencialesInvalidas|CREDENCIALES_INVALIDAS|Bad credentials/i],
-  ['DUPLICADO', /UsuarioYaExiste|EmailYaRegistrado|EmailDuplicado|YaExiste|YA_EXISTE|DUPLICAD|already exists/i],
+  // Texto del back (CodigoVerificacionInvalidoException): "Código inválido o vencido"
+  ['CODIGO_INVALIDO', /CodigoVerificacionInvalido|CODIGO(_VERIFICACION)?_INVALIDO|C[oó]digo inv[aá]lido/i],
+  ['USUARIO_NO_ENCONTRADO', /UsuarioNoEncontrado|USUARIO_NO_ENCONTRADO|No existe el usuario/i],
+  ['CREDENCIALES', /BadCredentials|CredencialesInvalidas|CREDENCIALES_INVALIDAS|Bad credentials|contrase[ñn]a incorrectos/i],
+  // Texto del back (UsuarioDuplicadoException): "Ya existe un usuario con ese email o nombre de usuario"
+  ['DUPLICADO', /UsuarioYaExiste|EmailYaRegistrado|EmailDuplicado|UsuarioDuplicado|YaExiste|YA_EXISTE|DUPLICAD|already exists|Ya existe un usuario/i],
   ['DEMASIADOS_INTENTOS', /DemasiadosIntentos|TooManyAttempts|DEMASIADOS_INTENTOS/i],
 ]
 
@@ -66,8 +69,14 @@ export const severidad = (tipo) => {
 
 const esTextoUtil = (t) => typeof t === 'string' && t.trim() && !/Exception|^\s*at\s|\bnull\b/.test(t)
 
-// Errores por campo: { campo: mensaje } desde { errors: {…} } o { errors: [{ field, defaultMessage }] }
-const camposDe = (d) => {
+// Cuerpo de validación del back (MethodArgumentNotValidException): un mapa plano { campo: mensaje }, sin clave "error"
+const esMapaPlano = (d, status) =>
+  status === 400 && Object.keys(d).length > 0 && Object.values(d).every((v) => typeof v === 'string') &&
+  !['error', 'mensaje', 'message', 'status', 'codigo', 'detail'].some((k) => k in d)
+
+// Errores por campo: { campo: mensaje } desde el mapa plano del back, { errors: {…} } o { errors: [{ field, defaultMessage }] }
+const camposDe = (d, status) => {
+  if (esMapaPlano(d, status)) return { ...d }
   const crudo = d.errors || d.errores || d.fieldErrors || d.campos
   if (!crudo || typeof crudo !== 'object') return {}
   const pares = Array.isArray(crudo)
@@ -108,7 +117,7 @@ export const normalizarError = (err, contexto = '') => {
   }
 
   const d = r.data && typeof r.data === 'object' ? r.data : {}
-  const campos = camposDe(d)
+  const campos = camposDe(d, r.status)
   const hayCampos = Object.keys(campos).length > 0
   const firma = [d.exception, d.error, d.code, d.codigo, d.type, d.tipo, d.title, d.message, d.mensaje, d.detail, typeof r.data === 'string' ? r.data : '']
     .filter((x) => typeof x === 'string').join(' ')

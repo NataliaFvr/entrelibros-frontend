@@ -1,13 +1,38 @@
-// [clave, trazo del ícono en un lienzo de 24x24]
+import zorro from '../assets/avatares/zorro.webp'
+import conejo from '../assets/avatares/conejo.webp'
+import buho from '../assets/avatares/buho.webp'
+import gato from '../assets/avatares/gato.webp'
+import parque from '../assets/avatares/parque.webp'
+import cafe from '../assets/avatares/cafe.webp'
+import escritor from '../assets/avatares/escritor.webp'
+import pelirroja from '../assets/avatares/pelirroja.webp'
+import tren from '../assets/avatares/tren.webp'
+import sudadera from '../assets/avatares/sudadera.webp'
+
+// Avatares por defecto de Entrelibros: ilustraciones 2D flat en la paleta oficial
+// (Evergreen #042A2B, Pacific Blue #5EB1BF, Light Cyan #CDEDF6, Atomic Tangerine #EF7B45,
+// Burnt Tangerine #D84727, Cream #FBFAF6). `clave` es lo que se guarda en el perfil.
 export const AVATARES = [
-  ['libro', 'M4 19a2 2 0 012-2h14V3H6a2 2 0 00-2 2z M6 17a2 2 0 000 4h14v-4'],
-  ['marca', 'M6 3h12v18l-6-4-6 4z'],
-  ['luna', 'M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z'],
-  ['estrella', 'M12 2l3 7 7 .6-5.3 4.7 1.6 7.2L12 17.8 5.7 21.5l1.6-7.2L2 9.6 9 9z'],
-  ['taza', 'M4 8h13v6a5 5 0 01-5 5H9a5 5 0 01-5-5z M17 10h2a2 2 0 010 4h-2 M8 2v3 M12 2v3'],
-  ['pluma', 'M20 4a8 8 0 00-11 3L4 20l13-5a8 8 0 003-11z M4 20l8-8'],
-  ['hoja', 'M11 20A7 7 0 014 13c0-6 7-9 16-9 0 9-3 16-9 16z M4 20c2-5 5-8 9-10'],
-  ['corazon', 'M20.8 5.6a5 5 0 00-7.1 0L12 7.3l-1.7-1.7a5 5 0 00-7.1 7.1L12 21.5l8.8-8.8a5 5 0 000-7.1z'],
-  ['chat', 'M21 12a8 8 0 01-11.5 7.2L4 20l1-4.5A8 8 0 1121 12z'],
-  ['rayo', 'M13 2L4 14h7l-1 8 9-12h-7z'],
+  { clave: 'zorro', nombre: 'Zorro con café en un día de lluvia', src: zorro },
+  { clave: 'conejo', nombre: 'Conejo leyendo entre estantes', src: conejo },
+  { clave: 'buho', nombre: 'Búho dormido sobre un libro', src: buho },
+  { clave: 'gato', nombre: 'Gato negro leyendo en el sillón', src: gato },
+  { clave: 'parque', nombre: 'Lector en el parque', src: parque },
+  { clave: 'cafe', nombre: 'Lectora con café y auriculares', src: cafe },
+  { clave: 'escritor', nombre: 'Escritor con laptop y gato', src: escritor },
+  { clave: 'pelirroja', nombre: 'Lectora pelirroja con auriculares', src: pelirroja },
+  { clave: 'tren', nombre: 'Lectora viajando en tren', src: tren },
+  { clave: 'sudadera', nombre: 'Lector con sudadera celeste', src: sudadera },
 ]
+
+// Claves de los 10 avatares anteriores (íconos) -> avatar nuevo equivalente,
+// para que los perfiles ya guardados en localStorage no pierdan su avatar.
+const LEGACY = {
+  libro: 'escritor', marca: 'tren', luna: 'buho', estrella: 'sudadera', taza: 'zorro',
+  pluma: 'pelirroja', hoja: 'parque', corazon: 'cafe', chat: 'gato', rayo: 'conejo',
+}
+
+export const buscarAvatar = (clave) => {
+  const k = LEGACY[clave] || clave
+  return AVATARES.find((a) => a.clave === k) || null
+}

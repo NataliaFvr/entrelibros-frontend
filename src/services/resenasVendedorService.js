@@ -28,3 +28,8 @@ export const reputacionVendedor = (tienda) => {
   const promedio = todas.length ? todas.reduce((a, r) => a + r.st, 0) / todas.length : 0
   return { promedio, cantidad: todas.length }
 }
+
+// Con el back (ResenaVendedorResponse solo trae el nombre del comprador) se recuerda en este navegador cuál es mi reseña de cada vendedor
+const claveMia = (u) => `entrelibros_resena_vend_api_${u.nombreUsuario}`
+export const miResenaId = (u, idVendedor) => leer(claveMia(u), {})[idVendedor] ?? null
+export const guardarMiResenaId = (u, idVendedor, idResena) => guardar(claveMia(u), { ...leer(claveMia(u), {}), [idVendedor]: idResena })

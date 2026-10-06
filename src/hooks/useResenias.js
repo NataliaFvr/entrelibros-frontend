@@ -1,15 +1,22 @@
 import { useEffect, useMemo, useState } from 'react'
+import { useCompra } from './useCompra'
 import { getResenias } from '../services/librosService'
 import { agregarOpinion, getOpiniones } from '../services/opinionesService'
+import { crearResenaLibroApi } from '../api/resenasApi'
+import { mensajeError } from '../utils/errorApi'
+import { USAR_API } from '../utils/modoApi'
 
-// Reseñas de un libro (las nuevas primero) + promedio + función para publicar una
+// Reseñas de un libro (las nuevas primero) + promedio + función para publicar una.
+// Con el back: GET /resenas-libro/libro/{id} y POST /resenas-libro { idOrdenItem, calificacion, comentario }
+// (solo quien compró y pagó ese ítem; una sola reseña por ítem). `publicar` lanza un Error con el mensaje del back si falla.
 const useResenias = (libroId) => {
+  const { itemPagado } = useCompra()
   const [base, setBase] = useState([])
-  const [propias, setPropias] = useState(() => getOpiniones(libroId))
+  const [propias, setPropias] = useState(() => (USAR_API ? [] : getOpiniones(libroId)))
 
   useEffect(() => {
     let vigente = true
-    getResenias(libroId).then((r) => { if (vigente) setBase(r) })
+    getResenias(libroId).then((r) => { if (vigente) setBase(r) }).catch(() => { if (vigente) setBase([]) })
     return () => { vigente = false }
   }, [libroId])
 
@@ -19,9 +26,20 @@ const useResenias = (libroId) => {
     [resenias],
   )
 
-  const publicar = (opinion) => {
-    agregarOpinion(libroId, opinion)
-    setPropias(getOpiniones(libroId))
+  const publicar = async (opinion) => {
+    if (!USAR_API) {
+      agregarOpinion(libroId, opinion)
+      setPropias(getOpiniones(libroId))
+      return
+    }
+    const compra = itemPagado(libroId)
+    if (!compra) throw new Error('Solo podés opinar sobre libros que compraste y pagaste.')
+    try {
+      await crearResenaLibroApi({ idOrdenItem: compra.idItem, calificacion: opinion.st, comentario: opinion.t })
+      setBase(await getResenias(libroId))
+    } catch (err) {
+      throw new Error(mensajeError(err))
+    }
   }
 
   return { resenias, promedio, publicar }

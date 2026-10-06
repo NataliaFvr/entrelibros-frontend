@@ -52,6 +52,12 @@ export const validarUsuario = (v) =>
 export const validarCodigo = (v) => (/^\d{6}$/.test(texto(v)) ? '' : 'Ingresá los 6 dígitos del código.')
 
 // Login: el campo acepta usuario o e-mail; si trae "@" se valida como e-mail
+// Con el back el login es solo por e-mail (AuthenticationRequest { email, contrasena })
+export const validadoresLoginApi = {
+  ident: validarEmail,
+  pw: validarLongitudPassword,
+}
+
 export const validadoresLogin = {
   ident: (v) => {
     const t = texto(v)

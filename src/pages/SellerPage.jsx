@@ -26,7 +26,7 @@ const Vendedor = ({ user }) => {
   const { tab = 'libros', id } = useParams()
   const { libros } = useLibros()
   const { vendedor, solicitar, aprobarSolicitud, guardarLibro, alternarBaja, aprobarLibro, rechazarLibro } = useVendedor(user)
-  const calificaciones = useCalificacionesRecibidas(vendedor.tienda, vendedor.pub)
+  const calificaciones = useCalificacionesRecibidas(vendedor.tienda, vendedor.pub, user.id)
 
   if (vendedor.estado !== 'aprobado') {
     return (

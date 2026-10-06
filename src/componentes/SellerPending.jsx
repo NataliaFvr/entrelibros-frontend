@@ -1,4 +1,6 @@
 // Solicitud en revisión. Sin panel de administración todavía, hay un botón de demo para aprobarla.
+import { USAR_API } from '../utils/modoApi'
+
 const SellerPending = ({ tienda, onAprobar }) => {
   return (
     <div className="card">
@@ -6,7 +8,7 @@ const SellerPending = ({ tienda, onAprobar }) => {
       <p className="sell-note" style={{ margin: '10px 0 16px' }}>
         Enviaste la solicitud para <b>{tienda}</b>. Un administrador la va a verificar y te avisamos cuando la resuelva.
       </p>
-      <button className="btn alt" type="button" onClick={onAprobar}>Simular aprobación del administrador (demo)</button>
+      {!USAR_API && <button className="btn alt" type="button" onClick={onAprobar}>Simular aprobación del administrador (demo)</button>}
     </div>
   )
 }

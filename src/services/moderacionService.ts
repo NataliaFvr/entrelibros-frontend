@@ -1,4 +1,4 @@
-import api from '../api/axiosConfig'
+import api, { RAIZ } from '../api/axiosConfig'
 import { normalizarError } from '../utils/errorApi'
 import type {
   AccionSolicitud,
@@ -17,9 +17,7 @@ import type {
 // ya manda el JWT y cierra la sesión si vence.
 //
 // OJO con la URL: en el back solo /auth cuelga de /api/v1; los controllers de libros están en la raíz
-// (@RequestMapping("libros")). Por eso acá se reemplaza la baseURL por la raíz del servidor
-// (VITE_API_URL sin el sufijo /api/v1). Si el back cambia de prefijo, se ajusta RAIZ y listo.
-const RAIZ = (import.meta.env.VITE_API_URL || 'http://localhost:8080/api/v1').replace(/\/api\/v1\/?$/, '')
+// (@RequestMapping("libros")). api/axiosConfig ya usa la raíz del servidor como baseURL (RAIZ).
 
 const RUTAS = {
   libro: (id: number) => `/libros/${id}`,

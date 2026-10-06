@@ -1,6 +1,9 @@
 import useFormulario from '../hooks/useFormulario'
 import { useToast } from '../hooks/useToast'
 import { validarContacto } from '../utils/validaciones'
+import { enviarContactoApi } from '../api/cuentaApi'
+import { mensajeError } from '../utils/errorApi'
+import { USAR_API } from '../utils/modoApi'
 import Field from './Field'
 import SelectField from './SelectField'
 import TextAreaField from './TextAreaField'
@@ -10,16 +13,25 @@ const DEPARTAMENTOS = ['Compras', 'Ventas', 'Envíos', 'Mi cuenta', 'Otro']
 
 const Obligatorio = ({ children }) => <>{children} <span className="req">*</span></>
 
-// Formulario de contacto. Hoy el envío es simulado: valida, avisa con un toast y limpia el formulario.
-// Cuando exista un endpoint para recibir mensajes, se llama desde `enviar` antes del toast.
+// Formulario de contacto. Con el back: POST /contacto { nombre, email, mensaje } (el back no guarda apellido, teléfono ni departamento:
+// se agregan al texto del mensaje para no perderlos). Sin el back el envío es simulado.
 const ContactForm = () => {
   const toast = useToast()
   const { valores, cambiar, error, setError, reiniciar } = useFormulario(INICIAL)
 
-  const enviar = (e) => {
+  const enviar = async (e) => {
     e.preventDefault()
     const mensaje = validarContacto(valores)
     if (mensaje) return setError(mensaje)
+    if (USAR_API) {
+      const contacto = [valores.area || valores.tel ? `Tel: ${`${valores.area} ${valores.tel}`.trim()}` : '', `Departamento: ${valores.depto}`].filter(Boolean).join(' · ')
+      try {
+        await enviarContactoApi({ nombre: `${valores.nombre} ${valores.apellido}`.trim(), email: valores.email.trim(), mensaje: `${valores.msg.trim()}\n\n${contacto}` })
+      } catch (err) {
+        return setError(mensajeError(err)) // incluye los errores de validación del back (email inválido, mensaje vacío…)
+      }
+    }
+    setError('')
     reiniciar()
     toast('¡Mensaje enviado! Te respondemos pronto.')
   }

@@ -7,11 +7,24 @@ import { getNotificaciones, guardarNotificaciones } from './notificacionesServic
 import { getVendedor, guardarVendedor } from './vendedorService'
 import { norm } from '../utils/format'
 import { estadoPago } from '../utils/pedidos'
+import { listarOrdenesAdminApi, listarPagosAdminApi } from '../api/comprasApi'
+import { crearCategoriaApi } from '../api/categoriasApi'
+import {
+  actualizarUsuarioApi, cambiarRolApi, crearUsuarioApi, darDeBajaUsuarioApi, listarUsuariosApi, reactivarUsuarioApi, resolverSolicitudApi,
+} from '../api/usuariosApi'
+import { mensajeError } from '../utils/errorApi'
+import { USAR_API } from '../utils/modoApi'
 
-// Servicio del panel de administración en modo demostración: usuarios y pedidos guardados en este navegador.
-// Cada función lanza un Error con mensaje en español si algo falla; la UI solo muestra `message`.
-// Back (todos @PreAuthorize ADMIN): GET/POST /usuarios, PATCH /usuarios/{id}, DELETE /usuarios/{id} (baja lógica),
-// PATCH /usuarios/{id}/rol, PATCH /usuarios/{id}/reactivar, GET /ordenes. Cuando estén, solo cambia este archivo.
+// Servicio del panel de administración. Sin VITE_API: modo demostración (usuarios y pedidos guardados en este navegador).
+// Con VITE_API=true usa el back (todos @PreAuthorize ADMIN): GET/POST /usuarios, PATCH /usuarios/{id}, PATCH /usuarios/{id}/baja,
+// PATCH /usuarios/{id}/reactivar, PATCH /usuarios/{id}/rol, PATCH /usuarios/{id}/solicitud-vendedor?aprobar=…, GET /ordenes, GET /pagos
+// y POST /categorias. En modo API las funciones devuelven una Promesa. Cada una lanza un Error con mensaje en español si algo falla;
+// la UI solo muestra `message`. Las tarifas de envío quedan como en el front (guardadas en el navegador).
+
+// Con el back: el error de la API se convierte en un Error con el mensaje que manda el back
+const conBack = async (fn) => {
+  try { return await fn() } catch (err) { throw new Error(mensajeError(err, 'registro')) }
+}
 
 const SIN_ESPACIO = 'No pudimos guardar: sin espacio en el navegador.'
 const CLAVES_POR_CUENTA = [claveMarks, claveCart, clavePerfil, claveDir, clavePedidos, claveVendedor, claveNotifs]
@@ -32,6 +45,7 @@ const notificar = (u, texto) =>
 
 // Mensaje si el usuario o el e-mail ya los tiene otra cuenta ('' = libre). `actual` = la cuenta que se edita.
 export const mensajeDuplicado = (v, actual = '') => {
+  if (USAR_API) return '' // lo valida el back (400 "Ya existe un usuario con ese email o nombre de usuario")
   const repetido = (campo) =>
     getUsuarios().some((u) => u.nombreUsuario !== actual && String(u[campo]).toLowerCase() === String(v[campo]).trim().toLowerCase())
   if (repetido('nombreUsuario')) return 'Ese nombre de usuario ya está en uso.'
@@ -47,6 +61,7 @@ export const listarUsuarios = () =>
 
 // Pasar a VENDEDOR aprueba la tienda; salir de VENDEDOR la deshabilita (conserva sus publicaciones por si vuelve)
 export const cambiarRol = (id, rol, avisar = true) => {
+  if (USAR_API) return conBack(() => cambiarRolApi(id, rol))
   const antes = buscar(id).rol
   const u = modificar(id, { rol })
   const v = getVendedor(u)
@@ -61,6 +76,7 @@ export const cambiarRol = (id, rol, avisar = true) => {
 
 // v = { nombre, apellido, nombreUsuario, email, pw, rol }. La cuenta nace confirmada y activa.
 export const crearUsuario = (v) => {
+  if (USAR_API) return conBack(() => crearUsuarioApi(v))
   const duplicado = mensajeDuplicado(v)
   if (duplicado) throw new Error(duplicado)
   guardarLista([...getUsuarios(), {
@@ -72,6 +88,11 @@ export const crearUsuario = (v) => {
 
 // Si cambia el nombre de usuario, todo lo de la cuenta (carrito, pedidos, tienda…) se muda a la clave nueva
 export const editarUsuario = (id, v) => {
+  if (USAR_API) {
+    const cambios = { nombre: v.nombre.trim(), apellido: v.apellido.trim(), nombreUsuario: v.nombreUsuario, email: v.email.trim() }
+    if (v.pw) cambios.contrasena = v.pw
+    return conBack(() => actualizarUsuarioApi(id, cambios))
+  }
   const duplicado = mensajeDuplicado(v, id)
   if (duplicado) throw new Error(duplicado)
   const cambios = { nombre: v.nombre.trim(), apellido: v.apellido.trim(), nombreUsuario: v.nombreUsuario, email: v.email.trim() }
@@ -80,11 +101,20 @@ export const editarUsuario = (id, v) => {
   if (nuevo.nombreUsuario !== id) CLAVES_POR_CUENTA.forEach((clave) => mover(clave({ nombreUsuario: id }), clave(nuevo)))
 }
 
-export const darDeBaja = (id) => { modificar(id, { estado: 'DADO_DE_BAJA' }) }
-export const reactivar = (id) => { modificar(id, { estado: 'ACTIVO' }) }
+export const darDeBaja = (id) => {
+  if (USAR_API) return conBack(() => darDeBajaUsuarioApi(id))
+  modificar(id, { estado: 'DADO_DE_BAJA' })
+  return undefined
+}
+export const reactivar = (id) => {
+  if (USAR_API) return conBack(() => reactivarUsuarioApi(id))
+  modificar(id, { estado: 'ACTIVO' })
+  return undefined
+}
 
 // Solicitud "quiero vender": aprobar = pasar a VENDEDOR; rechazar la devuelve a comprador común y avisa
 export const resolverSolicitudVenta = (id, aprobada) => {
+  if (USAR_API) return conBack(() => resolverSolicitudApi(id, aprobada))
   if (aprobada) return cambiarRol(id, 'VENDEDOR')
   const u = buscar(id)
   guardarVendedor(u, { ...getVendedor(u), estado: 'ninguno' })
@@ -115,6 +145,7 @@ export const listarPagos = () =>
 // Back: POST /categorias {nombre}
 export const crearCategoria = async (nombre) => {
   const limpio = nombre.trim().replace(/\s+/g, ' ')
+  if (USAR_API) return conBack(() => crearCategoriaApi(limpio)) // 400 si ya existe una con ese nombre
   const actuales = await getCategorias()
   if (actuales.some((c) => norm(c) === norm(limpio))) throw new Error('Esa categoría ya existe.')
   if (!guardar(CLAVE_CATEGORIAS, [...actuales, limpio])) throw new Error(SIN_ESPACIO)
@@ -123,4 +154,31 @@ export const crearCategoria = async (nombre) => {
 // Tarifas de envío. `tipo`: 'misma' | 'distinta'. Back: POST /envios {zona, costoFijo}
 export const cambiarTarifaEnvio = (tipo, costo) => {
   if (!guardarTarifa(tipo, costo)) throw new Error(SIN_ESPACIO)
+}
+
+/* ---------- Carga de listas (sirve para los dos modos: devuelven una Promesa) ---------- */
+
+// { id, nombreUsuario, nombre, apellido, email, rol, estado, quiereVender }
+export const cargarUsuarios = async () => {
+  if (!USAR_API) return listarUsuarios()
+  const lista = await conBack(() => listarUsuariosApi())
+  return lista.map((u) => ({ ...u, quiereVender: u.estadoSolicitud === 'PENDIENTE' }))
+}
+
+// { n, fecha, comprador, provincia, subtotal, envio, total, estadoPago, proveedor, items }
+export const cargarOrdenes = async () => {
+  if (!USAR_API) return listarOrdenes()
+  const [ordenes, pagos] = await conBack(() => Promise.all([listarOrdenesAdminApi(), listarPagosAdminApi()]))
+  const proveedores = new Map(pagos.map((p) => [p.idOrden, p.proveedor]))
+  return ordenes.map((o) => ({
+    n: o.n, fecha: o.date, comprador: o.comprador, provincia: o.addr, subtotal: o.sub, envio: o.env, total: o.sub + o.env,
+    estadoPago: o.pago, proveedor: proveedores.get(o.idOrden) || 'tarjeta', items: o.its,
+  }))
+}
+
+// { id, n, proveedor, monto, resultado }
+export const cargarPagos = async () => {
+  if (!USAR_API) return listarPagos()
+  const pagos = await conBack(() => listarPagosAdminApi())
+  return pagos.map((p) => ({ id: p.id, n: p.idOrden, proveedor: p.proveedor, monto: p.totalOrden, resultado: p.resultado }))
 }
