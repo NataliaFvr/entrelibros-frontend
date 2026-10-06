@@ -76,6 +76,7 @@ export const cambiarRol = (id, rol, avisar = true) => {
 
 // v = { nombre, apellido, nombreUsuario, email, pw, rol }. La cuenta nace confirmada y activa.
 export const crearUsuario = (v) => {
+  if (!['COMPRADOR', 'VENDEDOR'].includes(v.rol)) throw new Error('Desde el panel solo se pueden crear compradores o vendedores.')
   if (USAR_API) return conBack(() => crearUsuarioApi(v))
   const duplicado = mensajeDuplicado(v)
   if (duplicado) throw new Error(duplicado)

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import ImageCropper from './ImageCropper'
 import { MAX_FOTOS, MIN_FOTOS } from '../utils/imagen'
 import './ImageUploader.css'
 
@@ -6,7 +7,7 @@ import './ImageUploader.css'
 // La primera es la portada; las demás aparecen como carrusel en la ficha del libro.
 // El estado vive en `useImagenesLibro` (lo recibe por props: `imagenes`).
 const ImageUploader = ({ imagenes }) => {
-  const { fotos, errores, cargando, elegir, quitar, mover } = imagenes
+  const { fotos, errores, recorte, elegir, confirmarRecorte, cancelarRecorte, recortar, puedeRecortar, quitar, mover } = imagenes
   const [activa, setActiva] = useState(0)
   const actual = Math.min(activa, Math.max(fotos.length - 1, 0))
 
@@ -47,16 +48,22 @@ const ImageUploader = ({ imagenes }) => {
             <div className="iu-tools">
               <button className="lnk" type="button" onClick={() => alMover(-1)} disabled={actual === 0}>← Mover antes</button>
               <button className="lnk" type="button" onClick={() => alMover(1)} disabled={actual === fotos.length - 1}>Mover después →</button>
+              {puedeRecortar(actual) && <button className="lnk" type="button" onClick={() => recortar(actual)}>Recortar esta foto</button>}
               <button className="lnk" type="button" onClick={alQuitar}>Quitar esta foto</button>
             </div>
           )}
           <span className="iu-count" role="status">
-            {cargando ? 'Procesando fotos…' : `${fotos.length} de ${MAX_FOTOS} fotos`}
+            {`${fotos.length} de ${MAX_FOTOS} fotos`}
           </span>
         </div>
       </div>
 
       <p className="iu-err" role="alert">{errores.join(' ')}</p>
+      {recorte && (
+        <ImageCropper key={recorte.restantes + String(recorte.origen).slice(-20)} origen={recorte.origen} aspecto={recorte.aspecto} anchoMax={recorte.anchoMax}
+          titulo={recorte.restantes ? `${recorte.titulo} (faltan ${recorte.restantes} más)` : recorte.titulo}
+          onListo={confirmarRecorte} onCancelar={cancelarRecorte} />
+      )}
     </div>
   )
 }

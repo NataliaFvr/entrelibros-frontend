@@ -49,6 +49,16 @@ export const validarRepetida = (v, valores) => {
 export const validarUsuario = (v) =>
   RE_USUARIO.test(v) ? '' : 'Entre 3 y 20 caracteres: letras, números, punto o guion bajo.'
 
+// Nombre o apellido (UsuarioRequest: NotBlank). El back no limita el largo ni los caracteres: acá, básico — letras, espacios, ' y -, hasta 50.
+const RE_NOMBRE = /^[\p{L}][\p{L}\s'’.-]*$/u
+export const validarNombrePersona = (que = 'el nombre') => (v) => {
+  const t = texto(v)
+  if (!t) return `Ingresá ${que}.`
+  if (t.length < 2) return 'Debe tener al menos 2 letras.'
+  if (t.length > 50) return 'Máximo 50 caracteres.'
+  return RE_NOMBRE.test(t) ? '' : 'Usá solo letras, espacios, apóstrofe o guion.'
+}
+
 export const validarCodigo = (v) => (/^\d{6}$/.test(texto(v)) ? '' : 'Ingresá los 6 dígitos del código.')
 
 // Login: el campo acepta usuario o e-mail; si trae "@" se valida como e-mail
@@ -69,8 +79,8 @@ export const validadoresLogin = {
 
 // Registro y edición de perfil. `pwObligatoria` = false al editar (vacía = no cambia).
 export const validadoresCuenta = ({ pwObligatoria = true } = {}) => ({
-  nombre: obligatorio('Ingresá tu nombre.'),
-  apellido: obligatorio('Ingresá tu apellido.'),
+  nombre: validarNombrePersona('tu nombre'),
+  apellido: validarNombrePersona('tu apellido'),
   nombreUsuario: validarUsuario,
   email: validarEmail,
   pw: (v) => (!pwObligatoria && !v ? '' : validarPasswordNueva(v)),
@@ -138,11 +148,13 @@ export const validarStock = (v) => {
   return +s >= 1 ? '' : 'El stock debe ser al menos 1.'
 }
 
+const conLargo = (mensaje, max) => (v) => (!texto(v) ? mensaje : texto(v).length > max ? `Máximo ${max} caracteres.` : '')
+
 // Los validadores se aplican en orden: el primer campo con error recibe el foco al enviar
 export const validadoresLibro = {
-  t: obligatorio('Ingresá el título.'),
-  a: obligatorio('Ingresá el autor.'),
-  ed: obligatorio('Ingresá la editorial.'),
+  t: conLargo('Ingresá el título.', 150),
+  a: conLargo('Ingresá el autor.', 100),
+  ed: conLargo('Ingresá la editorial.', 100),
   cat: obligatorio('Elegí una categoría.'),
   idioma: obligatorio('Elegí un idioma.'),
   anio: validarAnio,
@@ -153,3 +165,99 @@ export const validadoresLibro = {
 
 // "1500,5" -> 1500.5 (redondeado a 2 decimales)
 export const aDecimal = (v) => Math.round(parseFloat(texto(v).replace(',', '.')) * 100) / 100
+
+/* ---------------- Contacto (ContactoRequest: nombre, email y mensaje NotBlank, email con formato) ---------------- */
+
+const RE_TEL = /^[\d\s()+-]{6,20}$/
+export const validarTelefono = (v) => {
+  const t = texto(v)
+  if (!t) return 'Ingresá tu teléfono.'
+  if (!RE_TEL.test(t) || t.replace(/\D/g, '').length < 6) return 'Ingresá un teléfono válido (solo números, espacios, + - o paréntesis).'
+  return t.replace(/\D/g, '').length > 15 ? 'El teléfono es demasiado largo.' : ''
+}
+// Teléfono opcional: vacío vale, pero si lo escribió tiene que ser válido
+export const validarTelefonoOpcional = (v) => (texto(v) ? validarTelefono(v) : '')
+
+export const MENSAJE_MIN = 10
+export const MENSAJE_MAX = 1000
+export const validarMensajeContacto = (v) => {
+  const t = texto(v)
+  if (!t) return 'Escribí tu mensaje.'
+  if (t.length < MENSAJE_MIN) return `Contanos un poco más (mínimo ${MENSAJE_MIN} caracteres).`
+  return t.length > MENSAJE_MAX ? `Máximo ${MENSAJE_MAX} caracteres.` : ''
+}
+
+export const validadoresContacto = {
+  nombre: validarNombrePersona('tu nombre'),
+  apellido: validarNombrePersona('tu apellido'),
+  email: validarEmail,
+  area: (v) => (!texto(v) || /^\+?\d{1,5}$/.test(texto(v)) ? '' : 'Ej.: +54 o 11 (solo números).'),
+  tel: validarTelefonoOpcional,
+  msg: validarMensajeContacto,
+}
+
+/* ---------------- Solicitud de vendedor (SolicitudVendedorRequest: nombreTienda NotBlank) ---------------- */
+
+export const validadoresSolicitudVendedor = {
+  tienda: (v) => {
+    const t = texto(v)
+    if (!t) return 'Ingresá el nombre de tu tienda.'
+    if (t.length < 2) return 'El nombre debe tener al menos 2 caracteres.'
+    return t.length > 60 ? 'Máximo 60 caracteres.' : ''
+  },
+  prov: obligatorio('Elegí tu provincia.'),
+  tel: validarTelefono,
+  desc: (v) => {
+    const t = texto(v)
+    if (!t) return 'Contanos qué libros vendés.'
+    if (t.length < 10) return 'Contanos un poco más (mínimo 10 caracteres).'
+    return t.length > 500 ? 'Máximo 500 caracteres.' : ''
+  },
+}
+
+/* ---------------- Direcciones ---------------- */
+
+export const validadoresDireccion = {
+  alias: (v) => {
+    const t = texto(v)
+    if (!t) return 'Ponele un nombre (Casa, Trabajo…).'
+    if (t.length < 2) return 'Debe tener al menos 2 caracteres.'
+    return t.length > 30 ? 'Máximo 30 caracteres.' : ''
+  },
+  calle: (v) => {
+    const t = texto(v)
+    if (!t) return 'Ingresá la calle y el número.'
+    if (t.length < 4) return 'Ingresá la calle completa.'
+    if (t.length > 100) return 'Máximo 100 caracteres.'
+    return /\d|\bs\/?n\b/i.test(t) ? '' : 'Agregá el número de la calle (o "S/N").'
+  },
+  ciudad: (v) => {
+    const t = texto(v)
+    if (!t) return 'Ingresá la ciudad o localidad.'
+    if (t.length < 2) return 'Debe tener al menos 2 caracteres.'
+    return t.length > 60 ? 'Máximo 60 caracteres.' : ''
+  },
+  // Formato argentino: 4 dígitos (1425) o el CPA (C1425ABC). Opcional.
+  cp: (v) => (!texto(v) || /^([A-Za-z]\d{4}[A-Za-z]{3}|\d{4})$/.test(texto(v)) ? '' : 'Ingresá 4 dígitos (ej.: 1425) o el formato C1425ABC.'),
+  prov: obligatorio('Elegí la provincia.'),
+}
+
+/* ---------------- Categorías (CategoriaRequest: nombre; único en la base) ---------------- */
+
+export const CATEGORIA_MAX = 40
+export const validarNombreCategoria = (v) => {
+  const t = texto(v).replace(/\s+/g, ' ')
+  if (!t) return 'Escribí el nombre de la categoría.'
+  if (t.length < 2) return 'Debe tener al menos 2 caracteres.'
+  if (t.length > CATEGORIA_MAX) return `Máximo ${CATEGORIA_MAX} caracteres.`
+  return /^[\p{L}\p{N}][\p{L}\p{N}\s&,.'’/-]*$/u.test(t) ? '' : 'Usá letras, números, espacios o & , . - / solamente.'
+}
+
+/* ---------------- Tarifas de envío (EnvioRequest.costoFijo es Double) ---------------- */
+
+export const COSTO_ENVIO_MAX = 1000000
+export const validarCostoEnvio = (v) => {
+  const falta = validarPrecio(v)
+  if (falta) return falta.replace('el precio', 'el costo').replace('El precio', 'El costo').replace('Ingresá el precio.', 'Ingresá el costo del envío.')
+  return aDecimal(v) > COSTO_ENVIO_MAX ? `El costo no puede superar $${COSTO_ENVIO_MAX.toLocaleString('es-AR')}.` : ''
+}

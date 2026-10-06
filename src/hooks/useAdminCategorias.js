@@ -1,24 +1,38 @@
+import { useCallback, useEffect, useState } from 'react'
 import { useLibros } from './useLibros'
 import { useToast } from './useToast'
-import { crearCategoria } from '../services/adminService'
+import { cambiarEstadoCategoria, crearCategoriaConFoto, editarCategoria, listarCategoriasAdmin } from '../services/categoriasService'
 
-// Categorías del catálogo y alta de una nueva. `crear` devuelve { ok } o { error }.
+// Categorías del panel (activas y de baja) con alta, edición y baja/reactivación. Cada acción devuelve { ok } o { error }.
 const useAdminCategorias = () => {
   const toast = useToast()
-  const { categorias, recargarCategorias } = useLibros()
+  const { recargarCategorias } = useLibros()
+  const [categorias, setCategorias] = useState([])
 
-  const crear = async (nombre) => {
+  const leer = useCallback(() => listarCategoriasAdmin().then(setCategorias), [])
+  useEffect(() => {
+    let vigente = true
+    listarCategoriasAdmin().then((c) => { if (vigente) setCategorias(c) })
+    return () => { vigente = false }
+  }, [])
+
+  const correr = async (fn, aviso) => {
     try {
-      await crearCategoria(nombre)
-      await recargarCategorias()
-      toast('Categoría creada')
+      await fn()
+      await Promise.all([leer(), recargarCategorias()]) // el catálogo y el inicio se actualizan al instante
+      toast(aviso)
       return { ok: true }
     } catch (err) {
-      return { error: (err && err.message) || 'No pudimos crear la categoría. Intentá de nuevo.' }
+      return { error: (err && err.message) || 'No pudimos guardar la categoría. Intentá de nuevo.' }
     }
   }
 
-  return { categorias, crear }
+  const crear = (datos) => correr(() => crearCategoriaConFoto(datos), 'Categoría creada')
+  const editar = (actual, datos) => correr(() => editarCategoria(actual, datos), 'Categoría actualizada')
+  const darDeBaja = (nombre) => correr(() => cambiarEstadoCategoria(nombre, false), 'Categoría dada de baja')
+  const reactivar = (nombre) => correr(() => cambiarEstadoCategoria(nombre, true), 'Categoría reactivada')
+
+  return { categorias, crear, editar, darDeBaja, reactivar }
 }
 
 export default useAdminCategorias

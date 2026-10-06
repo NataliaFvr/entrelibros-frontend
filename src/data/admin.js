@@ -12,6 +12,8 @@ export const SECCIONES_ADMIN = [
 ]
 
 // [valor del back (enum Rol), etiqueta]
+// Roles que el administrador puede asignar al CREAR una cuenta (admin no se crea desde el panel)
+export const ROLES_CREABLES = [['COMPRADOR', 'Comprador'], ['VENDEDOR', 'Vendedor']]
 export const ROLES = [['ADMIN', 'Admin'], ['COMPRADOR', 'Comprador'], ['VENDEDOR', 'Vendedor']]
 export const ETIQUETA_ROL = Object.fromEntries(ROLES)
 

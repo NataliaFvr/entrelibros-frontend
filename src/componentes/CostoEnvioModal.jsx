@@ -1,12 +1,12 @@
 import useFormulario from '../hooks/useFormulario'
-import { aDecimal, validarPrecio } from '../utils/validaciones'
+import { aDecimal, validarCostoEnvio } from '../utils/validaciones'
 import AdminModal from './AdminModal'
 import Aviso from './Aviso'
 import Field from './Field'
 
 // Cambiar el costo de un tipo de envío. `onGuardar(costo)` devuelve { ok } o { error }.
 const CostoEnvioModal = ({ titulo, costoActual, onGuardar, onCerrar }) => {
-  const f = useFormulario({ costo: String(costoActual) }, { costo: validarPrecio }, { enVivo: ['costo'] })
+  const f = useFormulario({ costo: String(costoActual) }, { costo: validarCostoEnvio }, { enVivo: ['costo'] })
 
   const enviar = (e) => {
     e.preventDefault()

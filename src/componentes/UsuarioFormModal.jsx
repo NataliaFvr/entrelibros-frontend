@@ -1,20 +1,19 @@
 import useFormulario from '../hooks/useFormulario'
-import { ROLES } from '../data/admin'
-import { validarEmail, validarPasswordNueva, validarUsuario } from '../utils/validaciones'
+import { ROLES_CREABLES } from '../data/admin'
+import { validarEmail, validarNombrePersona, validarPasswordNueva, validarUsuario } from '../utils/validaciones'
 import AdminModal from './AdminModal'
 import Aviso from './Aviso'
 import Field from './Field'
 import PasswordField from './PasswordField'
 import SelectField from './SelectField'
 
-const obligatorio = (mensaje) => (v) => (String(v ?? '').trim() ? '' : mensaje)
-
 // Al editar, la contraseña vacía significa "no cambia"
 const validadores = (editando) => ({
-  nombre: obligatorio('Ingresá el nombre.'),
-  apellido: obligatorio('Ingresá el apellido.'),
+  nombre: validarNombrePersona('el nombre'),
+  apellido: validarNombrePersona('el apellido'),
   nombreUsuario: validarUsuario,
   email: validarEmail,
+  rol: (v) => (editando || ['COMPRADOR', 'VENDEDOR'].includes(v) ? '' : 'Elegí comprador o vendedor.'),
   pw: (v) => (editando && !v ? '' : validarPasswordNueva(v)),
 })
 
@@ -46,7 +45,7 @@ const UsuarioFormModal = ({ usuario, onGuardar, onCerrar }) => {
         <Field label="Nombre de usuario" autoComplete="off" {...campo('nombreUsuario')} />
         <Field label="E-mail" type="email" autoComplete="off" {...campo('email')} />
         <PasswordField label={editando ? 'Nueva contraseña (vacía = no cambia)' : 'Contraseña (mín. 8, mayúscula, número y símbolo)'} autoComplete="new-password" {...campo('pw')} />
-        {!editando && <SelectField label="Rol" opciones={ROLES} {...campo('rol')} />}
+        {!editando && <SelectField label="Rol" opciones={ROLES_CREABLES} {...campo('rol')} />}
         <Aviso mensaje={f.error} tipo={f.tipoError} />
         <div className="modal-btns">
           <button className="btn main" type="submit">{editando ? 'Guardar cambios' : 'Crear usuario'}</button>

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { getCategorias, getLibros } from '../services/librosService'
+import { imagenesDeCategorias } from '../services/categoriasMeta'
 import { getImagenesApi } from '../api/librosApi'
 import { USAR_API } from '../utils/modoApi'
 import { LibrosCtx } from './librosCtx'
@@ -9,6 +10,7 @@ const EN_PARALELO = 6
 const LibrosProvider = ({ children }) => {
   const [libros, setLibros] = useState([])
   const [categorias, setCategorias] = useState([])
+  const [imagenesCategorias, setImagenesCategorias] = useState(imagenesDeCategorias)
   const [cargando, setCargando] = useState(true)
   const conFotos = useRef(new Set()) // ids de libros cuyas fotos ya se pidieron al back
   const montado = useRef(true)
@@ -46,9 +48,9 @@ const LibrosProvider = ({ children }) => {
     return getLibros().then(setLibros)
   }, [])
   // Vuelve a leer las categorías (cuando el administrador crea una nueva)
-  const recargarCategorias = useCallback(() => getCategorias().then(setCategorias), [])
+  const recargarCategorias = useCallback(() => getCategorias().then((c) => { setCategorias(c); setImagenesCategorias(imagenesDeCategorias()) }), [])
 
-  const value = useMemo(() => ({ libros, categorias, cargando, recargar, recargarCategorias }), [libros, categorias, cargando, recargar, recargarCategorias])
+  const value = useMemo(() => ({ libros, categorias, imagenesCategorias, cargando, recargar, recargarCategorias }), [libros, categorias, imagenesCategorias, cargando, recargar, recargarCategorias])
   return <LibrosCtx.Provider value={value}>{children}</LibrosCtx.Provider>
 }
 

@@ -1,0 +1,16 @@
+/* Recortador de imágenes: el marco se achica para que el pop-up entre sin scroll en celular, tablet y escritorio */
+.crop-card{max-width:min(520px,100%);display:flex;flex-direction:column;gap:12px;padding:clamp(18px,5vw,28px)}
+.crop-card h2{font-size:clamp(1.2rem,4vw,1.5rem)}
+.crop-help{font-size:.82rem;opacity:.75;line-height:1.4}
+.crop-marco{--alto-max:min(52vh,420px);position:relative;aspect-ratio:var(--asp);width:min(100%,calc(var(--alto-max) * var(--asp)));margin:0 auto;overflow:hidden;background:var(--evergreen);border-radius:10px;touch-action:none;cursor:grab;user-select:none;outline-offset:3px}
+.crop-marco:active{cursor:grabbing}
+.crop-marco:focus-visible{outline:3px solid var(--blue)}
+.crop-img{position:absolute;height:auto;max-width:none;pointer-events:none;-webkit-user-drag:none}
+.crop-guia{position:absolute;inset:0;border-radius:50%;box-shadow:0 0 0 999px rgba(4,42,43,.55),inset 0 0 0 2px rgba(255,255,255,.85);pointer-events:none}
+.crop-zoom{display:flex;align-items:center;gap:12px;font-size:.8rem;font-weight:600}
+.crop-zoom input{flex:1;min-width:0}
+.crop-btns{display:flex;justify-content:center}
+.crop-err{color:var(--burnt);font-weight:600;font-size:.9rem;line-height:1.4}
+.crop-load{font-size:.9rem;opacity:.7}
+.crop-acc{margin-top:4px}
+@media (max-width:600px){.crop-acc{flex-direction:column-reverse}}

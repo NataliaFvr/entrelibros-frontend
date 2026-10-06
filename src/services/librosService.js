@@ -1,4 +1,5 @@
 import { getLibrosApi } from '../api/librosApi'
+import { categoriasInactivas } from './categoriasMeta'
 import { listarCategoriasApi } from '../api/categoriasApi'
 import { getResenasLibroApi } from '../api/resenasApi'
 import { USAR_API } from '../utils/modoApi'
@@ -20,7 +21,14 @@ export async function getLibros() {
 // Las categorías que crea el administrador se guardan en este navegador (la lista completa, en orden de creación)
 export const CLAVE_CATEGORIAS = 'entrelibros_cats'
 
+// Categorías visibles en el catálogo y los formularios: sin las dadas de baja por el administrador
 export async function getCategorias() {
+  const inactivas = categoriasInactivas()
+  return (await getCategoriasTodas()).filter((c) => !inactivas.has(c))
+}
+
+// Todas, también las dadas de baja (panel de administración)
+export async function getCategoriasTodas() {
   if (USAR_API) return (await listarCategoriasApi()).map((c) => c.nombre) // el back devuelve [{ id, nombre }]
   const guardadas = leer(CLAVE_CATEGORIAS, null)
   const ok = Array.isArray(guardadas) && guardadas.length > 0 && guardadas.every((c) => typeof c === 'string' && c.trim())
