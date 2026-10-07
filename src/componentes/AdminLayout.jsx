@@ -2,9 +2,11 @@ import { Link, Navigate, NavLink, Outlet, useLocation, useNavigate } from 'react
 import { useAuth } from '../hooks/useAuth'
 import { SECCIONES_ADMIN } from '../data/admin'
 import ScrollToTop from './ScrollToTop'
+import Footer from './Footer'
+import VistaSwitch from './VistaSwitch'
 import './AdminPanel.css'
 
-// Marco del panel de administración: barra propia con las secciones, y pie propio (no lleva el header de la tienda).
+// Marco del panel de administración: barra propia con las secciones y el mismo pie que la tienda (en modo administrador).
 // Solo entra el rol ADMIN; sin sesión manda a ingresar y vuelve a la misma pantalla.
 const AdminLayout = () => {
   const { user, logout } = useAuth()
@@ -35,19 +37,16 @@ const AdminLayout = () => {
               ))}
             </nav>
             <div className="adm-who">
+              <VistaSwitch />
               <span className="tg">ADMIN</span>
               <span className="adm-user">{user.nombreUsuario}</span>
-              <Link className="lnk" to="/">Ver tienda</Link>
               <button className="lnk" type="button" onClick={salir}>Cerrar sesión</button>
             </div>
           </div>
         </div>
       </header>
       <Outlet />
-      <footer className="adm-footer">
-        <span>© 2026 ENTRELIBROS.COM</span>
-        <span>PANEL DE ADMINISTRACIÓN</span>
-      </footer>
+      <Footer />
     </div>
   )
 }

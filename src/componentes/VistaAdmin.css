@@ -1,0 +1,21 @@
+/* Header y footer en modo administrador (tienda y panel de gestión comparten estos estilos) */
+.vista-sw{display:inline-flex;flex-shrink:0;gap:2px;padding:3px;background:var(--cream);border:1px solid rgba(4,42,43,.15);border-radius:999px}
+.vista-op{padding:7px 14px;border-radius:999px;font-size:.8rem;font-weight:700;white-space:nowrap;color:var(--evergreen);transition:color .2s,background-color .2s}
+.vista-op:hover{color:var(--burnt)}
+.vista-op.on,.vista-op.on:hover{background:var(--evergreen);color:#fff}
+.vista-op:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+
+.header-admin{gap:14px;font-size:.82rem;font-weight:600}
+.header-admin .lnk{white-space:nowrap}
+.header-admin .adm-user{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:14ch}
+
+/* Celular y tablet: solo un botón con la otra vista; usuario y "Cerrar sesión" van en el menú */
+@media (max-width:1023px){
+  .vista-sw{padding:0;background:none;border:0}
+  .vista-op.on{display:none}
+  .vista-op{padding:7px 12px;font-size:.75rem;background:var(--evergreen);color:#fff}
+  .vista-op:hover{color:#fff;filter:brightness(1.2)}
+  .header-admin{gap:0}
+  .header-admin .tg,.header-admin .adm-user,.header-admin .lnk{display:none}
+}
+@media (max-width:380px){.vista-op{padding:6px 10px;font-size:.7rem}}

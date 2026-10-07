@@ -4,7 +4,8 @@ import { FORMATOS_IMAGEN, validarArchivoImagen } from '../utils/imagen'
 import ImageCropper from './ImageCropper'
 
 // Subir foto de perfil: valida el archivo, abre el recortador (cuadrado, guía circular) y entrega un JPEG base64.
-const PhotoControls = ({ onFoto, onQuitar }) => {
+// "Quitar foto" saca la foto o el avatar elegido (`onQuitar`) y el perfil vuelve a mostrar las iniciales.
+const PhotoControls = ({ onFoto, onQuitar, hayImagen = true }) => {
   const toast = useToast()
   const [archivo, setArchivo] = useState(null)
 
@@ -23,8 +24,8 @@ const PhotoControls = ({ onFoto, onQuitar }) => {
         Subir foto
         <input type="file" accept="image/jpeg,image/png" hidden onChange={elegir} />
       </label>{' '}
-      <button className="more" type="button" onClick={onQuitar}>Quitar foto</button>
-      <small>JPG o PNG, hasta 10 MB. Si no tenés foto, elegí un avatar.</small>
+      <button className="more" type="button" onClick={onQuitar} disabled={!hayImagen}>Quitar foto</button>
+      <small>JPG o PNG, hasta 10 MB. Si no tenés foto, elegí un avatar; si no, se muestran tus iniciales.</small>
       {archivo && (
         <ImageCropper origen={archivo} {...FORMATOS_IMAGEN.perfil}
           onListo={(d) => { onFoto(d); setArchivo(null) }} onCancelar={() => setArchivo(null)} />

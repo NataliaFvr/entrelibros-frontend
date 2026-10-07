@@ -35,13 +35,16 @@ export const tamanioSalida = ({ sw }, anchoMax, aspecto) => {
 /* ---------------- Con DOM ---------------- */
 
 // File / Blob / URL -> <img> ya decodificada. Rechaza si no es una imagen válida.
+export const liberarImagen = (img) => { if (img && img.src.startsWith('blob:')) URL.revokeObjectURL(img.src) }
+
 export const cargarImagen = (origen) =>
   new Promise((resolve, reject) => {
     const img = new Image()
     const esArchivo = typeof origen !== 'string'
     const url = esArchivo ? URL.createObjectURL(origen) : origen
     if (!esArchivo && /^https?:/.test(url)) img.crossOrigin = 'anonymous' // imágenes del back: hace falta CORS para poder recortarlas
-    img.onload = () => { if (esArchivo) URL.revokeObjectURL(url); resolve(img) }
+    // el blob NO se revoca acá: la vista previa lo sigue usando (ImageCropper lo libera al cerrar con `liberarImagen`)
+    img.onload = () => resolve(img)
     img.onerror = () => { if (esArchivo) URL.revokeObjectURL(url); reject(new Error('No es una imagen válida.')) }
     img.src = url
   })

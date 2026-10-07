@@ -1,5 +1,7 @@
 import { Link } from 'react-router-dom'
 import { useLibros } from '../hooks/useLibros'
+import { useAuth } from '../hooks/useAuth'
+import useEsAdmin from '../hooks/useEsAdmin'
 import useIrAVender from '../hooks/useIrAVender'
 import { AYUDA_LINKS, AYUDA_RAIZ } from '../data/ayuda'
 import { NOSOTROS } from '../data/nosotros'
@@ -10,15 +12,19 @@ const ESTADOS = [['nuevos', 'Nuevos'], ['usados', 'Usados']]
 const MobileMenu = ({ abierto, onCerrar }) => {
   const { categorias } = useLibros()
   const irAVender = useIrAVender()
+  const esAdmin = useEsAdmin()
+  const { logout } = useAuth()
 
   if (!abierto) return null
 
   const vender = () => { onCerrar(); irAVender() }
+  const salir = () => { onCerrar(); logout() }
 
   return (
     <>
       <div className="mmenu-back" onClick={onCerrar} />
       <nav id="menu-movil" className="mmenu" aria-label="Menú principal">
+        {esAdmin && <Link to="/" className="mm-link" onClick={onCerrar}>Inicio</Link>}
         <details open>
           <summary>Libros</summary>
           <div className="mm-body">
@@ -35,15 +41,21 @@ const MobileMenu = ({ abierto, onCerrar }) => {
             ))}
           </div>
         </details>
-        <button className="mm-link" type="button" onClick={vender}>Vender</button>
-        <Link to={NOSOTROS.to} className="mm-link" onClick={onCerrar}>{NOSOTROS.label}</Link>
-        <details>
-          <summary>Ayuda</summary>
-          <div className="mm-body">
-            <Link to={AYUDA_RAIZ} className="mm-link mm-all" onClick={onCerrar}>Centro de ayuda</Link>
-            {AYUDA_LINKS.map(({ to, label }) => <Link key={to} to={to} className="mm-link" onClick={onCerrar}>{label}</Link>)}
-          </div>
-        </details>
+        {esAdmin ? (
+          <button className="mm-link" type="button" onClick={salir}>Cerrar sesión</button>
+        ) : (
+          <>
+            <button className="mm-link" type="button" onClick={vender}>Vender</button>
+            <Link to={NOSOTROS.to} className="mm-link" onClick={onCerrar}>{NOSOTROS.label}</Link>
+            <details>
+              <summary>Ayuda</summary>
+              <div className="mm-body">
+                <Link to={AYUDA_RAIZ} className="mm-link mm-all" onClick={onCerrar}>Centro de ayuda</Link>
+                {AYUDA_LINKS.map(({ to, label }) => <Link key={to} to={to} className="mm-link" onClick={onCerrar}>{label}</Link>)}
+              </div>
+            </details>
+          </>
+        )}
       </nav>
     </>
   )

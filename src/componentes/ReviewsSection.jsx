@@ -14,7 +14,7 @@ const POR_PAGINA = 5
 
 // Solo puede opinar quien compró el libro (`haComprado`: sesión iniciada + pedido pagado con ese libro).
 // No se renderiza para ejemplares usados: las opiniones son de la obra, no de la publicación de un vendedor.
-const ReviewsSection = ({ resenias, promedio, haComprado, onPublicar }) => {
+const ReviewsSection = ({ resenias, promedio, haComprado, onPublicar, soloLectura = false }) => {
   const toast = useToast()
   const [orden, setOrden] = useState('new')
   const [filtro, setFiltro] = useState('')
@@ -43,7 +43,7 @@ const ReviewsSection = ({ resenias, promedio, haComprado, onPublicar }) => {
       <div className="rev-wrap">
         <ReviewSummary resenias={resenias} promedio={promedio} />
         <div className="rev-list">
-          <ReviewControls orden={orden} filtro={filtro} onOrden={cambiar(setOrden)} onFiltro={cambiar(setFiltro)} onOpinar={opinar} puedeOpinar={haComprado} />
+          <ReviewControls orden={orden} filtro={filtro} onOrden={cambiar(setOrden)} onFiltro={cambiar(setFiltro)} onOpinar={soloLectura ? undefined : opinar} puedeOpinar={haComprado} />
           {formAbierto && <ReviewForm onPublicar={publicar} onCancelar={() => setFormAbierto(false)} />}
           <div>
             {visibles.slice(0, cantidad).map((r) => <ReviewItem key={`${r.u}-${r.i}`} resenia={r} />)}

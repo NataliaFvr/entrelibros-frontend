@@ -1,5 +1,6 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useLibros } from '../hooks/useLibros'
+import useEsAdmin from '../hooks/useEsAdmin'
 import useIrAVender from '../hooks/useIrAVender'
 import { AYUDA_LINKS, AYUDA_RAIZ } from '../data/ayuda'
 import { NOSOTROS } from '../data/nosotros'
@@ -56,6 +57,17 @@ const NavMenu = () => {
   const enAyuda = pathname.startsWith(AYUDA_RAIZ)
   const enNosotros = pathname === NOSOTROS.to
   const vender = useIrAVender()
+  const esAdmin = useEsAdmin()
+
+  // El administrador solo ve inicio y catálogo
+  if (esAdmin) {
+    return (
+      <nav>
+        <Link className={`nav-item${pathname === '/' ? ' on' : ''}`} to="/">Inicio</Link>
+        <MenuLibros activo={enLibros} />
+      </nav>
+    )
+  }
 
   return (
     <nav>

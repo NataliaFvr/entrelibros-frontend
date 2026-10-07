@@ -6,6 +6,7 @@ import { useAuth } from '../hooks/useAuth'
 import { useToast } from '../hooks/useToast'
 import { useCompra } from '../hooks/useCompra'
 import useLibroPropio from '../hooks/useLibroPropio'
+import useEsAdmin from '../hooks/useEsAdmin'
 import { posicionBestseller } from '../utils/filtrarLibros'
 import { esUsado as libroUsado } from '../utils/libro'
 import BookBreadcrumb from '../componentes/BookBreadcrumb'
@@ -30,6 +31,7 @@ const Detalle = ({ libro, libros }) => {
   const { resenias, promedio, publicar } = useResenias(libro.id)
 
   const { esPropio, rutaEdicion, enRevision } = useLibroPropio()
+  const esAdmin = useEsAdmin() // el administrador ve la ficha en modo lectura: sin comprar, guardar ni opinar
 
   const esUsado = libroUsado(libro)
   const propio = esPropio(libro) // el vendedor ve su propia publicación: no la compra ni la guarda
@@ -72,12 +74,12 @@ const Detalle = ({ libro, libros }) => {
           rank={rank} 
           resumen={{ promedio, cantidad: resenias.length }} 
           guardado={marks.includes(libro.id)} 
-          onGuardar={propio ? undefined : guardar}
+          onGuardar={propio || esAdmin ? undefined : guardar}
         />
         <div className="buy-col">
           <BuyBox libro={libro} stock={stockDe(libro)} onComprar={comprar} onCarrito={alCarrito}
-            propio={propio} onEditar={() => navigate(rutaEdicion(libro))} editarDeshabilitado={propio && enRevision(libro)} />
-          <SellerBox vendedor={libro.v} cantidad={delVendedor.length} destacarReputacion={esUsado} propio={propio} />
+            propio={propio} soloLectura={esAdmin} onEditar={() => navigate(rutaEdicion(libro))} editarDeshabilitado={propio && enRevision(libro)} />
+          <SellerBox vendedor={libro.v} cantidad={delVendedor.length} destacarReputacion={esUsado} propio={propio} enlazar={!esAdmin} />
         </div>
       </div>
       <SpecSection libro={libro} />
@@ -85,7 +87,7 @@ const Detalle = ({ libro, libros }) => {
       
       {/* Las opiniones son de la obra: un ejemplar usado no tiene sección de opiniones */}
       {!esUsado && (
-        <ReviewsSection resenias={resenias} promedio={promedio} haComprado={Boolean(user) && compro(libro.id)} onPublicar={publicarOpinion} />
+        <ReviewsSection resenias={resenias} promedio={promedio} haComprado={Boolean(user) && compro(libro.id)} onPublicar={publicarOpinion} soloLectura={esAdmin} />
       )}
 
       <RelatedSection titulo={`Más de ${libro.a}`} libros={mismoAutor} />

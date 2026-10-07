@@ -48,7 +48,11 @@ const EditProfileForm = ({ user, perfil, onGuardar, onCancelar }) => {
       <h3 className="fr">Editar perfil</h3>
       <div className="ed-av">
         <Avatar user={user} perfil={borrador} size={72} />
-        <PhotoControls onFoto={(foto) => setBorrador({ avatar: '', foto })} onQuitar={() => setBorrador({ ...borrador, foto: '' })} />
+        <PhotoControls
+          onFoto={(foto) => setBorrador({ avatar: '', foto })}
+          onQuitar={() => setBorrador({ avatar: '', foto: '' })}
+          hayImagen={Boolean(borrador.foto || borrador.avatar)}
+        />
       </div>
       <AvatarPicker elegido={borrador.foto ? '' : borrador.avatar} onElegir={(avatar) => setBorrador({ avatar, foto: '' })} />
       <div className="two">

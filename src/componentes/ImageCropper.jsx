@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { MIN_LADO_FOTO } from '../utils/imagen'
-import { ZOOM_MAX, ZOOM_MIN, cargarImagen, mover, recortarAImagen, ventanaOrigen } from '../utils/recorte'
+import { ZOOM_MAX, ZOOM_MIN, cargarImagen, liberarImagen, mover, recortarAImagen, ventanaOrigen } from '../utils/recorte'
 import './ImageCropper.css'
 
 const PASO_TECLADO = 0.03 // fracción de la ventana por pulsación de flecha
@@ -21,14 +21,16 @@ const ImageCropper = ({ origen, aspecto = 1, anchoMax = 600, circular = false, t
 
   useEffect(() => {
     let vigente = true
+    let cargada = null
     cargarImagen(origen)
       .then((i) => {
-        if (!vigente) return
+        cargada = i
+        if (!vigente) return liberarImagen(i)
         if (Math.min(i.naturalWidth, i.naturalHeight) < MIN_LADO_FOTO) setError(`La imagen es muy chica (mínimo ${MIN_LADO_FOTO} px de lado).`)
         else setImg(i)
       })
       .catch((e) => { if (vigente) setError(e.message) })
-    return () => { vigente = false }
+    return () => { vigente = false; liberarImagen(cargada) }
   }, [origen])
 
   useEffect(() => {

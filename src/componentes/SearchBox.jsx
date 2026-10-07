@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useLibros } from '../hooks/useLibros'
 import useSugerencias from '../hooks/useSugerencias'
+import useEsAdmin from '../hooks/useEsAdmin'
 import { rutaVendedor } from '../utils/vendedor'
 import SearchSuggestions from './SearchSuggestions'
 
@@ -11,7 +12,9 @@ const SearchBox = () => {
   const [texto, setTexto] = useState('')
   const [abierto, setAbierto] = useState(false)
   const [activo, setActivo] = useState(-1)
-  const items = useSugerencias(libros, texto)
+  const esAdmin = useEsAdmin()
+  const sugeridos = useSugerencias(libros, texto)
+  const items = esAdmin ? sugeridos.filter((it) => it.tipo !== 'vendedor') : sugeridos // el admin no entra a perfiles de tienda
   const hayTexto = texto.trim() !== ''
 
   const cerrar = () => { setAbierto(false); setActivo(-1) }
@@ -45,7 +48,7 @@ const SearchBox = () => {
   return (
     <div className="search">
       <input
-        type="search" placeholder="Buscar libros, autores, tiendas..." autoComplete="off"
+        type="search" placeholder={esAdmin ? 'Buscar libros, autores...' : 'Buscar libros, autores, tiendas...'} autoComplete="off"
         aria-label="Buscar libros, autores o vendedores" value={texto}
         onChange={(e) => { setTexto(e.target.value); setAbierto(true); setActivo(-1) }}
         onFocus={() => setAbierto(true)} onBlur={cerrar} onKeyDown={onKeyDown}
