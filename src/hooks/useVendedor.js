@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useLibros } from './useLibros'
+import useMisLibros from './useMisLibros'
 import { useToast } from './useToast'
 import { enRevision, getVendedor, guardarVendedor, nuevoIdPublicacion } from '../services/vendedorService'
 import { esModeracionError, modificarLibro } from '../services/moderacionService'
@@ -24,6 +25,25 @@ const useVendedor = (user) => {
   const toast = useToast()
   const { recargar } = useLibros()
   const [vendedor, setVendedor] = useState(() => getVendedor(user))
+
+  // Con el back: libros del vendedor según el servidor. `estadoLibros` distingue "sin libros" ('ok' + lista vacía) de un fallo ('error')
+  const { estado: estadoLibros, libros: librosDelBack, reintentar: recargarMisLibros } = useMisLibros(user.id, USAR_API && vendedor.estado === 'aprobado')
+
+  // Libros que el back ya tiene como publicados pero este navegador no conoce (otro dispositivo, datos locales borrados): se suman al panel
+  useEffect(() => {
+    if (!USAR_API || !librosDelBack.length) return
+    const guardado = getVendedor(user)
+    const faltan = librosDelBack.filter((l) => !guardado.pub.some((p) => String(p.id) === String(l.id)))
+    if (!faltan.length) return
+    const nuevos = faltan.map((l) => ({
+      id: l.id, t: l.t, a: l.a, ed: l.ed, idioma: l.idioma, anio: l.anio, usado: l.usado, base: l.base, d: l.d, stock: l.stock,
+      cat: l.cat, imgs: [], descripcion: l.descripcion, estado: publicacionAFront(l.estadoPublicacion), mod: l.estadoModeracion || 'ACEPTADO',
+    }))
+    const completo = { ...guardado, pub: [...nuevos, ...guardado.pub] }
+    if (guardarVendedor(user, completo)) setVendedor(completo)
+    // `user` no cambia mientras el panel está abierto (el panel se remonta por cuenta)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [librosDelBack])
 
   // Guarda y avisa. Devuelve { ok: true } o { error } (también lo muestra en un toast)
   const cambiar = (nuevo, mensaje) => {
@@ -176,7 +196,7 @@ const useVendedor = (user) => {
     return revision ? { ...resto, modC: motivo } : { ...resto, mod: 'RECHAZADO', modC: motivo }
   }), 'Libro rechazado (simulado)')
 
-  return { vendedor, solicitar, aprobarSolicitud, guardarLibro, alternarBaja, aprobarLibro, rechazarLibro }
+  return { vendedor, estadoLibros, recargarMisLibros, solicitar, aprobarSolicitud, guardarLibro, alternarBaja, aprobarLibro, rechazarLibro }
 }
 
 export default useVendedor

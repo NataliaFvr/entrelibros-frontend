@@ -1,5 +1,6 @@
 import api from './axiosConfig'
 import { norm } from '../utils/format'
+import { esListaVacia } from '../utils/errorApi'
 
 // CategoriasController: GET /categorias -> [{ id, nombre }] (404 si no hay ninguna), POST /categorias { nombre } (ADMIN)
 let cache = []
@@ -9,7 +10,7 @@ export const listarCategoriasApi = async () => {
     const { data } = await api.get('/categorias')
     cache = Array.isArray(data) ? data : []
   } catch (err) {
-    if (err.response && err.response.status === 404) cache = []
+    if (esListaVacia(err)) cache = []
     else throw err
   }
   return cache

@@ -15,7 +15,7 @@ import SearchNoResults from '../componentes/SearchNoResults'
 import Pager from '../componentes/Pager'
 
 const Catalogo = ({ inicial }) => {
-  const { libros, categorias } = useLibros()
+  const { libros, categorias, errorCarga, recargar } = useLibros()
   const { f, set, setPage, toggle, limpiar } = useFiltros(inicial)
   const [filtrosAbiertos, setFiltrosAbiertos] = useState(false)
 
@@ -49,7 +49,7 @@ const Catalogo = ({ inicial }) => {
             <SearchNoResults termino={termino} destacados={destacados} onLimpiar={limpiar} />
           ) : (
             <>
-              <ProductGrid libros={items} topIds={topIds} ordenPorVentas={f.sort === 'best'} onLimpiar={limpiar} />
+              <ProductGrid libros={items} topIds={topIds} ordenPorVentas={f.sort === 'best'} onLimpiar={limpiar} error={errorCarga && !libros.length} onReintentar={recargar} />
               <Pager page={page} pages={pages} onChange={cambiarPagina} />
             </>
           )}

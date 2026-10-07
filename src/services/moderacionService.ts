@@ -1,5 +1,5 @@
 import api, { RAIZ } from '../api/axiosConfig'
-import { normalizarError } from '../utils/errorApi'
+import { esListaVacia, normalizarError } from '../utils/errorApi'
 import type {
   AccionSolicitud,
   DatosLibro,
@@ -79,7 +79,7 @@ export async function obtenerLibrosPorEstado(estado: EstadoModeracion, page = 0,
     const { data } = await api.get<Pagina<LibroResponse>>(RUTAS.porEstado, { baseURL: RAIZ, params: { estado, page, size } })
     return data
   } catch (err) {
-    if ((err as { response?: { status?: number } })?.response?.status === 404) return paginaVacia(size, page)
+    if (esListaVacia(err)) return paginaVacia(size, page)
     return fallar(err)
   }
 }

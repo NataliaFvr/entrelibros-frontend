@@ -2,13 +2,13 @@ import useLibroPropio from '../hooks/useLibroPropio'
 import ProductCard from './ProductCard'
 import EmptyState from './EmptyState'
 
-const ProductGrid = ({ libros, topIds, ordenPorVentas, onLimpiar }) => {
+const ProductGrid = ({ libros, topIds, ordenPorVentas, onLimpiar, error = false, onReintentar }) => {
   const { esPropio } = useLibroPropio()
   return (
     <div className="grid">
       {libros.length
         ? libros.map((l) => <ProductCard key={l.id} libro={l} masVendido={ordenPorVentas && topIds.has(l.id)} propio={esPropio(l)} />)
-        : <EmptyState onLimpiar={onLimpiar} />}
+        : <EmptyState onLimpiar={onLimpiar} error={error} onReintentar={onReintentar} />}
     </div>
   )
 }

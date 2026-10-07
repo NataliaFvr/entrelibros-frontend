@@ -1,10 +1,11 @@
 import api from './axiosConfig'
 import { aReseniaLibroFront, aReseniaVendedorFront } from '../utils/adaptadores'
+import { esListaVacia } from '../utils/errorApi'
 
 // ResenaLibroController + ResenaVendedorController (404 = sin reseñas)
 const lista = async (pedido) => {
   try { return (await pedido()).data } catch (err) {
-    if (err.response && err.response.status === 404) return []
+    if (esListaVacia(err)) return []
     throw err
   }
 }

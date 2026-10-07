@@ -135,6 +135,20 @@ export const normalizarError = (err, contexto = '') => {
   return { tipo, status: r.status, mensaje, campos }
 }
 
+// ¿Es el 404 de un LISTADO vacío? El back responde 404 { error: "…" } con ListaVaciaException ("No hay libros", "No tenés órdenes"…),
+// y también cuando se pide una página que ya no existe. Solo ese caso se trata como "no hay resultados".
+// Cualquier otro error (401, 403, 500, red, timeout) NO es "vacío": tiene que propagarse y mostrarse con mensajeError().
+// Un 404 sin campo `error` (proxy, HTML) o el 404 por defecto de Spring ({ timestamp, status, error: "Not Found", path }, URL inexistente)
+// tampoco es una lista vacía: es un error real.
+export const esListaVacia = (err) => {
+  const r = err && err.response
+  if (!r || r.status !== 404) return false
+  const d = r.data
+  if (!d || typeof d !== 'object' || Array.isArray(d)) return false
+  if (typeof d.error !== 'string' || !d.error.trim()) return false
+  return !('path' in d || 'timestamp' in d)
+}
+
 // Atajo: solo el texto
 export const mensajeError = (err, contexto = '') => normalizarError(err, contexto).mensaje
 
