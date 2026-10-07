@@ -11,8 +11,8 @@ import { USAR_API } from '../utils/modoApi'
 // estado: 'activo' | 'baja', mod: 'EN_REVISION' | 'ACEPTADO' | 'RECHAZADO' }.
 // Back: la solicitud y la moderación de libros las resuelve un administrador.
 // Una publicación está "en revisión" si es nueva y aún no fue aceptada, o si ya aceptada tiene una modificación
-// pendiente (`revision` = datos nuevos a la espera del administrador). Mientras tanto el catálogo sigue mostrando
-// los datos ya aprobados. Back: EstadoModeracion = EN_REVISION (HistorialModeracion registra la decisión del administrador).
+// pendiente (`revision` = datos nuevos a la espera del administrador). Igual que el back, editar un libro aceptado lo
+// pasa a EN_REVISION y lo saca del catálogo hasta que el administrador lo apruebe (HistorialModeracion registra la decisión).
 export const enRevision = (p) => p.mod === 'EN_REVISION' || Boolean(p.revision)
 
 // Precio con descuento, redondeado a centavos (el precio admite hasta 2 decimales)
@@ -82,13 +82,14 @@ export const nuevoIdPublicacion = () => {
   return Math.max(Date.now(), ...usados) + 1
 }
 
-// Libros de todos los vendedores que están activos y aceptados: entran al catálogo
+// Libros de todos los vendedores que están activos y aceptados y SIN revisión pendiente: entran al catálogo.
+// Un libro editado (con `revision`) sale del catálogo hasta que el administrador lo apruebe.
 export const librosPublicados = () =>
   getUsuarios().flatMap((u) => {
     const v = getVendedor(u)
     // Un vendedor dado de baja por el administrador deja de mostrar sus libros
     if (v.estado !== 'aprobado' || u.estado === 'DADO_DE_BAJA') return []
-    return v.pub.filter((p) => p.estado === 'activo' && p.mod === 'ACEPTADO').map((p) => aLibro(p, v))
+    return v.pub.filter((p) => p.estado === 'activo' && p.mod === 'ACEPTADO' && !enRevision(p)).map((p) => aLibro(p, v))
   })
 
 // Ids de todas las publicaciones que gestiona un vendedor (activas o no). El catálogo de ejemplo no debe

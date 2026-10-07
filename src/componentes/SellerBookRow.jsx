@@ -6,8 +6,8 @@ import './SellerPanel.css'
 
 const ETIQUETAS = { EN_REVISION: 'EN REVISIÓN', RECHAZADO: 'RECHAZADO' }
 
-// Fila de "Mis libros". Con una revisión pendiente el libro sigue publicado con sus datos aprobados,
-// se marca "Modificación en revisión" y no se puede volver a editar hasta que el administrador responda.
+// Fila de "Mis libros". Con una revisión pendiente el libro sale del catálogo, se marca "Modificación en revisión"
+// y no se puede volver a editar hasta que el administrador responda.
 const SellerBookRow = ({ libro, onEditar, onBaja, onAprobar, onRechazar }) => {
   const activo = libro.estado === 'activo'
   const aceptado = (libro.mod || 'ACEPTADO') === 'ACEPTADO'
@@ -25,13 +25,13 @@ const SellerBookRow = ({ libro, onEditar, onBaja, onAprobar, onRechazar }) => {
         {modificacion && (
           <>
             <span className="tg rev" role="status">Modificación en revisión</span>
-            <small className="rev-note" id={`rev-${libro.id}`}>Mientras tanto se muestra la versión ya aprobada.</small>
+            <small className="rev-note" id={`rev-${libro.id}`}>Mientras tanto el libro no se muestra en el catálogo.</small>
           </>
         )}
         {!pendiente && aceptado && libro.modC && <small className="rev-note">Tu última modificación fue rechazada: {libro.modC}</small>}
       </div>
       <div className="cprice">{fmt(precioFinal(libro))}</div>
-      <span className={`tg${activo && aceptado ? '' : ' off'}`}>{!activo ? 'DE BAJA' : ETIQUETAS[libro.mod] || 'ACTIVO'}</span>
+      <span className={`tg${activo && aceptado && !modificacion ? '' : ' off'}`}>{!activo ? 'DE BAJA' : modificacion ? ETIQUETAS.EN_REVISION : ETIQUETAS[libro.mod] || 'ACTIVO'}</span>
       <div className="ac">
         <button className="lnk" type="button" onClick={onEditar} disabled={pendiente}
           aria-describedby={modificacion ? `rev-${libro.id}` : undefined}

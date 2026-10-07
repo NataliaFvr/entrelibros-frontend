@@ -17,6 +17,9 @@ const ModeracionItem = ({ solicitud, ocupado, onAprobar, onRechazar }) => {
         </div>
         <span className="tg rev">{ETIQUETA[tipoModeracion]}</span>
       </div>
+      {tipoModeracion === 'MODIFICACION' && !datosActuales && (
+        <p className="note">Este libro ya estaba aprobado y su vendedor lo editó. El servidor no guarda la versión anterior: revisá que los datos de abajo sean correctos.</p>
+      )}
       <ComparadorCambios actuales={datosActuales} propuestos={datosPropuestos} />
       <div className="mod-actions">
         <button className="btn main" type="button" disabled={ocupado} onClick={onAprobar}>{ocupado ? 'Procesando…' : 'Aprobar'}</button>

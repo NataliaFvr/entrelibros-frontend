@@ -1,5 +1,17 @@
 /* Panel de moderación del administrador. Mobile primero: ~390px una columna, 768px+ comparador lado a lado. */
-.mod-list{display:grid;gap:16px;min-width:0}
+/* Carrusel de solicitudes: scroll horizontal con snap; cada tarjeta ocupa todo el ancho, así se ve una sola por pantalla */
+.mcar{display:flex;flex-direction:column;gap:12px;min-width:0}
+.mcar-bar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 16px}
+.mcar-count{font-size:.88rem;font-weight:600;margin:0;max-width:none}
+.mcar-count small{font-weight:500;opacity:.65}
+.mcar-nav{display:flex;gap:8px}
+.mcar-btn{display:flex;align-items:center;justify-content:center;width:42px;height:42px;padding:0;border-radius:50%;border:1px solid rgba(4,42,43,.2);background:#fff;color:var(--evergreen);font:inherit;font-size:1.5rem;line-height:1;cursor:pointer;transition:border-color .2s,color .2s}
+.mcar-btn:hover:not(:disabled){border-color:var(--burnt);color:var(--burnt)}
+.mcar-btn:disabled{opacity:.35;cursor:default}
+.mcar-btn:focus-visible,.mcar-pista:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.mcar-pista{position:relative;display:flex;align-items:flex-start;gap:16px;overflow-x:auto;padding:6px 0 16px;scroll-snap-type:x mandatory;overscroll-behavior-x:contain;scrollbar-width:thin}
+.mcar-slide{flex:0 0 100%;min-width:0;scroll-snap-align:start;scroll-snap-stop:always}
+@media (prefers-reduced-motion:reduce){.mcar-pista{scroll-behavior:auto}}
 .mod-item{display:flex;flex-direction:column;gap:14px;padding:clamp(14px,3vw,24px);min-width:0}
 .mod-head{display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:8px 12px}
 .mod-tit{display:flex;flex-direction:column;gap:2px;min-width:0;overflow-wrap:anywhere}
@@ -9,6 +21,7 @@
 .cmp-resumen{font-size:.82rem;font-weight:600;margin:0}
 .cmp{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(260px,100%),1fr));gap:12px}
 .cmp-col{background:#fff;border:1px solid rgba(4,42,43,.12);border-radius:10px;padding:14px;min-width:0}
+.cmp.solo .cmp-col dl{grid-template-columns:repeat(auto-fit,minmax(min(220px,100%),1fr));gap:6px 12px} /* publicación nueva: los campos se reparten en columnas y la tarjeta queda más baja */
 .cmp-col.new{border-color:var(--blue)}
 .cmp-col h4{font-size:1rem;margin:0 0 10px}
 .cmp-col dl{display:grid;gap:6px;margin:0}

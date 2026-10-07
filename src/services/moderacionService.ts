@@ -131,20 +131,43 @@ const aDatos = (l: LibroResponse): DatosLibro => ({
 })
 
 /**
- * Cola del panel de moderación: todos los libros EN_REVISION (se recorren las páginas del back).
- * El back de hoy solo distingue libros nuevos: todo lo que llega es tipo NUEVO, sin versión previa que comparar.
- * Cuando el back registre modificaciones pendientes, solo cambia este adaptador.
+ * Ids de los libros que ya fueron ACEPTADOS alguna vez, según GET /libros/historial-moderacion.
+ * El back mueve a EN_REVISION tanto un libro recién publicado como uno aceptado que su vendedor editó,
+ * y GET /libros/moderacion no distingue entre los dos: si el libro ya tuvo una aprobación, es una modificación.
+ * Si el historial no se puede leer, devuelve lo que alcanzó a juntar (todo lo demás se trata como nuevo).
+ */
+async function idsYaAprobados(): Promise<Set<number>> {
+  const ids = new Set<number>()
+  try {
+    for (let page = 0; ; page++) {
+      const pagina = await obtenerHistorial(page, 100)
+      pagina.content.forEach((h) => { if (h.estadoNuevo === 'ACEPTADO') ids.add(h.idLibro) })
+      if (pagina.last || pagina.empty) break
+    }
+  } catch {
+    // sin historial no hay forma de saber si fue una edición: se muestra como publicación nueva
+  }
+  return ids
+}
+
+/**
+ * Cola del panel de moderación: UNA sola consulta de libros EN_REVISION (se recorren las páginas del back).
+ * Las dos pestañas (nuevas / modificaciones) salen de esta misma lista; solo cambia el tipo de cada solicitud.
+ * Hoy el back no guarda la versión anterior ni la fecha del pedido: `datosActuales` y `fechaSolicitud` quedan en null
+ * (la lista se ordena por id hasta que LibroResponse traiga la fecha, ver utils/ordenSolicitudes).
  */
 export async function obtenerSolicitudes(): Promise<SolicitudModeracion[]> {
-  const solicitudes: SolicitudModeracion[] = []
+  const libros: LibroResponse[] = []
   for (let page = 0; ; page++) {
     const pagina = await obtenerPendientes(page, 50)
-    solicitudes.push(...pagina.content.map((l): SolicitudModeracion => ({
-      id: l.id, tipoModeracion: 'NUEVO', fechaSolicitud: null, libroId: l.id, nombreVendedor: l.nombreVendedor,
-      datosActuales: null, datosPropuestos: aDatos(l),
-    })))
-    if (pagina.last || pagina.empty) return solicitudes
+    libros.push(...pagina.content)
+    if (pagina.last || pagina.empty) break
   }
+  const yaAprobados = libros.length ? await idsYaAprobados() : new Set<number>()
+  return libros.map((l): SolicitudModeracion => ({
+    id: l.id, tipoModeracion: yaAprobados.has(l.id) ? 'MODIFICACION' : 'NUEVO', fechaSolicitud: null, libroId: l.id,
+    nombreVendedor: l.nombreVendedor, datosActuales: null, datosPropuestos: aDatos(l),
+  }))
 }
 
 /** Aprobar (ACEPTADO) o rechazar (RECHAZADO + motivo) una solicitud. Rechazar sin motivo lanza ModeracionError. */

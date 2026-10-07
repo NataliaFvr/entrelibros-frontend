@@ -11,7 +11,7 @@ import { mensajeError } from '../utils/errorApi'
 import { aLibroRequest } from '../utils/libroRequest'
 import { USAR_API } from '../utils/modoApi'
 
-const MENSAJE_REVISION = 'Tus cambios han sido enviados a revisión por un administrador'
+const MENSAJE_REVISION = 'Tus cambios fueron enviados a revisión. El libro no se verá en el catálogo hasta que un administrador lo apruebe.'
 
 const esFotoNueva = (foto) => typeof foto === 'string' && foto.startsWith('data:')
 
@@ -108,7 +108,8 @@ const useVendedor = (user) => {
   }
 
   // Sin `idEditado` publica uno nuevo; con `idEditado` lo modifica. Devuelve { ok } o { error }.
-  // Un libro ya aceptado conserva su versión aprobada (sigue en el catálogo) y los cambios quedan en `revision`.
+  // Editar un libro ya aceptado lo pasa a revisión y lo saca del catálogo hasta que se apruebe (como el back);
+  // la versión aprobada se conserva y los cambios quedan en `revision`.
   const guardarLibro = async (datos, idEditado) => {
     if (!idEditado) {
       if (USAR_API) return crearEnApi(datos)

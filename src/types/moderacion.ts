@@ -97,7 +97,7 @@ export interface DatosLibro {
   imagenUrl?: string | null
 }
 
-/** NUEVO = publicación recién creada; MODIFICACION = edición de un libro ya aceptado (hoy solo existe en el modo demo). */
+/** NUEVO = publicación recién creada; MODIFICACION = edición de un libro ya aceptado (el back lo devuelve a EN_REVISION y lo saca del catálogo hasta que se apruebe). */
 export type TipoModeracion = 'NUEVO' | 'MODIFICACION'
 
 /** Un elemento de la cola del panel de moderación. `id` es el id del libro: el back modera por libro. */

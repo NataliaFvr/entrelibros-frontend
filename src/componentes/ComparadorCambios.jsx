@@ -26,7 +26,7 @@ const Columna = ({ titulo, datos, cambiados = new Set(), propuesta = false }) =>
 // Sin `actuales` (publicación nueva) muestra solo los datos del libro. En celular las columnas se apilan.
 const ComparadorCambios = ({ actuales, propuestos }) => {
   if (!actuales) {
-    return <div className="cmp"><Columna titulo="Datos del libro" datos={propuestos} propuesta /></div>
+    return <div className="cmp solo"><Columna titulo="Datos del libro" datos={propuestos} propuesta /></div>
   }
   const cambiados = camposCambiados(actuales, propuestos)
   return (
