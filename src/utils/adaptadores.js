@@ -108,6 +108,23 @@ export const aPedidoFront = (o) => ({
   comprador: `${o.nombreComprador || ''}`.trim(),
 })
 
+// Venta del vendedor: OrdenVendedorResponse { id, estado, idOrden } + su OrdenResponse (GET /ordenes/{idOrden}, con items)
+// -> { n, date, est, its, comprador }, el formato que consumen SellerSales, SaleCard y SellerStats.
+// - La orden trae los items de TODOS los vendedores: se queda solo con los del vendedor `idVendedor`.
+// - El back no informa categoría ni si el libro es usado: salen del catálogo (`libros`, por idLibro).
+// - Solo cuenta como venta una orden pagada (SIMULADO_APROBADO) cuya parte del vendedor no fue cancelada; si no, devuelve null.
+export const aVentaFront = (ordenVendedor, orden, idVendedor, libros = []) => {
+  if (!orden || ordenVendedor.estado === 'CANCELADA' || orden.estadoPago !== 'SIMULADO_APROBADO') return null
+  const its = (orden.items || [])
+    .filter((i) => String(i.idVendedor) === String(idVendedor))
+    .map((i) => {
+      const l = libros.find((x) => x.id === i.idLibro)
+      return { t: i.tituloLibro || (l && l.t) || 'Libro', q: i.cantidad, p: i.precioUnitario, cat: l && l.cat, usado: Boolean(l && l.usado) }
+    })
+  if (!its.length) return null
+  return { n: String(orden.id), date: isoADia(orden.fecha), est: ESTADO_TEXTO[orden.estadoPago], its, comprador: `${orden.nombreComprador || ''}`.trim() }
+}
+
 /* ---------------- Imágenes ---------------- */
 
 // dataURL (las fotos del formulario van en base64) -> File para el multipart de POST /imagenes-libro

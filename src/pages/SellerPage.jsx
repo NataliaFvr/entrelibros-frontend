@@ -3,7 +3,7 @@ import { useAuth } from '../hooks/useAuth'
 import { useLibros } from '../hooks/useLibros'
 import useVendedor from '../hooks/useVendedor'
 import useCalificacionesRecibidas from '../hooks/useCalificacionesRecibidas'
-import { ventasDe } from '../services/ventasService'
+import useVentas from '../hooks/useVentas'
 import { enRevision, precioFinal } from '../services/vendedorService'
 import AuthHero from '../componentes/AuthHero'
 import AccountTabs from '../componentes/AccountTabs'
@@ -27,6 +27,7 @@ const Vendedor = ({ user }) => {
   const { libros } = useLibros()
   const { vendedor, solicitar, aprobarSolicitud, guardarLibro, alternarBaja, aprobarLibro, rechazarLibro } = useVendedor(user)
   const calificaciones = useCalificacionesRecibidas(vendedor.tienda, vendedor.pub, user.id)
+  const { ventas, cargando } = useVentas(user, vendedor.tienda, libros)
 
   if (vendedor.estado !== 'aprobado') {
     return (
@@ -46,7 +47,6 @@ const Vendedor = ({ user }) => {
   const editado = tab === 'editar' ? vendedor.pub.find((p) => String(p.id) === id) : null
   if (!TABS.includes(tab) || (tab === 'editar' && (!editado || enRevision(editado)))) return <Navigate to="/vender" replace />
 
-  const ventas = ventasDe(vendedor.tienda, libros)
   const vendido = ventas.reduce((suma, v) => suma + v.its.reduce((s, i) => s + i.p * i.q, 0), 0)
   const pestanias = [['libros', 'Mis libros'], ['nuevo', editado ? 'Editar libro' : 'Publicar libro'], ['ventas', 'Historial de ventas'], ['estadisticas', 'Estadísticas'], ['reputacion', 'Reputación']]
   const guardar = async (datos) => {
@@ -66,8 +66,8 @@ const Vendedor = ({ user }) => {
         <BookForm key={editado ? editado.id : 'nuevo'} libro={editado ? { ...editado, base: editado.base, p: precioFinal(editado) } : {}}
           onGuardar={guardar} onCancelar={() => navigate('/vender')} />
       )}
-      {tab === 'ventas' && <SellerSales ventas={ventas} />}
-      {tab === 'estadisticas' && <SellerStats ventas={ventas} />}
+      {tab === 'ventas' && !cargando && <SellerSales ventas={ventas} />}
+      {tab === 'estadisticas' && !cargando && <SellerStats ventas={ventas} />}
       {tab === 'reputacion' && <SellerReputation calificaciones={calificaciones} />}
     </main>
   )
