@@ -1,34 +1,34 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { getMisLibrosApi } from '../api/librosApi'
 import { mensajeError } from '../utils/errorApi'
 import { useToast } from './useToast'
 
-// Carga los libros del vendedor desde el back (GET /libros?idVendedores=…) y expone en qué estado está la carga:
+// Ejecuta la carga de "Mis libros" (`cargar`: función que devuelve una promesa) y expone en qué estado está:
 //   'cargando' | 'ok' | 'error'
-// - 'ok' con libros = [] significa "el back respondió que no hay libros" (404 { error } o página vacía): ahí sí corresponde el estado vacío.
+// - 'ok' significa que el back respondió. Si no hay libros (404 { error } de ListaVacia, ya convertido en [] por la capa api),
+//   corresponde el estado vacío ("Todavía no publicaste libros").
 // - 'error' es cualquier otro fallo (401, 403, 500, red…): se avisa con un toast (mensajeError) y NUNCA se confunde con "sin libros".
 // `activo` en false (modo demo, o cuenta que todavía no es vendedora) no pide nada y queda en 'ok'.
-const useMisLibros = (idVendedor, activo) => {
+const useMisLibros = (activo, cargar) => {
   const toast = useToast()
-  const avisar = useRef(toast)
-  useEffect(() => { avisar.current = toast }, [toast])
+  const ultimo = useRef({ toast, cargar })
+  useEffect(() => { ultimo.current = { toast, cargar } })
 
   const [estado, setEstado] = useState(activo ? 'cargando' : 'ok')
-  const [libros, setLibros] = useState([])
   const [intento, setIntento] = useState(0)
 
   useEffect(() => {
     if (!activo) return undefined
     let vigente = true
     setEstado('cargando')
-    getMisLibrosApi(idVendedor)
-      .then((lista) => { if (vigente) { setLibros(lista); setEstado('ok') } })
-      .catch((err) => { if (vigente) { setEstado('error'); avisar.current(mensajeError(err, 'libro')) } })
+    Promise.resolve()
+      .then(() => ultimo.current.cargar())
+      .then(() => { if (vigente) setEstado('ok') })
+      .catch((err) => { if (vigente) { setEstado('error'); ultimo.current.toast(mensajeError(err, 'libro')) } })
     return () => { vigente = false }
-  }, [idVendedor, activo, intento])
+  }, [activo, intento])
 
   const reintentar = useCallback(() => setIntento((n) => n + 1), [])
-  return { estado, libros, reintentar }
+  return { estado, reintentar }
 }
 
 export default useMisLibros

@@ -2,6 +2,7 @@ import api from './axiosConfig'
 import { aDireccionFront } from '../utils/adaptadores'
 import { guardar, leer } from '../services/almacen'
 import { claveDirPrincipal } from '../services/claves'
+import { esListaVacia } from '../utils/errorApi'
 
 // DireccionController (todas las rutas son del usuario logueado: el back lo saca del token).
 //   GET    /direcciones      -> [{ id, alias, calle, ciudad, provincia, cp }]
@@ -31,7 +32,7 @@ export const listarDireccionesApi = async (idUsuario) => {
   try {
     datos = (await api.get('/direcciones')).data
   } catch (err) {
-    if (err.response && err.response.status === 404) datos = [] // ListaVaciaException: "sin direcciones" no es un error
+    if (esListaVacia(err)) datos = [] // ListaVaciaException: "sin direcciones" no es un error
     else throw err
   }
   return resolverPrincipal(datos.map(aDireccionFront), idUsuario)

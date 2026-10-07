@@ -1,4 +1,5 @@
 import api from './axiosConfig'
+import { esListaVacia } from '../utils/errorApi'
 
 // OrdenController, parte del vendedor.
 // GET /ordenes/vendedor -> [{ id, estado, idOrden, idVendedor, nombreVendedor }]: no trae fecha, items ni comprador.
@@ -9,7 +10,7 @@ export const listarVentasApi = async () => {
   try {
     ordenesVendedor = (await api.get('/ordenes/vendedor')).data
   } catch (err) {
-    if (err.response && err.response.status === 404) return [] // ListaVaciaException: "todavía no vendiste" no es un error
+    if (esListaVacia(err)) return [] // ListaVaciaException: "todavía no vendiste" no es un error
     throw err
   }
   return Promise.all(ordenesVendedor.map(async (ordenVendedor) => {

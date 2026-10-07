@@ -1,5 +1,6 @@
 import api from './axiosConfig'
 import { aItemCarritoFront } from '../utils/adaptadores'
+import { esListaVacia } from '../utils/errorApi'
 
 // CarritoController. Todas las rutas son del usuario logueado: el back lo saca del token JWT, por eso NINGUNA petición
 // manda idUsuario.
@@ -14,7 +15,7 @@ export const listarCarritoApi = async () => {
   try {
     return (await api.get('/carrito')).data.map(aItemCarritoFront)
   } catch (err) {
-    if (err.response && err.response.status === 404) return [] // ListaVaciaException: carrito vacío no es un error
+    if (esListaVacia(err)) return [] // ListaVaciaException: carrito vacío no es un error
     throw err
   }
 }

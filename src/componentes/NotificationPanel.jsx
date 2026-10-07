@@ -12,7 +12,7 @@ const NotificationPanel = ({ id, lista, noLeidas, onLeer, onLeerTodas, onDescart
       </div>
       {lista.length ? (
         <ul className="notif-list">
-          {lista.map((n) => <NotificationItem key={n.id} notificacion={n} onLeer={onLeer} onDescartar={onDescartar} />)}
+          {lista.map((n) => <NotificationItem key={n.id} notificacion={n} onLeer={onLeer} onDescartar={onDescartar} onCerrar={onCerrar} />)}
         </ul>
       ) : (
         <p className="notif-empty">No tenés notificaciones.</p>

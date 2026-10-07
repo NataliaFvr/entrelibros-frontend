@@ -1,11 +1,12 @@
 import api from './axiosConfig'
 import { aPedidoFront, provinciaParaBack } from '../utils/adaptadores'
+import { esListaVacia } from '../utils/errorApi'
 
 // OrdenController + PagoController (el carrito está en carritoApi.js)
 
 const lista = async (pedido) => {
   try { return (await pedido()).data } catch (err) {
-    if (err.response && err.response.status === 404) return [] // ListaVaciaException: "sin elementos" no es un error
+    if (esListaVacia(err)) return [] // ListaVaciaException: "sin elementos" no es un error
     throw err
   }
 }

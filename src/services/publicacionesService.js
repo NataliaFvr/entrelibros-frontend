@@ -1,4 +1,4 @@
-import { getImagenesApi, getLibroApi, listarMisLibrosApi } from '../api/librosApi'
+import { getImagenesApi, getLibroApi, getMisLibrosApi } from '../api/librosApi'
 import { publicacionAFront } from '../utils/adaptadores'
 
 // Publicaciones del vendedor en el formato del panel { id, t, a, ed, cat, idioma, anio, usado, base, d, stock, imgs, descripcion,
@@ -17,7 +17,7 @@ const desdeBack = (l, previa = {}, catalogo = []) => {
 // GET /libros/mios es la fuente de verdad. Si el back todavía no lo tiene, se usa la lista guardada en este navegador
 // y se refresca el estado de cada libro con GET /libros/{id}. Devuelve la lista nueva, o null si no hay nada que actualizar.
 export const traerPublicaciones = async (locales, catalogo) => {
-  const mios = await listarMisLibrosApi()
+  const mios = await getMisLibrosApi()
   if (mios) {
     const previas = new Map(locales.map((p) => [p.id, p]))
     return Promise.all(mios.map(async (l) => {

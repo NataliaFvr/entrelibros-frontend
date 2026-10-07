@@ -32,7 +32,7 @@ const Vendedor = ({ user }) => {
   const navigate = useNavigate()
   const { tab = 'libros', id } = useParams()
   const { libros } = useLibros()
-  const { vendedor, solicitar, aprobarSolicitud, guardarLibro, alternarBaja, aprobarLibro, rechazarLibro } = useVendedor(user)
+  const { vendedor, estadoLibros, reintentar, solicitar, aprobarSolicitud, guardarLibro, alternarBaja, aprobarLibro, rechazarLibro } = useVendedor(user)
   const calificaciones = useCalificacionesRecibidas(vendedor.tienda, vendedor.pub, user.id)
   const { ventas, cargando } = useVentas(user, vendedor.tienda, libros)
 
@@ -68,7 +68,7 @@ const Vendedor = ({ user }) => {
       <SellerHead tienda={vendedor.tienda} publicados={vendedor.pub.filter((p) => p.estado === 'activo').length}
         ventas={ventas.length} vendido={vendido} onMiCuenta={() => navigate('/cuenta')} />
       <AccountTabs pestanias={pestanias} tab={tab === 'editar' ? 'nuevo' : tab} onIr={(t) => navigate(t === 'libros' ? '/vender' : `/vender/${t}`)} />
-      {tab === 'libros' && <SellerBooks libros={vendedor.pub} onBaja={alternarBaja} onAprobar={aprobarLibro} onRechazar={rechazarLibro} />}
+      {tab === 'libros' && <SellerBooks libros={vendedor.pub} estado={estadoLibros} onReintentar={reintentar} onBaja={alternarBaja} onAprobar={aprobarLibro} onRechazar={rechazarLibro} />}
       {(tab === 'nuevo' || tab === 'editar') && (
         <BookForm key={editado ? editado.id : 'nuevo'} libro={editado ? { ...editado, base: editado.base, p: precioFinal(editado) } : {}}
           onGuardar={guardar} onCancelar={() => navigate('/vender')} />

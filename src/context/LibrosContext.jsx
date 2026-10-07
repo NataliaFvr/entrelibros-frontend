@@ -2,6 +2,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { getCategorias, getLibros } from '../services/librosService'
 import { imagenesDeCategorias } from '../services/categoriasService'
 import { getImagenesApi } from '../api/librosApi'
+import { useToast } from '../hooks/useToast'
+import { mensajeError } from '../utils/errorApi'
 import { USAR_API } from '../utils/modoApi'
 import { LibrosCtx } from './librosCtx'
 
@@ -12,6 +14,10 @@ const LibrosProvider = ({ children }) => {
   const [categorias, setCategorias] = useState([])
   const [imagenesCategorias, setImagenesCategorias] = useState({})
   const [cargando, setCargando] = useState(true)
+  const [errorCarga, setErrorCarga] = useState(false) // true si el catálogo no se pudo leer (red, 500…): distinto de "no hay libros"
+  const toast = useToast()
+  const avisar = useRef(toast)
+  useEffect(() => { avisar.current = toast })
   const conFotos = useRef(new Set()) // ids de libros cuyas fotos ya se pidieron al back
   const montado = useRef(true)
   useEffect(() => { montado.current = true; return () => { montado.current = false } }, [])
@@ -19,6 +25,7 @@ const LibrosProvider = ({ children }) => {
   useEffect(() => {
     Promise.all([getLibros(), getCategorias()])
       .then(([l, c]) => { setLibros(l); setCategorias(c); setImagenesCategorias(imagenesDeCategorias()) }) // las URLs salen de las categorías ya cargadas
+      .catch((err) => { setErrorCarga(true); avisar.current(mensajeError(err)) })
       .finally(() => setCargando(false))
   }, [])
 
@@ -45,12 +52,14 @@ const LibrosProvider = ({ children }) => {
   // Vuelve a leer el catálogo (por ejemplo, cuando un vendedor publica o da de baja un libro)
   const recargar = useCallback(() => {
     conFotos.current = new Set()
-    return getLibros().then(setLibros)
+    return getLibros()
+      .then((l) => { setLibros(l); setErrorCarga(false) })
+      .catch((err) => { setErrorCarga(true); avisar.current(mensajeError(err)) })
   }, [])
   // Vuelve a leer las categorías (cuando el administrador crea una nueva)
   const recargarCategorias = useCallback(() => getCategorias().then((c) => { setCategorias(c); setImagenesCategorias(imagenesDeCategorias()) }), [])
 
-  const value = useMemo(() => ({ libros, categorias, imagenesCategorias, cargando, recargar, recargarCategorias }), [libros, categorias, imagenesCategorias, cargando, recargar, recargarCategorias])
+  const value = useMemo(() => ({ libros, categorias, imagenesCategorias, cargando, errorCarga, recargar, recargarCategorias }), [libros, categorias, imagenesCategorias, cargando, errorCarga, recargar, recargarCategorias])
   return <LibrosCtx.Provider value={value}>{children}</LibrosCtx.Provider>
 }
 

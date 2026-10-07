@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useLibros } from './useLibros'
 import { useToast } from './useToast'
 import { enRevision, getVendedor, guardarVendedor, nuevoIdPublicacion } from '../services/vendedorService'
 import { esModeracionError, modificarLibro } from '../services/moderacionService'
 import { darDeBajaApi, crearLibroApi, getImagenesApi, reactivarApi, subirImagenApi } from '../api/librosApi'
 import { traerPublicaciones } from '../services/publicacionesService'
+import useMisLibros from './useMisLibros'
 import { idsDeCategorias } from '../api/categoriasApi'
 import { actualizarUsuarioApi, solicitarVendedorApi } from '../api/usuariosApi'
 import { dataUrlAFile } from '../utils/adaptadores'
@@ -41,17 +42,12 @@ const useVendedor = (user) => {
   }
   const cambiarLibros = (fn, mensaje) => cambiar({ ...vendedor, pub: fn(vendedor.pub) }, mensaje)
 
-  // Con el back: la lista del panel sale de GET /libros/mios (estado de moderación y de publicación según el servidor)
-  useEffect(() => {
-    if (!USAR_API || vendedor.estado !== 'aprobado') return undefined
-    let vigente = true
-    traerPublicaciones(vendedor.pub, libros).then((pub) => {
-      if (vigente && pub && JSON.stringify(pub) !== JSON.stringify(vendedor.pub)) cambiar({ ...vendedor, pub })
-    }).catch(() => {})
-    return () => { vigente = false }
-    // Solo al abrir el panel
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  // Con el back: la lista del panel sale de GET /libros/mios (estado de moderación y de publicación según el servidor).
+  // `estadoLibros` distingue "cargando", "ok" (si no hay libros, estado vacío) y "error" (con toast y "Reintentar").
+  const { estado: estadoLibros, reintentar } = useMisLibros(USAR_API && vendedor.estado === 'aprobado', async () => {
+    const pub = await traerPublicaciones(vendedor.pub, libros)
+    if (pub && JSON.stringify(pub) !== JSON.stringify(vendedor.pub)) cambiar({ ...vendedor, pub })
+  })
 
   const solicitar = async (datos) => {
     if (USAR_API) {
@@ -165,7 +161,7 @@ const useVendedor = (user) => {
     return revision ? { ...resto, modC: motivo } : { ...resto, mod: 'RECHAZADO', modC: motivo }
   }), 'Libro rechazado (simulado)')
 
-  return { vendedor, solicitar, aprobarSolicitud, guardarLibro, alternarBaja, aprobarLibro, rechazarLibro }
+  return { vendedor, estadoLibros, reintentar, solicitar, aprobarSolicitud, guardarLibro, alternarBaja, aprobarLibro, rechazarLibro }
 }
 
 export default useVendedor

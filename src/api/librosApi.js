@@ -1,6 +1,7 @@
 import api, { RAIZ } from './axiosConfig'
 import { aLibroFront } from '../utils/adaptadores'
 import { listarCategoriasApi } from './categoriasApi'
+import { esListaVacia } from '../utils/errorApi'
 
 // LibrosController + ImagenesLibroController
 
@@ -14,7 +15,7 @@ export const traerPaginas = async (url, params = {}) => {
     try {
       pagina = (await api.get(url, { params: { ...params, page, size: TAMANIO } })).data
     } catch (err) {
-      if (err.response && err.response.status === 404) return todo
+      if (esListaVacia(err)) return todo
       throw err
     }
     todo.push(...(pagina.content || []))
@@ -37,16 +38,17 @@ export const getLibrosApi = async () => {
 }
 
 // GET /libros/mios -> publicaciones del vendedor logueado, de cualquier estado (en revisión, rechazadas, de baja…).
-// Devuelve [] si no tiene, o null si el back no tiene este endpoint todavía (hoy lo toma como /libros/{id} con id "mios" y
-// responde 400): en ese caso quien llama usa su respaldo. Acepta una lista o un Page de Spring.
-export const listarMisLibrosApi = async () => {
-  try {
-    const { data } = await api.get('/libros/mios', { params: { page: 0, size: TAMANIO } })
-    return (Array.isArray(data) ? data : data.content || []).map(aLibroFront)
-  } catch (err) {
-    if (err.response) return null
-    throw err
-  }
+// El back todavía NO tiene este endpoint (hoy lo toma como /libros/{id} con id "mios" y responde 400). Mientras tanto
+// MIS_LIBROS_EN_BACK = false y esta función devuelve null: quien llama usa su respaldo (publicacionesService.js).
+// Cuando el back lo sume: ponerlo en true. Contrato esperado:
+//   - 200 Page<LibroResponse> con los libros del vendedor.
+//   - 404 { error } (ListaVaciaException) si no tiene libros / el filtro no coincide / la página no existe -> acá se lee como [].
+//   - 401/403/500/red -> se propagan (nunca se confunden con "sin libros"); el que llama muestra mensajeError().
+export const MIS_LIBROS_EN_BACK = false
+
+export const getMisLibrosApi = async () => {
+  if (!MIS_LIBROS_EN_BACK) return null
+  return (await traerPaginas('/libros/mios')).map(aLibroFront)
 }
 
 export const getLibroApi = async (id) => aLibroFront((await api.get(`/libros/${id}`)).data)
@@ -64,7 +66,7 @@ export const getImagenesApi = async (idLibro) => {
     const { data } = await api.get(`/imagenes-libro/libro/${idLibro}`)
     return [...data].sort((a, b) => (a.orden ?? 0) - (b.orden ?? 0)).map((i) => urlImagen(i.id))
   } catch (err) {
-    if (err.response && err.response.status === 404) return []
+    if (esListaVacia(err)) return []
     throw err
   }
 }
