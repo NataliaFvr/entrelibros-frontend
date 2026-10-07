@@ -129,7 +129,7 @@ const provinciaDe = (direccion = '') => (direccion.split(', ').pop() || '').repl
 export const listarOrdenes = () =>
   getUsuarios().flatMap((u) =>
     leer(clavePedidos(u), []).map((o) => ({
-      n: o.n, fecha: o.date, comprador: `${u.nombre} ${u.apellido}`, provincia: provinciaDe(o.addr),
+      n: o.n, fecha: o.date, comprador: `${u.nombre} ${u.apellido}`, provincia: provinciaDe(o.addr), destino: o.addr,
       subtotal: o.sub, envio: o.env, total: o.sub + o.env, estadoPago: estadoPago(o),
       proveedor: o.proveedor || 'tarjeta', items: o.its,
     })))
@@ -172,7 +172,7 @@ export const cargarOrdenes = async () => {
   const [ordenes, pagos] = await conBack(() => Promise.all([listarOrdenesAdminApi(), listarPagosAdminApi()]))
   const proveedores = new Map(pagos.map((p) => [p.idOrden, p.proveedor]))
   return ordenes.map((o) => ({
-    n: o.n, fecha: o.date, comprador: o.comprador, provincia: o.addr, subtotal: o.sub, envio: o.env, total: o.sub + o.env,
+    n: o.n, fecha: o.date, comprador: o.comprador, provincia: o.dest.prov || o.addr, destino: o.addr, subtotal: o.sub, envio: o.env, total: o.sub + o.env,
     estadoPago: o.pago, proveedor: proveedores.get(o.idOrden) || 'tarjeta', items: o.its,
   }))
 }

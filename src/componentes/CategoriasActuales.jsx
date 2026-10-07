@@ -1,4 +1,5 @@
 import './CategoriasActuales.css'
+import CategoriaCirculo from './CategoriaCirculo'
 
 // Lista de categorías con su foto, estado y acciones. `categorias`: [{ nombre, imagen, activa }]
 const CategoriasActuales = ({ categorias, onEditar, onBaja, onReactivar }) => {
@@ -9,7 +10,7 @@ const CategoriasActuales = ({ categorias, onEditar, onBaja, onReactivar }) => {
       <ul className="cat-adm">
         {categorias.map((c) => (
           <li key={c.nombre} className={`cat-adm-it${c.activa ? '' : ' off'}`}>
-            <span className="cat-adm-img" aria-hidden="true">{c.imagen ? <img src={c.imagen} alt="" /> : c.nombre[0]}</span>
+            <span className="cat-adm-img" aria-hidden="true"><CategoriaCirculo nombre={c.nombre} src={c.imagen} claseImg="" /></span>
             <span className="cat-adm-n">
               {c.nombre}
               {!c.activa && <em className="cat-adm-b">De baja</em>}

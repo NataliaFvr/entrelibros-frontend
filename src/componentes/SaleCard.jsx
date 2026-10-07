@@ -13,6 +13,7 @@ const SaleCard = ({ venta }) => {
       {venta.its.map((i) => <SummaryRow key={i.t} titulo={i.t} detalle={`x${i.q}`} valor={fmt(i.p * i.q)} />)}
       <SummaryRow titulo="Total" valor={fmt(total)} total />
       <small className="ord-a">Comprador: {venta.comprador}</small>
+      {venta.destino && <small className="ord-a">Enviar a: {venta.destino}</small>}
     </div>
   )
 }

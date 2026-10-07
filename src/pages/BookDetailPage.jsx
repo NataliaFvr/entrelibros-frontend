@@ -58,10 +58,11 @@ const Detalle = ({ libro, libros }) => {
     }
   }
 
-  const comprar = () => {
+  const comprar = async () => {
     if (propio || requiereLogin('cart')) return
-    agregar(libro) // Solo lo suma al carrito: el Marcapáginas se limpia recién cuando el pago se aprueba
-    navigate('/carrito')
+    // Solo lo suma al carrito: el Marcapáginas se limpia recién cuando el pago se aprueba.
+    // Con el back espera a que el libro esté en el carrito antes de abrir la estantería.
+    if (await agregar(libro)) navigate('/carrito')
   }
 
   return (
@@ -79,7 +80,7 @@ const Detalle = ({ libro, libros }) => {
         <div className="buy-col">
           <BuyBox libro={libro} stock={stockDe(libro)} onComprar={comprar} onCarrito={alCarrito}
             propio={propio} soloLectura={esAdmin} onEditar={() => navigate(rutaEdicion(libro))} editarDeshabilitado={propio && enRevision(libro)} />
-          <SellerBox vendedor={libro.v} cantidad={delVendedor.length} destacarReputacion={esUsado} propio={propio} enlazar={!esAdmin} />
+          <SellerBox vendedor={libro.v} vendedorId={libro.vId} cantidad={delVendedor.length} destacarReputacion={esUsado} propio={propio} enlazar={!esAdmin} />
         </div>
       </div>
       <SpecSection libro={libro} />

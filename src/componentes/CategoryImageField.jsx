@@ -28,7 +28,7 @@ const CategoryImageField = ({ valor, onChange }) => {
             {valor ? 'Cambiar foto' : 'Subir foto'}
             <input type="file" accept="image/jpeg,image/png" hidden onChange={elegir} />
           </label>
-          {valor && <button className="more" type="button" onClick={() => setArchivo(valor)}>Recortar</button>}
+          {valor && valor.startsWith('data:') && <button className="more" type="button" onClick={() => setArchivo(valor)}>Recortar</button>}
           {valor && <button className="more" type="button" onClick={() => onChange('')}>Quitar</button>}
         </div>
       </div>

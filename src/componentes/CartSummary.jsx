@@ -3,19 +3,22 @@ import { fmt } from '../utils/format'
 import SummaryRow from './SummaryRow'
 import AddressSelect from './AddressSelect'
 
-// Resumen de la estantería + dirección de envío + botón para pasar al pago
-const CartSummary = ({ sub, envio, direcciones, elegida, onElegir, onFinalizar }) => {
+// Resumen de la estantería + dirección de envío + botón para pasar al pago.
+// `envio` puede ser null: todavía no se conoce (el back lo calcula según la zona de la dirección elegida).
+const CartSummary = ({ sub, envio, direcciones, elegida, onElegir, onFinalizar, enviando = false }) => {
   const navigate = useNavigate()
   return (
     <div className="card csum">
       <h3 className="fr">Resumen</h3>
       <SummaryRow titulo="Libros" valor={fmt(sub)} />
-      <SummaryRow titulo="Envío" valor={fmt(envio)} />
-      <SummaryRow titulo="Total" valor={fmt(sub + envio)} total />
+      <SummaryRow titulo="Envío" valor={envio == null ? 'A calcular' : fmt(envio)} />
+      <SummaryRow titulo="Total" valor={fmt(sub + (envio ?? 0))} total />
       {direcciones.length ? (
         <>
           <AddressSelect direcciones={direcciones} elegida={elegida} onElegir={onElegir} />
-          <button className="btn main" type="button" onClick={onFinalizar}>Procesar compra de la estantería</button>
+          <button className="btn main" type="button" onClick={onFinalizar} disabled={enviando}>
+            {enviando ? 'Procesando…' : 'Procesar compra de la estantería'}
+          </button>
         </>
       ) : (
         <>

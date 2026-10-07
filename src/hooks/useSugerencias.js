@@ -25,7 +25,7 @@ const useSugerencias = (libros, texto) => {
     return [
       ...autores.map((a) => ({ tipo: 'autor', key: `a-${a}`, nombre: a })),
       ...libs.map((l) => ({ tipo: 'libro', key: `l-${l.id}`, libro: l })),
-      ...tiendas.map((t) => ({ tipo: 'vendedor', key: `v-${t.tienda}`, ...t })),
+      ...tiendas.map((t) => ({ tipo: 'vendedor', key: `v-${t.id ?? t.tienda}`, ...t })),
       { tipo: 'todos', key: 'todos' },
     ]
   }, [libros, texto])

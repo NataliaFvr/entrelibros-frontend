@@ -26,7 +26,7 @@ const SearchSuggestions = ({ items, texto, activo, onElegir, onCerrar }) => {
             {primerVendedor && <div className="sg-h" role="presentation">Vendedores recomendados</div>}
             {it.tipo === 'vendedor' ? (
               // onMouseDown evita que el input pierda el foco (y cierre la lista) antes de que el enlace reciba el clic
-              <Link to={rutaVendedor(it.tienda)} className={cls} role="option" aria-selected={i === activo}
+              <Link to={rutaVendedor(it.tienda, it.id)} className={cls} role="option" aria-selected={i === activo}
                 onMouseDown={(e) => e.preventDefault()} onClick={onCerrar}>
                 <span className="sgi au">{initials(it.tienda, 2).toUpperCase()}</span>
                 <span><b>{it.tienda}</b><small>Vendedor · {it.cantidad} {plural(it.cantidad, 'libro', 'libros')}</small></span>

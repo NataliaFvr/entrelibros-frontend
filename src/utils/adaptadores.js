@@ -1,4 +1,5 @@
 import { TONES } from './colors'
+import { destinoTexto } from './format'
 
 // Traductores BACK -> FRONT (y de vuelta). El front trabaja con su propio modelo (libro: t, a, ed, base, d, p, usado…;
 // pedido: n, its, sub, env…) y el back con sus DTOs. Todo el conocimiento de los nombres del back vive acá:
@@ -15,8 +16,9 @@ export const publicacionAFront = (e) => (e === 'DADA_DE_BAJA' ? 'baja' : 'activo
 
 /* ---------------- Direcciones ---------------- */
 
-// DireccionResponse { id, alias, calle, ciudad, provincia, cp, principal } -> dirección del front (provincia -> prov).
-// El back garantiza que, si hay direcciones, exactamente una viene con principal = true: el front no lo recalcula.
+// DireccionResponse { id, alias, calle, ciudad, provincia, cp } -> dirección del front (provincia -> prov).
+// OJO: el back todavía NO informa cuál es la principal (no hay campo `principal` ni PATCH /direcciones/{id}/principal).
+// Si algún día lo informa, `principal` llega acá y se respeta; si no, direccionesApi decide la principal (ver resolverPrincipal).
 export const aDireccionFront = (d) => ({
   id: d.id,
   alias: d.alias,
@@ -24,7 +26,7 @@ export const aDireccionFront = (d) => ({
   ciudad: d.ciudad,
   prov: d.provincia,
   cp: d.cp || '',
-  principal: Boolean(d.principal),
+  principal: d.principal === true,
 })
 
 /* ---------------- Fechas ---------------- */
@@ -63,18 +65,25 @@ export const aLibroFront = (l) => {
 /* ---------------- Usuarios ---------------- */
 
 // UsuarioResponse -> usuario del front. `id` es el id numérico del back; `nombreUsuario` sigue siendo la clave de lo local.
+// `avatar` = clave del avatar por defecto elegido ('' = ninguno); `tieneFoto` = hay una foto subida (GET /usuarios/{id}/foto).
+// No hay `verificado`: el back no deja iniciar sesión a una cuenta sin verificar (403 email_no_verificado), así que
+// cualquier usuario que llega hasta acá ya está verificado.
 export const aUsuarioFront = (u) => ({
   id: u.id, nombreUsuario: u.nombreUsuario, nombre: u.nombre || '', apellido: u.apellido || '', email: u.email || '',
   rol: u.rol, estado: u.estado || 'ACTIVO', provincia: u.provincia || '', tienda: u.nombreTienda || '',
-  estadoSolicitud: u.estadoSolicitudVendedor || 'NINGUNO', verificado: true,
+  estadoSolicitud: u.estadoSolicitudVendedor || 'NINGUNO',
+  avatar: u.avatar || '', tieneFoto: Boolean(u.tieneFoto),
 })
 
 /* ---------------- Notificaciones ---------------- */
 
-// NotificacionResponse { id, tipo, mensaje, leida, fecha, idLibro } -> { id, texto, fecha(ms), leida }
+// NotificacionResponse { id, tipo, mensaje, leida, fecha, idLibro, idOrden } -> { id, texto, fecha(ms), leida }
+// El front usa el id como texto (key de React); al hablar con el back se vuelve número (idNotificacionApi).
 export const aNotificacionFront = (n) => ({
-  id: String(n.id), texto: n.mensaje, fecha: isoAMs(n.fecha) ?? Date.now(), leida: Boolean(n.leida), tipo: n.tipo, idLibro: n.idLibro ?? null,
+  id: String(n.id), texto: n.mensaje, fecha: isoAMs(n.fecha) ?? Date.now(), leida: Boolean(n.leida), tipo: n.tipo,
+  idLibro: n.idLibro ?? null, idOrden: n.idOrden ?? null,
 })
+export const idNotificacionApi = (id) => Number(id)
 
 /* ---------------- Reseñas ---------------- */
 
@@ -90,6 +99,13 @@ export const aReseniaVendedorFront = (r) => ({
   id: r.id, st: r.clasificacion, t: r.comentario || '', date: r.fecha, u: r.nombreComprador || '', nc: r.nombreComprador || '', libro: '',
 })
 
+/* ---------------- Carrito ---------------- */
+
+// CarritoItemResponse { id, cantidad, idLibro, tituloLibro, precioUnitario, subtotal } -> ítem del carrito del front.
+// `id` es el id del LIBRO (así lo usa toda la interfaz); `idItem` es el id de la fila del carrito en el back, que piden
+// PATCH y DELETE /carrito/items/{idItem}. El precio no se guarda acá: la pantalla lo toma del catálogo (con el descuento aplicado).
+export const aItemCarritoFront = (i) => ({ id: i.idLibro, q: i.cantidad, idItem: i.id })
+
 /* ---------------- Pedidos ---------------- */
 
 // El front manda "Ciudad Autónoma de Buenos Aires" (con tildes); el back compara contra "CABA" o "CIUDAD AUTONOMA DE BUENOS AIRES"
@@ -99,14 +115,39 @@ export const provinciaParaBack = (prov = '') => (/^(ciudad aut[oó]noma de bueno
 // OrdenResponse (con items) -> pedido del front { n, date, its, addr, sub, env, total, est, pago, reserva, proveedor }
 const ESTADO_TEXTO = { PENDIENTE: 'Pendiente', SIMULADO_APROBADO: 'Confirmada', RECHAZADO: 'Rechazada', CANCELADO: 'Cancelada', VENCIDO: 'Vencida' }
 
-export const aPedidoFront = (o) => ({
-  n: String(o.id), idOrden: o.id, date: isoADia(o.fecha),
-  its: (o.items || []).map((i) => ({ id: i.idLibro, q: i.cantidad, p: i.precioUnitario, t: i.tituloLibro, idItem: i.idOrdenItem, idVendedor: i.idVendedor })),
-  addr: o.provinciaDestino || '', sub: o.subtotal ?? 0, env: o.costoEnvio ?? 0,
-  est: ESTADO_TEXTO[o.estadoPago] || o.estadoPago, pago: o.estadoPago,
-  reserva: o.estadoPago === 'PENDIENTE' ? isoAMs(o.reservaHasta) ?? undefined : undefined,
-  comprador: `${o.nombreComprador || ''}`.trim(),
+// Dirección de entrega de la orden: el back la guarda copiada al hacer el checkout (calleDestino, ciudadDestino, cpDestino
+// + provinciaDestino). Una orden vieja puede traer solo la provincia: en ese caso `calle` queda vacía y se muestra la provincia.
+export const aDestinoFront = (o) => ({
+  calle: o.calleDestino || '', ciudad: o.ciudadDestino || '', cp: o.cpDestino || '', prov: o.provinciaDestino || '',
 })
+
+export const aPedidoFront = (o) => {
+  const dest = aDestinoFront(o)
+  return {
+    n: String(o.id), idOrden: o.id, date: isoADia(o.fecha),
+    its: (o.items || []).map((i) => ({ id: i.idLibro, q: i.cantidad, p: i.precioUnitario, t: i.tituloLibro, idItem: i.idOrdenItem, idVendedor: i.idVendedor })),
+    dest, addr: destinoTexto(dest), // addr = texto listo para mostrar: "calle, ciudad, Provincia (CP)"
+    sub: o.subtotal ?? 0, env: o.costoEnvio ?? 0, // env = costoEnvio REAL que calculó el back al confirmar la compra
+    est: ESTADO_TEXTO[o.estadoPago] || o.estadoPago, pago: o.estadoPago,
+    reserva: o.estadoPago === 'PENDIENTE' ? isoAMs(o.reservaHasta) ?? undefined : undefined,
+    comprador: `${o.nombreComprador || ''}`.trim(),
+  }
+}
+
+/* ---------------- Envío ---------------- */
+
+// El back cobra UN costo fijo por orden según la zona de destino (ZonaEnvio: CABA | PROVINCIA_BA | RESTO_PAIS).
+// Mismo criterio que CarritoServiceImpl.mapearProvinciaAZona: sin tildes ni mayúsculas.
+const sinTildes = (t = '') => t.normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().toUpperCase()
+export const zonaEnvioDe = (provincia) => {
+  const p = sinTildes(provincia)
+  if (p === 'CABA' || p === 'CIUDAD AUTONOMA DE BUENOS AIRES') return 'CABA'
+  if (p === 'BUENOS AIRES' || p === 'PROVINCIA DE BUENOS AIRES' || p === 'PROVINCIA_BA') return 'PROVINCIA_BA'
+  return 'RESTO_PAIS'
+}
+
+// EnvioResponse[] { id, zona, costoFijo } -> { CABA: 1500, PROVINCIA_BA: 2500, RESTO_PAIS: 3500 }
+export const aTarifasEnvioFront = (lista = []) => Object.fromEntries(lista.map((e) => [e.zona, e.costoFijo]))
 
 // Venta del vendedor: OrdenVendedorResponse { id, estado, idOrden } + su OrdenResponse (GET /ordenes/{idOrden}, con items)
 // -> { n, date, est, its, comprador }, el formato que consumen SellerSales, SaleCard y SellerStats.
@@ -122,8 +163,49 @@ export const aVentaFront = (ordenVendedor, orden, idVendedor, libros = []) => {
       return { t: i.tituloLibro || (l && l.t) || 'Libro', q: i.cantidad, p: i.precioUnitario, cat: l && l.cat, usado: Boolean(l && l.usado) }
     })
   if (!its.length) return null
-  return { n: String(orden.id), date: isoADia(orden.fecha), est: ESTADO_TEXTO[orden.estadoPago], its, comprador: `${orden.nombreComprador || ''}`.trim() }
+  return {
+    n: String(orden.id), date: isoADia(orden.fecha), est: ESTADO_TEXTO[orden.estadoPago], its, comprador: `${orden.nombreComprador || ''}`.trim(),
+    destino: destinoTexto(aDestinoFront(orden)), // adónde hay que mandar el paquete
+  }
 }
+
+/* ---------------- Estadísticas del vendedor ---------------- */
+
+// Desglose { nombre, unidades, ingresos } -> { nombre, unidades, ingresos } (sin nulos)
+const aDesgloseFront = (d) => ({ nombre: d.nombre || 'Otros', unidades: d.unidades ?? 0, ingresos: d.ingresos ?? 0 })
+const NOMBRE_ESTADO = { NUEVO: 'Nuevos', USADO: 'Usados' }
+
+// EstadisticasVendedorResponse -> el modelo que muestra SellerStats (el mismo que arma utils/estadisticas.js en modo demo):
+// { ingresos, unidades, ventas, promedio, categorias: [...], estados: [...] }
+export const aEstadisticasFront = (r) => ({
+  ingresos: r.ingresosTotales ?? 0,
+  unidades: r.unidadesVendidas ?? 0,
+  ventas: r.cantidadVentas ?? 0,
+  promedio: r.promedioPorVenta ?? 0,
+  categorias: (r.ventasPorCategoria || []).map(aDesgloseFront),
+  estados: (r.ventasPorEstado || []).map(aDesgloseFront).map((d) => ({ ...d, nombre: NOMBRE_ESTADO[d.nombre] || d.nombre })),
+})
+
+/* ---------------- Categorías ---------------- */
+
+// Categoria { id, nombre } (GET /categorias) o CategoriaResponse { id, nombre, tieneImagen } -> { id, nombre, tieneImagen }.
+// GET /categorias hoy NO informa tieneImagen (undefined): se asume que puede tenerla y el <img> cae al círculo con la inicial si da 404.
+export const aCategoriaFront = (c) => ({ id: c.id, nombre: c.nombre, tieneImagen: c.tieneImagen !== false })
+
+/* ---------------- Vendedor público ---------------- */
+
+// GET /vendedores/{id}. El contrato todavía no existe en el back: se aceptan los nombres más probables
+// (UsuarioResponse: nombreTienda / nombre / provincia / nombreUsuario) y se ignora lo que no venga.
+// -> { id, tienda, usuario, ubicacion, desde, descripcion, verificado }
+export const aVendedorPublicoFront = (v) => ({
+  id: v.id ?? v.idVendedor ?? null,
+  tienda: v.nombreTienda || v.tienda || [v.nombre, v.apellido].filter(Boolean).join(' ') || v.nombreUsuario || '',
+  usuario: v.nombreUsuario || '',
+  ubicacion: v.provincia || '',
+  desde: v.fechaRegistro ? String(v.fechaRegistro).slice(0, 4) : '',
+  descripcion: v.descripcion || '',
+  verificado: true, // un vendedor listado es un vendedor aprobado por un administrador
+})
 
 /* ---------------- Imágenes ---------------- */
 

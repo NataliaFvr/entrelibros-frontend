@@ -6,7 +6,7 @@ import { USAR_API } from '../utils/modoApi'
 
 // Datos públicos de un vendedor a partir del :id de la URL (slug de la tienda).
 // Devuelve { tienda, usuario?, ubicacion?, desde?, descripcion?, foto?, verificado } o null si no existe.
-// Back: GET /vendedores/{id} (404 si no existe)
+// SOLO DEMO (el :id es el slug). Con el back el :id es numérico y lo resuelve hooks/useVendedorPublico.js (GET /vendedores/{id}).
 export const buscarVendedor = (slug, libros) => {
   if (!USAR_API && slugVendedor(VENDEDOR_PRUEBA.tienda) === slug) return VENDEDOR_PRUEBA
 

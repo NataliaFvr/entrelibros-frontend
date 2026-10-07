@@ -24,14 +24,14 @@ const Reputacion = ({ promedio, cantidad, destacar }) => {
 }
 
 // `propio`: el libro es de quien mira la ficha -> en lugar de "ver más libros" se lo lleva a gestionar su tienda
-const SellerBox = ({ vendedor, cantidad, destacarReputacion = false, propio = false, enlazar = true }) => {
+const SellerBox = ({ vendedor, vendedorId = null, cantidad, destacarReputacion = false, propio = false, enlazar = true }) => {
   const navigate = useNavigate()
   const rep = useMemo(() => reputacionVendedor(vendedor), [vendedor])
   return (
     <div className="buy">
       <div className="sv-head">
         <span className="sv-av">{initials(vendedor, 2)}</span>
-        <div><small>{propio ? 'Tu publicación' : 'Vendido por'}</small><b>{enlazar ? <Link to={rutaVendedor(vendedor)} className="lnk">{vendedor}</Link> : vendedor}</b></div>
+        <div><small>{propio ? 'Tu publicación' : 'Vendido por'}</small><b>{enlazar ? <Link to={rutaVendedor(vendedor, vendedorId)} className="lnk">{vendedor}</Link> : vendedor}</b></div>
       </div>
       <Reputacion {...rep} destacar={destacarReputacion} />
       <div className="sv-meta">{cantidad} {plural(cantidad, 'libro publicado', 'libros publicados')}</div>

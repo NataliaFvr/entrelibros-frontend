@@ -29,7 +29,7 @@ const SearchBox = () => {
     cerrar()
     if (it.tipo === 'autor') navigate(`/libros?autor=${encodeURIComponent(it.nombre)}`)
     else if (it.tipo === 'libro') navigate(`/libro/${it.libro.id}`)
-    else if (it.tipo === 'vendedor') navigate(rutaVendedor(it.tienda))
+    else if (it.tipo === 'vendedor') navigate(rutaVendedor(it.tienda, it.id))
     else buscar(texto)
   }
 

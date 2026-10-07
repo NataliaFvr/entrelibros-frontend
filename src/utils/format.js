@@ -17,6 +17,11 @@ export const enmascararMail = (email) => {
 export const direccionTexto = (a) =>
   `${a.alias} — ${a.calle}, ${a.ciudad}, ${a.prov}${a.cp ? ` (${a.cp})` : ''}`
 
+// Dirección de entrega de un pedido (sin alias): Av. Rivadavia 1234, San Justo, Buenos Aires (1754)
+// Si el pedido solo conoce la provincia (órdenes viejas, sin calle), devuelve solo la provincia.
+export const destinoTexto = ({ calle, ciudad, prov, cp } = {}) =>
+  calle ? `${[calle, ciudad, prov].filter(Boolean).join(', ')}${cp ? ` (${cp})` : ''}` : prov || ''
+
 // 65 min en ms -> "65:00"
 export const mmss = (ms) => {
   const s = Math.max(0, Math.ceil(ms / 1000))

@@ -20,7 +20,7 @@ const OrdenDetalleModal = ({ orden: o, onCerrar }) => {
       <div>
         <SummaryRow titulo="Comprador" valor={<b>{o.comprador}</b>} />
         <SummaryRow titulo="Fecha" valor={<b>{fechaCorta(o.fecha)}</b>} />
-        <SummaryRow titulo="Destino" valor={<b>{o.provincia}</b>} />
+        <SummaryRow titulo="Destino" valor={<b>{o.destino || o.provincia}</b>} />
       </div>
       <div>
         <h3 className="fr adm-card-t">Libros</h3>

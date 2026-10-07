@@ -1,26 +1,25 @@
 import api from './axiosConfig'
-import { aPedidoFront } from '../utils/adaptadores'
-import { esListaVacia } from '../utils/errorApi'
+import { aPedidoFront, provinciaParaBack } from '../utils/adaptadores'
 
-// CarritoController + OrdenController + PagoController
+// OrdenController + PagoController (el carrito está en carritoApi.js)
 
 const lista = async (pedido) => {
   try { return (await pedido()).data } catch (err) {
-    if (esListaVacia(err)) return [] // ListaVaciaException: "sin elementos" no es un error
+    if (err.response && err.response.status === 404) return [] // ListaVaciaException: "sin elementos" no es un error
     throw err
   }
 }
 
-// El carrito vive en el front hasta confirmar la compra; ahí se copia al carrito del back (que arma la orden)
-export const sincronizarCarritoApi = async (idUsuario, carrito) => {
-  const actuales = await lista(() => api.get('/carrito'))
-  await Promise.all(actuales.map((i) => api.delete(`/carrito/items/${i.id}`)))
-  for (const c of carrito) await api.post('/carrito/items', { idUsuario, idLibro: c.id, cantidad: c.q })
-}
-
-// POST /carrito/checkout -> OrdenResponse PENDIENTE con reservaHasta (1 hora)
-export const checkoutApi = async (idUsuario, provinciaDestino) =>
-  (await api.post('/carrito/checkout', { idUsuario, provinciaDestino })).data
+// POST /carrito/checkout { idDireccion, provinciaDestino } -> OrdenResponse PENDIENTE con reservaHasta (1 hora).
+// El carrito ya está en el back (api/carritoApi.js): el checkout lo convierte en orden y lo vacía.
+// idDireccion es lo que manda la interfaz: el back copia calle/ciudad/CP de esa dirección a la orden y la provincia sale de
+// ella (ignora provinciaDestino). provinciaDestino se manda igual como respaldo, por si la dirección no tuviera id.
+// El usuario NO viaja en el cuerpo: el back lo saca del token.
+export const checkoutApi = async ({ idDireccion, provincia }) =>
+  (await api.post('/carrito/checkout', {
+    ...(idDireccion != null ? { idDireccion } : {}),
+    ...(provincia ? { provinciaDestino: provinciaParaBack(provincia) } : {}),
+  })).data
 
 // GET /ordenes y GET /ordenes/comprador devuelven las órdenes SIN items: el detalle (GET /ordenes/{id}) los trae
 const conDetalle = (ordenes) => Promise.all(ordenes.map(async (o) => {

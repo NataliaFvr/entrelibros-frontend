@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useParams, useSearchParams } from 'react-router-dom'
+import { Navigate, useParams, useSearchParams } from 'react-router-dom'
 import useVendedorPublico from '../hooks/useVendedorPublico'
 import useResenasVendedor from '../hooks/useResenasVendedor'
 import AccountTabs from '../componentes/AccountTabs'
@@ -12,7 +12,7 @@ import SellerCatalog from '../componentes/SellerCatalog'
 import NotFoundPage from './NotFoundPage'
 
 const Perfil = ({ vendedor, libros }) => {
-  const { resenias, promedio, miResena, libroComprado, esPropio, puedeResenar, publicar } = useResenasVendedor(vendedor.tienda)
+  const { resenias, promedio, miResena, libroComprado, esPropio, puedeResenar, publicar } = useResenasVendedor(vendedor.tienda, vendedor.id)
   const [modal, setModal] = useState(false)
   const [params, setParams] = useSearchParams()
   const tab = params.get('tab') === 'resenias' ? 'resenias' : 'libros' // /vendedor/:id?tab=resenias
@@ -43,11 +43,12 @@ const Perfil = ({ vendedor, libros }) => {
 // /vendedor/:id — si el vendedor no existe, muestra el 404
 const PublicSellerProfile = () => {
   const { id } = useParams()
-  const { cargando, vendedor, libros } = useVendedorPublico(id)
+  const { cargando, vendedor, libros, redirigirA } = useVendedorPublico(id)
 
+  if (redirigirA != null) return <Navigate to={`/vendedor/${redirigirA}`} replace />
   if (cargando) return <main className="usr" />
   if (!vendedor) return <NotFoundPage />
-  return <Perfil key={vendedor.tienda} vendedor={vendedor} libros={libros} />
+  return <Perfil key={vendedor.id ?? vendedor.tienda} vendedor={vendedor} libros={libros} />
 }
 
 export default PublicSellerProfile

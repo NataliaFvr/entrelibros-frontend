@@ -27,8 +27,9 @@ const AccountPage = () => {
   }
   const guardar = async (valores, nuevoPerfil) => {
     try {
-      await actualizarPerfil(valores, nuevoPerfil)
-      navigate('/cuenta')
+      const r = await actualizarPerfil(valores, nuevoPerfil)
+      if (r && r.sesionCerrada) navigate('/ingresar') // cambió el e-mail: hay que volver a ingresar
+      else navigate('/cuenta')
     } catch (err) {
       toast(err.message) // con el back: duplicado, validación, etc.
     }

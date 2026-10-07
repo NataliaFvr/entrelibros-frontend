@@ -13,8 +13,8 @@ const SellerMatches = ({ tiendas }) => {
     <section className="sm" aria-label="Vendedores que coinciden con tu búsqueda">
       <h2>{plural(tiendas.length, 'Vendedor', 'Vendedores')}</h2>
       <div className="sm-list">
-        {tiendas.map(({ tienda, cantidad }) => (
-          <Link key={tienda} to={rutaVendedor(tienda)} className="sm-card">
+        {tiendas.map(({ tienda, cantidad, id }) => (
+          <Link key={id ?? tienda} to={rutaVendedor(tienda, id)} className="sm-card">
             <span className="sm-av">{initials(tienda, 2).toUpperCase()}</span>
             <span className="sm-txt"><b>{tienda}</b><small>{cantidad} {plural(cantidad, 'libro publicado', 'libros publicados')}</small></span>
             <span className="sm-go">Ver perfil →</span>

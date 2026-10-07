@@ -10,10 +10,9 @@ const SellerCatalog = ({ tienda, libros }) => {
   const { requiereLogin } = useAuth()
   const { agregar } = useCompra()
 
-  const comprar = (libro) => {
+  const comprar = async (libro) => {
     if (requiereLogin('cart')) return
-    agregar(libro)
-    navigate('/carrito')
+    if (await agregar(libro)) navigate('/carrito') // con el back espera a que el libro esté en el carrito
   }
   const alCarrito = (libro) => { if (!requiereLogin('cart')) agregar(libro) }
 

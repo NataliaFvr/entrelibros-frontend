@@ -1,11 +1,15 @@
 import api from './axiosConfig'
 import { traerPaginas } from './librosApi'
-import { aNotificacionFront } from '../utils/adaptadores'
+import { aNotificacionFront, idNotificacionApi } from '../utils/adaptadores'
 
 // NotificacionController, MarcapaginaController y ContactoController
 
 export const listarNotificacionesApi = async () => (await traerPaginas('/notificaciones')).map(aNotificacionFront)
-// El back solo sabe marcar TODAS como leídas (no hay PATCH por id ni DELETE)
+// Se gestionan por id: PATCH /notificaciones/{id}/leida y DELETE /notificaciones/{id} (solo las propias).
+// PATCH /notificaciones/marcar-leidas marca todas; GET /notificaciones/no-leidas/cantidad devuelve { cantidad } (0 si no hay).
+export const marcarLeidaApi = async (id) => aNotificacionFront((await api.patch(`/notificaciones/${idNotificacionApi(id)}/leida`)).data)
+export const eliminarNotificacionApi = async (id) => (await api.delete(`/notificaciones/${idNotificacionApi(id)}`)).data
+export const cantidadNoLeidasApi = async () => (await api.get('/notificaciones/no-leidas/cantidad')).data.cantidad
 export const marcarTodasLeidasApi = async () => (await api.patch('/notificaciones/marcar-leidas')).data
 
 // GET /marcapaginas -> Page<{ id, fechaGuardado, libro }>: el front guarda solo los ids de los libros

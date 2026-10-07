@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react'
 import { useLibros } from './useLibros'
-import useMisLibros from './useMisLibros'
 import { useToast } from './useToast'
 import { enRevision, getVendedor, guardarVendedor, nuevoIdPublicacion } from '../services/vendedorService'
 import { esModeracionError, modificarLibro } from '../services/moderacionService'
-import { darDeBajaApi, crearLibroApi, getImagenesApi, getLibroApi, reactivarApi, subirImagenApi } from '../api/librosApi'
+import { darDeBajaApi, crearLibroApi, getImagenesApi, reactivarApi, subirImagenApi } from '../api/librosApi'
+import { traerPublicaciones } from '../services/publicacionesService'
 import { idsDeCategorias } from '../api/categoriasApi'
 import { actualizarUsuarioApi, solicitarVendedorApi } from '../api/usuariosApi'
-import { dataUrlAFile, publicacionAFront } from '../utils/adaptadores'
+import { dataUrlAFile } from '../utils/adaptadores'
 import { mensajeError } from '../utils/errorApi'
 import { aLibroRequest } from '../utils/libroRequest'
 import { USAR_API } from '../utils/modoApi'
@@ -19,31 +19,12 @@ const esFotoNueva = (foto) => typeof foto === 'string' && foto.startsWith('data:
 // Estado y acciones del vendedor de la cuenta `user`. Cada cambio se guarda y refresca el catálogo.
 // Con el back (VITE_API=true): las publicaciones se crean con POST /libros (+ fotos por /imagenes-libro), se dan de baja con
 // PATCH /libros/{id}/baja|reactivar, y la solicitud de vendedor va por POST /usuarios/solicitud-vendedor.
-// El back no tiene "mis libros" con los pendientes: la lista del panel se guarda acá con los ids reales y su estado
-// (moderación, baja) se vuelve a leer del back (GET /libros/{id}) al abrir el panel.
+// La lista del panel se pide a GET /libros/mios (services/publicacionesService.js); si el back todavía no lo tiene, se usa la
+// lista guardada en este navegador con los ids reales y su estado se refresca con GET /libros/{id}.
 const useVendedor = (user) => {
   const toast = useToast()
-  const { recargar } = useLibros()
+  const { libros, recargar } = useLibros()
   const [vendedor, setVendedor] = useState(() => getVendedor(user))
-
-  // Con el back: libros del vendedor según el servidor. `estadoLibros` distingue "sin libros" ('ok' + lista vacía) de un fallo ('error')
-  const { estado: estadoLibros, libros: librosDelBack, reintentar: recargarMisLibros } = useMisLibros(user.id, USAR_API && vendedor.estado === 'aprobado')
-
-  // Libros que el back ya tiene como publicados pero este navegador no conoce (otro dispositivo, datos locales borrados): se suman al panel
-  useEffect(() => {
-    if (!USAR_API || !librosDelBack.length) return
-    const guardado = getVendedor(user)
-    const faltan = librosDelBack.filter((l) => !guardado.pub.some((p) => String(p.id) === String(l.id)))
-    if (!faltan.length) return
-    const nuevos = faltan.map((l) => ({
-      id: l.id, t: l.t, a: l.a, ed: l.ed, idioma: l.idioma, anio: l.anio, usado: l.usado, base: l.base, d: l.d, stock: l.stock,
-      cat: l.cat, imgs: [], descripcion: l.descripcion, estado: publicacionAFront(l.estadoPublicacion), mod: l.estadoModeracion || 'ACEPTADO',
-    }))
-    const completo = { ...guardado, pub: [...nuevos, ...guardado.pub] }
-    if (guardarVendedor(user, completo)) setVendedor(completo)
-    // `user` no cambia mientras el panel está abierto (el panel se remonta por cuenta)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [librosDelBack])
 
   // Guarda y avisa. Devuelve { ok: true } o { error } (también lo muestra en un toast)
   const cambiar = (nuevo, mensaje) => {
@@ -60,25 +41,13 @@ const useVendedor = (user) => {
   }
   const cambiarLibros = (fn, mensaje) => cambiar({ ...vendedor, pub: fn(vendedor.pub) }, mensaje)
 
-  // Con el back: estado de moderación y de publicación de cada libro, según el servidor
+  // Con el back: la lista del panel sale de GET /libros/mios (estado de moderación y de publicación según el servidor)
   useEffect(() => {
-    if (!USAR_API || vendedor.estado !== 'aprobado' || !vendedor.pub.length) return undefined
+    if (!USAR_API || vendedor.estado !== 'aprobado') return undefined
     let vigente = true
-    Promise.all(vendedor.pub.map((p) => getLibroApi(p.id).catch(() => null))).then((libros) => {
-      if (!vigente) return
-      const porId = new Map(libros.filter(Boolean).map((l) => [l.id, l]))
-      if (!porId.size) return
-      const pub = vendedor.pub.map((p) => {
-        const l = porId.get(p.id)
-        if (!l) return p
-        const { revision, ...resto } = p // eslint-disable-line no-unused-vars
-        return {
-          ...resto, t: l.t, a: l.a, ed: l.ed, idioma: l.idioma, anio: l.anio, usado: l.usado, base: l.base, d: l.d, stock: l.stock,
-          descripcion: l.descripcion, mod: l.estadoModeracion || p.mod, estado: publicacionAFront(l.estadoPublicacion),
-        }
-      })
-      if (JSON.stringify(pub) !== JSON.stringify(vendedor.pub)) cambiar({ ...vendedor, pub })
-    })
+    traerPublicaciones(vendedor.pub, libros).then((pub) => {
+      if (vigente && pub && JSON.stringify(pub) !== JSON.stringify(vendedor.pub)) cambiar({ ...vendedor, pub })
+    }).catch(() => {})
     return () => { vigente = false }
     // Solo al abrir el panel
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -196,7 +165,7 @@ const useVendedor = (user) => {
     return revision ? { ...resto, modC: motivo } : { ...resto, mod: 'RECHAZADO', modC: motivo }
   }), 'Libro rechazado (simulado)')
 
-  return { vendedor, estadoLibros, recargarMisLibros, solicitar, aprobarSolicitud, guardarLibro, alternarBaja, aprobarLibro, rechazarLibro }
+  return { vendedor, solicitar, aprobarSolicitud, guardarLibro, alternarBaja, aprobarLibro, rechazarLibro }
 }
 
 export default useVendedor

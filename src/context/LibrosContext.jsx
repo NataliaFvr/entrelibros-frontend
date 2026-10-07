@@ -1,20 +1,16 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { getCategorias, getLibros } from '../services/librosService'
-import { imagenesDeCategorias } from '../services/categoriasMeta'
+import { imagenesDeCategorias } from '../services/categoriasService'
 import { getImagenesApi } from '../api/librosApi'
-import { mensajeError } from '../utils/errorApi'
-import { useToast } from '../hooks/useToast'
 import { USAR_API } from '../utils/modoApi'
 import { LibrosCtx } from './librosCtx'
 
 const EN_PARALELO = 6
 
 const LibrosProvider = ({ children }) => {
-  const toast = useToast()
-  const [errorCarga, setErrorCarga] = useState(false) // true si falló la carga del catálogo (distinto de "no hay libros")
   const [libros, setLibros] = useState([])
   const [categorias, setCategorias] = useState([])
-  const [imagenesCategorias, setImagenesCategorias] = useState(imagenesDeCategorias)
+  const [imagenesCategorias, setImagenesCategorias] = useState({})
   const [cargando, setCargando] = useState(true)
   const conFotos = useRef(new Set()) // ids de libros cuyas fotos ya se pidieron al back
   const montado = useRef(true)
@@ -22,10 +18,9 @@ const LibrosProvider = ({ children }) => {
 
   useEffect(() => {
     Promise.all([getLibros(), getCategorias()])
-      .then(([l, c]) => { setLibros(l); setCategorias(c); setErrorCarga(false) })
-      .catch((err) => { setErrorCarga(true); toast(mensajeError(err)) })
+      .then(([l, c]) => { setLibros(l); setCategorias(c); setImagenesCategorias(imagenesDeCategorias()) }) // las URLs salen de las categorías ya cargadas
       .finally(() => setCargando(false))
-  }, [toast])
+  }, [])
 
   // Con el back, LibroResponse no trae las fotos: se piden por libro (GET /imagenes-libro/libro/{id}) en segundo plano,
   // de a pocos a la vez, y se van sumando al catálogo. Mientras tanto la tarjeta muestra la portada de colores.
@@ -50,14 +45,12 @@ const LibrosProvider = ({ children }) => {
   // Vuelve a leer el catálogo (por ejemplo, cuando un vendedor publica o da de baja un libro)
   const recargar = useCallback(() => {
     conFotos.current = new Set()
-    return getLibros()
-      .then((l) => { setLibros(l); setErrorCarga(false) })
-      .catch((err) => { setErrorCarga(true); toast(mensajeError(err)) })
-  }, [toast])
+    return getLibros().then(setLibros)
+  }, [])
   // Vuelve a leer las categorías (cuando el administrador crea una nueva)
-  const recargarCategorias = useCallback(() => getCategorias().then((c) => { setCategorias(c); setImagenesCategorias(imagenesDeCategorias()) }).catch((err) => toast(mensajeError(err))), [toast])
+  const recargarCategorias = useCallback(() => getCategorias().then((c) => { setCategorias(c); setImagenesCategorias(imagenesDeCategorias()) }), [])
 
-  const value = useMemo(() => ({ libros, categorias, imagenesCategorias, cargando, errorCarga, recargar, recargarCategorias }), [libros, categorias, imagenesCategorias, cargando, errorCarga, recargar, recargarCategorias])
+  const value = useMemo(() => ({ libros, categorias, imagenesCategorias, cargando, recargar, recargarCategorias }), [libros, categorias, imagenesCategorias, cargando, recargar, recargarCategorias])
   return <LibrosCtx.Provider value={value}>{children}</LibrosCtx.Provider>
 }
 

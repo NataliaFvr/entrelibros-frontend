@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { TONES, textOn } from '../utils/colors'
 import { useLibros } from '../hooks/useLibros'
 import ItemGrid from './ItemGrid'
+import CategoriaCirculo from './CategoriaCirculo'
 
 // `categorias`: nombres, ordenadas de más a menos libros
 const CategoryGrid = ({ categorias }) => {
@@ -15,7 +16,7 @@ const CategoryGrid = ({ categorias }) => {
           return (
             <Link key={c} to={`/libros?cat=${encodeURIComponent(c)}`} className="cat-item">
               <div className="cat-circle" style={{ background: col, color: textOn(col) }}>
-                {imagenesCategorias[c] ? <img className="cat-img" src={imagenesCategorias[c]} alt="" loading="lazy" /> : c[0]}
+                <CategoriaCirculo nombre={c} src={imagenesCategorias[c]} />
               </div>
               <span>{c}</span>
             </Link>

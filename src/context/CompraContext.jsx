@@ -3,43 +3,42 @@ import { CompraCtx } from './compraCtx'
 import { useAuth } from '../hooks/useAuth'
 import { useLibros } from '../hooks/useLibros'
 import { useToast } from '../hooks/useToast'
+import useCarrito from '../hooks/useCarrito'
 import { guardar, leer } from '../services/almacen'
-import { claveCart, clavePedidos } from '../services/claves'
+import { clavePedidos } from '../services/claves'
 import { esLibroPropio } from '../services/vendedorService'
-import { cancelarOrdenApi, checkoutApi, crearPagoApi, listarPedidosApi, sincronizarCarritoApi } from '../api/comprasApi'
-import { provinciaParaBack } from '../utils/adaptadores'
+import { cancelarOrdenApi, checkoutApi, crearPagoApi, listarPedidosApi } from '../api/comprasApi'
 import { mensajeError } from '../utils/errorApi'
 import { USAR_API } from '../utils/modoApi'
 import { costoEnvio } from '../utils/envio'
+import { direccionTexto } from '../utils/format'
 import { RESERVA_MS, estadoPago, subtotal } from '../utils/pedidos'
 
-const cargar = (user) => ({
-  carrito: user ? leer(claveCart(user), []) : [],
-  pedidos: user && !USAR_API ? leer(clavePedidos(user), []) : [], // con el back los pedidos se piden a GET /ordenes/comprador
-})
+const cargarPedidos = (user) => (user && !USAR_API ? leer(clavePedidos(user), []) : []) // con el back: GET /ordenes/comprador
 
-// Carrito y pedidos de la cuenta que tiene la sesión. Se guardan solos en localStorage.
-// Con el back (VITE_API=true): el carrito se arma acá y, al confirmar, se copia al carrito del back para
-// POST /carrito/checkout {idUsuario, provinciaDestino} -> orden PENDIENTE (reserva 1 h); luego POST /pagos y PATCH /ordenes/{id}/cancelar.
+// Carrito y pedidos de la cuenta que tiene la sesión.
+// El carrito lo maneja hooks/useCarrito.js: con el back (VITE_API=true) cada acción se sincroniza con /carrito/items y el
+// checkout (POST /carrito/checkout { idDireccion, provinciaDestino }) usa ese mismo carrito -> orden PENDIENTE (reserva 1 h);
+// luego POST /pagos y PATCH /ordenes/{id}/cancelar. En demo se guarda solo en localStorage.
 // El número de pedido (`n`) es el id de la orden.
 const CompraProvider = ({ children }) => {
   const { user, quitarMarks } = useAuth()
   const { libros } = useLibros()
   const toast = useToast()
+  const { carrito, agregar, cambiarCantidad, quitar, vaciar } = useCarrito(user, {
+    esPropio: (libro) => esLibroPropio(user, libro),
+    avisar: toast,
+  })
   const nombre = user ? user.nombreUsuario : null
   const [cargadoDe, setCargadoDe] = useState(nombre)
-  const [carrito, setCarrito] = useState(() => cargar(user).carrito)
-  const [pedidos, setPedidos] = useState(() => cargar(user).pedidos)
+  const [pedidos, setPedidos] = useState(() => cargarPedidos(user))
 
-  // Si cambia la cuenta (entrar, salir, renombrar), se recargan sus datos
+  // Si cambia la cuenta (entrar, salir, renombrar), se recargan sus pedidos
   if (cargadoDe !== nombre) {
-    const datos = cargar(user)
     setCargadoDe(nombre)
-    setCarrito(datos.carrito)
-    setPedidos(datos.pedidos)
+    setPedidos(cargarPedidos(user))
   }
 
-  useEffect(() => { if (user) guardar(claveCart(user), carrito) }, [user, carrito])
   useEffect(() => { if (user && !USAR_API) guardar(clavePedidos(user), pedidos) }, [user, pedidos])
 
   // Con el back: los pedidos salen del servidor (GET /ordenes/comprador + detalle de cada orden)
@@ -65,49 +64,29 @@ const CompraProvider = ({ children }) => {
     return () => clearInterval(t)
   }, [pedidos])
 
-  // Los usados tienen 1 unidad; los nuevos, hasta 10 por compra
-  const agregar = (libro) => {
-    if (esLibroPropio(user, libro)) {
-      toast('No podés comprar tus propios libros')
-      return
-    }
-    const tope = libro.usado ? 1 : 10
-    setCarrito((prev) => (prev.some((c) => c.id === libro.id)
-      ? prev.map((c) => (c.id === libro.id ? { ...c, q: Math.min(c.q + 1, tope) } : c))
-      : [...prev, { id: libro.id, q: 1 }]))
-    toast('Añadido a tu estantería')
-  }
-
-  const cambiarCantidad = (libro, delta) => {
-    const tope = libro.usado ? 1 : 10
-    setCarrito((prev) => prev.map((c) => (c.id === libro.id ? { ...c, q: Math.max(1, Math.min(tope, c.q + delta)) } : c)))
-  }
-
-  const quitar = (id) => setCarrito((prev) => prev.filter((c) => c.id !== id))
-
-  // Convierte el carrito en un pedido pendiente de pago y devuelve su número
-  // `prov` = provincia de la dirección elegida (con el back se envía como provinciaDestino)
-  const crearPedido = (direccion, prov) => {
-    if (USAR_API) return crearPedidoApi(prov)
+  // Convierte el carrito en un pedido pendiente de pago y devuelve su número.
+  // `direccion` = la dirección elegida { id, alias, calle, ciudad, prov, cp }: con el back viaja su id (idDireccion) y la
+  // orden guarda la dirección completa; el costo de envío lo calcula el back.
+  const crearPedido = (direccion) => {
+    if (USAR_API) return crearPedidoApi(direccion)
     const items = carrito
       .map((c) => ({ id: c.id, q: c.q, p: libros.find((l) => l.id === c.id)?.p }))
       .filter((i) => i.p !== undefined)
     const n = `EL-${String(Date.now()).slice(-5)}`
     const pedido = {
-      n, date: new Date().toISOString().slice(0, 10), its: items, addr: direccion,
+      n, date: new Date().toISOString().slice(0, 10), its: items, addr: direccionTexto(direccion),
       sub: subtotal(items), env: costoEnvio(items, libros), est: 'Pendiente', pago: 'PENDIENTE', reserva: Date.now() + RESERVA_MS,
     }
     setPedidos((prev) => [pedido, ...prev])
-    setCarrito([])
+    vaciar()
     toast('Reservamos tus libros por 1 hora')
     return n
   }
 
-  const crearPedidoApi = async (prov) => {
+  const crearPedidoApi = async (direccion) => {
     try {
-      await sincronizarCarritoApi(user.id, carrito)
-      const orden = await checkoutApi(user.id, provinciaParaBack(prov))
-      setCarrito([])
+      const orden = await checkoutApi({ idDireccion: direccion.id, provincia: direccion.prov })
+      vaciar() // el back ya vació el carrito al crear la orden
       await refrescarPedidos()
       toast('Reservamos tus libros por 1 hora')
       return String(orden.id)

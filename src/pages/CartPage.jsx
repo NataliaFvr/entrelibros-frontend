@@ -4,8 +4,7 @@ import { useAuth } from '../hooks/useAuth'
 import { useCompra } from '../hooks/useCompra'
 import { useLibros } from '../hooks/useLibros'
 import { useToast } from '../hooks/useToast'
-import { costoEnvio } from '../utils/envio'
-import { direccionTexto } from '../utils/format'
+import useCostoEnvio from '../hooks/useCostoEnvio'
 import { subtotal } from '../utils/pedidos'
 import Stepper from '../componentes/Stepper'
 import EmptyBlock from '../componentes/EmptyBlock'
@@ -18,22 +17,27 @@ const CartPage = () => {
   const { carrito, crearPedido } = useCompra()
   const { libros, cargando } = useLibros()
   const toast = useToast()
-  const [elegida, setElegida] = useState(0)
+  const [elegidaPorUsuario, setElegida] = useState(null) // null = todavía no tocó el selector: se usa la principal
   const [enviando, setEnviando] = useState(false)
+
+  // La dirección que viaja al checkout: la que eligió la persona o, si no eligió, la principal
+  const principal = Math.max(0, direcciones.findIndex((d) => d.principal))
+  const elegida = Math.min(elegidaPorUsuario ?? principal, Math.max(0, direcciones.length - 1))
+  const direccion = direcciones[elegida]
+
+  const items = carrito.map((c) => ({ libro: libros.find((l) => l.id === c.id), q: c.q })).filter((i) => i.libro)
+  const precios = items.map(({ libro, q }) => ({ id: libro.id, q, p: libro.p }))
+  const envio = useCostoEnvio(precios, libros, direccion) // null = todavía no se puede calcular
 
   if (!user) return <Navigate to="/ingresar" replace state={{ from: '/carrito' }} />
   if (cargando) return <main className="usr" />
 
-  const items = carrito.map((c) => ({ libro: libros.find((l) => l.id === c.id), q: c.q })).filter((i) => i.libro)
-  const precios = items.map(({ libro, q }) => ({ id: libro.id, q, p: libro.p }))
-
   const finalizar = async () => {
-    if (enviando) return
-    const direccion = direcciones[Math.min(elegida, direcciones.length - 1)]
+    if (enviando || !direccion) return
     setEnviando(true)
     try {
       // Con el back crearPedido es async (checkout) y puede fallar: sin stock, libro no disponible, etc.
-      const n = await crearPedido(direccionTexto(direccion), direccion.prov)
+      const n = await crearPedido(direccion)
       navigate(`/pago/${n}`)
     } catch (err) {
       toast(err.message)
@@ -52,8 +56,8 @@ const CartPage = () => {
       ) : (
         <div className="cart-grid">
           <CartList items={items} libros={libros} />
-          <CartSummary sub={subtotal(precios)} envio={costoEnvio(precios, libros)} direcciones={direcciones}
-            elegida={Math.min(elegida, Math.max(0, direcciones.length - 1))} onElegir={setElegida} onFinalizar={finalizar} />
+          <CartSummary sub={subtotal(precios)} envio={envio} direcciones={direcciones}
+            elegida={elegida} onElegir={setElegida} onFinalizar={finalizar} enviando={enviando} />
         </div>
       )}
     </main>

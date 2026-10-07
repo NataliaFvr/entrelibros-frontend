@@ -1,18 +1,9 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { getNotificaciones, guardarNotificaciones } from '../services/notificacionesService'
-import { guardar, leer } from '../services/almacen'
-import { claveNotifs } from '../services/claves'
-import { listarNotificacionesApi, marcarTodasLeidasApi } from '../api/cuentaApi'
+import { eliminarNotificacionApi, listarNotificacionesApi, marcarLeidaApi, marcarTodasLeidasApi } from '../api/cuentaApi'
 import { USAR_API } from '../utils/modoApi'
 
 const CADA = 60000 // con el back se vuelve a pedir la lista cada minuto
-
-// Con el back el servidor solo sabe "marcar TODAS como leídas" (PATCH /notificaciones/marcar-leidas): marcar una sola
-// o descartar una se recuerda en este navegador (ids), sin perder el resto.
-const estadoLocal = (u) => {
-  const g = leer(claveNotifs(u), null)
-  return g && !Array.isArray(g) ? { leidas: g.leidas || [], ocultas: g.ocultas || [] } : { leidas: [], ocultas: [] }
-}
 
 // Notificaciones de la cuenta `user`: [{ id, texto, fecha, leida }]. Cada cambio se guarda solo.
 const useNotificacionesDemo = (user) => {
@@ -30,33 +21,27 @@ const useNotificacionesDemo = (user) => {
   return { lista, noLeidas: lista.filter((n) => !n.leida).length, marcarLeida, marcarTodas, descartar }
 }
 
-const useNotificacionesApi = (user) => {
-  const [servidor, setServidor] = useState([])
-  const [local, setLocal] = useState(() => estadoLocal(user))
+// Con el back las notificaciones se gestionan por id: leer una (PATCH /{id}/leida), descartarla (DELETE /{id}) o marcar todas.
+// El cambio se ve al instante y, si el servidor lo rechaza, se deshace.
+const useNotificacionesApi = () => {
+  const [lista, setLista] = useState([])
 
-  const traer = useCallback(() => listarNotificacionesApi().then(setServidor).catch(() => {}), [])
+  const traer = useCallback(() => listarNotificacionesApi().then(setLista).catch(() => {}), [])
   useEffect(() => {
     traer()
     const t = setInterval(traer, CADA)
     return () => clearInterval(t)
   }, [traer])
 
-  const lista = useMemo(
-    () => servidor.filter((n) => !local.ocultas.includes(n.id)).map((n) => (n.leida || local.leidas.includes(n.id) ? { ...n, leida: true } : n)),
-    [servidor, local],
-  )
-
-  const cambiarLocal = (nuevo) => {
-    setLocal(nuevo)
-    guardar(claveNotifs(user), nuevo)
+  // Aplica `cambio` a la lista ya, llama al back y, si falla, vuelve a pedir la lista real
+  const aplicar = async (cambio, llamar) => {
+    setLista(cambio)
+    try { await llamar() } catch { traer() }
   }
 
-  const marcarLeida = (id) => cambiarLocal({ ...local, leidas: [...local.leidas, id] })
-  const descartar = (id) => cambiarLocal({ ...local, ocultas: [...local.ocultas, id] })
-  const marcarTodas = async () => {
-    setServidor((s) => s.map((n) => ({ ...n, leida: true })))
-    try { await marcarTodasLeidasApi() } catch { traer() }
-  }
+  const marcarLeida = (id) => aplicar((l) => l.map((n) => (n.id === id ? { ...n, leida: true } : n)), () => marcarLeidaApi(id))
+  const descartar = (id) => aplicar((l) => l.filter((n) => n.id !== id), () => eliminarNotificacionApi(id))
+  const marcarTodas = () => aplicar((l) => l.map((n) => ({ ...n, leida: true })), marcarTodasLeidasApi)
 
   return { lista, noLeidas: lista.filter((n) => !n.leida).length, marcarLeida, marcarTodas, descartar }
 }

@@ -15,12 +15,12 @@ import { estadoPago } from '../utils/pedidos'
 // (pedido pagado) y que no sea el dueño de la tienda. Cada comprador tiene una única reseña por vendedor: si vuelve a publicar, se reemplaza.
 // Con el back: GET /resenas-vendedor/vendedor/{idVendedor}, POST /resenas-vendedor { idPago, idVendedor, clasificacion, comentario }
 // y PATCH /resenas-vendedor/{id}. El vendedor se identifica por id (sale de los libros del catálogo).
-const useResenasVendedor = (tienda) => {
+const useResenasVendedor = (tienda, idConocido = null) => {
   const { user } = useAuth()
   const { pedidos } = useCompra()
   const { libros } = useLibros()
   const toast = useToast()
-  const idVendedor = USAR_API ? (libros.find((l) => l.v === tienda)?.vId ?? null) : null
+  const idVendedor = USAR_API ? (idConocido ?? libros.find((l) => l.v === tienda)?.vId ?? null) : null
   const [resenias, setResenias] = useState(() => (USAR_API ? [] : getResenasVendedor(tienda)))
 
   useEffect(() => {

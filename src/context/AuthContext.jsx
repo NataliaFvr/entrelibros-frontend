@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { AuthCtx } from './authCtx'
 import { useToast } from '../hooks/useToast'
 import useVerificacion from '../hooks/useVerificacion'
@@ -6,9 +6,9 @@ import { guardar, leer, mover } from '../services/almacen'
 import { actualizarUsuario, cerrarSesion, getSesion, iniciarSesion, registrar as crearCuenta } from '../services/authService'
 import { EVENTO_SESION_EXPIRADA } from '../api/axiosConfig'
 import { cerrarSesionApi, getSesionApi, loginApi, reenviarCodigoApi, registrarApi, traerUsuarioApi } from '../api/authApi'
-import { actualizarUsuarioApi } from '../api/usuariosApi'
-import { crearDireccionApi, eliminarDireccionApi, listarDireccionesApi, marcarPrincipalApi } from '../api/direccionesApi'
-import { crearDireccionDemo, eliminarDireccionDemo, listarDireccionesDemo, marcarPrincipalDemo } from '../services/direccionesDemo'
+import { actualizarUsuarioApi, quitarFotoUsuarioApi, subirFotoUsuarioApi, urlFotoUsuario } from '../api/usuariosApi'
+import { dataUrlAFile } from '../utils/adaptadores'
+import { direcciones as servicioDirecciones } from '../services/direccionesService'
 import { agregarMarcapaginaApi, listarMarcapaginasApi, quitarMarcapaginaApi } from '../api/cuentaApi'
 import { USAR_API } from '../utils/modoApi'
 import { claveCart, claveDir, claveMarks, claveNotifs, clavePedidos, clavePerfil, claveVendedor } from '../services/claves'
@@ -22,16 +22,21 @@ const AuthProvider = ({ children }) => {
   const toast = useToast()
   const [user, setUser] = useState(USAR_API ? getSesionApi : getSesion)
   const [marks, setMarks] = useState(() => (user ? leer(claveMarks(user), []) : []))
-  const [perfil, setPerfil] = useState(() => (user ? leer(clavePerfil(user), {}) : {}))
-  const [direcciones, setDirecciones] = useState(() => (user && !USAR_API ? listarDireccionesDemo(user) : []))
+  // Perfil visual { avatar, foto }. Con el back sale del usuario (avatar + tieneFoto -> GET /usuarios/{id}/foto); en demo, de localStorage.
+  const [perfilDemo, setPerfil] = useState(() => (user && !USAR_API ? leer(clavePerfil(user), {}) : {}))
+  const perfil = useMemo(
+    () => (USAR_API ? (user ? { avatar: user.avatar || '', foto: user.tieneFoto ? urlFotoUsuario(user.id) : '' } : {}) : perfilDemo),
+    [user, perfilDemo],
+  )
+  const [direcciones, setDirecciones] = useState([]) // las trae el efecto de abajo (back o demo, por la pasarela)
   const [gate, setGate] = useState(null) // null = cerrado, si no: 'cart' | 'fav' | 'review' | 'sell' | 'account'
   const [gateDestino, setGateDestino] = useState(null) // adónde ir al entrar (null = volver a la página actual)
 
   const entrar = (u, saludo) => {
     setUser(u)
     setMarks(leer(claveMarks(u), []))
-    setPerfil(leer(clavePerfil(u), {}))
-    setDirecciones(USAR_API ? [] : listarDireccionesDemo(u)) // con el back las trae el efecto de abajo
+    if (!USAR_API) setPerfil(leer(clavePerfil(u), {}))
+    setDirecciones([]) // las trae el efecto de abajo
     toast(saludo || `¡Hola, ${u.nombre}!`)
   }
 
@@ -42,9 +47,19 @@ const AuthProvider = ({ children }) => {
     let vigente = true
     traerUsuarioApi(idApi).then((u) => { if (vigente) setUser(u) }).catch(() => {})
     listarMarcapaginasApi().then((ids) => { if (vigente) setMarks(ids) }).catch(() => {})
-    listarDireccionesApi().then((lista) => { if (vigente) setDirecciones(lista) }).catch(() => {})
     return () => { vigente = false }
   }, [idApi])
+
+  // Direcciones de la cuenta (GET /direcciones con el back; localStorage en demo). Se piden al entrar o al cambiar de cuenta.
+  const claveCuenta = user ? `${user.id ?? ''}|${user.nombreUsuario}` : null
+  useEffect(() => {
+    if (!claveCuenta) return undefined
+    let vigente = true
+    servicioDirecciones.listar(user).then((lista) => { if (vigente) setDirecciones(lista) }).catch(() => {})
+    return () => { vigente = false }
+    // `user` cambia de identidad al refrescarlo; solo importa cuándo cambia la cuenta
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [claveCuenta])
 
   const verificacion = useVerificacion((u) => entrar(u, `¡Cuenta confirmada! Hola, ${u.nombre}`))
 
@@ -114,28 +129,40 @@ const AuthProvider = ({ children }) => {
     return () => window.removeEventListener(EVENTO_SESION_EXPIRADA, alVencer)
   }, [toast])
 
-  // Con el back: PATCH /usuarios/{id}. El token del back lleva el e-mail: si cambia, hay que volver a ingresar.
+  // Con el back: foto (POST/DELETE /usuarios/{id}/foto), avatar y datos (PATCH /usuarios/{id}).
+  // El token del back lleva el e-mail como subject: si el e-mail cambia, el token viejo deja de servir. Por eso las fotos se
+  // suben ANTES del PATCH (con el token todavía válido) y, si el e-mail cambió, se cierra la sesión y se pide un nuevo ingreso.
+  // Devuelve { sesionCerrada: true } cuando hay que volver a ingresar.
   const actualizarPerfilApi = async (v, nuevoPerfil) => {
     const cambios = { nombre: v.nombre.trim(), apellido: v.apellido.trim(), nombreUsuario: v.nombreUsuario, email: v.email.trim() }
     if (v.pw) cambios.contrasena = v.pw
+    const fotoNueva = typeof nuevoPerfil.foto === 'string' && nuevoPerfil.foto.startsWith('data:')
+    const avatar = nuevoPerfil.foto ? '' : nuevoPerfil.avatar || '' // con foto, no hay avatar por defecto
+    if (avatar !== (user.avatar || '')) cambios.avatar = avatar
+
     let nuevo
     try {
+      if (fotoNueva) await subirFotoUsuarioApi(user.id, await dataUrlAFile(nuevoPerfil.foto, 'perfil'))
+      else if (!nuevoPerfil.foto && user.tieneFoto) await quitarFotoUsuarioApi(user.id)
       nuevo = await actualizarUsuarioApi(user.id, cambios)
     } catch (err) {
+      traerUsuarioApi(user.id).then(setUser).catch(() => {}) // por si la foto sí se guardó: se vuelve a mostrar lo que hay en el servidor
       throw new Error(mensajeError(err, 'registro'))
     }
     if (nuevo.nombreUsuario !== user.nombreUsuario) {
       ;[claveMarks, claveCart, clavePerfil, claveDir, clavePedidos, claveVendedor, claveNotifs].forEach((clave) => mover(clave(user), clave(nuevo)))
     }
-    guardar(clavePerfil(nuevo), nuevoPerfil)
-    setPerfil(nuevoPerfil)
     if (nuevo.email !== user.email) {
-      logout()
+      cerrarSesionGuardada()
+      setUser(null)
+      setMarks([])
+      setDirecciones([])
       toast('Cambiaste tu e-mail: volvé a ingresar con el nuevo.')
-      return
+      return { sesionCerrada: true }
     }
     setUser(nuevo)
     toast('Perfil actualizado')
+    return {}
   }
 
   // Guarda los datos del perfil; si cambió el usuario, lleva todo lo suyo a la clave nueva
@@ -153,17 +180,11 @@ const AuthProvider = ({ children }) => {
     toast('Perfil actualizado')
   }
 
-  // Direcciones. Con el back (GET/POST /direcciones, DELETE /direcciones/{id}, PATCH /direcciones/{id}/principal) la
-  // principal la decide el servidor: después de cada cambio se vuelve a pedir la lista y se muestra tal cual llega.
-  // Sin el back, direccionesDemo hace de servidor con el mismo contrato. Las tarjetas se identifican por `id`.
-  const cambiarDirecciones = async (llamarApi, llamarDemo, aviso) => {
+  // Direcciones: la pasarela (services/direccionesService.js) llama al back o a la demo y devuelve la lista resultante,
+  // que se muestra tal cual. Las tarjetas se identifican por `id`.
+  const cambiarDirecciones = async (llamar, aviso) => {
     try {
-      if (USAR_API) {
-        await llamarApi()
-        setDirecciones(await listarDireccionesApi())
-      } else {
-        setDirecciones(llamarDemo())
-      }
+      setDirecciones(await llamar())
       if (aviso) toast(aviso)
       return true
     } catch (err) {
@@ -173,14 +194,12 @@ const AuthProvider = ({ children }) => {
   }
 
   // Devuelve true si se guardó (el formulario solo se limpia en ese caso)
-  const agregarDireccion = (d) =>
-    cambiarDirecciones(() => crearDireccionApi(d), () => crearDireccionDemo(user, d), 'Dirección guardada')
+  const agregarDireccion = (d) => cambiarDirecciones(() => servicioDirecciones.crear(user, d), 'Dirección guardada')
 
-  const eliminarDireccion = (id) =>
-    cambiarDirecciones(() => eliminarDireccionApi(id), () => eliminarDireccionDemo(user, id))
+  const eliminarDireccion = (id) => cambiarDirecciones(() => servicioDirecciones.eliminar(user, id))
 
   const marcarPrincipal = (id) =>
-    cambiarDirecciones(() => marcarPrincipalApi(id), () => marcarPrincipalDemo(user, id), 'Dirección principal actualizada')
+    cambiarDirecciones(() => servicioDirecciones.marcarPrincipal(user, id), 'Dirección principal actualizada')
 
   // Corta la acción y muestra el modal si no hay sesión (true = hay que loguearse).
   // `destino` (opcional): ruta a la que ir después de entrar.
