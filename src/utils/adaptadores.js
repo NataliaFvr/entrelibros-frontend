@@ -13,6 +13,20 @@ export const solicitudAFront = (e) => SOLICITUD[e] || 'ninguno'
 // EstadoPublicacion (ACTIVA | DADA_DE_BAJA) <-> estado de la publicación del front
 export const publicacionAFront = (e) => (e === 'DADA_DE_BAJA' ? 'baja' : 'activo')
 
+/* ---------------- Direcciones ---------------- */
+
+// DireccionResponse { id, alias, calle, ciudad, provincia, cp, principal } -> dirección del front (provincia -> prov).
+// El back garantiza que, si hay direcciones, exactamente una viene con principal = true: el front no lo recalcula.
+export const aDireccionFront = (d) => ({
+  id: d.id,
+  alias: d.alias,
+  calle: d.calle,
+  ciudad: d.ciudad,
+  prov: d.provincia,
+  cp: d.cp || '',
+  principal: Boolean(d.principal),
+})
+
 /* ---------------- Fechas ---------------- */
 
 // LocalDateTime del back ("2026-10-04T12:00:00", sin zona) -> milisegundos. Se lee como hora local del navegador.

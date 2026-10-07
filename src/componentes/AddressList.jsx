@@ -1,7 +1,6 @@
 import { useAuth } from '../hooks/useAuth'
 import { useCompra } from '../hooks/useCompra'
 import { direccionTexto } from '../utils/format'
-import { conPrincipal } from '../utils/direcciones'
 import AddressCard from './AddressCard'
 import EmptyBlock from './EmptyBlock'
 
@@ -14,13 +13,13 @@ const AddressList = () => {
 
   return (
     <div className="addr-grid">
-      {conPrincipal(direcciones).map((d, i) => (
+      {direcciones.map((d) => (
         <AddressCard
-          key={i}
+          key={d.id}
           direccion={d}
           usos={pedidos.filter((p) => p.addr === direccionTexto(d)).length}
-          onEliminar={() => eliminarDireccion(i)}
-          onPrincipal={() => marcarPrincipal(i)}
+          onEliminar={() => eliminarDireccion(d.id)}
+          onPrincipal={() => marcarPrincipal(d.id)}
         />
       ))}
     </div>

@@ -5,7 +5,7 @@ const AddressSelect = ({ direcciones, elegida, onElegir }) => {
     <label className="fld">
       Enviar a
       <select className="fsel" value={elegida} onChange={(e) => onElegir(+e.target.value)}>
-        {direcciones.map((d, i) => <option key={i} value={i}>{direccionTexto(d)}</option>)}
+        {direcciones.map((d, i) => <option key={d.id ?? i} value={i}>{direccionTexto(d)}</option>)}
       </select>
     </label>
   )

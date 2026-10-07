@@ -1,5 +1,6 @@
 import { PROVINCIAS } from '../data/provincias'
 import { useAuth } from '../hooks/useAuth'
+import { USAR_API } from '../utils/modoApi'
 import useFormulario from '../hooks/useFormulario'
 import { validadoresDireccion } from '../utils/validaciones'
 import Field from './Field'
@@ -13,12 +14,13 @@ const AddressForm = () => {
   const f = useFormulario(INICIAL, validadoresDireccion)
   const campo = (n) => ({ name: n, value: f.valores[n], onChange: f.cambiar, onBlur: f.alSalir, error: f.errores[n] })
 
-  const enviar = (e) => {
+  const enviar = async (e) => {
     e.preventDefault()
     if (Object.keys(f.validarTodo(e.currentTarget)).length) return
     const { alias, calle, ciudad, prov, cp } = f.valores
-    agregarDireccion({ alias: alias.trim(), calle: calle.trim(), ciudad: ciudad.trim(), prov, cp: cp.trim().toUpperCase() })
-    f.reiniciar()
+    // Solo se limpia el formulario si se guardó: si el back falla, la persona conserva lo que escribió
+    const guardada = await agregarDireccion({ alias: alias.trim(), calle: calle.trim(), ciudad: ciudad.trim(), prov, cp: cp.trim().toUpperCase() })
+    if (guardada) f.reiniciar()
   }
 
   return (
@@ -27,7 +29,7 @@ const AddressForm = () => {
       <Field label="Nombre (Casa, Trabajo…)" maxLength={30} {...campo('alias')} />
       <Field label="Calle, número, piso y depto" maxLength={100} autoComplete="street-address" {...campo('calle')} />
       <Field label="Ciudad / localidad" maxLength={60} autoComplete="address-level2" {...campo('ciudad')} />
-      <Field label="Código postal (opcional)" maxLength={8} autoComplete="postal-code" {...campo('cp')} />
+      <Field label={USAR_API ? 'Código postal' : 'Código postal (opcional)'} maxLength={8} autoComplete="postal-code" {...campo('cp')} />
       <SelectField label="Provincia" opciones={PROVINCIAS} {...campo('prov')} />
       <button className="btn main" type="submit">Guardar dirección</button>
     </form>

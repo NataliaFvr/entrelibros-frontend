@@ -7,11 +7,12 @@ import { actualizarUsuario, cerrarSesion, getSesion, iniciarSesion, registrar as
 import { EVENTO_SESION_EXPIRADA } from '../api/axiosConfig'
 import { cerrarSesionApi, getSesionApi, loginApi, reenviarCodigoApi, registrarApi, traerUsuarioApi } from '../api/authApi'
 import { actualizarUsuarioApi } from '../api/usuariosApi'
+import { crearDireccionApi, eliminarDireccionApi, listarDireccionesApi, marcarPrincipalApi } from '../api/direccionesApi'
+import { crearDireccionDemo, eliminarDireccionDemo, listarDireccionesDemo, marcarPrincipalDemo } from '../services/direccionesDemo'
 import { agregarMarcapaginaApi, listarMarcapaginasApi, quitarMarcapaginaApi } from '../api/cuentaApi'
 import { USAR_API } from '../utils/modoApi'
 import { claveCart, claveDir, claveMarks, claveNotifs, clavePedidos, clavePerfil, claveVendedor } from '../services/claves'
 import LoginGate from '../componentes/LoginGate'
-import { conPrincipal } from '../utils/direcciones'
 import { mensajeError, normalizarError } from '../utils/errorApi'
 
 // Cierra la sesión guardada: la del back (tokens) o la de demostración
@@ -22,7 +23,7 @@ const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(USAR_API ? getSesionApi : getSesion)
   const [marks, setMarks] = useState(() => (user ? leer(claveMarks(user), []) : []))
   const [perfil, setPerfil] = useState(() => (user ? leer(clavePerfil(user), {}) : {}))
-  const [direcciones, setDirecciones] = useState(() => (user ? leer(claveDir(user), []) : []))
+  const [direcciones, setDirecciones] = useState(() => (user && !USAR_API ? listarDireccionesDemo(user) : []))
   const [gate, setGate] = useState(null) // null = cerrado, si no: 'cart' | 'fav' | 'review' | 'sell' | 'account'
   const [gateDestino, setGateDestino] = useState(null) // adónde ir al entrar (null = volver a la página actual)
 
@@ -30,7 +31,7 @@ const AuthProvider = ({ children }) => {
     setUser(u)
     setMarks(leer(claveMarks(u), []))
     setPerfil(leer(clavePerfil(u), {}))
-    setDirecciones(leer(claveDir(u), []))
+    setDirecciones(USAR_API ? [] : listarDireccionesDemo(u)) // con el back las trae el efecto de abajo
     toast(saludo || `¡Hola, ${u.nombre}!`)
   }
 
@@ -41,6 +42,7 @@ const AuthProvider = ({ children }) => {
     let vigente = true
     traerUsuarioApi(idApi).then((u) => { if (vigente) setUser(u) }).catch(() => {})
     listarMarcapaginasApi().then((ids) => { if (vigente) setMarks(ids) }).catch(() => {})
+    listarDireccionesApi().then((lista) => { if (vigente) setDirecciones(lista) }).catch(() => {})
     return () => { vigente = false }
   }, [idApi])
 
@@ -151,25 +153,34 @@ const AuthProvider = ({ children }) => {
     toast('Perfil actualizado')
   }
 
-  const agregarDireccion = (d) => {
-    const nuevas = conPrincipal([...direcciones, d])
-    setDirecciones(nuevas)
-    guardar(claveDir(user), nuevas)
-    toast('Dirección guardada')
+  // Direcciones. Con el back (GET/POST /direcciones, DELETE /direcciones/{id}, PATCH /direcciones/{id}/principal) la
+  // principal la decide el servidor: después de cada cambio se vuelve a pedir la lista y se muestra tal cual llega.
+  // Sin el back, direccionesDemo hace de servidor con el mismo contrato. Las tarjetas se identifican por `id`.
+  const cambiarDirecciones = async (llamarApi, llamarDemo, aviso) => {
+    try {
+      if (USAR_API) {
+        await llamarApi()
+        setDirecciones(await listarDireccionesApi())
+      } else {
+        setDirecciones(llamarDemo())
+      }
+      if (aviso) toast(aviso)
+      return true
+    } catch (err) {
+      toast(mensajeError(err))
+      return false
+    }
   }
 
-  const eliminarDireccion = (indice) => {
-    const nuevas = conPrincipal(direcciones.filter((_, i) => i !== indice))
-    setDirecciones(nuevas)
-    guardar(claveDir(user), nuevas)
-  }
+  // Devuelve true si se guardó (el formulario solo se limpia en ese caso)
+  const agregarDireccion = (d) =>
+    cambiarDirecciones(() => crearDireccionApi(d), () => crearDireccionDemo(user, d), 'Dirección guardada')
 
-  const marcarPrincipal = (indice) => {
-    const nuevas = direcciones.map((d, i) => ({ ...d, principal: i === indice }))
-    setDirecciones(nuevas)
-    guardar(claveDir(user), nuevas)
-    toast('Dirección principal actualizada')
-  }
+  const eliminarDireccion = (id) =>
+    cambiarDirecciones(() => eliminarDireccionApi(id), () => eliminarDireccionDemo(user, id))
+
+  const marcarPrincipal = (id) =>
+    cambiarDirecciones(() => marcarPrincipalApi(id), () => marcarPrincipalDemo(user, id), 'Dirección principal actualizada')
 
   // Corta la acción y muestra el modal si no hay sesión (true = hay que loguearse).
   // `destino` (opcional): ruta a la que ir después de entrar.

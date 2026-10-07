@@ -1,3 +1,5 @@
+import { USAR_API } from './modoApi'
+
 // Validaciones del cliente. Espejan las restricciones del back (AuthenticationRequest, UsuarioRequest, LibroRequest)
 // para avisar al instante; el back sigue siendo quien decide. Cada validador recibe (valor, todosLosValores)
 // y devuelve el mensaje de error o '' si el valor es válido.
@@ -237,8 +239,11 @@ export const validadoresDireccion = {
     if (t.length < 2) return 'Debe tener al menos 2 caracteres.'
     return t.length > 60 ? 'Máximo 60 caracteres.' : ''
   },
-  // Formato argentino: 4 dígitos (1425) o el CPA (C1425ABC). Opcional.
-  cp: (v) => (!texto(v) || /^([A-Za-z]\d{4}[A-Za-z]{3}|\d{4})$/.test(texto(v)) ? '' : 'Ingresá 4 dígitos (ej.: 1425) o el formato C1425ABC.'),
+  // Formato argentino: 4 dígitos (1425) o el CPA (C1425ABC). Opcional en demo; con el back es obligatorio (DireccionRequest.cp es @NotBlank).
+  cp: (v) => {
+    if (!texto(v)) return USAR_API ? 'Ingresá el código postal.' : ''
+    return /^([A-Za-z]\d{4}[A-Za-z]{3}|\d{4})$/.test(texto(v)) ? '' : 'Ingresá 4 dígitos (ej.: 1425) o el formato C1425ABC.'
+  },
   prov: obligatorio('Elegí la provincia.'),
 }
 
