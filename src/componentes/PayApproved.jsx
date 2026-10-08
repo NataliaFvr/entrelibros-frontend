@@ -16,7 +16,7 @@ const PayApproved = ({ pedido, libros, onVerCompras, onSeguir }) => {
         <OrderLines pedido={pedido} libros={libros} />
         <SummaryRow titulo="Envío" valor={fmt(pedido.env)} />
         <SummaryRow titulo="Total pagado" valor={fmt(pedido.sub + pedido.env)} total />
-        <small className="ord-a">Enviado a: {pedido.addr}</small>
+        <small className="ord-a">Envío a: {pedido.addr}</small>
       </div>
       <div className="rvf-b" style={{ justifyContent: 'center', flexWrap: 'wrap' }}>
         <button className="btn main" type="button" onClick={onVerCompras}>Ver mis compras</button>

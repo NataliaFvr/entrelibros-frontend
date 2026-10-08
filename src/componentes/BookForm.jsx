@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useLibros } from '../hooks/useLibros'
 import useFormulario from '../hooks/useFormulario'
 import useImagenesLibro from '../hooks/useImagenesLibro'
@@ -6,12 +6,14 @@ import { IDIOMA_POR_DEFECTO, opcionesIdioma } from '../data/idiomas'
 import { MIN_FOTOS } from '../utils/imagen'
 import { mapearCampos, normalizarError } from '../utils/errorApi'
 import { categoriasDe } from '../utils/libro'
+import { canonico, valoresFrecuentes } from '../utils/sugerencias'
 import { propsNumero } from '../utils/entradaNumerica'
 import { CAMPOS_LIBRO } from '../utils/libroRequest'
 import { ANIO_MIN, aDecimal, anioActual, validadoresLibro } from '../utils/validaciones'
 import Aviso from './Aviso'
 import Field from './Field'
 import CategoriasField from './CategoriasField'
+import SugerenciasField from './SugerenciasField'
 import SelectField from './SelectField'
 import TextAreaField from './TextAreaField'
 import ImageUploader from './ImageUploader'
@@ -28,7 +30,10 @@ const EN_VIVO = ['anio', 'base', 'd', 'stock']
 // Las reglas espejan LibroRequest del back: anioPublicacion entero 1900..año actual, precio > 0 con hasta 2 decimales,
 // descuento entero 0..100 e idioma de un catálogo fijo.
 const BookForm = ({ libro = {}, onGuardar, onCancelar }) => {
-  const { categorias } = useLibros()
+  const { categorias, libros } = useLibros()
+  // Editoriales y autores que ya hay en el catálogo: se ofrecen como sugerencias para que todos escriban el mismo nombre
+  const editoriales = useMemo(() => valoresFrecuentes(libros, 'ed'), [libros])
+  const autores = useMemo(() => valoresFrecuentes(libros, 'a'), [libros])
   const { valores, cambiar, errores, alSalir, validarTodo, setErroresCampos, error, tipoError, setError } = useFormulario(
     { ...desdeLibro(libro), cats: categoriasDe(libro).length ? categoriasDe(libro) : categorias.slice(0, 1) }, validadoresLibro, { enVivo: EN_VIVO },
   )
@@ -54,7 +59,7 @@ const BookForm = ({ libro = {}, onGuardar, onCancelar }) => {
       const enOrden = categorias.filter((c) => valores.cats.includes(c))
       // `onGuardar` puede devolver { error } (validación del servidor) o lanzar un error de red/HTTP
       const respuesta = await onGuardar({
-        t: valores.t.trim(), a: valores.a.trim(), ed: valores.ed.trim(), cat: enOrden[0], cats: enOrden, idioma: valores.idioma,
+        t: valores.t.trim(), a: canonico(autores, valores.a), ed: canonico(editoriales, valores.ed), cat: enOrden[0], cats: enOrden, idioma: valores.idioma,
         anio: parseInt(valores.anio, 10), usado, base: aDecimal(valores.base), d: parseInt(valores.d, 10),
         stock: usado ? 1 : parseInt(valores.stock, 10), imgs: imagenes.fotos, descripcion: valores.descripcion.trim(),
       })
@@ -76,8 +81,8 @@ const BookForm = ({ libro = {}, onGuardar, onCancelar }) => {
       <h3 className="fr">{libro.id ? 'Editar libro' : 'Publicar libro'}</h3>
       <Field label="Título" {...props('t')} />
       <div className="two">
-        <Field label="Autor" {...props('a')} />
-        <Field label="Editorial" {...props('ed')} />
+        <SugerenciasField label="Autor" sugerencias={autores} minimo={2} maximo={5} {...props('a')} />
+        <SugerenciasField label="Editorial" sugerencias={editoriales} maximo={8} {...props('ed')} />
       </div>
       <div className="two">
         <SelectField label="Idioma" {...props('idioma')} opciones={opcionesIdioma(libro.idioma)} />

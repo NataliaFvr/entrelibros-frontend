@@ -25,7 +25,7 @@ const OrderCard = ({ pedido, libros }) => {
       <OrderLines pedido={pedido} libros={libros} />
       <SummaryRow titulo="Envío" valor={fmt(pedido.env)} />
       <SummaryRow titulo="Total" valor={fmt(pedido.sub + pedido.env)} total />
-      <small className="ord-a">Enviado a: {pedido.addr}</small>
+      <small className="ord-a">Envío a: {pedido.addr}</small>
       {pendiente && (
         <div className="rvf-b">
           <small className="dim">Reserva: te quedan {mmss(pedido.reserva - ahora)} min</small>

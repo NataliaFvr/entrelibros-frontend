@@ -13,7 +13,7 @@ const OrderSummary = ({ pedido, libros, error, onCancelar }) => {
       <SummaryRow titulo="Libros" valor={fmt(pedido.sub)} />
       <SummaryRow titulo="Envío" valor={fmt(pedido.env)} />
       <SummaryRow titulo="Total" valor={fmt(total)} total />
-      <small className="ord-a">Enviado a: {pedido.addr}</small>
+      <small className="ord-a">Envío a: {pedido.addr}</small>
       <ReserveTimer reserva={pedido.reserva} />
       <p className="ferr" role="alert">{error}</p>
       <button className="btn main" type="submit" form="fPay">Pagar {fmt(total)}</button>

@@ -75,12 +75,12 @@ const venta = (n, date, comprador, est, pub) => ({
   its: [{ t: pub.t, q: 1, p: Math.round(pub.base * (1 - pub.d / 100)), cat: pub.cat, usado: pub.usado }],
 })
 
-// Historial de ventas: $187 + $240 + $370 + $70 = $867 · 4 unidades · $217 de promedio
+// Historial de ventas (no hay seguimiento de envío: una venta solo se confirma): $187 + $240 + $370 + $70 = $867 · 4 unidades · $217 de promedio
 export const VENTAS_ALEPH = [
-  venta('VT-2040', '2026-09-12', 'Camila R.', 'Enviado', PUBLICACIONES_ALEPH[0]),
-  venta('VT-2033', '2026-08-30', 'Martín P.', 'Entregado', PUBLICACIONES_ALEPH[1]),
-  venta('VT-2026', '2026-08-11', 'Sofía L.', 'Entregado', PUBLICACIONES_ALEPH[2]),
-  venta('VT-2019', '2026-07-21', 'Diego F.', 'Entregado', PUBLICACIONES_ALEPH[3]),
+  venta('VT-2040', '2026-09-12', 'Camila R.', 'Confirmada', PUBLICACIONES_ALEPH[0]),
+  venta('VT-2033', '2026-08-30', 'Martín P.', 'Confirmada', PUBLICACIONES_ALEPH[1]),
+  venta('VT-2026', '2026-08-11', 'Sofía L.', 'Confirmada', PUBLICACIONES_ALEPH[2]),
+  venta('VT-2019', '2026-07-21', 'Diego F.', 'Confirmada', PUBLICACIONES_ALEPH[3]),
 ]
 
 // Reseñas de los compradores de esas 4 ventas. Promedio: (5 + 5 + 4 + 5) / 4 = 4,75 -> 4,8
