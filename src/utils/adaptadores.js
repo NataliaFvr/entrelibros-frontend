@@ -57,7 +57,8 @@ export const aLibroFront = (l) => {
   return {
     id: l.id, t, a, ed: l.editorial || '', idioma: l.idioma || '', anio: l.anio ?? 0,
     base, d, p: precioFinal(base, d), usado: l.estadoLibro === 'USADO',
-    cat: cats[0] || '', cats, v: l.nombreVendedor || '', vId: l.idVendedor ?? null, envio: 'distinta', ventas: 0,
+    cat: cats[0] || '', cats, v: l.nombreTienda || l.nombreVendedor || '', vId: l.idVendedor ?? null,
+    provV: l.provinciaVendedor || '', envio: l.envio || 'distinta', ventas: 0,
     stock: l.stock ?? 0, imgs: [], descripcion: l.descripcion || '',
     c: TONES[(t.length + a.length) % TONES.length],
     estadoPublicacion: l.estadoPublicacion, estadoModeracion: l.estadoModeracion,
@@ -138,18 +139,20 @@ export const aPedidoFront = (o) => {
 
 /* ---------------- Envío ---------------- */
 
-// El back cobra UN costo fijo por orden según la zona de destino (ZonaEnvio: CABA | PROVINCIA_BA | RESTO_PAIS).
-// Mismo criterio que CarritoServiceImpl.mapearProvinciaAZona: sin tildes ni mayúsculas.
-const sinTildes = (t = '') => t.normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().toUpperCase()
-export const zonaEnvioDe = (provincia) => {
-  const p = sinTildes(provincia)
-  if (p === 'CABA' || p === 'CIUDAD AUTONOMA DE BUENOS AIRES') return 'CABA'
-  if (p === 'BUENOS AIRES' || p === 'PROVINCIA DE BUENOS AIRES' || p === 'PROVINCIA_BA') return 'PROVINCIA_BA'
-  return 'RESTO_PAIS'
+// Mismo criterio que EnvioPolicy del back: se comparan las provincias sin tildes, espacios de más ni mayúsculas,
+// y si falta alguna de las dos se cobra como distinta provincia.
+const normalizarProvincia = (t = '') => t.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/\s+/g, ' ').trim().toUpperCase()
+export const tipoEnvio = (provinciaVendedor, provinciaComprador) => {
+  const v = normalizarProvincia(provinciaVendedor)
+  const c = normalizarProvincia(provinciaComprador)
+  return v && c && v === c ? 'misma' : 'distinta'
 }
 
-// EnvioResponse[] { id, zona, costoFijo } -> { CABA: 1500, PROVINCIA_BA: 2500, RESTO_PAIS: 3500 }
-export const aTarifasEnvioFront = (lista = []) => Object.fromEntries(lista.map((e) => [e.zona, e.costoFijo]))
+// EnvioResponse[] { id, zona: 'misma' | 'distinta', costoFijo } -> { misma: 1800, distinta: 3500, ids: { misma: 1, distinta: 2 } }
+export const aTarifasEnvioFront = (lista = []) => ({
+  ...Object.fromEntries(lista.map((e) => [e.zona, e.costoFijo])),
+  ids: Object.fromEntries(lista.map((e) => [e.zona, e.id])),
+})
 
 // Venta del vendedor: OrdenVendedorResponse { id, estado, idOrden } + su OrdenResponse (GET /ordenes/{idOrden}, con items)
 // -> { n, date, est, its, comprador }, el formato que consumen SellerSales, SaleCard y SellerStats.
