@@ -1,21 +1,25 @@
-import { useState } from 'react'
 import { useToast } from './useToast'
+import useTarifasEnvio from './useTarifasEnvio'
 import { cambiarTarifaEnvio } from '../services/adminService'
-import { getTarifas } from '../services/enviosService'
+import { actualizarTarifaEnvioApi } from '../api/enviosApi'
+import { normalizarError } from '../utils/errorApi'
+import { USAR_API } from '../utils/modoApi'
 
-// Tarifas de envío vigentes y cambio de precio. `cambiar` devuelve { ok } o { error }.
+// Tarifas de envío vigentes y cambio de precio. `cambiar` devuelve (una Promesa de) { ok } o { error }.
 const useAdminEnvios = () => {
   const toast = useToast()
-  const [tarifas, setTarifas] = useState(getTarifas)
+  const { recargar, ids, ...tarifas } = useTarifasEnvio()
 
-  const cambiar = (tipo, costo) => {
+  const cambiar = async (tipo, costo) => {
     try {
-      cambiarTarifaEnvio(tipo, costo)
-      setTarifas(getTarifas())
+      if (USAR_API) await actualizarTarifaEnvioApi(ids[tipo], costo)
+      else cambiarTarifaEnvio(tipo, costo)
+      recargar()
       toast('Tarifa actualizada')
       return { ok: true }
     } catch (err) {
-      return { error: (err && err.message) || 'No pudimos guardar la tarifa. Intentá de nuevo.' }
+      const mensaje = USAR_API ? normalizarError(err).mensaje : err && err.message
+      return { error: mensaje || 'No pudimos guardar la tarifa. Intentá de nuevo.' }
     }
   }
 

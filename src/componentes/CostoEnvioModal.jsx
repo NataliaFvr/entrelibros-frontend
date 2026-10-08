@@ -4,14 +4,14 @@ import AdminModal from './AdminModal'
 import Aviso from './Aviso'
 import Field from './Field'
 
-// Cambiar el costo de un tipo de envío. `onGuardar(costo)` devuelve { ok } o { error }.
+// Cambiar el costo de un tipo de envío. `onGuardar(costo)` devuelve (una Promesa de) { ok } o { error }.
 const CostoEnvioModal = ({ titulo, costoActual, onGuardar, onCerrar }) => {
   const f = useFormulario({ costo: String(costoActual) }, { costo: validarCostoEnvio }, { enVivo: ['costo'] })
 
-  const enviar = (e) => {
+  const enviar = async (e) => {
     e.preventDefault()
     if (Object.keys(f.validarTodo(e.currentTarget)).length) return
-    const r = onGuardar(aDecimal(f.valores.costo))
+    const r = await onGuardar(aDecimal(f.valores.costo))
     if (r.error) f.setError(r.error, 'DESCONOCIDO')
     else onCerrar()
   }

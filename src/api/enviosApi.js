@@ -2,14 +2,18 @@ import api from './axiosConfig'
 import { aTarifasEnvioFront } from '../utils/adaptadores'
 import { esListaVacia } from '../utils/errorApi'
 
-// EnvioController: GET /envios -> [{ id, zona: CABA | PROVINCIA_BA | RESTO_PAIS, costoFijo }] (404 si no hay tarifas cargadas).
-// El back cobra un costo fijo POR ORDEN según la zona de la dirección de destino. Acá solo se usa para mostrar el costo
-// antes de confirmar; el costo definitivo es el `costoEnvio` de la orden que devuelve el checkout.
+// EnvioController: GET /envios -> [{ id, zona: 'misma' | 'distinta', costoFijo }].
+// El back cobra un envío por vendedor según si comparte provincia con el comprador; el costo definitivo
+// es el `costoEnvio` de la orden que devuelve el checkout.
 export const listarTarifasEnvioApi = async () => {
   try {
     return aTarifasEnvioFront((await api.get('/envios')).data)
   } catch (err) {
-    if (esListaVacia(err)) return {}
+    if (esListaVacia(err)) return aTarifasEnvioFront([])
     throw err
   }
 }
+
+// PATCH /envios/{id} { costoFijo } — solo ADMIN
+export const actualizarTarifaEnvioApi = async (idEnvio, costoFijo) =>
+  (await api.patch(`/envios/${idEnvio}`, { costoFijo })).data
