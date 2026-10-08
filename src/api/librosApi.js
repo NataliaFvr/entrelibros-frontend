@@ -30,10 +30,20 @@ export const getLibrosApi = async () => {
   const libros = base.map(aLibroFront)
   libros.forEach((l, i) => { l.ventas = libros.length > 1 ? 1 - i / libros.length : 1 })
   const porId = new Map(libros.map((l) => [l.id, l]))
-  await Promise.all(categorias.map(async (c) => {
-    const delaCategoria = await traerPaginas('/libros', { idCategorias: [c.id] })
-    delaCategoria.forEach((r) => { const l = porId.get(r.id); if (l && !l.cat) l.cat = c.nombre })
-  }))
+  // Un libro puede estar en varias categorías, pero LibroResponse no las trae: se piden por categoría (GET /libros?idCategorias=…).
+  // Se recorren en el orden de GET /categorias; `cats` las tiene todas y `cat` (la que se muestra) es la primera.
+  // Si algún día el back manda `categorias` en el libro, se usan esas y se evitan estos pedidos (ver aLibroFront).
+  const sinCategorias = libros.some((l) => !l.cats.length)
+  if (sinCategorias) {
+    const porCategoria = await Promise.all(categorias.map((c) => traerPaginas('/libros', { idCategorias: [c.id] })))
+    porCategoria.forEach((delaCategoria, i) => {
+      delaCategoria.forEach((r) => {
+        const l = porId.get(r.id)
+        if (l && !l.cats.includes(categorias[i].nombre)) l.cats = [...l.cats, categorias[i].nombre]
+      })
+    })
+    libros.forEach((l) => { l.cat = l.cats[0] || '' })
+  }
   return libros
 }
 

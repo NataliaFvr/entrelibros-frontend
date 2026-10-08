@@ -157,7 +157,7 @@ export const validadoresLibro = {
   t: conLargo('Ingresá el título.', 150),
   a: conLargo('Ingresá el autor.', 100),
   ed: conLargo('Ingresá la editorial.', 100),
-  cat: obligatorio('Elegí una categoría.'),
+  cats: (v) => (Array.isArray(v) && v.length ? '' : 'Elegí al menos una categoría.'),
   idioma: obligatorio('Elegí un idioma.'),
   anio: validarAnio,
   base: validarPrecio,

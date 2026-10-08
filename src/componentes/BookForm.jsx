@@ -5,17 +5,19 @@ import useImagenesLibro from '../hooks/useImagenesLibro'
 import { IDIOMA_POR_DEFECTO, opcionesIdioma } from '../data/idiomas'
 import { MIN_FOTOS } from '../utils/imagen'
 import { mapearCampos, normalizarError } from '../utils/errorApi'
+import { categoriasDe } from '../utils/libro'
 import { propsNumero } from '../utils/entradaNumerica'
 import { CAMPOS_LIBRO } from '../utils/libroRequest'
 import { ANIO_MIN, aDecimal, anioActual, validadoresLibro } from '../utils/validaciones'
 import Aviso from './Aviso'
 import Field from './Field'
+import CategoriasField from './CategoriasField'
 import SelectField from './SelectField'
 import TextAreaField from './TextAreaField'
 import ImageUploader from './ImageUploader'
 
 const desdeLibro = (p) => ({
-  t: p.t || '', a: p.a || '', ed: p.ed || '', cat: p.cat || '', idioma: p.idioma || IDIOMA_POR_DEFECTO, anio: String(p.anio || ''),
+  t: p.t || '', a: p.a || '', ed: p.ed || '', cats: categoriasDe(p), idioma: p.idioma || IDIOMA_POR_DEFECTO, anio: String(p.anio || ''),
   estado: p.usado ? 'Usado' : 'Nuevo', descripcion: p.descripcion || '', base: String(p.base || ''), d: String(p.d || 0), stock: String(p.usado ? 1 : p.stock || 1),
 })
 
@@ -28,7 +30,7 @@ const EN_VIVO = ['anio', 'base', 'd', 'stock']
 const BookForm = ({ libro = {}, onGuardar, onCancelar }) => {
   const { categorias } = useLibros()
   const { valores, cambiar, errores, alSalir, validarTodo, setErroresCampos, error, tipoError, setError } = useFormulario(
-    { ...desdeLibro(libro), cat: libro.cat || categorias[0] || '' }, validadoresLibro, { enVivo: EN_VIVO },
+    { ...desdeLibro(libro), cats: categoriasDe(libro).length ? categoriasDe(libro) : categorias.slice(0, 1) }, validadoresLibro, { enVivo: EN_VIVO },
   )
   const imagenes = useImagenesLibro(libro.imgs || [])
   const [enviando, setEnviando] = useState(false)
@@ -48,9 +50,11 @@ const BookForm = ({ libro = {}, onGuardar, onCancelar }) => {
     setError('')
     setEnviando(true)
     try {
+      // Las categorías van en el orden de la lista oficial: así la que se muestra en las tarjetas es la misma antes y después de recargar
+      const enOrden = categorias.filter((c) => valores.cats.includes(c))
       // `onGuardar` puede devolver { error } (validación del servidor) o lanzar un error de red/HTTP
       const respuesta = await onGuardar({
-        t: valores.t.trim(), a: valores.a.trim(), ed: valores.ed.trim(), cat: valores.cat, idioma: valores.idioma,
+        t: valores.t.trim(), a: valores.a.trim(), ed: valores.ed.trim(), cat: enOrden[0], cats: enOrden, idioma: valores.idioma,
         anio: parseInt(valores.anio, 10), usado, base: aDecimal(valores.base), d: parseInt(valores.d, 10),
         stock: usado ? 1 : parseInt(valores.stock, 10), imgs: imagenes.fotos, descripcion: valores.descripcion.trim(),
       })
@@ -76,18 +80,18 @@ const BookForm = ({ libro = {}, onGuardar, onCancelar }) => {
         <Field label="Editorial" {...props('ed')} />
       </div>
       <div className="two">
-        <SelectField label="Categoría" {...props('cat')} opciones={categorias} />
         <SelectField label="Idioma" {...props('idioma')} opciones={opcionesIdioma(libro.idioma)} />
+        <SelectField label="Estado" {...props('estado')} opciones={['Nuevo', 'Usado']} />
       </div>
+      <CategoriasField {...props('cats')} opciones={categorias} />
       <div className="two">
         <Field label={`Año de edición (${ANIO_MIN}–${anioActual()})`} type="number" min={ANIO_MIN} max={anioActual()} step="1" {...propsNumero('entero')} {...props('anio')} />
-        <SelectField label="Estado" {...props('estado')} opciones={['Nuevo', 'Usado']} />
+        <Field label="Stock (los usados: 1 unidad)" type="number" min="1" step="1" {...propsNumero('entero')} {...props('stock')} readOnly={usado} />
       </div>
       <div className="two">
         <Field label="Precio ($, hasta 2 decimales)" type="number" min="0.01" step="0.01" {...propsNumero('decimal')} {...props('base')} />
         <Field label="Descuento (%, de 0 a 100)" type="number" min="0" max="100" step="1" {...propsNumero('entero')} {...props('d')} />
       </div>
-      <Field label="Stock (los usados: 1 unidad)" type="number" min="1" step="1" {...propsNumero('entero')} {...props('stock')} readOnly={usado} />
       <TextAreaField label="Descripción (opcional)" name="descripcion" value={valores.descripcion} onChange={alCambiar} maxLength={1000} rows={5}
         placeholder="Contá de qué trata el libro y, si es usado, en qué estado está. Si la dejás vacía, la ficha no muestra descripción." />
       <small className="iu-hint" style={{ marginTop: -8 }}>{valores.descripcion.length} / 1000</small>

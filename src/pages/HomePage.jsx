@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { useLibros } from '../hooks/useLibros'
 import { masVendidos, ordenarPorVentas } from '../utils/filtrarLibros'
-import { esUsado } from '../utils/libro'
+import { categoriasDe, esUsado } from '../utils/libro'
 import Hero from '../componentes/Hero'
 import SeccionLibros from '../componentes/SeccionLibros'
 import FlashSale from '../componentes/FlashSale'
@@ -24,7 +24,7 @@ const HomePage = () => {
     const cuentaCats = new Map(categorias.map((c) => [c, 0]))
     libros.forEach((l) => {
       cuentaAutores.set(l.a, (cuentaAutores.get(l.a) || 0) + 1)
-      if (cuentaCats.has(l.cat)) cuentaCats.set(l.cat, cuentaCats.get(l.cat) + 1)
+      categoriasDe(l).forEach((c) => { if (cuentaCats.has(c)) cuentaCats.set(c, cuentaCats.get(c) + 1) })
     })
     const autores = [...cuentaAutores].map(([nombre, cantidad]) => ({ nombre, cantidad })).sort(porMasLibros)
     const topCategorias = [...cuentaCats].map(([nombre, cantidad]) => ({ nombre, cantidad })).sort(porMasLibros).map((c) => c.nombre)

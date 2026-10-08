@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import Stars from './Stars'
 import { fmt, plural } from '../utils/format'
-import { esUsado } from '../utils/libro'
+import { categoriasDe, esUsado, textoCategorias } from '../utils/libro'
 
 const BookmarkIcon = () => {
   return (
@@ -53,7 +53,7 @@ const BookInfo = ({ libro, rank, resumen, guardado, onGuardar }) => {
         <h3>Lo que tenés que saber de este libro</h3>
         <ul>
           <li>Editorial: {libro.ed}</li><li>Idioma: {libro.idioma}</li>
-          <li>Año de edición: {libro.anio}</li><li>Categoría: {libro.cat}</li>
+          <li>Año de edición: {libro.anio}</li><li>{categoriasDe(libro).length > 1 ? 'Categorías' : 'Categoría'}: {textoCategorias(libro)}</li>
         </ul>
         <a className="lnk" href="#spec">Ver características</a>
       </div>

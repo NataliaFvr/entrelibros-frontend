@@ -1,5 +1,5 @@
 import { norm } from './format'
-import { esUsado } from './libro'
+import { categoriasDe, esUsado } from './libro'
 
 export const PAGE_SIZE = 12
 export const PRECIO_MAX = 500
@@ -25,14 +25,14 @@ const ORDEN = {
 export function filtrarLibros(libros, f) {
   const r = libros.filter((l) =>
     (f.estado === 'ambos' || (f.estado === 'usados') === esUsado(l)) &&
-    (!f.cats.length || f.cats.includes(l.cat)) &&
+    (!f.cats.length || categoriasDe(l).some((c) => f.cats.includes(c))) &&
     (f.envios.length !== 1 || f.envios[0] === l.envio) &&
     l.p >= f.min && l.p <= f.max &&
     (f.desc === 0 || (f.desc === 1 ? l.d > 0 : l.d >= f.desc)) &&
     (!f.ed || l.ed === f.ed) && (!f.autor || l.a === f.autor) &&
     (!f.idioma || l.idioma === f.idioma) && (!f.vendedor || l.v === f.vendedor) &&
     (f.anio === '' || (f.anio === '0' ? l.anio < 2000 : l.anio >= +f.anio)) &&
-    (!f.q || norm(`${l.t} ${l.a} ${l.ed} ${l.cat} ${l.v}`).includes(norm(f.q))))
+    (!f.q || norm(`${l.t} ${l.a} ${l.ed} ${categoriasDe(l).join(' ')} ${l.v}`).includes(norm(f.q))))
   return r.sort(ORDEN[f.sort])
 }
 

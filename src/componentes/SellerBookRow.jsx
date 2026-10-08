@@ -1,6 +1,7 @@
 import { coverBg, TONES } from '../utils/colors'
 import { fmt } from '../utils/format'
 import { enRevision, precioFinal } from '../services/vendedorService'
+import { textoCategorias } from '../utils/libro'
 import { USAR_API } from '../utils/modoApi'
 import './SellerPanel.css'
 
@@ -20,7 +21,7 @@ const SellerBookRow = ({ libro, onEditar, onBaja, onAprobar, onRechazar }) => {
       <div className="cmini" style={{ background: coverBg({ c: color, imgs: libro.imgs }) }} />
       <div className="cinfo">
         <b>{libro.t}</b>
-        <small>{libro.a} · {libro.cat} · {libro.usado ? 'Usado' : 'Nuevo'}</small>
+        <small>{libro.a} · {textoCategorias(libro)} · {libro.usado ? 'Usado' : 'Nuevo'}</small>
         <small>Stock: {libro.stock}{libro.mod === 'RECHAZADO' && libro.modC ? ` · Motivo: ${libro.modC}` : ''}</small>
         {modificacion && (
           <>

@@ -1,7 +1,8 @@
+import { categoriasDe, textoCategorias } from '../utils/libro'
 const SpecSection = ({ libro }) => {
   const spec = [
     ['Título', libro.t], ['Autor', libro.a], ['Editorial', libro.ed], ['Idioma', libro.idioma],
-    ['Año de edición', libro.anio], ['Categoría', libro.cat], ['Estado', libro.usado ? 'Usado' : 'Nuevo'], ['Vendedor', libro.v],
+    ['Año de edición', libro.anio], [categoriasDe(libro).length > 1 ? 'Categorías' : 'Categoría', textoCategorias(libro)], ['Estado', libro.usado ? 'Usado' : 'Nuevo'], ['Vendedor', libro.v],
   ]
   return (
     <section className="dsec" id="spec">

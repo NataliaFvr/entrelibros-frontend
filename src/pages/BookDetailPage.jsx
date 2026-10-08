@@ -8,7 +8,7 @@ import { useCompra } from '../hooks/useCompra'
 import useLibroPropio from '../hooks/useLibroPropio'
 import useEsAdmin from '../hooks/useEsAdmin'
 import { posicionBestseller } from '../utils/filtrarLibros'
-import { esUsado as libroUsado } from '../utils/libro'
+import { categoriasDe, esUsado as libroUsado } from '../utils/libro'
 import BookBreadcrumb from '../componentes/BookBreadcrumb'
 import Gallery from '../componentes/Gallery'
 import BookInfo from '../componentes/BookInfo'
@@ -42,7 +42,7 @@ const Detalle = ({ libro, libros }) => {
       rank: posicionBestseller(libros, libro), // 0 si es usado: no participa del ranking
       delVendedor: libros.filter((x) => x.v === libro.v),
       mismoAutor: otros.filter((x) => x.a === libro.a),
-      mismaCategoria: otros.filter((x) => x.cat === libro.cat && x.a !== libro.a),
+      mismaCategoria: otros.filter((x) => x.a !== libro.a && categoriasDe(x).some((c) => categoriasDe(libro).includes(c))),
     }
   }, [libros, libro])
 

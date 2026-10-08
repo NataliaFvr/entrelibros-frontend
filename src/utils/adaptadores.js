@@ -52,10 +52,12 @@ export const aLibroFront = (l) => {
   const d = l.descuentoPct ?? 0
   const t = l.titulo || ''
   const a = l.autor || ''
+  // Si el back manda `categorias` (lista de { id, nombre } o de nombres) se usan en ese orden; si no, las completa getLibrosApi
+  const cats = Array.isArray(l.categorias) ? l.categorias.map((c) => (typeof c === 'string' ? c : c && c.nombre)).filter(Boolean) : []
   return {
     id: l.id, t, a, ed: l.editorial || '', idioma: l.idioma || '', anio: l.anio ?? 0,
     base, d, p: precioFinal(base, d), usado: l.estadoLibro === 'USADO',
-    cat: '', v: l.nombreVendedor || '', vId: l.idVendedor ?? null, envio: 'distinta', ventas: 0,
+    cat: cats[0] || '', cats, v: l.nombreVendedor || '', vId: l.idVendedor ?? null, envio: 'distinta', ventas: 0,
     stock: l.stock ?? 0, imgs: [], descripcion: l.descripcion || '',
     c: TONES[(t.length + a.length) % TONES.length],
     estadoPublicacion: l.estadoPublicacion, estadoModeracion: l.estadoModeracion,

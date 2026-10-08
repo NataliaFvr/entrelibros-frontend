@@ -388,6 +388,12 @@
   .fld input,.fld .fsel{font-family:inherit;font-size:.9rem;padding:10px 12px;border:1px solid rgba(4,42,43,.2);border-radius:8px;background:#fff;color:var(--evergreen);width:100%}
   .fld input:focus,.fld .fsel:focus{outline:2px solid var(--blue);outline-offset:1px}
   .two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .catset{border:0;padding:0;margin:0}.catset legend{padding:0;margin-bottom:6px;font-size:.78rem;font-weight:600}
+  .catchips{display:flex;flex-wrap:wrap;gap:8px}
+  .catchip{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border:1px solid rgba(4,42,43,.2);border-radius:999px;background:#fff;font-size:.85rem;font-weight:600;cursor:pointer;max-width:100%}
+  .catchip input{width:auto;margin:0;accent-color:var(--evergreen)}.catchip em{font-style:normal;font-weight:700;color:var(--burnt);font-size:.75rem}
+  .catchip.on{background:var(--cream);border-color:var(--evergreen)}
+  .catchip:focus-within{outline:2px solid var(--blue);outline-offset:1px}
   .pw{position:relative;display:block}.pw input{padding-right:70px}
   .eye{position:absolute;right:6px;top:50%;transform:translateY(-50%);background:none;border:0;font-family:inherit;font-weight:700;font-size:.75rem;color:var(--burnt);cursor:pointer;padding:6px}
   .ferr{color:var(--burnt);font-size:.82rem;font-weight:600}.ferr:empty{display:none}

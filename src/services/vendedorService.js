@@ -44,7 +44,7 @@ export const guardarVendedor = (u, v) => guardar(claveVendedor(u), v) // true si
 
 const aLibro = (p, v) => ({
   id: p.id, t: p.t, a: p.a, ed: p.ed, idioma: p.idioma, anio: p.anio, base: p.base, d: p.d, p: precioFinal(p),
-  usado: p.usado, cat: p.cat, v: v.tienda, envio: v.prov === 'Buenos Aires' ? 'misma' : 'distinta',
+  usado: p.usado, cat: p.cat, cats: p.cats, v: v.tienda, envio: v.prov === 'Buenos Aires' ? 'misma' : 'distinta',
   ventas: 0.5, stock: p.stock, imgs: p.imgs || [], descripcion: p.descripcion || '', c: TONES[(p.t.length + p.a.length) % TONES.length],
 })
 

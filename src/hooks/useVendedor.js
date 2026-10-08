@@ -11,6 +11,7 @@ import { actualizarUsuarioApi, solicitarVendedorApi } from '../api/usuariosApi'
 import { dataUrlAFile } from '../utils/adaptadores'
 import { mensajeError } from '../utils/errorApi'
 import { aLibroRequest } from '../utils/libroRequest'
+import { categoriasDe } from '../utils/libro'
 import { USAR_API } from '../utils/modoApi'
 
 const MENSAJE_REVISION = 'Tus cambios fueron enviados a revisión. El libro no se verá en el catálogo hasta que un administrador lo apruebe.'
@@ -75,7 +76,7 @@ const useVendedor = (user) => {
   const crearEnApi = async (datos) => {
     let creado
     try {
-      creado = await crearLibroApi(aLibroRequest(datos, await idsDeCategorias([datos.cat])))
+      creado = await crearLibroApi(aLibroRequest(datos, await idsDeCategorias(categoriasDe(datos))))
     } catch (err) {
       const mensaje = mensajeError(err, 'libro')
       toast(mensaje)
@@ -110,7 +111,7 @@ const useVendedor = (user) => {
     let imgs = datos.imgs
     if (USAR_API) {
       try {
-        const ids = await idsDeCategorias([datos.cat])
+        const ids = await idsDeCategorias(categoriasDe(datos))
         const libro = await modificarLibro(idEditado, aLibroRequest(datos, ids.length ? ids : undefined))
         enviadoARevision = libro.estadoModeracion === 'EN_REVISION'
         imgs = await subirFotos(idEditado, datos.imgs)
