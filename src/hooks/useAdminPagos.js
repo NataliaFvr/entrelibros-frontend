@@ -1,5 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
+<<<<<<< HEAD
 import { cargarPagos } from '../services/adminService'
+=======
+import { cargarPagos } from '../api/adminApi'
+>>>>>>> 726f86e (Union)
 import { POR_PAGINA } from '../data/admin'
 
 // Pagos registrados con sus totales (aprobados, rechazados y monto cobrado) y paginación.

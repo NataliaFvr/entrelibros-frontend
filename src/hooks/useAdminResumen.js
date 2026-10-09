@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
-import { fuenteModeracion } from '../services/moderacionFuente'
-import { cargarOrdenes, cargarUsuarios } from '../services/adminService'
+import { fuenteModeracion } from '../api/moderacionApi'
+import { cargarOrdenes, cargarUsuarios } from '../api/adminApi'
 import { ETIQUETAS_PAGO } from '../utils/pedidos'
 
 const mensajeDe = (err) => (err && err.message) || 'No pudimos traer las solicitudes. Intentá de nuevo.'

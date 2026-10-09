@@ -6,8 +6,13 @@ import { EVENTO_SESION_EXPIRADA } from '../api/axiosConfig'
 import { cerrarSesionApi, getSesionApi, loginApi, reenviarCodigoApi, registrarApi, traerUsuarioApi } from '../api/authApi'
 import { actualizarUsuarioApi, quitarFotoUsuarioApi, subirFotoUsuarioApi, urlFotoUsuario } from '../api/usuariosApi'
 import { agregarMarcapaginaApi, listarMarcapaginasApi, quitarMarcapaginaApi } from '../api/cuentaApi'
+<<<<<<< HEAD
 import { dataUrlAFile } from '../utils/adaptadores'
 import { direcciones as servicioDirecciones } from '../services/direccionesService'
+=======
+import { dataUrlAFile } from '../api/adaptadores'
+import { direcciones as servicioDirecciones } from '../api/direccionesApiExtra'
+>>>>>>> 726f86e (Union)
 import LoginGate from '../componentes/LoginGate'
 import { mensajeError, normalizarError } from '../utils/errorApi'
 

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { getCategorias, getLibros } from '../services/librosService'
-import { imagenesDeCategorias } from '../services/categoriasService'
+import { getCategorias, getLibros } from '../api/librosApiExtra'
+import { imagenesDeCategorias } from '../api/categoriasApiExtra'
 import { getImagenesApi } from '../api/librosApi'
 import { useToast } from '../hooks/useToast'
 import { mensajeError } from '../utils/errorApi'

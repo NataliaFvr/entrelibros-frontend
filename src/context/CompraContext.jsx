@@ -3,13 +3,17 @@ import { CompraCtx } from './compraCtx'
 import { useAuth } from '../hooks/useAuth'
 import { useToast } from '../hooks/useToast'
 import useCarrito from '../hooks/useCarrito'
+<<<<<<< HEAD
 import { esLibroPropio } from '../services/vendedorService'
+=======
+import { esLibroPropio } from '../api/vendedorApi'
+>>>>>>> 726f86e (Union)
 import { cancelarOrdenApi, checkoutApi, crearPagoApi, listarPedidosApi } from '../api/comprasApi'
 import { mensajeError } from '../utils/errorApi'
 import { estadoPago } from '../utils/pedidos'
 
 // Carrito y pedidos de la cuenta que tiene la sesión.
-// El carrito lo maneja hooks/useCarrito.js: con el back (VITE_API=true) cada acción se sincroniza con /carrito/items y el
+// El carrito lo maneja hooks/useCarrito.js: cada acción se sincroniza con /carrito/items y el
 // checkout (POST /carrito/checkout { idDireccion, provinciaDestino }) usa ese mismo carrito -> orden PENDIENTE (reserva 1 h);
 // luego POST /pagos y PATCH /ordenes/{id}/cancelar.
 // El número de pedido (`n`) es el id de la orden.
@@ -42,7 +46,7 @@ const CompraProvider = ({ children }) => {
     return () => { vigente = false }
   }, [idApi])
 
-  // Mientras haya pedidos pendientes, pasa a "vencido" los que se quedaron sin reserva
+  // Mientras haya pedidos pendientes, muestra como vencidos los que superaron la fecha enviada por el back.
   useEffect(() => {
     if (!pedidos.some((o) => o.pago === 'PENDIENTE')) return
     const t = setInterval(() => {

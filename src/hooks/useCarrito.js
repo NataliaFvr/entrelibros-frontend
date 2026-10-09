@@ -6,9 +6,12 @@ import { mensajeError } from '../utils/errorApi'
 // `agregar`, `cambiarCantidad` y `quitar` devuelven una promesa (o un valor) que es true si se aplicó, para poder esperar el
 // resultado antes de navegar (por ejemplo "Comprar ahora" espera a que el libro esté en el carrito).
 
+<<<<<<< HEAD
 // Los usados tienen 1 unidad; los nuevos, hasta 10 por compra (el stock real lo valida el back)
 const topeDe = (libro) => (libro.usado ? 1 : 10)
 
+=======
+>>>>>>> 726f86e (Union)
 const useCarrito = (user, { esPropio, avisar }) => {
   const idUsuario = user ? user.id : null
   const [carrito, setCarrito] = useState([])
@@ -59,7 +62,7 @@ const useCarrito = (user, { esPropio, avisar }) => {
     return ejecutar(async () => {
       const actual = ultimo.current.find((c) => c.id === libro.id)
       if (actual) {
-        const q = Math.min(actual.q + 1, topeDe(libro))
+        const q = Math.min(actual.q + 1, actual.maxCantidad)
         if (q !== actual.q) {
           const item = await cambiarCantidadItemApi(actual.idItem, q) // PATCH: reemplaza la cantidad
           poner(ultimo.current.map((c) => (c.id === libro.id ? item : c)))
@@ -74,7 +77,7 @@ const useCarrito = (user, { esPropio, avisar }) => {
   const cambiarCantidad = (libro, delta) => ejecutar(async () => {
     const actual = ultimo.current.find((c) => c.id === libro.id)
     if (!actual) return
-    const q = Math.max(1, Math.min(topeDe(libro), actual.q + delta))
+    const q = Math.max(1, Math.min(actual.maxCantidad, actual.q + delta))
     if (q === actual.q) return
     const item = await cambiarCantidadItemApi(actual.idItem, q)
     poner(ultimo.current.map((c) => (c.id === libro.id ? item : c)))

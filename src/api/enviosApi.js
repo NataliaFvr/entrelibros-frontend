@@ -1,5 +1,5 @@
 import api from './axiosConfig'
-import { aTarifasEnvioFront } from '../utils/adaptadores'
+import { aTarifasEnvioFront } from './adaptadores'
 import { esListaVacia } from '../utils/errorApi'
 
 // EnvioController: GET /envios -> [{ id, zona: 'misma' | 'distinta', costoFijo }].

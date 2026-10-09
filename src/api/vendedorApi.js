@@ -1,4 +1,4 @@
-import { solicitudAFront } from '../utils/adaptadores'
+import { solicitudAFront } from './adaptadores'
 
 export const enRevision = (p) => p.estadoModeracion === 'EN_REVISION' || p.mod === 'EN_REVISION' || Boolean(p.revision)
 export const precioFinal = (p) => Math.round(p.base * (1 - p.d / 100) * 100) / 100

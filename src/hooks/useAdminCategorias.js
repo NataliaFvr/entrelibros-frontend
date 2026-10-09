@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useLibros } from './useLibros'
 import { useToast } from './useToast'
-import { cambiarEstadoCategoria, crearCategoriaConFoto, editarCategoria, listarCategoriasAdmin } from '../services/categoriasService'
+import { cambiarEstadoCategoria, crearCategoriaConFoto, editarCategoria, listarCategoriasAdmin } from '../api/categoriasApiExtra'
 
 // Categorías del panel (activas y de baja) con alta, edición y baja/reactivación. Cada acción devuelve { ok } o { error }.
 const useAdminCategorias = () => {

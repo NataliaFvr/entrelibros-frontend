@@ -1,4 +1,4 @@
-import api, { RAIZ } from '../api/axiosConfig'
+import api, { RAIZ } from './axiosConfig'
 import { esListaVacia, normalizarError } from '../utils/errorApi'
 
 const RUTAS = {

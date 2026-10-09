@@ -5,15 +5,14 @@ import AddressSelect from './AddressSelect'
 import AddressForm from './AddressForm'
 
 // Resumen de la estantería + dirección de envío + botón para pasar al pago.
-// `envio` puede ser null: todavía no se conoce (el back lo calcula según la zona de la dirección elegida).
-const CartSummary = ({ sub, envio, direcciones, elegida, onElegir, onFinalizar, enviando = false }) => {
+const CartSummary = ({ sub, direcciones, elegida, onElegir, onFinalizar, enviando = false }) => {
   const [agregando, setAgregando] = useState(false) // formulario de nueva dirección abierto (si ya hay direcciones)
   return (
     <div className="card csum">
       <h3 className="fr">Resumen</h3>
       <SummaryRow titulo="Libros" valor={fmt(sub)} />
-      <SummaryRow titulo="Envío" valor={envio == null ? 'A calcular' : fmt(envio)} />
-      <SummaryRow titulo="Total" valor={fmt(sub + (envio ?? 0))} total />
+      <SummaryRow titulo="Envío" valor="Se calcula al confirmar" />
+      <SummaryRow titulo="Total" valor="Se calcula al confirmar" total />
       {direcciones.length ? (
         <>
           <AddressSelect direcciones={direcciones} elegida={elegida} onElegir={onElegir} />

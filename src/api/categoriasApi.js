@@ -1,5 +1,5 @@
 import api, { RAIZ } from './axiosConfig'
-import { aCategoriaFront } from '../utils/adaptadores'
+import { aCategoriaFront } from './adaptadores'
 import { norm } from '../utils/format'
 import { esListaVacia } from '../utils/errorApi'
 
@@ -35,7 +35,7 @@ export const crearCategoriaApi = async (nombre) => aCategoriaFront((await api.po
 
 /* ---------- Imágenes ---------- */
 
-// URL del <img> de una categoría. Si la imagen no existe, el <img> falla (404) y el componente muestra la inicial (onError).
+// URL del <img> de una categoría. El componente muestra la inicial si la imagen deja de estar disponible.
 export const urlImagenCategoria = (id) => `${RAIZ}/categorias/${id}/imagen${versiones.has(id) ? `?v=${versiones.get(id)}` : ''}`
 
 const recordar = (id, tieneImagen) => {

@@ -1,8 +1,8 @@
-import { listarOrdenesAdminApi, listarPagosAdminApi } from '../api/comprasApi'
-import { crearCategoriaApi } from '../api/categoriasApi'
+import { listarOrdenesAdminApi, listarPagosAdminApi } from './comprasApi'
+import { crearCategoriaApi } from './categoriasApi'
 import {
   actualizarUsuarioApi, cambiarRolApi, crearUsuarioApi, darDeBajaUsuarioApi, listarUsuariosApi, reactivarUsuarioApi, resolverSolicitudApi,
-} from '../api/usuariosApi'
+} from './usuariosApi'
 import { mensajeError } from '../utils/errorApi'
 
 const conBack = async (fn) => {

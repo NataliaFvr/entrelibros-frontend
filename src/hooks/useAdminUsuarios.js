@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useAuth } from './useAuth'
 import { useLibros } from './useLibros'
 import { useToast } from './useToast'
-import * as admin from '../services/adminService'
+import * as admin from '../api/adminApi'
 import { ETIQUETA_ROL, POR_PAGINA } from '../data/admin'
 import { norm } from '../utils/format'
 

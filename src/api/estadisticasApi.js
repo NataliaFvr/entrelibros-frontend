@@ -1,5 +1,5 @@
 import api from './axiosConfig'
-import { aEstadisticasFront } from '../utils/adaptadores'
+import { aEstadisticasFront } from './adaptadores'
 
 // VendedoresController (rol VENDEDOR): GET /vendedores/estadisticas -> EstadisticasVendedorResponse
 // { ingresosTotales, unidadesVendidas, cantidadVentas, promedioPorVenta, ventasPorCategoria[], ventasPorEstado[] (NUEVO/USADO) }

@@ -1,5 +1,5 @@
-import { TONES } from './colors'
-import { destinoTexto } from './format'
+import { TONES } from '../utils/colors'
+import { destinoTexto } from '../utils/format'
 
 // Traductores BACK -> FRONT (y de vuelta). El front trabaja con su propio modelo (libro: t, a, ed, base, d, p, usado…;
 // pedido: n, its, sub, env…) y el back con sus DTOs. Todo el conocimiento de los nombres del back vive acá:
@@ -16,9 +16,7 @@ export const publicacionAFront = (e) => (e === 'DADA_DE_BAJA' ? 'baja' : 'activo
 
 /* ---------------- Direcciones ---------------- */
 
-// DireccionResponse { id, alias, calle, ciudad, provincia, cp } -> dirección del front (provincia -> prov).
-// OJO: el back todavía NO informa cuál es la principal (no hay campo `principal` ni PATCH /direcciones/{id}/principal).
-// Si algún día lo informa, `principal` llega acá y se respeta; si no, direccionesApi decide la principal (ver resolverPrincipal).
+// DireccionResponse { id, alias, calle, ciudad, provincia, cp, principal } -> dirección del front.
 export const aDireccionFront = (d) => ({
   id: d.id,
   alias: d.alias,
@@ -62,6 +60,7 @@ export const aLibroFront = (l) => {
     stock: l.stock ?? 0, imgs: [], descripcion: l.descripcion || '',
     c: TONES[(t.length + a.length) % TONES.length],
     estadoPublicacion: l.estadoPublicacion, estadoModeracion: l.estadoModeracion,
+    motivoRechazo: l.motivoRechazo || '',
   }
 }
 
@@ -104,18 +103,17 @@ export const aReseniaVendedorFront = (r) => ({
 
 /* ---------------- Carrito ---------------- */
 
-// CarritoItemResponse { id, cantidad, idLibro, tituloLibro, precioUnitario, subtotal } -> ítem del carrito del front.
+// CarritoItemResponse { id, cantidad, idLibro, tituloLibro, precioUnitario, subtotal, maxCantidad } -> ítem del carrito.
 // `id` es el id del LIBRO (así lo usa toda la interfaz); `idItem` es el id de la fila del carrito en el back, que piden
 // PATCH y DELETE /carrito/items/{idItem}. El precio no se guarda acá: la pantalla lo toma del catálogo (con el descuento aplicado).
-export const aItemCarritoFront = (i) => ({ id: i.idLibro, q: i.cantidad, idItem: i.id })
+export const aItemCarritoFront = (i) => ({ id: i.idLibro, q: i.cantidad, idItem: i.id, maxCantidad: i.maxCantidad })
 
 /* ---------------- Pedidos ---------------- */
 
-// El front manda "Ciudad Autónoma de Buenos Aires" (con tildes); el back compara contra "CABA" o "CIUDAD AUTONOMA DE BUENOS AIRES"
-// (sin tildes) para elegir la zona de envío. Se manda siempre "CABA" para que no caiga por error en RESTO_PAIS.
+// El front normaliza la provincia solo para el request; el backend calcula la zona y el costo real.
 export const provinciaParaBack = (prov = '') => (/^(ciudad aut[oó]noma de buenos aires|caba)$/i.test(prov.trim()) ? 'CABA' : prov.trim())
 
-// OrdenResponse (con items) -> pedido del front { n, date, its, addr, sub, env, total, est, pago, reserva, proveedor }
+// OrdenResponse (con items) -> pedido del front { n, date, its, addr, sub, env, total, est, pago, venceEn, proveedor }
 const ESTADO_TEXTO = { PENDIENTE: 'Pendiente', SIMULADO_APROBADO: 'Confirmada', RECHAZADO: 'Rechazada', CANCELADO: 'Cancelada', VENCIDO: 'Vencida' }
 
 // Dirección de entrega de la orden: el back la guarda copiada al hacer el checkout (calleDestino, ciudadDestino, cpDestino
@@ -130,23 +128,14 @@ export const aPedidoFront = (o) => {
     n: String(o.id), idOrden: o.id, date: isoADia(o.fecha),
     its: (o.items || []).map((i) => ({ id: i.idLibro, q: i.cantidad, p: i.precioUnitario, t: i.tituloLibro, idItem: i.idOrdenItem, idVendedor: i.idVendedor })),
     dest, addr: destinoTexto(dest), // addr = texto listo para mostrar: "calle, ciudad, Provincia (CP)"
-    sub: o.subtotal ?? 0, env: o.costoEnvio ?? 0, // env = costoEnvio REAL que calculó el back al confirmar la compra
+    sub: o.subtotal ?? 0, env: o.costoEnvio ?? 0, total: o.total ?? 0,
     est: ESTADO_TEXTO[o.estadoPago] || o.estadoPago, pago: o.estadoPago,
-    reserva: o.estadoPago === 'PENDIENTE' ? isoAMs(o.reservaHasta) ?? undefined : undefined,
+    venceEn: o.estadoPago === 'PENDIENTE' ? isoAMs(o.venceEn) ?? undefined : undefined,
     comprador: `${o.nombreComprador || ''}`.trim(),
   }
 }
 
 /* ---------------- Envío ---------------- */
-
-// Mismo criterio que EnvioPolicy del back: se comparan las provincias sin tildes, espacios de más ni mayúsculas,
-// y si falta alguna de las dos se cobra como distinta provincia.
-const normalizarProvincia = (t = '') => t.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/\s+/g, ' ').trim().toUpperCase()
-export const tipoEnvio = (provinciaVendedor, provinciaComprador) => {
-  const v = normalizarProvincia(provinciaVendedor)
-  const c = normalizarProvincia(provinciaComprador)
-  return v && c && v === c ? 'misma' : 'distinta'
-}
 
 // EnvioResponse[] { id, zona: 'misma' | 'distinta', costoFijo } -> { misma: 1800, distinta: 3500, ids: { misma: 1, distinta: 2 } }
 export const aTarifasEnvioFront = (lista = []) => ({
@@ -194,7 +183,7 @@ export const aEstadisticasFront = (r) => ({
 /* ---------------- Categorías ---------------- */
 
 // Categoria { id, nombre } (GET /categorias) o CategoriaResponse { id, nombre, tieneImagen } -> { id, nombre, tieneImagen }.
-// GET /categorias hoy NO informa tieneImagen (undefined): se asume que puede tenerla y el <img> cae al círculo con la inicial si da 404.
+// GET /categorias informa si existe una imagen activa para evitar pedidos innecesarios.
 export const aCategoriaFront = (c) => ({ id: c.id, nombre: c.nombre, tieneImagen: c.tieneImagen !== false })
 
 /* ---------------- Vendedor público ---------------- */
@@ -207,7 +196,7 @@ export const aVendedorPublicoFront = (v) => ({
   tienda: v.nombreTienda || v.tienda || [v.nombre, v.apellido].filter(Boolean).join(' ') || v.nombreUsuario || '',
   usuario: v.nombreUsuario || '',
   ubicacion: v.provincia || '',
-  desde: v.fechaRegistro ? String(v.fechaRegistro).slice(0, 4) : '',
+  desde: (v.desde || v.fechaRegistro) ? String(v.desde || v.fechaRegistro).slice(0, 4) : '',
   descripcion: v.descripcion || '',
   verificado: true, // un vendedor listado es un vendedor aprobado por un administrador
 })

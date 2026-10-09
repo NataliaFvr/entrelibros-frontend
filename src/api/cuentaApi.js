@@ -1,6 +1,6 @@
 import api from './axiosConfig'
 import { traerPaginas } from './librosApi'
-import { aNotificacionFront, idNotificacionApi } from '../utils/adaptadores'
+import { aNotificacionFront, idNotificacionApi } from './adaptadores'
 import { esListaVacia } from '../utils/errorApi'
 
 // NotificacionController, MarcapaginaController y ContactoController

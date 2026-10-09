@@ -1,5 +1,5 @@
 import api from './axiosConfig'
-import { aPedidoFront, provinciaParaBack } from '../utils/adaptadores'
+import { aPedidoFront, provinciaParaBack } from './adaptadores'
 import { esListaVacia } from '../utils/errorApi'
 
 // OrdenController + PagoController (el carrito está en carritoApi.js)
@@ -11,7 +11,7 @@ const lista = async (pedido) => {
   }
 }
 
-// POST /carrito/checkout { idDireccion, provinciaDestino } -> OrdenResponse PENDIENTE con reservaHasta (1 hora).
+// POST /carrito/checkout { idDireccion, provinciaDestino } -> OrdenResponse PENDIENTE con costoEnvio y venceEn.
 // El carrito ya está en el back (api/carritoApi.js): el checkout lo convierte en orden y lo vacía.
 // idDireccion es lo que manda la interfaz: el back copia calle/ciudad/CP de esa dirección a la orden y la provincia sale de
 // ella (ignora provinciaDestino). provinciaDestino se manda igual como respaldo, por si la dirección no tuviera id.

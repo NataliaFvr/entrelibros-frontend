@@ -1,6 +1,6 @@
 import { coverBg, TONES } from '../utils/colors'
 import { fmt } from '../utils/format'
-import { enRevision, precioFinal } from '../services/vendedorService'
+import { enRevision, precioFinal } from '../api/vendedorApi'
 import { textoCategorias } from '../utils/libro'
 import './SellerPanel.css'
 

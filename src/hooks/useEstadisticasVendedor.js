@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { getEstadisticas } from '../services/estadisticasService'
+import { getEstadisticas } from '../api/estadisticasApiExtra'
 
 // Estadísticas del vendedor { ingresos, unidades, ventas, promedio, categorias, estados } (null mientras cargan).
 // Se vuelven a pedir si cambia el conjunto de ventas (la lista llega como un array nuevo en cada render: se compara por contenido).

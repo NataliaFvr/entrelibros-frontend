@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useLibros } from './useLibros'
 import { useToast } from './useToast'
-import { fuenteModeracion as fuente } from '../services/moderacionFuente'
+import { fuenteModeracion as fuente } from '../api/moderacionApi'
 
 const mensajeDe = (err) => (err && err.message) || 'No pudimos completar la acción. Intentá de nuevo.'
 

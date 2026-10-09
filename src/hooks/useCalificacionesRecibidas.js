@@ -1,12 +1,15 @@
 import { useEffect, useState } from 'react'
+<<<<<<< HEAD
 import { getOpinionesVendedor } from '../services/opinionesService'
+=======
+import { getOpinionesVendedor } from '../api/opinionesApi'
+>>>>>>> 726f86e (Union)
 import { getResenasVendedorApi } from '../api/resenasApi'
 
 const promedio = (lista) => (lista.length ? lista.reduce((a, r) => a + r.st, 0) / lista.length : 0)
 
 // Todo lo que le calificaron a un vendedor: su atención (reseñas al vendedor) y sus libros (opiniones de lo que vendió).
-// Con el back: GET /resenas-vendedor/vendedor/{idVendedor} y GET /resenas-libro/libro/{id} de cada una de sus publicaciones.
-// Sin el back: las reales de este navegador + las de ejemplo del vendedor de prueba.
+// GET /resenas-vendedor/vendedor/{idVendedor} y GET /resenas-libro/libro/{id} de cada publicación.
 const useCalificacionesRecibidas = (tienda, publicaciones, idVendedor = null) => {
   const [delBack, setDelBack] = useState([])
   const [delLibro, setDelLibro] = useState([])

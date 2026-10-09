@@ -1,6 +1,6 @@
 import api, { RAIZ } from './axiosConfig'
 import { traerPaginas } from './librosApi'
-import { aUsuarioFront } from '../utils/adaptadores'
+import { aUsuarioFront } from './adaptadores'
 
 // UsuariosController
 

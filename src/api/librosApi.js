@@ -1,5 +1,5 @@
 import api, { RAIZ } from './axiosConfig'
-import { aLibroFront } from '../utils/adaptadores'
+import { aLibroFront } from './adaptadores'
 import { listarCategoriasApi } from './categoriasApi'
 import { esListaVacia } from '../utils/errorApi'
 

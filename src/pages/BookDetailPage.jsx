@@ -20,9 +20,6 @@ import ReviewsSection from '../componentes/ReviewsSection'
 import RelatedSection from '../componentes/RelatedSection'
 import NotFoundPage from './NotFoundPage'
 
-// Stock de ejemplo hasta que el back lo informe
-const stockDe = (l) => (l.stock != null ? l.stock : libroUsado(l) ? 1 : 1 + ((l.id * 7) % 30))
-
 const Detalle = ({ libro, libros }) => {
   const navigate = useNavigate()
   const toast = useToast()
@@ -78,7 +75,7 @@ const Detalle = ({ libro, libros }) => {
           onGuardar={propio || esAdmin ? undefined : guardar}
         />
         <div className="buy-col">
-          <BuyBox libro={libro} stock={stockDe(libro)} onComprar={comprar} onCarrito={alCarrito}
+          <BuyBox libro={libro} stock={libro.stock} onComprar={comprar} onCarrito={alCarrito}
             propio={propio} soloLectura={esAdmin} onEditar={() => navigate(rutaEdicion(libro))} editarDeshabilitado={propio && enRevision(libro)} />
           <SellerBox vendedor={libro.v} vendedorId={libro.vId} cantidad={delVendedor.length} destacarReputacion={esUsado} propio={propio} enlazar={!esAdmin} />
         </div>

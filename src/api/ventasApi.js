@@ -4,7 +4,7 @@ import { esListaVacia } from '../utils/errorApi'
 // OrdenController, parte del vendedor.
 // GET /ordenes/vendedor -> [{ id, estado, idOrden, idVendedor, nombreVendedor }]: no trae fecha, items ni comprador.
 // Ese detalle sale de GET /ordenes/{idOrden} (el vendedor de la orden tiene permiso), que devuelve OrdenResponse con items.
-// Devuelve [{ ordenVendedor, orden }]; el mapeo al formato del front vive en aVentaFront (utils/adaptadores.js).
+// Devuelve [{ ordenVendedor, orden }]; el mapeo al formato del front vive en aVentaFront (api/adaptadores.js).
 export const listarVentasApi = async () => {
   let ordenesVendedor
   try {

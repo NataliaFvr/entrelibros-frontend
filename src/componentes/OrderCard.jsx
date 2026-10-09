@@ -24,11 +24,11 @@ const OrderCard = ({ pedido, libros }) => {
       </div>
       <OrderLines pedido={pedido} libros={libros} />
       <SummaryRow titulo="Envío" valor={fmt(pedido.env)} />
-      <SummaryRow titulo="Total" valor={fmt(pedido.sub + pedido.env)} total />
+      <SummaryRow titulo="Total" valor={fmt(pedido.total)} total />
       <small className="ord-a">Envío a: {pedido.addr}</small>
       {pendiente && (
         <div className="rvf-b">
-          <small className="dim">Reserva: te quedan {mmss(pedido.reserva - ahora)} min</small>
+          <small className="dim">Reserva: te quedan {mmss(pedido.venceEn - ahora)} min</small>
           <button className="btn main" type="button" onClick={() => navigate(`/pago/${pedido.n}`)}>Pagar ahora</button>
           <ConfirmLink texto="Cancelar compra" onConfirmar={() => cancelarPedido(pedido.n)} />
         </div>

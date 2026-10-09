@@ -1,5 +1,5 @@
 import api from './axiosConfig'
-import { aItemCarritoFront } from '../utils/adaptadores'
+import { aItemCarritoFront } from './adaptadores'
 import { esListaVacia } from '../utils/errorApi'
 
 // CarritoController. Todas las rutas son del usuario logueado: el back lo saca del token JWT, por eso NINGUNA petición

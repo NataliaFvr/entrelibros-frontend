@@ -1,6 +1,6 @@
-import { getCategoriasTodas } from './librosService'
-import { categoriasCargadas, crearCategoriaApi, quitarImagenCategoriaApi, subirImagenCategoriaApi, urlImagenCategoria } from '../api/categoriasApi'
-import { dataUrlAFile } from '../utils/adaptadores'
+import { getCategoriasTodas } from './librosApiExtra'
+import { categoriasCargadas, crearCategoriaApi, quitarImagenCategoriaApi, subirImagenCategoriaApi, urlImagenCategoria } from './categoriasApi'
+import { dataUrlAFile } from './adaptadores'
 import { norm } from '../utils/format'
 import { mensajeError } from '../utils/errorApi'
 

@@ -1,4 +1,4 @@
-import { getResenasLibroApi } from '../api/resenasApi'
+import { getResenasLibroApi } from './resenasApi'
 
 export const getOpinionesVendedor = async (_tienda, publicaciones) => {
   const listas = await Promise.all(publicaciones.map(async (p) => (

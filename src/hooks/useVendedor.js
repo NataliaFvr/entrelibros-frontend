@@ -1,14 +1,23 @@
 import { useEffect, useState } from 'react'
 import { useLibros } from './useLibros'
 import { useToast } from './useToast'
+<<<<<<< HEAD
 import { enRevision, getVendedor } from '../services/vendedorService'
 import { esModeracionError, modificarLibro } from '../services/moderacionService'
+=======
+import { enRevision, getVendedor } from '../api/vendedorApi'
+import { esModeracionError, modificarLibro } from '../api/moderacionApiExtra'
+>>>>>>> 726f86e (Union)
 import { darDeBajaApi, crearLibroApi, getImagenesApi, reactivarApi, subirImagenApi } from '../api/librosApi'
-import { traerPublicaciones } from '../services/publicacionesService'
+import { traerPublicaciones } from '../api/publicacionesApi'
 import useMisLibros from './useMisLibros'
 import { idsDeCategorias } from '../api/categoriasApi'
 import { solicitarVendedorApi } from '../api/usuariosApi'
+<<<<<<< HEAD
 import { dataUrlAFile } from '../utils/adaptadores'
+=======
+import { dataUrlAFile } from '../api/adaptadores'
+>>>>>>> 726f86e (Union)
 import { mensajeError } from '../utils/errorApi'
 import { aLibroRequest } from '../utils/libroRequest'
 import { categoriasDe } from '../utils/libro'
@@ -19,7 +28,7 @@ const esFotoNueva = (foto) => typeof foto === 'string' && foto.startsWith('data:
 
 const useVendedor = (user) => {
   const toast = useToast()
-  const { libros, recargar } = useLibros()
+  const { recargar } = useLibros()
   const [vendedor, setVendedor] = useState(() => getVendedor(user))
 
   // Guarda y avisa. Devuelve { ok: true } o { error } (también lo muestra en un toast)
@@ -34,7 +43,11 @@ const useVendedor = (user) => {
   // Con el back: la lista del panel sale de GET /libros/mios (estado de moderación y de publicación según el servidor).
   // `estadoLibros` distingue "cargando", "ok" (si no hay libros, estado vacío) y "error" (con toast y "Reintentar").
   const { estado: estadoLibros, reintentar } = useMisLibros(vendedor.estado === 'aprobado', async () => {
+<<<<<<< HEAD
     const pub = await traerPublicaciones(vendedor.pub, libros)
+=======
+    const pub = await traerPublicaciones()
+>>>>>>> 726f86e (Union)
     if (JSON.stringify(pub) !== JSON.stringify(vendedor.pub)) cambiar({ ...vendedor, pub })
   })
 

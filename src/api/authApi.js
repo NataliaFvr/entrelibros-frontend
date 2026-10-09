@@ -1,5 +1,5 @@
 import api, { RUTA_AUTH, borrarTokens, guardarTokens } from './axiosConfig'
-import { aUsuarioFront } from '../utils/adaptadores'
+import { aUsuarioFront } from './adaptadores'
 
 // AuthenticationController (/api/v1/auth). Login por E-MAIL (el back no acepta nombre de usuario).
 const CLAVE_USUARIO = 'entrelibros_usuario_api'

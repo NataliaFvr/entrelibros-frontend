@@ -19,9 +19,7 @@ const useVendedorPublico = (param) => {
   }, [id])
 
   const delVendedor = useMemo(() => (id == null ? [] : libros.filter((l) => l.vId === id)), [libros, id])
-  const vendedor = id == null ? null
-    : remoto.id === id && remoto.datos ? remoto.datos
-      : delVendedor.length ? { id, tienda: delVendedor[0].v, verificado: true } : null
+  const vendedor = id == null ? null : remoto.id === id ? remoto.datos : null
   // Enlaces viejos /vendedor/libreria-x: se llevan al id numérico
   const redirigirA = id == null && !cargando ? libros.find((l) => l.vId != null && slugVendedor(l.v) === param)?.vId ?? null : null
 

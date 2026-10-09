@@ -1,5 +1,5 @@
 import api from './axiosConfig'
-import { aReseniaLibroFront, aReseniaVendedorFront } from '../utils/adaptadores'
+import { aReseniaLibroFront, aReseniaVendedorFront } from './adaptadores'
 import { esListaVacia } from '../utils/errorApi'
 
 // ResenaLibroController + ResenaVendedorController (404 = sin reseñas)
