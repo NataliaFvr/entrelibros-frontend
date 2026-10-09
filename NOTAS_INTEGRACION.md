@@ -12,16 +12,11 @@
 El backend calcula el envío por **zona** (CABA / PROVINCIA_BA / RESTO_PAIS, `GET /envios`) y el checkout usa ese importe. `POST /carrito/items` siempre crea una fila nueva (no suma): el front usa `PATCH` si el libro ya está en el carrito.
 
 ## 2. Integración actual
-<<<<<<< HEAD
-`VITE_API=true` (archivo `.env`, ver `.env.example`) queda configurado para usar el back real.
-La aplicación ya no tiene un interruptor de modo demo: las pantallas llaman a los servicios y APIs del back, y
-`utils/adaptadores.js` concentra la traducción de DTOs.
-=======
 `VITE_API_URL` (archivo `.env`, ver `.env.example`) configura la URL del backend.
 La aplicación usa una única capa de datos en `src/api/`: allí viven las
-peticiones HTTP y los adaptadores de cada contrato. `utils/` queda reservado
-para lógica pura de presentación, formato y validación.
->>>>>>> 726f86e (Union)
+peticiones HTTP y los adaptadores de cada contrato. Los importes, descuentos,
+totales, stock, límites y vencimientos son informados por el backend; `utils/`
+queda reservado para lógica pura de presentación, formato y validación.
 
 ## 3. Limpieza del modo demo
 La limpieza está aplicada: se eliminaron las ramas demo, las cuentas y catálogos de ejemplo, y los servicios/utilidades

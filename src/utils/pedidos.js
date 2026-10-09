@@ -12,5 +12,3 @@ export const estadoPago = (pedido, ahora = Date.now()) => {
   const pago = pedido.pago || 'SIMULADO_APROBADO'
   return pago === 'PENDIENTE' && pedido.venceEn && pedido.venceEn <= ahora ? 'VENCIDO' : pago
 }
-
-export const subtotal = (items) => items.reduce((suma, i) => suma + i.p * i.q, 0)

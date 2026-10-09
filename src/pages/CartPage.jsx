@@ -4,7 +4,6 @@ import { useAuth } from '../hooks/useAuth'
 import { useCompra } from '../hooks/useCompra'
 import { useLibros } from '../hooks/useLibros'
 import { useToast } from '../hooks/useToast'
-import { subtotal } from '../utils/pedidos'
 import Stepper from '../componentes/Stepper'
 import EmptyBlock from '../componentes/EmptyBlock'
 import CartList from '../componentes/CartList'
@@ -25,7 +24,7 @@ const CartPage = () => {
   const direccion = direcciones[elegida]
 
   const items = carrito.map((c) => ({ libro: libros.find((l) => l.id === c.id), q: c.q })).filter((i) => i.libro)
-  const precios = items.map(({ libro, q }) => ({ id: libro.id, q, p: libro.p }))
+  const subtotalCarrito = carrito.reduce((suma, item) => suma + item.subtotal, 0)
   if (!user) return <Navigate to="/ingresar" replace state={{ from: '/carrito' }} />
   if (cargando) return <main className="usr" />
 
@@ -53,7 +52,7 @@ const CartPage = () => {
       ) : (
         <div className="cart-grid">
           <CartList items={items} />
-          <CartSummary sub={subtotal(precios)} direcciones={direcciones}
+          <CartSummary sub={subtotalCarrito} direcciones={direcciones}
             elegida={elegida} onElegir={setElegida} onFinalizar={finalizar} enviando={enviando} />
         </div>
       )}

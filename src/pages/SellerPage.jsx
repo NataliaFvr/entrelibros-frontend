@@ -4,7 +4,7 @@ import { useLibros } from '../hooks/useLibros'
 import useVendedor from '../hooks/useVendedor'
 import useCalificacionesRecibidas from '../hooks/useCalificacionesRecibidas'
 import useVentas from '../hooks/useVentas'
-import { enRevision, precioFinal } from '../api/vendedorApi'
+import { enRevision } from '../api/vendedorApi'
 import AuthHero from '../componentes/AuthHero'
 import AccountTabs from '../componentes/AccountTabs'
 import MiniDeco from '../componentes/MiniDeco'
@@ -70,7 +70,7 @@ const Vendedor = ({ user }) => {
       <AccountTabs pestanias={pestanias} tab={tab === 'editar' ? 'nuevo' : tab} onIr={(t) => navigate(t === 'libros' ? '/vender' : `/vender/${t}`)} />
       {tab === 'libros' && <SellerBooks libros={vendedor.pub} estado={estadoLibros} onReintentar={reintentar} onBaja={alternarBaja} />}
       {(tab === 'nuevo' || tab === 'editar') && (
-        <BookForm key={editado ? editado.id : 'nuevo'} libro={editado ? { ...editado, base: editado.base, p: precioFinal(editado) } : {}}
+        <BookForm key={editado ? editado.id : 'nuevo'} libro={editado || {}}
           onGuardar={guardar} onCancelar={() => navigate('/vender')} />
       )}
       {tab === 'ventas' && !cargando && <SellerSales ventas={ventas} />}

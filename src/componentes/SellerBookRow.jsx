@@ -1,6 +1,6 @@
 import { coverBg, TONES } from '../utils/colors'
 import { fmt } from '../utils/format'
-import { enRevision, precioFinal } from '../api/vendedorApi'
+import { enRevision } from '../api/vendedorApi'
 import { textoCategorias } from '../utils/libro'
 import './SellerPanel.css'
 
@@ -30,7 +30,7 @@ const SellerBookRow = ({ libro, onEditar, onBaja }) => {
         )}
         {!pendiente && aceptado && libro.modC && <small className="rev-note">Tu última modificación fue rechazada: {libro.modC}</small>}
       </div>
-      <div className="cprice">{fmt(precioFinal(libro))}</div>
+      <div className="cprice">{fmt(libro.p)}</div>
       <span className={`tg${activo && aceptado && !modificacion ? '' : ' off'}`}>{!activo ? 'DE BAJA' : modificacion ? ETIQUETAS.EN_REVISION : ETIQUETAS[libro.mod] || 'ACTIVO'}</span>
       <div className="ac">
         <button className="lnk" type="button" onClick={onEditar} disabled={pendiente}

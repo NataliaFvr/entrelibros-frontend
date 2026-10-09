@@ -1,5 +1,5 @@
 import { getImagenesApi, getMisLibrosApi } from './librosApi'
-import { precioFinal, publicacionAFront } from './adaptadores'
+import { publicacionAFront } from './adaptadores'
 
 // Publicaciones del vendedor en el formato del panel { id, t, a, ed, cat, idioma, anio, usado, base, d, stock, imgs, descripcion,
 // estado: 'activo' | 'baja', mod: 'EN_REVISION' | 'ACEPTADO' | 'RECHAZADO' }. Solo se usa con el back.
@@ -15,7 +15,7 @@ const desdeBack = (l) => {
       ...publicacion,
       t: l.snapshotTitulo, a: l.snapshotAutor, ed: l.snapshotEditorial, anio: l.snapshotAnio,
       idioma: l.snapshotIdioma, usado: l.snapshotEstadoLibro === 'USADO', base: l.snapshotPrecio,
-      d: l.snapshotDescuentoPct, p: precioFinal(l.snapshotPrecio, l.snapshotDescuentoPct), stock: l.snapshotStock,
+      d: l.snapshotDescuentoPct, p: l.snapshotPrecioFinal ?? l.snapshotPrecio, stock: l.snapshotStock,
       descripcion: l.snapshotDescripcion,
     }
   }

@@ -28,7 +28,6 @@ export const traerPaginas = async (url, params = {}) => {
 export const getLibrosApi = async () => {
   const [base, categorias] = await Promise.all([traerPaginas('/libros', { sort: 'bestsellers' }), listarCategoriasApi()])
   const libros = base.map(aLibroFront)
-  libros.forEach((l, i) => { l.ventas = libros.length > 1 ? 1 - i / libros.length : 1 })
   const porId = new Map(libros.map((l) => [l.id, l]))
   // Un libro puede estar en varias categorías, pero LibroResponse no las trae: se piden por categoría (GET /libros?idCategorias=…).
   // Se recorren en el orden de GET /categorias; `cats` las tiene todas y `cat` (la que se muestra) es la primera.

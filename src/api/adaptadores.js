@@ -41,22 +41,19 @@ export const isoADia = (iso) => (iso ? String(iso).slice(0, 10) : '')
 
 /* ---------------- Libros ---------------- */
 
-export const precioFinal = (base, descuentoPct) => Math.round(base * (1 - (descuentoPct || 0) / 100) * 100) / 100
-
 // LibroResponse -> libro del front. Lo que el back todavía no informa queda con un valor neutro (cat, envio, ventas, imgs):
 // librosApi los completa cuando puede (categorías por filtro, ranking de ventas, imágenes por libro).
 export const aLibroFront = (l) => {
   const base = l.precio ?? 0
-  const d = l.descuentoPct ?? 0
   const t = l.titulo || ''
   const a = l.autor || ''
   // Si el back manda `categorias` (lista de { id, nombre } o de nombres) se usan en ese orden; si no, las completa getLibrosApi
   const cats = Array.isArray(l.categorias) ? l.categorias.map((c) => (typeof c === 'string' ? c : c && c.nombre)).filter(Boolean) : []
   return {
     id: l.id, t, a, ed: l.editorial || '', idioma: l.idioma || '', anio: l.anio ?? 0,
-    base, d, p: precioFinal(base, d), usado: l.estadoLibro === 'USADO',
+    base, d: l.descuentoPct ?? 0, p: l.precioFinal ?? l.precio ?? 0, usado: l.estadoLibro === 'USADO',
     cat: cats[0] || '', cats, v: l.nombreTienda || l.nombreVendedor || '', vId: l.idVendedor ?? null,
-    provV: l.provinciaVendedor || '', envio: l.envio || 'distinta', ventas: 0,
+    provV: l.provinciaVendedor || '', envio: l.envio || 'distinta', ventas: l.vendidos ?? 0,
     stock: l.stock ?? 0, imgs: [], descripcion: l.descripcion || '',
     c: TONES[(t.length + a.length) % TONES.length],
     estadoPublicacion: l.estadoPublicacion, estadoModeracion: l.estadoModeracion,
@@ -106,7 +103,9 @@ export const aReseniaVendedorFront = (r) => ({
 // CarritoItemResponse { id, cantidad, idLibro, tituloLibro, precioUnitario, subtotal, maxCantidad } -> ítem del carrito.
 // `id` es el id del LIBRO (así lo usa toda la interfaz); `idItem` es el id de la fila del carrito en el back, que piden
 // PATCH y DELETE /carrito/items/{idItem}. El precio no se guarda acá: la pantalla lo toma del catálogo (con el descuento aplicado).
-export const aItemCarritoFront = (i) => ({ id: i.idLibro, q: i.cantidad, idItem: i.id, maxCantidad: i.maxCantidad })
+export const aItemCarritoFront = (i) => ({
+  id: i.idLibro, q: i.cantidad, idItem: i.id, maxCantidad: i.maxCantidad, subtotal: i.subtotal ?? 0,
+})
 
 /* ---------------- Pedidos ---------------- */
 
