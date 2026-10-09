@@ -7,7 +7,7 @@ import { useToast } from './useToast'
 // - 'ok' significa que el back respondió. Si no hay libros (404 { error } de ListaVacia, ya convertido en [] por la capa api),
 //   corresponde el estado vacío ("Todavía no publicaste libros").
 // - 'error' es cualquier otro fallo (401, 403, 500, red…): se avisa con un toast (mensajeError) y NUNCA se confunde con "sin libros".
-// `activo` en false (modo demo, o cuenta que todavía no es vendedora) no pide nada y queda en 'ok'.
+// `activo` en false (cuenta que todavía no es vendedora) no pide nada y queda en 'ok'.
 const useMisLibros = (activo, cargar) => {
   const toast = useToast()
   const ultimo = useRef({ toast, cargar })

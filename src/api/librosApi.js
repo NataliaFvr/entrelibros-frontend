@@ -47,17 +47,7 @@ export const getLibrosApi = async () => {
   return libros
 }
 
-// GET /libros/mios -> publicaciones del vendedor logueado, de cualquier estado (en revisión, rechazadas, de baja…).
-// El back todavía NO tiene este endpoint (hoy lo toma como /libros/{id} con id "mios" y responde 400). Mientras tanto
-// MIS_LIBROS_EN_BACK = false y esta función devuelve null: quien llama usa su respaldo (publicacionesService.js).
-// Cuando el back lo sume: ponerlo en true. Contrato esperado:
-//   - 200 Page<LibroResponse> con los libros del vendedor.
-//   - 404 { error } (ListaVaciaException) si no tiene libros / el filtro no coincide / la página no existe -> acá se lee como [].
-//   - 401/403/500/red -> se propagan (nunca se confunden con "sin libros"); el que llama muestra mensajeError().
-export const MIS_LIBROS_EN_BACK = false
-
 export const getMisLibrosApi = async () => {
-  if (!MIS_LIBROS_EN_BACK) return null
   return (await traerPaginas('/libros/mios')).map(aLibroFront)
 }
 

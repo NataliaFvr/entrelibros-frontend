@@ -1,10 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useCompra } from './useCompra'
 import { getResenias } from '../services/librosService'
-import { agregarOpinion, getOpiniones } from '../services/opinionesService'
 import { crearResenaLibroApi } from '../api/resenasApi'
 import { mensajeError } from '../utils/errorApi'
-import { USAR_API } from '../utils/modoApi'
 
 // Reseñas de un libro (las nuevas primero) + promedio + función para publicar una.
 // Con el back: GET /resenas-libro/libro/{id} y POST /resenas-libro { idOrdenItem, calificacion, comentario }
@@ -12,7 +10,7 @@ import { USAR_API } from '../utils/modoApi'
 const useResenias = (libroId) => {
   const { itemPagado } = useCompra()
   const [base, setBase] = useState([])
-  const [propias, setPropias] = useState(() => (USAR_API ? [] : getOpiniones(libroId)))
+  const [propias] = useState([])
 
   useEffect(() => {
     let vigente = true
@@ -27,11 +25,6 @@ const useResenias = (libroId) => {
   )
 
   const publicar = async (opinion) => {
-    if (!USAR_API) {
-      agregarOpinion(libroId, opinion)
-      setPropias(getOpiniones(libroId))
-      return
-    }
     const compra = itemPagado(libroId)
     if (!compra) throw new Error('Solo podés opinar sobre libros que compraste y pagaste.')
     try {

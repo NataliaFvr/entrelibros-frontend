@@ -1,8 +1,6 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { getOpinionesVendedor } from '../services/opinionesService'
-import { getResenasVendedor } from '../services/resenasVendedorService'
 import { getResenasVendedorApi } from '../api/resenasApi'
-import { USAR_API } from '../utils/modoApi'
 
 const promedio = (lista) => (lista.length ? lista.reduce((a, r) => a + r.st, 0) / lista.length : 0)
 
@@ -10,14 +8,13 @@ const promedio = (lista) => (lista.length ? lista.reduce((a, r) => a + r.st, 0) 
 // Con el back: GET /resenas-vendedor/vendedor/{idVendedor} y GET /resenas-libro/libro/{id} de cada una de sus publicaciones.
 // Sin el back: las reales de este navegador + las de ejemplo del vendedor de prueba.
 const useCalificacionesRecibidas = (tienda, publicaciones, idVendedor = null) => {
-  const local = useMemo(() => (USAR_API ? [] : getResenasVendedor(tienda)), [tienda])
   const [delBack, setDelBack] = useState([])
   const [delLibro, setDelLibro] = useState([])
   const [cargando, setCargando] = useState(true)
-  const atencion = USAR_API ? delBack : local
+  const atencion = delBack
 
   useEffect(() => {
-    if (!USAR_API || idVendedor == null) return undefined
+    if (idVendedor == null) return undefined
     let vigente = true
     getResenasVendedorApi(idVendedor).then((r) => { if (vigente) setDelBack(r) }).catch(() => {})
     return () => { vigente = false }

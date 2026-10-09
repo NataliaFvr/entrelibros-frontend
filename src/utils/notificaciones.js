@@ -1,5 +1,5 @@
 // A dónde lleva cada notificación del back (TipoNotificacion). Devuelve null si no hay destino útil
-// (por ejemplo las de demo, que no traen `tipo`, o VENDEDOR_RECHAZADO).
+// (por ejemplo las que no traen `tipo`, o VENDEDOR_RECHAZADO).
 export const rutaNotificacion = ({ tipo, idLibro } = {}) => {
   switch (tipo) {
     case 'LIBRO_ACEPTADO': return idLibro != null ? `/libro/${idLibro}` : '/vender'

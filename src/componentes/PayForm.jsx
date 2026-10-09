@@ -1,7 +1,6 @@
 import { validarTarjeta } from '../utils/tarjeta'
 import PayMethods from './PayMethods'
 import CardFields from './CardFields'
-import SelectField from './SelectField'
 
 // El botón "Pagar" está en el resumen y usa form="fPay" para enviar este formulario.
 // `form` (valores, cambiar, completar) vive en la página, así no se pierde mientras se procesa el pago.
@@ -12,7 +11,7 @@ const PayForm = ({ form, usuario, nota, error, onError, onPagar }) => {
     e.preventDefault()
     const mensaje = valores.pm === 'tarjeta' ? validarTarjeta(valores) : ''
     onError(mensaje)
-    if (!mensaje) onPagar(valores.pm, valores.sim)
+    if (!mensaje) onPagar(valores.pm)
   }
 
   const tarjetaDePrueba = () => {
@@ -33,8 +32,6 @@ const PayForm = ({ form, usuario, nota, error, onError, onPagar }) => {
         {valores.pm === 'transferencia' && (
           <div className="note">Te mostramos el CBU y el alias para transferir y la acreditación es inmediata. <b>Simulado.</b></div>
         )}
-        <SelectField className="demo-sim" label="Demo · resultado simulado del pago" name="sim" value={valores.sim} onChange={cambiar}
-          opciones={[['APROBADO', 'Aprobado'], ['RECHAZADO', 'Rechazado']]} />
         <p className="ferr" role="alert">{error}</p>
       </form>
     </div>

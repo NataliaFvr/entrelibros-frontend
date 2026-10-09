@@ -180,7 +180,7 @@ export const aVentaFront = (ordenVendedor, orden, idVendedor, libros = []) => {
 const aDesgloseFront = (d) => ({ nombre: d.nombre || 'Otros', unidades: d.unidades ?? 0, ingresos: d.ingresos ?? 0 })
 const NOMBRE_ESTADO = { NUEVO: 'Nuevos', USADO: 'Usados' }
 
-// EstadisticasVendedorResponse -> el modelo que muestra SellerStats (el mismo que arma utils/estadisticas.js en modo demo):
+// EstadisticasVendedorResponse -> el modelo que muestra SellerStats.
 // { ingresos, unidades, ventas, promedio, categorias: [...], estados: [...] }
 export const aEstadisticasFront = (r) => ({
   ingresos: r.ingresosTotales ?? 0,

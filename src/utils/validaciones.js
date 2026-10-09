@@ -1,5 +1,3 @@
-import { USAR_API } from './modoApi'
-
 // Validaciones del cliente. Espejan las restricciones del back (AuthenticationRequest, UsuarioRequest, LibroRequest)
 // para avisar al instante; el back sigue siendo quien decide. Cada validador recibe (valor, todosLosValores)
 // y devuelve el mensaje de error o '' si el valor es válido.
@@ -63,19 +61,8 @@ export const validarNombrePersona = (que = 'el nombre') => (v) => {
 
 export const validarCodigo = (v) => (/^\d{6}$/.test(texto(v)) ? '' : 'Ingresá los 6 dígitos del código.')
 
-// Login: el campo acepta usuario o e-mail; si trae "@" se valida como e-mail
-// Con el back el login es solo por e-mail (AuthenticationRequest { email, contrasena })
 export const validadoresLoginApi = {
   ident: validarEmail,
-  pw: validarLongitudPassword,
-}
-
-export const validadoresLogin = {
-  ident: (v) => {
-    const t = texto(v)
-    if (!t) return 'Ingresá tu usuario o e-mail.'
-    return t.includes('@') ? validarEmail(t) : ''
-  },
   pw: validarLongitudPassword,
 }
 
@@ -95,17 +82,6 @@ export const CAMPOS_CUENTA = {
   email: 'email', contrasena: 'pw', password: 'pw', codigo: 'codigo',
 }
 
-// Chequeo final del registro/edición contra las cuentas guardadas en el navegador (modo demo).
-// `actual` = usuario que se edita (no cuenta como repetido). Con el back, los duplicados los devuelve la API (409).
-// Devuelve el mensaje del primer error, o '' si está todo bien.
-export const validarCuenta = (v, usuarios, { actual = '', pwObligatoria = true } = {}) => {
-  const malos = Object.entries(validadoresCuenta({ pwObligatoria })).map(([c, f]) => f(v[c], v)).filter(Boolean)
-  if (malos.length) return malos[0]
-  const repetido = (campo) => usuarios.some((u) => u.nombreUsuario !== actual && String(u[campo]).toLowerCase() === v[campo].toLowerCase())
-  if (repetido('nombreUsuario')) return 'Ese nombre de usuario ya está en uso.'
-  if (repetido('email')) return 'Ese e-mail ya tiene una cuenta.'
-  return ''
-}
 
 // Formulario de Contáctanos: nombre, apellido, e-mail válido y mensaje son obligatorios.
 // Devuelve el mensaje del primer error, o '' si está todo bien.
@@ -198,7 +174,7 @@ export const validadoresContacto = {
   msg: validarMensajeContacto,
 }
 
-/* ---------------- Solicitud de vendedor (SolicitudVendedorRequest: nombreTienda NotBlank) ---------------- */
+/* ---------------- Solicitud de vendedor (SolicitudVendedorRequest: todos los campos obligatorios) ---------------- */
 
 export const validadoresSolicitudVendedor = {
   tienda: (v) => {
@@ -239,9 +215,8 @@ export const validadoresDireccion = {
     if (t.length < 2) return 'Debe tener al menos 2 caracteres.'
     return t.length > 60 ? 'Máximo 60 caracteres.' : ''
   },
-  // Formato argentino: 4 dígitos (1425) o el CPA (C1425ABC). Opcional en demo; con el back es obligatorio (DireccionRequest.cp es @NotBlank).
   cp: (v) => {
-    if (!texto(v)) return USAR_API ? 'Ingresá el código postal.' : ''
+    if (!texto(v)) return 'Ingresá el código postal.'
     return /^([A-Za-z]\d{4}[A-Za-z]{3}|\d{4})$/.test(texto(v)) ? '' : 'Ingresá 4 dígitos (ej.: 1425) o el formato C1425ABC.'
   },
   prov: obligatorio('Elegí la provincia.'),

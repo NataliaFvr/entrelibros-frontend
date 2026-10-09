@@ -1,11 +1,9 @@
 import { norm } from './format'
-import { USAR_API } from './modoApi'
 
 // "Librería El Resplandor" -> "libreria-el-resplandor" (es el :id de /vendedor/:id)
 export const slugVendedor = (tienda) => norm(tienda).replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')
 
-// Con el back el :id de la ruta es el id numérico del vendedor; en demo, el slug del nombre de la tienda
-export const rutaVendedor = (tienda, id = null) => `/vendedor/${USAR_API && id != null ? id : slugVendedor(tienda)}`
+export const rutaVendedor = (tienda, id = null) => `/vendedor/${id ?? slugVendedor(tienda)}`
 
 // Tiendas del catálogo cuyo nombre contiene `texto` (sin tildes ni mayúsculas), con su cantidad de libros.
 // Las que más libros tienen van primero. Back: GET /vendedores?q=

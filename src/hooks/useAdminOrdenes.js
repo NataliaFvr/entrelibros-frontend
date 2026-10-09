@@ -1,17 +1,15 @@
 import { useEffect, useMemo, useState } from 'react'
-import { cargarOrdenes, listarOrdenes } from '../services/adminService'
+import { cargarOrdenes } from '../services/adminService'
 import { POR_PAGINA } from '../data/admin'
-import { USAR_API } from '../utils/modoApi'
 
 // Órdenes de la plataforma: las más recientes primero, con filtro por estado de pago y paginación.
 // Con el back: GET /ordenes (ADMIN) + el detalle de cada una.
 const useAdminOrdenes = () => {
-  const [ordenes, setOrdenes] = useState(() => (USAR_API ? [] : listarOrdenes()))
+  const [ordenes, setOrdenes] = useState([])
   const [estado, setEstado] = useState('')
   const [pagina, setPagina] = useState(1)
 
   useEffect(() => {
-    if (!USAR_API) return undefined
     let vigente = true
     cargarOrdenes().then((lista) => { if (vigente) setOrdenes(lista) }).catch(() => {})
     return () => { vigente = false }

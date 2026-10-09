@@ -1,28 +1,22 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useLibros } from './useLibros'
 import { useToast } from './useToast'
-import { enRevision, getVendedor, guardarVendedor, nuevoIdPublicacion } from '../services/vendedorService'
+import { enRevision, getVendedor } from '../services/vendedorService'
 import { esModeracionError, modificarLibro } from '../services/moderacionService'
 import { darDeBajaApi, crearLibroApi, getImagenesApi, reactivarApi, subirImagenApi } from '../api/librosApi'
 import { traerPublicaciones } from '../services/publicacionesService'
 import useMisLibros from './useMisLibros'
 import { idsDeCategorias } from '../api/categoriasApi'
-import { actualizarUsuarioApi, solicitarVendedorApi } from '../api/usuariosApi'
+import { solicitarVendedorApi } from '../api/usuariosApi'
 import { dataUrlAFile } from '../utils/adaptadores'
 import { mensajeError } from '../utils/errorApi'
 import { aLibroRequest } from '../utils/libroRequest'
 import { categoriasDe } from '../utils/libro'
-import { USAR_API } from '../utils/modoApi'
 
 const MENSAJE_REVISION = 'Tus cambios fueron enviados a revisión. El libro no se verá en el catálogo hasta que un administrador lo apruebe.'
 
 const esFotoNueva = (foto) => typeof foto === 'string' && foto.startsWith('data:')
 
-// Estado y acciones del vendedor de la cuenta `user`. Cada cambio se guarda y refresca el catálogo.
-// Con el back (VITE_API=true): las publicaciones se crean con POST /libros (+ fotos por /imagenes-libro), se dan de baja con
-// PATCH /libros/{id}/baja|reactivar, y la solicitud de vendedor va por POST /usuarios/solicitud-vendedor.
-// La lista del panel se pide a GET /libros/mios (services/publicacionesService.js); si el back todavía no lo tiene, se usa la
-// lista guardada en este navegador con los ids reales y su estado se refresca con GET /libros/{id}.
 const useVendedor = (user) => {
   const toast = useToast()
   const { libros, recargar } = useLibros()
@@ -30,12 +24,6 @@ const useVendedor = (user) => {
 
   // Guarda y avisa. Devuelve { ok: true } o { error } (también lo muestra en un toast)
   const cambiar = (nuevo, mensaje) => {
-    // Las fotos viajan en base64 dentro de localStorage (~5 MB): si no entran, avisamos en vez de perderlas en silencio
-    if (!guardarVendedor(user, nuevo)) {
-      const error = 'No pudimos guardar: sin espacio en el navegador. Probá con menos fotos.'
-      toast(error)
-      return { error }
-    }
     setVendedor(nuevo)
     recargar()
     if (mensaje) toast(mensaje)
@@ -45,24 +33,22 @@ const useVendedor = (user) => {
 
   // Con el back: la lista del panel sale de GET /libros/mios (estado de moderación y de publicación según el servidor).
   // `estadoLibros` distingue "cargando", "ok" (si no hay libros, estado vacío) y "error" (con toast y "Reintentar").
-  const { estado: estadoLibros, reintentar } = useMisLibros(USAR_API && vendedor.estado === 'aprobado', async () => {
+  const { estado: estadoLibros, reintentar } = useMisLibros(vendedor.estado === 'aprobado', async () => {
     const pub = await traerPublicaciones(vendedor.pub, libros)
-    if (pub && JSON.stringify(pub) !== JSON.stringify(vendedor.pub)) cambiar({ ...vendedor, pub })
+    if (JSON.stringify(pub) !== JSON.stringify(vendedor.pub)) cambiar({ ...vendedor, pub })
   })
 
+  useEffect(() => { setVendedor(getVendedor(user)) }, [user])
+
   const solicitar = async (datos) => {
-    if (USAR_API) {
-      try {
-        await solicitarVendedorApi(datos.tienda)
-        if (datos.prov && datos.prov !== user.provincia) await actualizarUsuarioApi(user.id, { provincia: datos.prov })
-      } catch (err) {
-        toast(mensajeError(err, 'libro'))
-        return
-      }
+    try {
+      await solicitarVendedorApi(datos)
+    } catch (err) {
+      toast(mensajeError(err, 'libro'))
+      return
     }
     cambiar({ ...vendedor, ...datos, estado: 'pendiente' }, 'Solicitud enviada')
   }
-  const aprobarSolicitud = () => cambiar({ ...vendedor, estado: 'aprobado', pub: [] }, '¡Solicitud aprobada!')
 
   // Sube a /imagenes-libro las fotos nuevas (las que todavía son base64) y devuelve las URLs finales del libro
   const subirFotos = async (idLibro, fotos = []) => {
@@ -98,9 +84,7 @@ const useVendedor = (user) => {
   // la versión aprobada se conserva y los cambios quedan en `revision`.
   const guardarLibro = async (datos, idEditado) => {
     if (!idEditado) {
-      if (USAR_API) return crearEnApi(datos)
-      return cambiarLibros((pub) => [{ id: nuevoIdPublicacion(), ...datos, estado: 'activo', mod: 'EN_REVISION' }, ...pub],
-        'Libro enviado a revisión del administrador')
+      return crearEnApi(datos)
     }
     const actual = vendedor.pub.find((p) => p.id === idEditado)
     if (!actual) return { error: 'No encontramos ese libro. Puede que ya no exista.' }
@@ -109,17 +93,15 @@ const useVendedor = (user) => {
     // PATCH /libros/{id}. El estado que manda el back es la verdad: solo si vuelve EN_REVISION se muestra como pendiente.
     let enviadoARevision = true
     let imgs = datos.imgs
-    if (USAR_API) {
-      try {
-        const ids = await idsDeCategorias(categoriasDe(datos))
-        const libro = await modificarLibro(idEditado, aLibroRequest(datos, ids.length ? ids : undefined))
-        enviadoARevision = libro.estadoModeracion === 'EN_REVISION'
-        imgs = await subirFotos(idEditado, datos.imgs)
-      } catch (err) {
-        const mensaje = esModeracionError(err) ? err.message : mensajeError(err, 'libro')
-        toast(mensaje)
-        return { error: mensaje } // el formulario lo muestra en pantalla y no pierde lo escrito
-      }
+    try {
+      const ids = await idsDeCategorias(categoriasDe(datos))
+      const libro = await modificarLibro(idEditado, aLibroRequest(datos, ids.length ? ids : undefined))
+      enviadoARevision = libro.estadoModeracion === 'EN_REVISION'
+      imgs = await subirFotos(idEditado, datos.imgs)
+    } catch (err) {
+      const mensaje = esModeracionError(err) ? err.message : mensajeError(err, 'libro')
+      toast(mensaje)
+      return { error: mensaje }
     }
     const nuevosDatos = { ...datos, imgs }
 
@@ -136,33 +118,17 @@ const useVendedor = (user) => {
 
   const alternarBaja = async (id) => {
     const p = vendedor.pub.find((x) => x.id === id)
-    if (USAR_API) {
-      try {
-        await (p.estado === 'activo' ? darDeBajaApi(id) : reactivarApi(id))
-      } catch (err) {
-        toast(mensajeError(err, 'libro'))
-        return
-      }
+    try {
+      await (p.estado === 'activo' ? darDeBajaApi(id) : reactivarApi(id))
+    } catch (err) {
+      toast(mensajeError(err, 'libro'))
+      return
     }
     cambiarLibros((pub) => pub.map((x) => (x.id === id ? { ...x, estado: x.estado === 'activo' ? 'baja' : 'activo' } : x)),
       p.estado === 'activo' ? 'Libro dado de baja' : 'Libro reactivado')
   }
 
-  // Simulan la decisión del administrador (solo modo demo). Con el back la decide el panel de moderación: PATCH /libros/{id}/moderacion
-  const aprobarLibro = (id) => cambiarLibros((pub) => pub.map((p) => {
-    if (p.id !== id) return p
-    const { revision, ...resto } = p
-    return { ...resto, ...(revision || {}), mod: 'ACEPTADO', modC: '' }
-  }), 'Libro aprobado (simulado)')
-
-  const rechazarLibro = (id) => cambiarLibros((pub) => pub.map((p) => {
-    if (p.id !== id) return p
-    const { revision, ...resto } = p
-    const motivo = 'No cumple las pautas de publicación (simulado).'
-    return revision ? { ...resto, modC: motivo } : { ...resto, mod: 'RECHAZADO', modC: motivo }
-  }), 'Libro rechazado (simulado)')
-
-  return { vendedor, estadoLibros, reintentar, solicitar, aprobarSolicitud, guardarLibro, alternarBaja, aprobarLibro, rechazarLibro }
+  return { vendedor, estadoLibros, reintentar, solicitar, guardarLibro, alternarBaja }
 }
 
 export default useVendedor

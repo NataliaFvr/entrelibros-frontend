@@ -1,13 +1,11 @@
 import { useEffect, useMemo, useState } from 'react'
 import { listarVentasApi } from '../api/ventasApi'
-import { ventasDe } from '../services/ventasService'
-import { USAR_API } from '../utils/modoApi'
 import { aVentaFront } from '../utils/adaptadores'
 
 // Ventas del vendedor en el formato { n, date, est, its, comprador }.
-// Con el back se piden una vez al abrir la pantalla y se arman con el catálogo (categoría y usado); en demo salen del almacenamiento local.
-const useVentas = (user, tienda, libros) => {
-  const idVendedor = USAR_API ? user.id : null
+// Se piden una vez al abrir la pantalla y se arman con el catálogo (categoría y usado).
+const useVentas = (user, _tienda, libros) => {
+  const idVendedor = user.id
   const [crudas, setCrudas] = useState([])
   const [cargando, setCargando] = useState(Boolean(idVendedor))
 
@@ -26,7 +24,7 @@ const useVentas = (user, tienda, libros) => {
     .filter(Boolean)
     .sort((a, b) => b.date.localeCompare(a.date)), [crudas, idVendedor, libros])
 
-  return { ventas: USAR_API ? delBack : ventasDe(tienda, libros), cargando }
+  return { ventas: delBack, cargando }
 }
 
 export default useVentas

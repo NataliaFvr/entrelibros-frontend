@@ -3,7 +3,6 @@ import { useToast } from '../hooks/useToast'
 import { MENSAJE_MAX, validadoresContacto } from '../utils/validaciones'
 import { enviarContactoApi } from '../api/cuentaApi'
 import { mapearCampos, mensajeError, normalizarError } from '../utils/errorApi'
-import { USAR_API } from '../utils/modoApi'
 import Field from './Field'
 import SelectField from './SelectField'
 import TextAreaField from './TextAreaField'
@@ -13,8 +12,7 @@ const DEPARTAMENTOS = ['Compras', 'Ventas', 'Envíos', 'Mi cuenta', 'Otro']
 
 const Obligatorio = ({ children }) => <>{children} <span className="req">*</span></>
 
-// Formulario de contacto. Con el back: POST /contacto { nombre, email, mensaje } (el back no guarda apellido, teléfono ni departamento:
-// se agregan al texto del mensaje para no perderlos). Sin el back el envío es simulado.
+// Formulario de contacto. POST /contacto recibe nombre, email y mensaje; los datos adicionales se agregan al texto.
 const ContactForm = () => {
   const toast = useToast()
   const { valores, cambiar, error, setError, reiniciar, errores, alSalir, validarTodo, setErroresCampos } = useFormulario(INICIAL, validadoresContacto)
@@ -23,15 +21,13 @@ const ContactForm = () => {
   const enviar = async (e) => {
     e.preventDefault()
     if (Object.keys(validarTodo(e.currentTarget)).length) return setError('')
-    if (USAR_API) {
-      const contacto = [valores.area || valores.tel ? `Tel: ${`${valores.area} ${valores.tel}`.trim()}` : '', `Departamento: ${valores.depto}`].filter(Boolean).join(' · ')
-      try {
-        await enviarContactoApi({ nombre: `${valores.nombre} ${valores.apellido}`.trim(), email: valores.email.trim(), mensaje: `${valores.msg.trim()}\n\n${contacto}` })
-      } catch (err) {
-        const campos = mapearCampos(normalizarError(err).campos, { nombre: 'nombre', email: 'email', mensaje: 'msg' })
-        if (Object.keys(campos).length) return setErroresCampos(campos) // validación del back por campo
-        return setError(mensajeError(err))
-      }
+    const contacto = [valores.area || valores.tel ? `Tel: ${`${valores.area} ${valores.tel}`.trim()}` : '', `Departamento: ${valores.depto}`].filter(Boolean).join(' · ')
+    try {
+      await enviarContactoApi({ nombre: `${valores.nombre} ${valores.apellido}`.trim(), email: valores.email.trim(), mensaje: `${valores.msg.trim()}\n\n${contacto}` })
+    } catch (err) {
+      const campos = mapearCampos(normalizarError(err).campos, { nombre: 'nombre', email: 'email', mensaje: 'msg' })
+      if (Object.keys(campos).length) return setErroresCampos(campos)
+      return setError(mensajeError(err))
     }
     setError('')
     reiniciar()

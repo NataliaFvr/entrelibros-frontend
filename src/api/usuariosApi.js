@@ -21,8 +21,11 @@ export const darDeBajaUsuarioApi = async (id) => (await api.patch(`/usuarios/${i
 export const reactivarUsuarioApi = async (id) => (await api.patch(`/usuarios/${id}/reactivar`)).data
 export const cambiarRolApi = async (id, rol) => (await api.patch(`/usuarios/${id}/rol`, { rol })).data
 
-// COMPRADOR pide ser vendedor: { nombreTienda } (el back no guarda teléfono ni descripción)
-export const solicitarVendedorApi = async (nombreTienda) => aUsuarioFront((await api.post('/usuarios/solicitud-vendedor', { nombreTienda })).data)
+// COMPRADOR pide ser vendedor: { nombreTienda, telefono, descripcion, provincia }
+export const solicitarVendedorApi = async ({ tienda, tel, desc, prov }) =>
+  aUsuarioFront((await api.post('/usuarios/solicitud-vendedor', {
+    nombreTienda: tienda, telefono: tel, descripcion: desc, provincia: prov,
+  })).data)
 
 // ADMIN: solicitudes pendientes y su resolución (aprobar y comentario viajan como query params, no como body)
 export const listarSolicitudesApi = async () => (await traerPaginas('/usuarios/solicitudes-vendedor')).map(aUsuarioFront)

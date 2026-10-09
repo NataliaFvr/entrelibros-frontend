@@ -1,4 +1,4 @@
-import { getImagenesApi, getLibroApi, getMisLibrosApi } from '../api/librosApi'
+import { getImagenesApi, getMisLibrosApi } from '../api/librosApi'
 import { publicacionAFront } from '../utils/adaptadores'
 import { categoriasDe } from '../utils/libro'
 
@@ -23,21 +23,12 @@ const desdeBack = (l, previa = {}, catalogo = []) => {
   }
 }
 
-// GET /libros/mios es la fuente de verdad. Si el back todavía no lo tiene, se usa la lista guardada en este navegador
-// y se refresca el estado de cada libro con GET /libros/{id}. Devuelve la lista nueva, o null si no hay nada que actualizar.
 export const traerPublicaciones = async (locales, catalogo) => {
   const mios = await getMisLibrosApi()
-  if (mios) {
-    const previas = new Map(locales.map((p) => [p.id, p]))
-    return Promise.all(mios.map(async (l) => {
-      const p = desdeBack(l, previas.get(l.id), catalogo)
-      if (!p.imgs.length) p.imgs = await getImagenesApi(l.id).catch(() => [])
-      return p
-    }))
-  }
-  if (!locales.length) return null
-  const libros = await Promise.all(locales.map((p) => getLibroApi(p.id).catch(() => null)))
-  const porId = new Map(libros.filter(Boolean).map((l) => [l.id, l]))
-  if (!porId.size) return null
-  return locales.map((p) => (porId.has(p.id) ? desdeBack(porId.get(p.id), p, catalogo) : p))
+  const previas = new Map(locales.map((p) => [p.id, p]))
+  return Promise.all(mios.map(async (l) => {
+    const p = desdeBack(l, previas.get(l.id), catalogo)
+    if (!p.imgs.length) p.imgs = await getImagenesApi(l.id).catch(() => [])
+    return p
+  }))
 }

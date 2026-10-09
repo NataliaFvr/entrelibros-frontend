@@ -1,9 +1,9 @@
-import { useMemo } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { initials } from '../utils/colors'
 import { plural } from '../utils/format'
 import { rutaVendedor } from '../utils/vendedor'
-import { reputacionVendedor } from '../services/resenasVendedorService'
+import { getResenasVendedorApi } from '../api/resenasApi'
 import Stars from './Stars'
 import './SellerPanel.css'
 
@@ -26,7 +26,17 @@ const Reputacion = ({ promedio, cantidad, destacar }) => {
 // `propio`: el libro es de quien mira la ficha -> en lugar de "ver más libros" se lo lleva a gestionar su tienda
 const SellerBox = ({ vendedor, vendedorId = null, cantidad, destacarReputacion = false, propio = false, enlazar = true }) => {
   const navigate = useNavigate()
-  const rep = useMemo(() => reputacionVendedor(vendedor), [vendedor])
+  const [resenias, setResenias] = useState([])
+  useEffect(() => {
+    let vigente = true
+    if (vendedorId == null) return undefined
+    getResenasVendedorApi(vendedorId).then((r) => { if (vigente) setResenias(r) }).catch(() => {})
+    return () => { vigente = false }
+  }, [vendedorId])
+  const rep = {
+    promedio: resenias.length ? resenias.reduce((suma, r) => suma + r.st, 0) / resenias.length : 0,
+    cantidad: resenias.length,
+  }
   return (
     <div className="buy">
       <div className="sv-head">

@@ -1,25 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { getNotificaciones, guardarNotificaciones } from '../services/notificacionesService'
 import { cantidadNoLeidasApi, eliminarNotificacionApi, listarPrimeraPaginaNotificacionesApi, marcarLeidaApi, marcarTodasLeidasApi } from '../api/cuentaApi'
-import { USAR_API } from '../utils/modoApi'
 
 const CADA = 60000 // con el back se consulta el contador cada minuto (liviano); la lista solo se pide si el contador cambió
-
-// Notificaciones de la cuenta `user`: [{ id, texto, fecha, leida }]. Cada cambio se guarda solo.
-const useNotificacionesDemo = (user) => {
-  const [lista, setLista] = useState(() => getNotificaciones(user))
-
-  const cambiar = (nueva) => {
-    setLista(nueva)
-    guardarNotificaciones(user, nueva)
-  }
-
-  const marcarLeida = (id) => cambiar(lista.map((n) => (n.id === id ? { ...n, leida: true } : n)))
-  const marcarTodas = () => cambiar(lista.map((n) => ({ ...n, leida: true })))
-  const descartar = (id) => cambiar(lista.filter((n) => n.id !== id))
-
-  return { lista, noLeidas: lista.filter((n) => !n.leida).length, marcarLeida, marcarTodas, descartar, refrescar: () => {} }
-}
 
 // Con el back las notificaciones se gestionan por id: leer una (PATCH /{id}/leida), descartarla (DELETE /{id}) o marcar todas.
 // El cambio se ve al instante y, si el servidor lo rechaza, se vuelve a pedir lo real.
@@ -71,7 +53,4 @@ const useNotificacionesApi = () => {
   return { lista, noLeidas, marcarLeida, marcarTodas, descartar, refrescar: traer }
 }
 
-// El modo se decide una sola vez por build (VITE_API): no cambia entre renders, así que los hooks siempre se llaman en el mismo orden
-const useNotificaciones = USAR_API ? useNotificacionesApi : useNotificacionesDemo
-
-export default useNotificaciones
+export default useNotificacionesApi

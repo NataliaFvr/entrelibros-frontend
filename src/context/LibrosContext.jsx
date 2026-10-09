@@ -4,7 +4,6 @@ import { imagenesDeCategorias } from '../services/categoriasService'
 import { getImagenesApi } from '../api/librosApi'
 import { useToast } from '../hooks/useToast'
 import { mensajeError } from '../utils/errorApi'
-import { USAR_API } from '../utils/modoApi'
 import { LibrosCtx } from './librosCtx'
 
 const EN_PARALELO = 6
@@ -32,7 +31,6 @@ const LibrosProvider = ({ children }) => {
   // Con el back, LibroResponse no trae las fotos: se piden por libro (GET /imagenes-libro/libro/{id}) en segundo plano,
   // de a pocos a la vez, y se van sumando al catálogo. Mientras tanto la tarjeta muestra la portada de colores.
   useEffect(() => {
-    if (!USAR_API) return
     const pendientes = libros.filter((l) => !conFotos.current.has(l.id))
     if (!pendientes.length) return
     pendientes.forEach((l) => conFotos.current.add(l.id))

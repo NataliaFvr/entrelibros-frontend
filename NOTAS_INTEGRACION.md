@@ -13,16 +13,11 @@ El front ya está preparado: si no existen, usa un respaldo y no se rompe.
 Además: el back calcula el envío por **zona** (CABA / PROVINCIA_BA / RESTO_PAIS, `GET /envios`), pero la pantalla de admin "Tarifas de envío" sigue con el modelo viejo (misma/distinta provincia, guardado en el navegador).
 `POST /carrito/items` siempre crea una fila nueva (no suma): el front usa `PATCH` si el libro ya está en el carrito.
 
-## 2. Cómo está armado el cambio mock ↔ API
-`VITE_API=true` (archivo `.env`, ver `.env.example`) activa el back; sin definir o `false` = demo con mocks.
-Las pantallas no miran `VITE_API`: hablan con una "pasarela" que elige la fuente (`elegirFuente` en `utils/modoApi.js`):
+## 2. Integración actual
+`VITE_API=true` (archivo `.env`, ver `.env.example`) queda configurado para usar el back real.
+La aplicación ya no tiene un interruptor de modo demo: las pantallas llaman a los servicios y APIs del back, y
+`utils/adaptadores.js` concentra la traducción de DTOs.
 
-- `services/direccionesService.js` · `hooks/useCarrito.js` · `hooks/useCostoEnvio.js` · `services/estadisticasService.js`
-- `hooks/useNotificaciones.js` · `hooks/useVendedorPublico.js` · `services/categoriasService.js` · `context/AuthContext.jsx` (perfil)
-- Los nombres del back viven solo en `utils/adaptadores.js` y `api/*Api.js`.
-
-## 3. Checklist para quitar el modo demo (cuando el back esté validado)
-1. Borrar las ramas marcadas `DEMO-ONLY` / `Demo` en las pasarelas de arriba y reemplazar `elegirFuente(api, demo)` por `api`.
-2. Borrar: `services/direccionesDemo.js`, `services/authService.js`, `services/ventasService.js`, `services/notificacionesService.js`, `services/enviosService.js`, `utils/estadisticas.js`, `utils/envio.js`, `data/` (mocks) y lo que quede sin usar (`npx oxlint`).
-3. Borrar `USAR_API`, `USAR_API_LIBROS` y `elegirFuente` de `utils/modoApi.js` y los `if (USAR_API)` restantes.
-4. `verificado: true` ya no está en `aUsuarioFront` (el back no deja entrar a una cuenta sin verificar).
+## 3. Limpieza del modo demo
+La limpieza está aplicada: se eliminaron las ramas demo, las cuentas y catálogos de ejemplo, y los servicios/utilidades
+que solo respaldaban localStorage. También se eliminó `verificado` del modelo `aUsuarioFront`; la verificación la exige el back.

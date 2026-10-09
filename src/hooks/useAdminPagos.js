@@ -1,13 +1,11 @@
 import { useEffect, useMemo, useState } from 'react'
-import { cargarPagos, listarPagos } from '../services/adminService'
+import { cargarPagos } from '../services/adminService'
 import { POR_PAGINA } from '../data/admin'
-import { USAR_API } from '../utils/modoApi'
 
 // Pagos registrados con sus totales (aprobados, rechazados y monto cobrado) y paginación.
 const useAdminPagos = () => {
-  const [pagos, setPagos] = useState(() => (USAR_API ? [] : listarPagos()))
+  const [pagos, setPagos] = useState([])
   useEffect(() => {
-    if (!USAR_API) return undefined
     let vigente = true
     cargarPagos().then((lista) => { if (vigente) setPagos(lista) }).catch(() => {}) // GET /pagos (ADMIN)
     return () => { vigente = false }

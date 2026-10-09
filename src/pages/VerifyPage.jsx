@@ -1,10 +1,8 @@
 import { Navigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import AuthHero from '../componentes/AuthHero'
-import MailSim from '../componentes/MailSim'
 import VerifyForm from '../componentes/VerifyForm'
 import MiniDeco from '../componentes/MiniDeco'
-import { USAR_API } from '../utils/modoApi'
 
 // Confirmación del e-mail con código de 6 dígitos. Al confirmar, entra y vuelve a donde estaba.
 const VerifyPage = () => {
@@ -18,7 +16,6 @@ const VerifyPage = () => {
     <main className="usr">
       <AuthHero titulo="Confirmá tu cuenta" sub="Un último paso antes de empezar a leer" />
       <div className="au-card">
-        {!USAR_API && <MailSim usuario={verificacion.usuario} onConfirmarDesdeMail={verificacion.confirmarDesdeMail} />}
         <div className="au-main">
           <VerifyForm usuario={verificacion.usuario} nota={verificacion.nota} onConfirmar={verificacion.confirmar}
             onReenviar={verificacion.reenviar} onVolver={verificacion.cancelar} />

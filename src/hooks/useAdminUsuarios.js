@@ -5,7 +5,6 @@ import { useToast } from './useToast'
 import * as admin from '../services/adminService'
 import { ETIQUETA_ROL, POR_PAGINA } from '../data/admin'
 import { norm } from '../utils/format'
-import { USAR_API } from '../utils/modoApi'
 
 const mensajeDe = (err) => (err && err.message) || 'No pudimos completar la acción. Intentá de nuevo.'
 
@@ -15,10 +14,9 @@ const useAdminUsuarios = () => {
   const { user, perfil, actualizarPerfil } = useAuth()
   const toast = useToast()
   const { recargar } = useLibros()
-  const [usuarios, setUsuarios] = useState(() => (USAR_API ? [] : admin.listarUsuarios()))
+  const [usuarios, setUsuarios] = useState([])
   const refrescar = useCallback(async () => setUsuarios(await admin.cargarUsuarios()), [])
   useEffect(() => { // GET /usuarios
-    if (!USAR_API) return undefined
     let vigente = true
     admin.cargarUsuarios().then((lista) => { if (vigente) setUsuarios(lista) }).catch(() => {})
     return () => { vigente = false }

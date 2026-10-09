@@ -1,4 +1,4 @@
-// Un libro es usado si viene marcado como `usado` (mock/servicios) o `esUsado` (back).
+// Un libro es usado si viene marcado como `usado` o `esUsado` (back).
 // Centralizado para que ninguna vista tenga que adivinar cuál de los dos campos llega.
 export const esUsado = (libro) => Boolean(libro && (libro.usado || libro.esUsado))
 
@@ -9,7 +9,7 @@ export const descripcionDe = (libro) => (typeof libro?.descripcion === 'string' 
 //   - `cats`: todas. `cat`: la que se MUESTRA en tarjetas, breadcrumb y "Más de…" = la primera de `cats`.
 //   - El back no guarda orden ni "principal" (LibroCategoria es solo libro+categoría): el orden es el de GET /categorias
 //     (findAll), que el front aplica siempre igual (getLibrosApi y el formulario), así no cambia entre sesiones.
-// Los libros de demo traen solo `cat`: se toma como lista de una.
+// Los libros antiguos pueden traer solo `cat`: se toma como lista de una.
 export const categoriasDe = (libro) => {
   if (!libro) return []
   if (Array.isArray(libro.cats) && libro.cats.length) return libro.cats

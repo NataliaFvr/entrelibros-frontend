@@ -5,7 +5,7 @@ import StatGroup from './StatGroup'
 const Numero = ({ valor, texto }) => <div className="card"><b>{valor}</b><small>{texto}</small></div>
 
 // Presentacional: muestra el modelo { ingresos, unidades, ventas, promedio, categorias, estados } que arma
-// useEstadisticasVendedor (del back o de la demo). No sabe de dónde salen los datos.
+// useEstadisticasVendedor obtiene los datos del back.
 const SellerStats = ({ estadisticas, error = false }) => {
   if (error) return <EmptyBlock titulo="No pudimos cargar tus estadísticas" texto="Intentá de nuevo en un momento." />
   if (!estadisticas) return null

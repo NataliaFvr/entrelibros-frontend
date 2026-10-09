@@ -1,10 +1,8 @@
 import { useState } from 'react'
 import { useAuth } from '../hooks/useAuth'
 import useFormulario from '../hooks/useFormulario'
-import { getUsuarios } from '../services/authService'
-import { CAMPOS_CUENTA, validadoresCuenta, validarCuenta } from '../utils/validaciones'
+import { CAMPOS_CUENTA, validadoresCuenta } from '../utils/validaciones'
 import { mapearCampos } from '../utils/errorApi'
-import { USAR_API } from '../utils/modoApi'
 import Aviso from './Aviso'
 import Field from './Field'
 import PasswordField from './PasswordField'
@@ -24,10 +22,6 @@ const RegisterForm = ({ onPendiente, onIrALogin }) => {
     if (enviando) return
     const malos = validarTodo(e.currentTarget)
     if (Object.keys(malos).length) return setError('Revisá los campos marcados antes de continuar.')
-    // Modo demo: usuario y e-mail repetidos se chequean contra las cuentas del navegador.
-    // Con el back (VITE_API=true) no se hace: la API responde 400 "Ya existe un usuario…" y registrar() lo devuelve como tipo DUPLICADO.
-    const repetido = USAR_API ? '' : validarCuenta(valores, getUsuarios())
-    if (repetido) return setError(repetido, 'DUPLICADO')
     setError('')
     setEnviando(true)
     try {

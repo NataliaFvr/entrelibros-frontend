@@ -1,6 +1,5 @@
 import { PROVINCIAS } from '../data/provincias'
 import { useAuth } from '../hooks/useAuth'
-import { USAR_API } from '../utils/modoApi'
 import useFormulario from '../hooks/useFormulario'
 import { validadoresDireccion } from '../utils/validaciones'
 import Field from './Field'
@@ -31,7 +30,7 @@ const AddressForm = ({ embebido = false, onGuardada }) => {
       <Field label="Nombre (Casa, Trabajo…)" maxLength={30} {...campo('alias')} />
       <Field label="Calle, número, piso y depto" maxLength={100} autoComplete="street-address" {...campo('calle')} />
       <Field label="Ciudad / localidad" maxLength={60} autoComplete="address-level2" {...campo('ciudad')} />
-      <Field label={USAR_API ? 'Código postal' : 'Código postal (opcional)'} maxLength={8} autoComplete="postal-code" {...campo('cp')} />
+      <Field label="Código postal" maxLength={8} autoComplete="postal-code" {...campo('cp')} />
       <SelectField label="Provincia" opciones={PROVINCIAS} {...campo('prov')} />
       <button className="btn main" type="submit">Guardar dirección</button>
     </form>

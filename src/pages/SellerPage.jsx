@@ -19,7 +19,7 @@ import useEstadisticasVendedor from '../hooks/useEstadisticasVendedor'
 import SellerReputation from '../componentes/SellerReputation'
 
 const TABS = ['libros', 'nuevo', 'editar', 'ventas', 'estadisticas', 'reputacion']
-// Pestaña Estadísticas: del back (GET /vendedores/estadisticas) o, en demo, calculadas con el historial de ventas
+// Pestaña Estadísticas: datos del back (GET /vendedores/estadisticas).
 const Estadisticas = ({ ventas }) => {
   const { datos, error } = useEstadisticasVendedor(ventas)
   return <SellerStats estadisticas={datos} error={error} />
@@ -32,7 +32,7 @@ const Vendedor = ({ user }) => {
   const navigate = useNavigate()
   const { tab = 'libros', id } = useParams()
   const { libros } = useLibros()
-  const { vendedor, estadoLibros, reintentar, solicitar, aprobarSolicitud, guardarLibro, alternarBaja, aprobarLibro, rechazarLibro } = useVendedor(user)
+  const { vendedor, estadoLibros, reintentar, solicitar, guardarLibro, alternarBaja } = useVendedor(user)
   const calificaciones = useCalificacionesRecibidas(vendedor.tienda, vendedor.pub, user.id)
   const { ventas, cargando } = useVentas(user, vendedor.tienda, libros)
 
@@ -43,7 +43,7 @@ const Vendedor = ({ user }) => {
         <AuthHero titulo="Vendé tus libros en Entrelibros" sub="Tu cuenta de comprador + verificación del administrador" />
         <div className="info-wrap">
           {vendedor.estado === 'pendiente'
-            ? <SellerPending tienda={vendedor.tienda} onAprobar={aprobarSolicitud} />
+            ? <SellerPending tienda={vendedor.tienda} />
             : <SellerRequestForm onEnviar={solicitar} />}
         </div>
         <MiniDeco />
@@ -68,7 +68,7 @@ const Vendedor = ({ user }) => {
       <SellerHead tienda={vendedor.tienda} publicados={vendedor.pub.filter((p) => p.estado === 'activo').length}
         ventas={ventas.length} vendido={vendido} onMiCuenta={() => navigate('/cuenta')} />
       <AccountTabs pestanias={pestanias} tab={tab === 'editar' ? 'nuevo' : tab} onIr={(t) => navigate(t === 'libros' ? '/vender' : `/vender/${t}`)} />
-      {tab === 'libros' && <SellerBooks libros={vendedor.pub} estado={estadoLibros} onReintentar={reintentar} onBaja={alternarBaja} onAprobar={aprobarLibro} onRechazar={rechazarLibro} />}
+      {tab === 'libros' && <SellerBooks libros={vendedor.pub} estado={estadoLibros} onReintentar={reintentar} onBaja={alternarBaja} />}
       {(tab === 'nuevo' || tab === 'editar') && (
         <BookForm key={editado ? editado.id : 'nuevo'} libro={editado ? { ...editado, base: editado.base, p: precioFinal(editado) } : {}}
           onGuardar={guardar} onCancelar={() => navigate('/vender')} />

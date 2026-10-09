@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import useFormulario from '../hooks/useFormulario'
-import { getUsuarios } from '../services/authService'
-import { CAMPOS_CUENTA, validadoresCuenta, validarCuenta } from '../utils/validaciones'
+import { CAMPOS_CUENTA, validadoresCuenta } from '../utils/validaciones'
 import { mapearCampos, normalizarError } from '../utils/errorApi'
 import Avatar from './Avatar'
 import AvatarPicker from './AvatarPicker'
@@ -26,8 +25,6 @@ const EditProfileForm = ({ user, perfil, onGuardar, onCancelar }) => {
     if (enviando) return
     const malos = validarTodo(e.currentTarget)
     if (Object.keys(malos).length) return setError('Revisá los campos marcados antes de continuar.')
-    const repetido = validarCuenta(valores, getUsuarios(), { actual: user.nombreUsuario, pwObligatoria: false }) // modo demo
-    if (repetido) return setError(repetido, 'DUPLICADO')
     setError('')
     setEnviando(true)
     try {

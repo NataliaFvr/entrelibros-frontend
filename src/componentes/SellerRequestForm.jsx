@@ -5,7 +5,7 @@ import Field from './Field'
 import SelectField from './SelectField'
 import TextAreaField from './TextAreaField'
 
-// Solicitud para pasar a vendedor. El back (SolicitudVendedorRequest) solo exige nombreTienda; el resto se valida acá con reglas básicas.
+// Solicitud para pasar a vendedor. El back (SolicitudVendedorRequest) exige todos los campos; acá se validan con reglas básicas.
 // `onEnviar` puede devolver una promesa; si falla, el mensaje de error queda bajo el formulario.
 const SellerRequestForm = ({ onEnviar }) => {
   const f = useFormulario({ tienda: '', prov: 'Buenos Aires', tel: '', desc: '' }, validadoresSolicitudVendedor)

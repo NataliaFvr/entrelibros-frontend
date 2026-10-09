@@ -5,7 +5,7 @@ import SellerBookRow from './SellerBookRow'
 // estado: 'cargando' | 'ok' | 'error' (ver useMisLibros).
 // El vacío ("Todavía no publicaste libros") solo se muestra con estado 'ok': el back respondió que no hay libros.
 // Si la carga falló (red, servidor…) se muestra un bloque de error con "Reintentar" y el motivo sale en el toast.
-const SellerBooks = ({ libros, estado = 'ok', onReintentar, onBaja, onAprobar, onRechazar }) => {
+const SellerBooks = ({ libros, estado = 'ok', onReintentar, onBaja }) => {
   const navigate = useNavigate()
 
   if (!libros.length) {
@@ -18,7 +18,7 @@ const SellerBooks = ({ libros, estado = 'ok', onReintentar, onBaja, onAprobar, o
   return (
     <>
       {libros.map((p) => (
-        <SellerBookRow key={p.id} libro={p} onEditar={() => navigate(`/vender/editar/${p.id}`)} onBaja={() => onBaja(p.id)} onAprobar={() => onAprobar(p.id)} onRechazar={() => onRechazar(p.id)} />
+        <SellerBookRow key={p.id} libro={p} onEditar={() => navigate(`/vender/editar/${p.id}`)} onBaja={() => onBaja(p.id)} />
       ))}
       <p className="sell-note">Dar de baja oculta el libro del catálogo pero conserva su historial: las compras y opiniones anteriores no se pierden.</p>
     </>
