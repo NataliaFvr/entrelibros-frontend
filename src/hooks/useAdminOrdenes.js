@@ -1,9 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-<<<<<<< HEAD
-import { cargarOrdenes } from '../services/adminService'
-=======
 import { cargarOrdenes } from '../api/adminApi'
->>>>>>> 726f86e (Union)
 import { POR_PAGINA } from '../data/admin'
 
 // Órdenes de la plataforma: las más recientes primero, con filtro por estado de pago y paginación.

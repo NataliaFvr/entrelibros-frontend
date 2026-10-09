@@ -1,9 +1,5 @@
 import { useEffect, useState } from 'react'
-<<<<<<< HEAD
-import { getOpinionesVendedor } from '../services/opinionesService'
-=======
 import { getOpinionesVendedor } from '../api/opinionesApi'
->>>>>>> 726f86e (Union)
 import { getResenasVendedorApi } from '../api/resenasApi'
 
 const promedio = (lista) => (lista.length ? lista.reduce((a, r) => a + r.st, 0) / lista.length : 0)

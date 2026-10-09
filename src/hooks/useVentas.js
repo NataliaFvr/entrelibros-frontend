@@ -1,10 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { listarVentasApi } from '../api/ventasApi'
-<<<<<<< HEAD
-import { aVentaFront } from '../utils/adaptadores'
-=======
 import { aVentaFront } from '../api/adaptadores'
->>>>>>> 726f86e (Union)
 
 // Ventas del vendedor en el formato { n, date, est, its, comprador }.
 // Se piden una vez al abrir la pantalla y se arman con el catálogo (categoría y usado).

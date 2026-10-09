@@ -6,12 +6,6 @@ import { mensajeError } from '../utils/errorApi'
 // `agregar`, `cambiarCantidad` y `quitar` devuelven una promesa (o un valor) que es true si se aplicó, para poder esperar el
 // resultado antes de navegar (por ejemplo "Comprar ahora" espera a que el libro esté en el carrito).
 
-<<<<<<< HEAD
-// Los usados tienen 1 unidad; los nuevos, hasta 10 por compra (el stock real lo valida el back)
-const topeDe = (libro) => (libro.usado ? 1 : 10)
-
-=======
->>>>>>> 726f86e (Union)
 const useCarrito = (user, { esPropio, avisar }) => {
   const idUsuario = user ? user.id : null
   const [carrito, setCarrito] = useState([])

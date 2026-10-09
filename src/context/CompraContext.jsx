@@ -3,11 +3,7 @@ import { CompraCtx } from './compraCtx'
 import { useAuth } from '../hooks/useAuth'
 import { useToast } from '../hooks/useToast'
 import useCarrito from '../hooks/useCarrito'
-<<<<<<< HEAD
-import { esLibroPropio } from '../services/vendedorService'
-=======
 import { esLibroPropio } from '../api/vendedorApi'
->>>>>>> 726f86e (Union)
 import { cancelarOrdenApi, checkoutApi, crearPagoApi, listarPedidosApi } from '../api/comprasApi'
 import { mensajeError } from '../utils/errorApi'
 import { estadoPago } from '../utils/pedidos'

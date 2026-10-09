@@ -53,11 +53,7 @@ const CartPage = () => {
       ) : (
         <div className="cart-grid">
           <CartList items={items} />
-<<<<<<< HEAD
-          <CartSummary sub={subtotal(precios)} envio={envio} direcciones={direcciones}
-=======
           <CartSummary sub={subtotal(precios)} direcciones={direcciones}
->>>>>>> 726f86e (Union)
             elegida={elegida} onElegir={setElegida} onFinalizar={finalizar} enviando={enviando} />
         </div>
       )}

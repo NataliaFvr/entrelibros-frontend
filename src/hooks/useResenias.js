@@ -1,10 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useCompra } from './useCompra'
-<<<<<<< HEAD
-import { getResenias } from '../services/librosService'
-=======
 import { getResenias } from '../api/librosApiExtra'
->>>>>>> 726f86e (Union)
 import { crearResenaLibroApi } from '../api/resenasApi'
 import { mensajeError } from '../utils/errorApi'
 
