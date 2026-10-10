@@ -3,7 +3,7 @@ import { useLibros } from './useLibros'
 import { useToast } from './useToast'
 import { enRevision, getVendedor } from '../api/vendedorApi'
 import { esModeracionError, modificarLibro } from '../api/moderacionApiExtra'
-import { darDeBajaApi, crearLibroApi, getImagenesApi, reactivarApi, subirImagenApi } from '../api/librosApi'
+import { darDeBajaApi, crearLibroApi, eliminarImagenApi, getImagenesApi, getImagenesConIdApi, reactivarApi, subirImagenApi } from '../api/librosApi'
 import { traerPublicaciones } from '../api/publicacionesApi'
 import useMisLibros from './useMisLibros'
 import { idsDeCategorias } from '../api/categoriasApi'
@@ -50,8 +50,11 @@ const useVendedor = (user) => {
     cambiar({ ...vendedor, ...datos, estado: 'pendiente' }, 'Solicitud enviada')
   }
 
-  // Sube a /imagenes-libro las fotos nuevas (las que todavía son base64) y devuelve las URLs finales del libro
+  // Borra del servidor las fotos quitadas y sube las nuevas; el back todavía no permite persistir el reordenamiento.
   const subirFotos = async (idLibro, fotos = []) => {
+    for (const img of await getImagenesConIdApi(idLibro)) {
+      if (!fotos.includes(img.url)) await eliminarImagenApi(img.id)
+    }
     for (let i = 0; i < fotos.length; i++) {
       if (esFotoNueva(fotos[i])) await subirImagenApi(idLibro, await dataUrlAFile(fotos[i], `foto-${i + 1}`), i)
     }

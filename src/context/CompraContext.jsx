@@ -30,7 +30,7 @@ const CompraProvider = ({ children }) => {
     setPedidos([])
   }
 
-  // Con el back: los pedidos salen del servidor (GET /ordenes/comprador + detalle de cada orden)
+  // Los pedidos salen del servidor; cada orden ya incluye sus ítems.
   const refrescarPedidos = useCallback(async () => {
     try { setPedidos(await listarPedidosApi()) } catch { /* se queda con lo que había */ }
   }, [])

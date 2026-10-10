@@ -20,7 +20,7 @@ const BuyBox = ({ libro, stock, onComprar, onCarrito, propio = false, soloLectur
       ) : (
         <>
           <div className="ship">
-            <b>{libro.envio === 'misma' ? 'Vendedor en tu misma provincia' : 'Vendedor en otra provincia'}</b>
+            <b>{libro.provV ? `Vendedor en ${libro.provV}` : 'Provincia del vendedor no informada'}</b>
             <small>El costo y el plazo de envío se calculan al finalizar la compra.</small>
           </div>
           <button className="btn main" type="button" onClick={onComprar}>Comprar ahora</button>

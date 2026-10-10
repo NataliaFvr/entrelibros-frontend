@@ -1,11 +1,11 @@
 import api, { RAIZ } from './axiosConfig'
 import { aLibroFront } from './adaptadores'
-import { listarCategoriasApi } from './categoriasApi'
 import { esListaVacia } from '../utils/errorApi'
 
 // LibrosController + ImagenesLibroController
 
 const TAMANIO = 100
+export const TAMANIO_CATALOGO = 12
 
 // Recorre todas las páginas de un listado paginado (Page<T> de Spring). El back responde 404 si no hay resultados.
 export const traerPaginas = async (url, params = {}) => {
@@ -23,27 +23,46 @@ export const traerPaginas = async (url, params = {}) => {
   }
 }
 
-// Catálogo público (solo libros ACEPTADOS y ACTIVOS). El orden "bestsellers" del back da el ranking de ventas;
-// las categorías salen de pedir el catálogo filtrado por cada una (LibroResponse no trae categorías).
-export const getLibrosApi = async () => {
-  const [base, categorias] = await Promise.all([traerPaginas('/libros', { sort: 'bestsellers' }), listarCategoriasApi()])
-  const libros = base.map(aLibroFront)
-  const porId = new Map(libros.map((l) => [l.id, l]))
-  // Un libro puede estar en varias categorías, pero LibroResponse no las trae: se piden por categoría (GET /libros?idCategorias=…).
-  // Se recorren en el orden de GET /categorias; `cats` las tiene todas y `cat` (la que se muestra) es la primera.
-  // Si algún día el back manda `categorias` en el libro, se usan esas y se evitan estos pedidos (ver aLibroFront).
-  const sinCategorias = libros.some((l) => !l.cats.length)
-  if (sinCategorias) {
-    const porCategoria = await Promise.all(categorias.map((c) => traerPaginas('/libros', { idCategorias: [c.id] })))
-    porCategoria.forEach((delaCategoria, i) => {
-      delaCategoria.forEach((r) => {
-        const l = porId.get(r.id)
-        if (l && !l.cats.includes(categorias[i].nombre)) l.cats = [...l.cats, categorias[i].nombre]
-      })
-    })
-    libros.forEach((l) => { l.cat = l.cats[0] || '' })
+// Una página del catálogo público. A diferencia de `traerPaginas`, esta función
+// nunca recorre el resultado completo: `totalElements` y `totalPages` vienen en
+// la respuesta de Spring y sirven para el contador y el paginador.
+export const getCatalogoApi = async (f, { categorias = [], filtros = {}, provinciaComprador } = {}) => {
+  const idCategorias = f.cats.map((nombre) => categorias.find((c) => c.nombre === nombre)?.id).filter(Boolean)
+  const idVendedor = (filtros.vendedores || []).find((v) => v.nombre === f.vendedor)?.id
+  const sort = { best: 'bestsellers', new: 'nuevo', asc: 'precioAsc', desc: 'precioDesc', disc: 'descuento' }[f.sort]
+  const params = {
+    page: Math.max(0, f.page - 1), size: TAMANIO_CATALOGO, sort,
+    texto: f.q || undefined,
+    idCategorias: idCategorias.length ? idCategorias : undefined,
+    precioMin: f.min > 0 ? f.min : undefined,
+    precioMax: f.max < 500 ? f.max : undefined,
+    descuentoMin: f.desc > 1 ? f.desc : undefined,
+    soloConDescuento: f.desc === 1 || undefined,
+    editoriales: f.ed || undefined, autores: f.autor || undefined, idiomas: f.idioma || undefined,
+    idVendedores: idVendedor || undefined,
+    estadoLibro: f.estado === 'ambos' ? undefined : f.estado === 'nuevos' ? 'NUEVO' : 'USADO',
+    anioMin: f.anio && f.anio !== '0' ? Number(f.anio) : undefined,
+    anioMax: f.anio === '0' ? 1999 : undefined,
+    // Elegir ambas zonas equivale a no filtrar. El servidor usa la misma regla
+    // de provincias que calcula el envío real.
+    provinciaComprador: f.envios.length === 1 ? provinciaComprador || undefined : undefined,
+    envioLocal: f.envios.length === 1 ? f.envios[0] === 'misma' : undefined,
   }
-  return libros
+  const { data } = await api.get('/libros', { params })
+  return {
+    libros: (data.content || []).map(aLibroFront),
+    total: data.totalElements || 0,
+    pages: data.totalPages || 0,
+  }
+}
+
+export const getFiltrosDisponiblesApi = async () => (await api.get('/libros/filtros-disponibles')).data
+
+// Muestra acotada para los componentes fuera del catálogo (inicio, carruseles y sugerencias).
+// El catálogo completo usa `getCatalogoApi`; no hay que recorrer todas las páginas acá.
+export const getLibrosApi = async () => {
+  const { data } = await api.get('/libros', { params: { sort: 'bestsellers', page: 0, size: TAMANIO } })
+  return (data.content || []).map(aLibroFront)
 }
 
 export const getMisLibrosApi = async () => {
@@ -64,6 +83,18 @@ export const getImagenesApi = async (idLibro) => {
   try {
     const { data } = await api.get(`/imagenes-libro/libro/${idLibro}`)
     return [...data].sort((a, b) => (a.orden ?? 0) - (b.orden ?? 0)).map((i) => urlImagen(i.id))
+  } catch (err) {
+    if (esListaVacia(err)) return []
+    throw err
+  }
+}
+
+export const eliminarImagenApi = async (idImagen) => (await api.delete(`/imagenes-libro/${idImagen}`)).data
+
+export const getImagenesConIdApi = async (idLibro) => {
+  try {
+    const { data } = await api.get(`/imagenes-libro/libro/${idLibro}`)
+    return [...data].sort((a, b) => (a.orden ?? 0) - (b.orden ?? 0)).map((i) => ({ id: i.id, url: urlImagen(i.id) }))
   } catch (err) {
     if (esListaVacia(err)) return []
     throw err

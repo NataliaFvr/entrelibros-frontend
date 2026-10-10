@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { useCompra } from '../hooks/useCompra'
-import { useLibros } from '../hooks/useLibros'
 import { useToast } from '../hooks/useToast'
 import Stepper from '../componentes/Stepper'
 import EmptyBlock from '../componentes/EmptyBlock'
@@ -13,7 +12,6 @@ const CartPage = () => {
   const navigate = useNavigate()
   const { user, direcciones } = useAuth()
   const { carrito, crearPedido } = useCompra()
-  const { libros, cargando } = useLibros()
   const toast = useToast()
   const [elegidaPorUsuario, setElegida] = useState(null) // null = todavía no tocó el selector: se usa la principal
   const [enviando, setEnviando] = useState(false)
@@ -23,10 +21,9 @@ const CartPage = () => {
   const elegida = Math.min(elegidaPorUsuario ?? principal, Math.max(0, direcciones.length - 1))
   const direccion = direcciones[elegida]
 
-  const items = carrito.map((c) => ({ libro: libros.find((l) => l.id === c.id), q: c.q })).filter((i) => i.libro)
+  const items = carrito.map((libro) => ({ libro, q: libro.q }))
   const subtotalCarrito = carrito.reduce((suma, item) => suma + item.subtotal, 0)
   if (!user) return <Navigate to="/ingresar" replace state={{ from: '/carrito' }} />
-  if (cargando) return <main className="usr" />
 
   const finalizar = async () => {
     if (enviando || !direccion) return

@@ -19,7 +19,8 @@ export const actualizarUsuarioApi = async (id, cambios) => {
 
 export const darDeBajaUsuarioApi = async (id) => (await api.patch(`/usuarios/${id}/baja`)).data
 export const reactivarUsuarioApi = async (id) => (await api.patch(`/usuarios/${id}/reactivar`)).data
-export const cambiarRolApi = async (id, rol) => (await api.patch(`/usuarios/${id}/rol`, { rol })).data
+export const cambiarRolApi = async (id, rol, datosVendedor = {}) =>
+  (await api.patch(`/usuarios/${id}/rol`, { rol, ...datosVendedor })).data
 
 // COMPRADOR pide ser vendedor: { nombreTienda, telefono, descripcion, provincia }
 export const solicitarVendedorApi = async ({ tienda, tel, desc, prov }) =>

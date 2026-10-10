@@ -46,7 +46,7 @@ const AdminUsuariosPage = () => {
 
       {modal?.tipo === 'crear' && <UsuarioFormModal onGuardar={adm.crear} onCerrar={cerrar} />}
       {modal?.tipo === 'editar' && <UsuarioFormModal usuario={modal.usuario} onGuardar={(v) => adm.editar(modal.usuario, v)} onCerrar={cerrar} />}
-      {modal?.tipo === 'rol' && <RolModal usuario={modal.usuario} onGuardar={(rol) => adm.cambiarRol(modal.usuario, rol)} onCerrar={cerrar} />}
+      {modal?.tipo === 'rol' && <RolModal usuario={modal.usuario} onGuardar={(rol, datos) => adm.cambiarRol(modal.usuario, rol, datos)} onCerrar={cerrar} />}
       {modal?.tipo === 'baja' && <ConfirmarBajaModal usuario={modal.usuario} onConfirmar={() => adm.darDeBaja(modal.usuario)} onCerrar={cerrar} />}
     </main>
   )

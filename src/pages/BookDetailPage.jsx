@@ -25,7 +25,7 @@ const Detalle = ({ libro, libros }) => {
   const toast = useToast()
   const { user, requiereLogin, marks, toggleMark } = useAuth()
   const { agregar, compro } = useCompra()
-  const { resenias, promedio, publicar } = useResenias(libro.id)
+  const { resenias, promedio, miResenia, publicar, eliminar } = useResenias(libro.id)
 
   const { esPropio, rutaEdicion, enRevision } = useLibroPropio()
   const esAdmin = useEsAdmin() // el administrador ve la ficha en modo lectura: sin comprar, guardar ni opinar
@@ -49,9 +49,18 @@ const Detalle = ({ libro, libros }) => {
   const publicarOpinion = async (st, texto) => {
     try {
       await publicar({ st, i: -Date.now(), u: `${user.nombre} ${user.apellido[0]}.`, t: texto, w: new Date().toLocaleDateString('es-AR') })
-      toast('¡Gracias por tu opinión!')
+      toast(miResenia ? 'Opinión actualizada' : '¡Gracias por tu opinión!')
     } catch (err) {
       toast(err.message) // con el back: ya reseñaste este ejemplar, compra sin pagar, etc.
+    }
+  }
+
+  const eliminarOpinion = async () => {
+    try {
+      await eliminar()
+      toast('Opinión eliminada')
+    } catch (err) {
+      toast(err.message)
     }
   }
 
@@ -85,7 +94,8 @@ const Detalle = ({ libro, libros }) => {
       
       {/* Las opiniones son de la obra: un ejemplar usado no tiene sección de opiniones */}
       {!esUsado && (
-        <ReviewsSection resenias={resenias} promedio={promedio} haComprado={Boolean(user) && compro(libro.id)} onPublicar={publicarOpinion} soloLectura={esAdmin} />
+        <ReviewsSection resenias={resenias} promedio={promedio} miResenia={miResenia} haComprado={Boolean(user) && compro(libro.id)}
+          onPublicar={publicarOpinion} onEliminar={eliminarOpinion} soloLectura={esAdmin} />
       )}
 
       <RelatedSection titulo={`Más de ${libro.a}`} libros={mismoAutor} />

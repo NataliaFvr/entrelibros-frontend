@@ -1,31 +1,52 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { useLibros } from '../hooks/useLibros'
+import { getCatalogoApi, getFiltrosDisponiblesApi } from '../api/librosApi'
+import { listarCategoriasApi } from '../api/categoriasApi'
+import { useAuth } from '../hooks/useAuth'
 import useFiltros from '../hooks/useFiltros'
-import useResultadoBusqueda from '../hooks/useResultadoBusqueda'
-import { PAGE_SIZE, filtrarLibros, masVendidos } from '../utils/filtrarLibros'
 import { filtrosDesdeURL } from '../utils/filtrosURL'
 import { plural } from '../utils/format'
 import SortSelect from '../componentes/SortSelect'
 import ActiveChips from '../componentes/ActiveChips'
 import FilterSidebar from '../componentes/FilterSidebar'
 import ProductGrid from '../componentes/ProductGrid'
-import SellerMatches from '../componentes/SellerMatches'
 import SearchNoResults from '../componentes/SearchNoResults'
 import Pager from '../componentes/Pager'
 
-const Catalogo = ({ inicial }) => {
-  const { libros, categorias, errorCarga, recargar } = useLibros()
+const Catalogo = ({ inicial, categorias, filtros }) => {
+  const { user } = useAuth()
   const { f, set, setPage, toggle, limpiar } = useFiltros(inicial)
   const [filtrosAbiertos, setFiltrosAbiertos] = useState(false)
+  const [resultado, setResultado] = useState({ libros: [], total: 0, pages: 0 })
+  const [cargando, setCargando] = useState(true)
+  const [error, setError] = useState(false)
+  const solicitudActual = useRef(0)
 
-  const resultado = useMemo(() => filtrarLibros(libros, f), [libros, f])
-  const { termino, tiendas, sinCoincidencias, destacados } = useResultadoBusqueda(libros, f.q)
-  const topIds = useMemo(() => new Set(masVendidos(libros).slice(0, 6).map((l) => l.id)), [libros])
+  const cargar = () => {
+    const solicitud = ++solicitudActual.current
+    setCargando(true)
+    setError(false)
+    return getCatalogoApi(f, { categorias, filtros, provinciaComprador: user?.provincia })
+      // Al cambiar varios filtros, la petición anterior puede terminar después.
+      // Solo la última puede actualizar la grilla.
+      .then((data) => { if (solicitud === solicitudActual.current) setResultado(data) })
+      .catch(() => {
+        if (solicitud === solicitudActual.current) {
+          setResultado({ libros: [], total: 0, pages: 0 })
+          setError(true)
+        }
+      })
+      .finally(() => { if (solicitud === solicitudActual.current) setCargando(false) })
+  }
+  useEffect(() => { cargar() }, [f, categorias, filtros, user?.provincia]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const pages = Math.max(1, Math.ceil(resultado.length / PAGE_SIZE))
+  const topIds = useMemo(() => new Set(
+    f.sort === 'best' && f.page === 1 ? resultado.libros.slice(0, 6).map((l) => l.id) : [],
+  ), [f.page, f.sort, resultado.libros])
+  const sinCoincidencias = Boolean(f.q && !resultado.total && !error)
+
+  const pages = Math.max(1, resultado.pages)
   const page = Math.min(f.page, pages)
-  const items = resultado.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
 
   const cambiarPagina = (p) => { setPage(p); window.scrollTo({ top: 0, behavior: 'smooth' }) }
 
@@ -35,22 +56,21 @@ const Catalogo = ({ inicial }) => {
       <div className="cat-top">
         <div>
           <h1>Libros</h1>
-          <p>{resultado.length.toLocaleString('es-AR')} {plural(resultado.length, 'resultado', 'resultados')}</p>
+          <p>{resultado.total.toLocaleString('es-AR')} {plural(resultado.total, 'resultado', 'resultados')}</p>
         </div>
         <SortSelect value={f.sort} onChange={(sort) => set({ sort })} />
       </div>
       <ActiveChips f={f} set={set} toggle={toggle} onLimpiar={limpiar} />
       <button className="filters-btn" type="button" onClick={() => setFiltrosAbiertos((v) => !v)}>Filtros</button>
       <div className="cat-layout">
-        <FilterSidebar f={f} set={set} toggle={toggle} libros={libros} categorias={categorias} abierto={filtrosAbiertos} />
+        <FilterSidebar f={f} set={set} toggle={toggle} categorias={categorias.map((c) => c.nombre)} filtros={filtros} abierto={filtrosAbiertos} />
         <div>
-          <SellerMatches tiendas={tiendas} />
           {sinCoincidencias ? (
-            <SearchNoResults termino={termino} destacados={destacados} onLimpiar={limpiar} />
+            <SearchNoResults termino={f.q.trim()} destacados={[]} onLimpiar={limpiar} />
           ) : (
             <>
-              <ProductGrid libros={items} topIds={topIds} ordenPorVentas={f.sort === 'best'} onLimpiar={limpiar} error={errorCarga && !libros.length} onReintentar={recargar} />
-              <Pager page={page} pages={pages} onChange={cambiarPagina} />
+              <ProductGrid libros={resultado.libros} topIds={topIds} ordenPorVentas={f.sort === 'best'} onLimpiar={limpiar} error={error} onReintentar={cargar} />
+              {!cargando && <Pager page={page} pages={pages} onChange={cambiarPagina} />}
             </>
           )}
         </div>
@@ -62,9 +82,14 @@ const Catalogo = ({ inicial }) => {
 // Al cambiar la URL (menú, buscador, "Ver todo") se reinician los filtros desde la nueva búsqueda
 const CatalogPage = () => {
   const { search } = useLocation()
-  const { categorias, cargando } = useLibros()
-  if (cargando) return <main className="cat" />
-  return <Catalogo key={search} inicial={filtrosDesdeURL(search, categorias)} />
+  const [datos, setDatos] = useState({ categorias: [], filtros: null })
+  useEffect(() => {
+    Promise.all([listarCategoriasApi(), getFiltrosDisponiblesApi()])
+      .then(([categorias, filtros]) => setDatos({ categorias, filtros }))
+      .catch(() => setDatos({ categorias: [], filtros: {} }))
+  }, [])
+  if (!datos.filtros) return <main className="cat" />
+  return <Catalogo key={search} inicial={filtrosDesdeURL(search, datos.categorias.map((c) => c.nombre))} {...datos} />
 }
 
 export default CatalogPage

@@ -71,6 +71,7 @@ export const aLibroFront = (l) => {
 export const aUsuarioFront = (u) => ({
   id: u.id, nombreUsuario: u.nombreUsuario, nombre: u.nombre || '', apellido: u.apellido || '', email: u.email || '',
   rol: u.rol, estado: u.estado || 'ACTIVO', provincia: u.provincia || '', tienda: u.nombreTienda || '',
+  telefono: u.telefono || '',
   estadoSolicitud: u.estadoSolicitudVendedor || 'NINGUNO',
   avatar: u.avatar || '', tieneFoto: Boolean(u.tieneFoto),
 })
@@ -103,11 +104,13 @@ export const aReseniaVendedorFront = (r) => ({
 
 /* ---------------- Carrito ---------------- */
 
-// CarritoItemResponse { id, cantidad, idLibro, tituloLibro, precioUnitario, subtotal, maxCantidad } -> ítem del carrito.
-// `id` es el id del LIBRO (así lo usa toda la interfaz); `idItem` es el id de la fila del carrito en el back, que piden
-// PATCH y DELETE /carrito/items/{idItem}. El precio no se guarda acá: la pantalla lo toma del catálogo (con el descuento aplicado).
+// CarritoItemResponse incluye un snapshot del libro para que el carrito siga siendo visible aunque salga del catálogo.
+// `id` es el id del LIBRO; `idItem` es el id de la fila del carrito que piden PATCH y DELETE.
 export const aItemCarritoFront = (i) => ({
   id: i.idLibro, q: i.cantidad, idItem: i.id, maxCantidad: i.maxCantidad, subtotal: i.subtotal ?? 0,
+  t: i.tituloLibro || 'Libro', p: i.precioUnitario ?? 0, v: i.nombreTienda || '', stock: i.stock ?? 0,
+  d: i.descuentoPct ?? 0, imgs: i.portada ? [`${RAIZ}${i.portada}`] : [],
+  c: TONES[((i.tituloLibro || '').length + (i.nombreTienda || '').length) % TONES.length],
 })
 
 /* ---------------- Pedidos ---------------- */

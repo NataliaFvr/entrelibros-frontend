@@ -16,6 +16,11 @@ export const getResenasLibroApi = async (idLibro) => (await lista(() => api.get(
 export const crearResenaLibroApi = async ({ idOrdenItem, calificacion, comentario }) =>
   aReseniaLibroFront((await api.post('/resenas-libro', { idOrdenItem, calificacion, comentario })).data)
 
+export const modificarResenaLibroApi = async (idResena, { calificacion, comentario }) =>
+  aReseniaLibroFront((await api.patch(`/resenas-libro/${idResena}`, { calificacion, comentario })).data)
+export const eliminarResenaLibroApi = async (idResena) => (await api.delete(`/resenas-libro/${idResena}`)).data
+export const eliminarResenaVendedorApi = async (idResena) => (await api.delete(`/resenas-vendedor/${idResena}`)).data
+
 export const getResenasVendedorApi = async (idVendedor) =>
   (await lista(() => api.get(`/resenas-vendedor/vendedor/${idVendedor}`))).map(aReseniaVendedorFront)
 

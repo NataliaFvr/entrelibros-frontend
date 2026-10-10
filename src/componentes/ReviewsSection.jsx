@@ -14,24 +14,27 @@ const POR_PAGINA = 5
 
 // Solo puede opinar quien compró el libro (`haComprado`: sesión iniciada + pedido pagado con ese libro).
 // No se renderiza para ejemplares usados: las opiniones son de la obra, no de la publicación de un vendedor.
-const ReviewsSection = ({ resenias, promedio, haComprado, onPublicar, soloLectura = false }) => {
+const ReviewsSection = ({ resenias, promedio, miResenia, haComprado, onPublicar, onEliminar, soloLectura = false }) => {
   const toast = useToast()
   const [orden, setOrden] = useState('new')
   const [filtro, setFiltro] = useState('')
   const [cantidad, setCantidad] = useState(POR_PAGINA)
   const [formAbierto, setFormAbierto] = useState(false)
+  const [editando, setEditando] = useState(null)
 
   const visibles = resenias.filter((r) => !filtro || r.st === +filtro).sort(ORDEN[orden])
   const cambiar = (setter) => (v) => { setter(v); setCantidad(POR_PAGINA) }
 
   const opinar = () => {
     if (!haComprado) return toast('Solo los compradores verificados de este libro pueden dejar una opinión')
+    setEditando(miResenia)
     setFormAbierto(true)
   }
 
   const publicar = (puntos, texto) => {
     onPublicar(puntos, texto)
     setFormAbierto(false)
+    setEditando(null)
     setOrden('new')
     setFiltro('')
     setCantidad(POR_PAGINA)
@@ -44,9 +47,10 @@ const ReviewsSection = ({ resenias, promedio, haComprado, onPublicar, soloLectur
         <ReviewSummary resenias={resenias} promedio={promedio} />
         <div className="rev-list">
           <ReviewControls orden={orden} filtro={filtro} onOrden={cambiar(setOrden)} onFiltro={cambiar(setFiltro)} onOpinar={soloLectura ? undefined : opinar} puedeOpinar={haComprado} />
-          {formAbierto && <ReviewForm onPublicar={publicar} onCancelar={() => setFormAbierto(false)} />}
+          {formAbierto && <ReviewForm key={editando?.id || 'nueva'} inicial={editando} onPublicar={publicar} onCancelar={() => { setFormAbierto(false); setEditando(null) }} />}
           <div>
-            {visibles.slice(0, cantidad).map((r) => <ReviewItem key={`${r.u}-${r.i}`} resenia={r} />)}
+            {visibles.slice(0, cantidad).map((r) => <ReviewItem key={`${r.u}-${r.i}`} resenia={r}
+              propia={!soloLectura && miResenia?.id === r.id} onEditar={() => { setEditando(r); setFormAbierto(true) }} onEliminar={onEliminar} />)}
             {!resenias.length && (
               <div className="empty" style={{ marginTop: 12 }}>
                 <h3>Este libro todavía no tiene opiniones</h3>

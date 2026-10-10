@@ -32,13 +32,13 @@ const useResenasVendedor = (tienda, idConocido = null) => {
     [resenias],
   )
 
-  // Libros que esta persona ya le compró a este vendedor (los más recientes primero)
+  // Se toma el vendedor del ítem comprado, no de la muestra local de libros: esa
+  // muestra puede estar paginada y no contener una compra anterior.
   const comprados = useMemo(
     () => pedidos
       .filter((p) => estadoPago(p) === 'SIMULADO_APROBADO')
-      .flatMap((p) => p.its.map((i) => libros.find((l) => l.id === i.id)))
-      .filter((l) => l && l.v === tienda),
-    [pedidos, libros, tienda],
+      .flatMap((p) => p.its.filter((i) => i.idVendedor === idVendedor)),
+    [pedidos, idVendedor],
   )
 
   // ¿Es la tienda de la cuenta con sesión? (el vendedor mirando su propia vista pública)

@@ -11,7 +11,7 @@ const conBack = async (fn) => {
 
 export const mensajeDuplicado = () => ''
 
-export const cambiarRol = (id, rol) => conBack(() => cambiarRolApi(id, rol))
+export const cambiarRol = (id, rol, datosVendedor) => conBack(() => cambiarRolApi(id, rol, datosVendedor))
 export const crearUsuario = (v) => {
   if (!['COMPRADOR', 'VENDEDOR'].includes(v.rol)) throw new Error('Desde el panel solo se pueden crear compradores o vendedores.')
   return conBack(() => crearUsuarioApi(v))
@@ -25,7 +25,7 @@ export const editarUsuario = (id, v) => {
 
 export const darDeBaja = (id) => conBack(() => darDeBajaUsuarioApi(id))
 export const reactivar = (id) => conBack(() => reactivarUsuarioApi(id))
-export const resolverSolicitudVenta = (id, aprobada) => conBack(() => resolverSolicitudApi(id, aprobada))
+export const resolverSolicitudVenta = (id, aprobada, comentario) => conBack(() => resolverSolicitudApi(id, aprobada, comentario))
 
 export const cargarUsuarios = async () => {
   const lista = await conBack(() => listarUsuariosApi())

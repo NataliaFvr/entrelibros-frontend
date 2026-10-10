@@ -22,12 +22,8 @@ export const checkoutApi = async ({ idDireccion, provincia }) =>
     ...(provincia ? { provinciaDestino: provinciaParaBack(provincia) } : {}),
   })).data
 
-// GET /ordenes y GET /ordenes/comprador devuelven las órdenes SIN items: el detalle (GET /ordenes/{id}) los trae
-const conDetalle = (ordenes) => Promise.all(ordenes.map(async (o) => {
-  try { return (await api.get(`/ordenes/${o.id}`)).data } catch { return o }
-}))
-
-export const listarPedidosApi = async () => (await conDetalle(await lista(() => api.get('/ordenes/comprador')))).map(aPedidoFront)
+// GET /ordenes/comprador ya devuelve cada orden con sus ítems.
+export const listarPedidosApi = async () => (await lista(() => api.get('/ordenes/comprador'))).map(aPedidoFront)
 
 export const cancelarOrdenApi = async (idOrden) => (await api.patch(`/ordenes/${idOrden}/cancelar`)).data
 
@@ -35,6 +31,6 @@ export const cancelarOrdenApi = async (idOrden) => (await api.patch(`/ordenes/${
 export const crearPagoApi = async (idOrden, proveedor) => (await api.post('/pagos', { idOrden, proveedor })).data
 export const pagosDeOrdenApi = async (idOrden) => lista(() => api.get(`/pagos/orden/${idOrden}`))
 
-// ADMIN: GET /ordenes y GET /pagos
-export const listarOrdenesAdminApi = async () => (await conDetalle(await lista(() => api.get('/ordenes')))).map(aPedidoFront)
+// ADMIN: GET /ordenes y GET /pagos. Las órdenes ya incluyen sus ítems.
+export const listarOrdenesAdminApi = async () => (await lista(() => api.get('/ordenes'))).map(aPedidoFront)
 export const listarPagosAdminApi = async () => lista(() => api.get('/pagos'))

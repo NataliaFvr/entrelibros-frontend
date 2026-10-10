@@ -2,10 +2,10 @@ import { useState } from 'react'
 import { useToast } from '../hooks/useToast'
 import RatingInput from './RatingInput'
 
-const ReviewForm = ({ onPublicar, onCancelar }) => {
+const ReviewForm = ({ inicial = null, onPublicar, onCancelar }) => {
   const toast = useToast()
-  const [puntos, setPuntos] = useState(0)
-  const [texto, setTexto] = useState('')
+  const [puntos, setPuntos] = useState(inicial?.st || 0)
+  const [texto, setTexto] = useState(inicial?.t || '')
 
   const enviar = () => {
     if (!puntos || texto.trim().length < 3) return toast('Elegí una puntuación y escribí tu opinión')
@@ -17,7 +17,7 @@ const ReviewForm = ({ onPublicar, onCancelar }) => {
       <RatingInput value={puntos} onChange={setPuntos} />
       <textarea rows={3} maxLength={500} placeholder="Contá qué te pareció el libro" value={texto} onChange={(e) => setTexto(e.target.value)} />
       <div className="rvf-b">
-        <button className="btn main" type="button" onClick={enviar}>Publicar opinión</button>
+        <button className="btn main" type="button" onClick={enviar}>{inicial ? 'Guardar cambios' : 'Publicar opinión'}</button>
         <button className="btn alt" type="button" onClick={onCancelar}>Cancelar</button>
       </div>
     </div>

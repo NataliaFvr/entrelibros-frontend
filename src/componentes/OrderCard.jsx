@@ -14,6 +14,9 @@ const OrderCard = ({ pedido, libros }) => {
   const estado = estadoPago(pedido, ahora)
   const [texto, clase] = ETIQUETAS_PAGO[estado]
   const pendiente = estado === 'PENDIENTE'
+  const vendedores = [...new Map(pedido.its
+    .filter((i) => i.idVendedor != null)
+    .map((i) => [i.idVendedor, libros.find((l) => l.vId === i.idVendedor)?.v || 'vendedor']))]
 
   return (
     <div className="card ord">
@@ -31,6 +34,15 @@ const OrderCard = ({ pedido, libros }) => {
           <small className="dim">Reserva: te quedan {mmss(pedido.venceEn - ahora)} min</small>
           <button className="btn main" type="button" onClick={() => navigate(`/pago/${pedido.n}`)}>Pagar ahora</button>
           <ConfirmLink texto="Cancelar compra" onConfirmar={() => cancelarPedido(pedido.n)} />
+        </div>
+      )}
+      {estado === 'SIMULADO_APROBADO' && vendedores.length > 0 && (
+        <div className="rvf-b">
+          {vendedores.map(([idVendedor, nombre]) => (
+            <button key={idVendedor} className="btn alt" type="button" onClick={() => navigate(`/vendedor/${idVendedor}?tab=resenias`)}>
+              Calificar a {nombre}
+            </button>
+          ))}
         </div>
       )}
     </div>

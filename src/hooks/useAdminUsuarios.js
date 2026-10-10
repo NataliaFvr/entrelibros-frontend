@@ -67,18 +67,18 @@ const useAdminUsuarios = () => {
     return actualizarPerfil(v, perfil)
   }, u.propio ? '' : 'Cambios guardados')
 
-  const cambiarRol = (u, rol) => {
+  const cambiarRol = (u, rol, datosVendedor) => {
     if (rol === u.rol) {
       toast(`El rol ya era ${ETIQUETA_ROL[rol]}`)
       return { ok: true }
     }
-    return ejecutar(() => admin.cambiarRol(u.id, rol), `Rol actualizado a ${ETIQUETA_ROL[rol]}`)
+    return ejecutar(() => admin.cambiarRol(u.id, rol, datosVendedor), `Rol actualizado a ${ETIQUETA_ROL[rol]}`)
   }
 
   const darDeBaja = (u) => ejecutar(() => admin.darDeBaja(u.id), 'Usuario dado de baja')
   const reactivar = (u) => ejecutar(() => admin.reactivar(u.id), 'Usuario reactivado')
-  const resolverVenta = (u, aprobada) =>
-    ejecutar(() => admin.resolverSolicitudVenta(u.id, aprobada), aprobada ? 'Vendedor aprobado' : 'Solicitud rechazada')
+  const resolverVenta = (u, aprobada, comentario) =>
+    ejecutar(() => admin.resolverSolicitudVenta(u.id, aprobada, comentario), aprobada ? 'Vendedor aprobado' : 'Solicitud rechazada')
 
   return {
     filtros, filtrar, total: filtrados.length, visibles, pagina: paginaActual, paginas, setPagina,
