@@ -1,8 +1,15 @@
-import { getResenasLibroApi } from './resenasApi'
+import api from './axiosConfig'
+import { aReseniaLibroFront } from './adaptadores'
+import { esListaVacia } from '../utils/errorApi'
 
-export const getOpinionesVendedor = async (_tienda, publicaciones) => {
-  const listas = await Promise.all(publicaciones.map(async (p) => (
-    (await getResenasLibroApi(p.id).catch(() => [])).map((r) => ({ ...r, libro: p.t, clave: `${p.id}-${r.id}` }))
-  )))
-  return listas.flat().sort((a, b) => String(b.date).localeCompare(String(a.date)))
+// Todas las opiniones de los libros de un vendedor, sin consultar una vez por publicación.
+export const getOpinionesVendedor = async (idVendedor) => {
+  try {
+    const { data } = await api.get(`/resenas-libro/vendedor/${idVendedor}/opiniones-libros`)
+    return data.map((r) => ({ ...aReseniaLibroFront(r), libro: r.tituloLibro || '', clave: `${r.idLibro}-${r.id}` }))
+      .sort((a, b) => String(b.date).localeCompare(String(a.date)))
+  } catch (err) {
+    if (esListaVacia(err)) return []
+    throw err
+  }
 }

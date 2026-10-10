@@ -96,21 +96,11 @@ const aDatos = (l) => ({
   precio: l.precio, descuentoPct: l.descuentoPct, stock: l.stock, descripcion: l.descripcion,
 })
 
-// El back pasa a EN_REVISION tanto un libro nuevo como uno aceptado que se editó, y no los distingue:
-// si el libro ya tuvo una aprobación en el historial, es una modificación.
-async function idsYaAprobados() {
-  const ids = new Set()
-  try {
-    for (let page = 0; ; page++) {
-      const pagina = await obtenerHistorial(page, 100)
-      pagina.content.forEach((h) => { if (h.estadoNuevo === 'ACEPTADO') ids.add(h.idLibro) })
-      if (pagina.last || pagina.empty) break
-    }
-  } catch {
-    // sin historial no se puede saber si fue una edición: se muestra como publicación nueva
-  }
-  return ids
-}
+const aDatosAnteriores = (l) => (l.snapshotTitulo == null ? null : {
+  titulo: l.snapshotTitulo, autor: l.snapshotAutor, editorial: l.snapshotEditorial, anio: l.snapshotAnio,
+  idioma: l.snapshotIdioma, estadoLibro: l.snapshotEstadoLibro, precio: l.snapshotPrecio,
+  descuentoPct: l.snapshotDescuentoPct, stock: l.snapshotStock, descripcion: l.snapshotDescripcion,
+})
 
 export async function obtenerSolicitudes() {
   const libros = []
@@ -119,11 +109,13 @@ export async function obtenerSolicitudes() {
     libros.push(...pagina.content)
     if (pagina.last || pagina.empty) break
   }
-  const yaAprobados = libros.length ? await idsYaAprobados() : new Set()
-  return libros.map((l) => ({
-    id: l.id, tipoModeracion: yaAprobados.has(l.id) ? 'MODIFICACION' : 'NUEVO', fechaSolicitud: null, libroId: l.id,
-    nombreVendedor: l.nombreVendedor, datosActuales: null, datosPropuestos: aDatos(l),
-  }))
+  return libros.map((l) => {
+    const datosActuales = aDatosAnteriores(l)
+    return {
+      id: l.id, tipoModeracion: datosActuales ? 'MODIFICACION' : 'NUEVO', fechaSolicitud: l.fechaSolicitudRevision || null,
+      libroId: l.id, nombreVendedor: l.nombreVendedor, datosActuales, datosPropuestos: aDatos(l),
+    }
+  })
 }
 
 export async function moderarSolicitud(id, accion) {

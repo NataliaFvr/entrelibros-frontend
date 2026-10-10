@@ -59,3 +59,15 @@ export const quitarImagenCategoriaApi = async (id) => {
   }
   recordar(id, false)
 }
+
+export const listarCategoriasTodasApi = async () => {
+  try {
+    return (await api.get('/categorias/todas')).data.map(aCategoriaFront)
+  } catch (err) {
+    if (esListaVacia(err)) return []
+    throw err
+  }
+}
+export const renombrarCategoriaApi = async (id, nombre) => aCategoriaFront((await api.patch(`/categorias/${id}`, { nombre })).data)
+export const darDeBajaCategoriaApi = async (id) => aCategoriaFront((await api.patch(`/categorias/${id}/baja`)).data)
+export const reactivarCategoriaApi = async (id) => aCategoriaFront((await api.patch(`/categorias/${id}/reactivar`)).data)

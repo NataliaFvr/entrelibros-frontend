@@ -10,6 +10,7 @@
 // Excepciones del back (nombre de la clase o código) -> tipo. Se busca en cualquier campo del cuerpo de la respuesta.
 // El orden importa: lo más específico va primero.
 const FIRMAS = [
+  ['CUENTA_DADA_DE_BAJA', /cuenta_dada_de_baja|CuentaDadaDeBaja/i],
   // El back responde 403 { error, codigo: "email_no_verificado" } al login de una cuenta sin verificar (GlobalExceptionHandler)
   ['CUENTA_NO_CONFIRMADA', /CuentaNoConfirmada|CuentaNoVerificada|CUENTA_NO_(CONFIRMADA|VERIFICADA)|PENDIENTE_CONFIRMACION|DisabledException|email_no_verificado/i],
   ['CODIGO_VENCIDO', /CodigoVerificacion(Expirad|Venc)|CODIGO(_VERIFICACION)?_(EXPIRADO|VENCIDO)/i],
@@ -23,6 +24,7 @@ const FIRMAS = [
 ]
 
 export const MENSAJES = {
+  CUENTA_DADA_DE_BAJA: 'Tu cuenta está dada de baja. Si creés que es un error, contactanos.',
   CUENTA_NO_CONFIRMADA: 'Tu cuenta todavía no está confirmada. Revisá tu e-mail y confirmala con el código que te enviamos.',
   CODIGO_VENCIDO: 'El código venció. Pedí uno nuevo.',
   CODIGO_INVALIDO: 'El código ingresado no es correcto. Revisalo e intentá de nuevo.',
@@ -43,6 +45,7 @@ export const MENSAJES = {
 
 // Título corto del aviso visual
 export const TITULOS = {
+  CUENTA_DADA_DE_BAJA: 'Cuenta dada de baja',
   CUENTA_NO_CONFIRMADA: 'Cuenta sin confirmar',
   CODIGO_VENCIDO: 'El código venció',
   CODIGO_INVALIDO: 'Código incorrecto',

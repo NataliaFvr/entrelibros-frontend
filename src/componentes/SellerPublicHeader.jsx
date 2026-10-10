@@ -1,17 +1,15 @@
-import { initials } from '../utils/colors'
 import { plural } from '../utils/format'
 import Stars from './Stars'
+import Avatar from './Avatar'
 import './SellerPanel.css'
 
 // Cabecera pública del vendedor: avatar, nombre, verificado, ubicación y reputación
 const SellerPublicHeader = ({ vendedor, promedio, cantidad, publicados }) => {
-  const { tienda, usuario, foto, ubicacion, desde, verificado, descripcion } = vendedor
+  const { tienda, usuario, foto, avatar, ubicacion, desde, verificado, descripcion } = vendedor
 
   return (
     <div className="u-head card sp-head">
-      {foto
-        ? <img className="uav" style={{ width: 84, height: 84 }} src={foto} alt={`Foto de ${tienda}`} />
-        : <span className="uav ini" style={{ width: 84, height: 84, fontSize: 30 }}>{initials(tienda, 2).toUpperCase()}</span>}
+      <Avatar user={{ nombre: tienda }} perfil={{ foto, avatar }} size={84} />
       <div className="u-id">
         <h1 className="fr">{tienda}</h1>
         {usuario && <p className="sp-user">@{usuario}</p>}

@@ -45,7 +45,7 @@ const useResenasVendedor = (tienda, idConocido = null) => {
   const esPropio = Boolean(user) && idVendedor != null && user.id === idVendedor
   const puedeResenar = Boolean(user) && user.rol === 'COMPRADOR' && !esPropio && comprados.length > 0
 
-  const miResena = user ? resenias.find((r) => r.u === `${user.nombre} ${user.apellido}`) || null : null
+  const miResena = user ? resenias.find((r) => r.idComprador === user.id) || null : null
   const libroComprado = comprados.length ? comprados[0].t : ''
 
   const publicarApi = async (st, texto) => {

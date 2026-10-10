@@ -6,7 +6,7 @@ import { cambiarEstadoCategoria, crearCategoriaConFoto, editarCategoria, listarC
 // Categorías del panel (activas y de baja) con alta, edición y baja/reactivación. Cada acción devuelve { ok } o { error }.
 const useAdminCategorias = () => {
   const toast = useToast()
-  const { recargarCategorias } = useLibros()
+  const { recargar, recargarCategorias } = useLibros()
   const [categorias, setCategorias] = useState([])
 
   const leer = useCallback(() => listarCategoriasAdmin().then(setCategorias), [])
@@ -19,7 +19,7 @@ const useAdminCategorias = () => {
   const correr = async (fn, aviso) => {
     try {
       await fn()
-      await Promise.all([leer(), recargarCategorias()]) // el catálogo y el inicio se actualizan al instante
+      await Promise.all([leer(), recargarCategorias(), recargar()]) // el catálogo y el inicio se actualizan al instante
       toast(aviso)
       return { ok: true }
     } catch (err) {

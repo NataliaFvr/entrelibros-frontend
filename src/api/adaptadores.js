@@ -1,5 +1,6 @@
 import { TONES } from '../utils/colors'
 import { destinoTexto } from '../utils/format'
+import { RAIZ } from './axiosConfig'
 
 // Traductores BACK -> FRONT (y de vuelta). El front trabaja con su propio modelo (libro: t, a, ed, base, d, p, usado…;
 // pedido: n, its, sub, env…) y el back con sus DTOs. Todo el conocimiento de los nombres del back vive acá:
@@ -54,7 +55,7 @@ export const aLibroFront = (l) => {
     base, d: l.descuentoPct ?? 0, p: l.precioFinal ?? l.precio ?? 0, usado: l.estadoLibro === 'USADO',
     cat: cats[0] || '', cats, v: l.nombreTienda || l.nombreVendedor || '', vId: l.idVendedor ?? null,
     provV: l.provinciaVendedor || '', envio: l.envio || 'distinta', ventas: l.vendidos ?? 0,
-    stock: l.stock ?? 0, imgs: [], descripcion: l.descripcion || '',
+    stock: l.stock ?? 0, imgs: l.portada ? [`${RAIZ}${l.portada}`] : [], descripcion: l.descripcion || '',
     c: TONES[(t.length + a.length) % TONES.length],
     estadoPublicacion: l.estadoPublicacion, estadoModeracion: l.estadoModeracion,
     motivoRechazo: l.motivoRechazo || '',
@@ -90,12 +91,14 @@ const inicial = (apellido) => (apellido ? ` ${String(apellido).trim()[0]}.` : ''
 
 // ResenaLibroResponse { id, calificacion, comentario, fecha, idLibro, nombreComprador, apellidoComprador }
 export const aReseniaLibroFront = (r) => ({
-  id: r.id, i: r.id, st: r.calificacion, t: r.comentario || '', date: r.fecha, u: `${r.nombreComprador || ''}${inicial(r.apellidoComprador)}`.trim(), idLibro: r.idLibro,
+  id: r.id, i: r.id, st: r.calificacion, t: r.comentario || '', date: r.fecha, idComprador: r.idComprador,
+  u: `${r.nombreComprador || ''}${inicial(r.apellidoComprador)}`.trim(), idLibro: r.idLibro,
 })
 
 // ResenaVendedorResponse { id, clasificacion, comentario, fecha, idPago, idVendedor, nombreComprador }
 export const aReseniaVendedorFront = (r) => ({
-  id: r.id, st: r.clasificacion, t: r.comentario || '', date: r.fecha, u: r.nombreComprador || '', nc: r.nombreComprador || '', libro: '',
+  id: r.id, st: r.clasificacion, t: r.comentario || '', date: r.fecha, idComprador: r.idComprador,
+  u: r.nombreComprador || '', nc: r.nombreComprador || '', libro: r.libro || '',
 })
 
 /* ---------------- Carrito ---------------- */
@@ -142,23 +145,18 @@ export const aTarifasEnvioFront = (lista = []) => ({
   ids: Object.fromEntries(lista.map((e) => [e.zona, e.id])),
 })
 
-// Venta del vendedor: OrdenVendedorResponse { id, estado, idOrden } + su OrdenResponse (GET /ordenes/{idOrden}, con items)
-// -> { n, date, est, its, comprador }, el formato que consumen SellerSales, SaleCard y SellerStats.
-// - La orden trae los items de TODOS los vendedores: se queda solo con los del vendedor `idVendedor`.
-// - El back no informa categoría ni si el libro es usado: salen del catálogo (`libros`, por idLibro).
-// - Solo cuenta como venta una orden pagada (SIMULADO_APROBADO) cuya parte del vendedor no fue cancelada; si no, devuelve null.
-export const aVentaFront = (ordenVendedor, orden, idVendedor, libros = []) => {
-  if (!orden || ordenVendedor.estado === 'CANCELADA' || orden.estadoPago !== 'SIMULADO_APROBADO') return null
-  const its = (orden.items || [])
-    .filter((i) => String(i.idVendedor) === String(idVendedor))
-    .map((i) => {
-      const l = libros.find((x) => x.id === i.idLibro)
-      return { t: i.tituloLibro || (l && l.t) || 'Libro', q: i.cantidad, p: i.precioUnitario, cat: l && l.cat, usado: Boolean(l && l.usado) }
-    })
+// OrdenVendedorResponse ya incluye los ítems de esa venta, fecha, comprador y destino.
+// -> { n, date, est, its, comprador }, el formato que consumen SellerSales y SaleCard.
+export const aVentaFront = (ordenVendedor) => {
+  if (ordenVendedor.estado === 'CANCELADA' || ordenVendedor.estadoPago !== 'SIMULADO_APROBADO') return null
+  const its = (ordenVendedor.items || []).map((i) => ({
+    t: i.tituloLibro || 'Libro', q: i.cantidad, p: i.precioUnitario,
+    cat: (i.categorias || [])[0] || '', usado: i.estadoLibro === 'USADO',
+  }))
   if (!its.length) return null
   return {
-    n: String(orden.id), date: isoADia(orden.fecha), est: ESTADO_TEXTO[orden.estadoPago], its, comprador: `${orden.nombreComprador || ''}`.trim(),
-    destino: destinoTexto(aDestinoFront(orden)), // adónde hay que mandar el paquete
+    n: String(ordenVendedor.idOrden), date: isoADia(ordenVendedor.fecha), est: ESTADO_TEXTO[ordenVendedor.estadoPago], its,
+    comprador: `${ordenVendedor.nombreComprador || ''}`.trim(), destino: destinoTexto(aDestinoFront(ordenVendedor)),
   }
 }
 
@@ -183,22 +181,28 @@ export const aEstadisticasFront = (r) => ({
 
 // Categoria { id, nombre } (GET /categorias) o CategoriaResponse { id, nombre, tieneImagen } -> { id, nombre, tieneImagen }.
 // GET /categorias informa si existe una imagen activa para evitar pedidos innecesarios.
-export const aCategoriaFront = (c) => ({ id: c.id, nombre: c.nombre, tieneImagen: c.tieneImagen !== false })
+export const aCategoriaFront = (c) => ({ id: c.id, nombre: c.nombre, activa: c.activa !== false, tieneImagen: Boolean(c.tieneImagen) })
 
 /* ---------------- Vendedor público ---------------- */
 
-// GET /vendedores/{id}. El contrato todavía no existe en el back: se aceptan los nombres más probables
-// (UsuarioResponse: nombreTienda / nombre / provincia / nombreUsuario) y se ignora lo que no venga.
-// -> { id, tienda, usuario, ubicacion, desde, descripcion, verificado }
-export const aVendedorPublicoFront = (v) => ({
-  id: v.id ?? v.idVendedor ?? null,
+// GET /vendedores/{id} -> datos públicos del vendedor, incluida su reputación y su imagen de perfil.
+export const aVendedorPublicoFront = (v) => {
+  const id = v.id ?? v.idVendedor ?? null
+  return {
+  id,
   tienda: v.nombreTienda || v.tienda || [v.nombre, v.apellido].filter(Boolean).join(' ') || v.nombreUsuario || '',
   usuario: v.nombreUsuario || '',
   ubicacion: v.provincia || '',
   desde: (v.desde || v.fechaRegistro) ? String(v.desde || v.fechaRegistro).slice(0, 4) : '',
   descripcion: v.descripcion || '',
+  promedioResenas: v.promedioResenas ?? 0,
+  cantidadResenas: v.cantidadResenas ?? 0,
+  tieneFoto: Boolean(v.tieneFoto),
+  avatar: v.avatar || '',
+  foto: v.tieneFoto && id != null ? `${RAIZ}/usuarios/${id}/foto` : '',
   verificado: true, // un vendedor listado es un vendedor aprobado por un administrador
-})
+  }
+}
 
 /* ---------------- Imágenes ---------------- */
 

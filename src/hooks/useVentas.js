@@ -3,8 +3,8 @@ import { listarVentasApi } from '../api/ventasApi'
 import { aVentaFront } from '../api/adaptadores'
 
 // Ventas del vendedor en el formato { n, date, est, its, comprador }.
-// Se piden una vez al abrir la pantalla y se arman con el catálogo (categoría y usado).
-const useVentas = (user, _tienda, libros) => {
+// Se piden una vez al abrir la pantalla; cada respuesta ya trae el detalle de su venta.
+const useVentas = (user, _tienda, _libros) => {
   const idVendedor = user.id
   const [crudas, setCrudas] = useState([])
   const [cargando, setCargando] = useState(Boolean(idVendedor))
@@ -20,9 +20,9 @@ const useVentas = (user, _tienda, libros) => {
   }, [idVendedor])
 
   const delBack = useMemo(() => crudas
-    .map(({ ordenVendedor, orden }) => aVentaFront(ordenVendedor, orden, idVendedor, libros))
+    .map(aVentaFront)
     .filter(Boolean)
-    .sort((a, b) => b.date.localeCompare(a.date)), [crudas, idVendedor, libros])
+    .sort((a, b) => b.date.localeCompare(a.date)), [crudas])
 
   return { ventas: delBack, cargando }
 }
