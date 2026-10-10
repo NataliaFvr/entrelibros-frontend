@@ -28,14 +28,19 @@ export const traerPaginas = async (url, params = {}) => {
 // la respuesta de Spring y sirven para el contador y el paginador.
 export const getCatalogoApi = async (f, { categorias = [], filtros = {}, provinciaComprador } = {}) => {
   const idCategorias = f.cats.map((nombre) => categorias.find((c) => c.nombre === nombre)?.id).filter(Boolean)
-  const idVendedor = (filtros.vendedores || []).find((v) => v.nombre === f.vendedor)?.id
+  // El selector guarda el ID. El nombre solo se conserva para los enlaces viejos
+  // (`/libros?vendedor=...`) y para mostrarlo en el chip.
+  const idVendedor = f.vendedorId || (filtros.vendedores || []).find((v) => v.nombre === f.vendedor)?.id
   const sort = { best: 'bestsellers', new: 'nuevo', asc: 'precioAsc', desc: 'precioDesc', disc: 'descuento' }[f.sort]
+  const filtrarEnvio = f.envios.length === 1 && Boolean(provinciaComprador)
+  const precioMinimo = filtros.precioMin ?? 0
+  const precioMaximo = filtros.precioMax ?? 500
   const params = {
     page: Math.max(0, f.page - 1), size: TAMANIO_CATALOGO, sort,
     texto: f.q || undefined,
     idCategorias: idCategorias.length ? idCategorias : undefined,
-    precioMin: f.min > 0 ? f.min : undefined,
-    precioMax: f.max < 500 ? f.max : undefined,
+    precioMin: f.min > precioMinimo ? f.min : undefined,
+    precioMax: f.max < precioMaximo ? f.max : undefined,
     descuentoMin: f.desc > 1 ? f.desc : undefined,
     soloConDescuento: f.desc === 1 || undefined,
     editoriales: f.ed || undefined, autores: f.autor || undefined, idiomas: f.idioma || undefined,
@@ -45,8 +50,8 @@ export const getCatalogoApi = async (f, { categorias = [], filtros = {}, provinc
     anioMax: f.anio === '0' ? 1999 : undefined,
     // Elegir ambas zonas equivale a no filtrar. El servidor usa la misma regla
     // de provincias que calcula el envío real.
-    provinciaComprador: f.envios.length === 1 ? provinciaComprador || undefined : undefined,
-    envioLocal: f.envios.length === 1 ? f.envios[0] === 'misma' : undefined,
+    provinciaComprador: filtrarEnvio ? provinciaComprador : undefined,
+    envioLocal: filtrarEnvio ? f.envios[0] === 'misma' : undefined,
   }
   const { data } = await api.get('/libros', { params })
   return {

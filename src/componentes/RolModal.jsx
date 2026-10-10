@@ -9,17 +9,18 @@ import { PROVINCIAS } from '../data/provincias'
 // Cambiar el rol de una cuenta. `onGuardar(rol)` devuelve { ok } o { error }.
 const RolModal = ({ usuario, onGuardar, onCerrar }) => {
   const [rol, setRol] = useState(usuario.rol)
+  const [nombreTienda, setNombreTienda] = useState(usuario.tienda || '')
   const [provincia, setProvincia] = useState(usuario.provincia || 'Buenos Aires')
   const [telefono, setTelefono] = useState(usuario.telefono || '')
   const [error, setError] = useState('')
 
   const enviar = async (e) => {
     e.preventDefault()
-    if (rol === 'VENDEDOR' && (!provincia.trim() || !telefono.trim())) {
-      setError('Para habilitar a un vendedor, completá provincia y teléfono.')
+    if (rol === 'VENDEDOR' && (!nombreTienda.trim() || !provincia.trim() || !telefono.trim())) {
+      setError('Para habilitar a un vendedor, completá nombre de tienda, provincia y teléfono.')
       return
     }
-    const r = await onGuardar(rol, rol === 'VENDEDOR' ? { provincia, telefono: telefono.trim() } : undefined) // con el back es async
+    const r = await onGuardar(rol, rol === 'VENDEDOR' ? { nombreTienda: nombreTienda.trim(), provincia, telefono: telefono.trim() } : undefined) // con el back es async
     if (r.error) setError(r.error)
     else onCerrar()
   }
@@ -30,7 +31,8 @@ const RolModal = ({ usuario, onGuardar, onCerrar }) => {
         <SelectField label="Rol" name="rol" value={rol} onChange={(_, valor) => setRol(valor)} opciones={ROLES} />
         {rol === 'VENDEDOR' && usuario.rol !== 'VENDEDOR' && (
           <>
-            <p className="note">Para habilitar a un vendedor necesitás registrar su provincia y teléfono.</p>
+            <p className="note">Para habilitar a un vendedor necesitás registrar su tienda, provincia y teléfono.</p>
+            <Field label="Nombre de tienda" name="nombreTienda" value={nombreTienda} onChange={(_, valor) => setNombreTienda(valor)} autoComplete="organization" />
             <div className="two">
               <SelectField label="Provincia" name="provincia" value={provincia} onChange={(_, valor) => setProvincia(valor)} opciones={PROVINCIAS} />
               <Field label="Teléfono" name="telefono" value={telefono} onChange={(_, valor) => setTelefono(valor)} type="tel" inputMode="tel" autoComplete="tel" />

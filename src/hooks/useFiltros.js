@@ -14,7 +14,7 @@ const useFiltros = (inicial) => {
       return { ...prev, [clave]: nuevo, page: 1 }
     })
   // Limpiar mantiene el orden elegido
-  const limpiar = () => setF((prev) => ({ ...FILTROS_INICIALES, cats: [], envios: [], sort: prev.sort }))
+  const limpiar = () => setF((prev) => ({ ...FILTROS_INICIALES, cats: [], envios: [], min: inicial.min, max: inicial.max, sort: prev.sort }))
 
   return { f, set, setPage, toggle, limpiar }
 }

@@ -1,10 +1,8 @@
-import { PRECIO_MAX } from '../utils/filtrarLibros'
-
 // Rango de precio: dos sliders + dos inputs numéricos. `onChange(min, max)`.
-const PriceFilter = ({ min, max, onChange }) => {
+const PriceFilter = ({ min, max, minimo = 0, maximo = 500, onChange }) => {
   const cambiar = (lo, hi, desde) => {
-    lo = Math.max(0, Math.min(PRECIO_MAX, Number.isNaN(lo) ? 0 : lo))
-    hi = Math.max(0, Math.min(PRECIO_MAX, Number.isNaN(hi) ? PRECIO_MAX : hi))
+    lo = Math.max(minimo, Math.min(maximo, Number.isNaN(lo) ? minimo : lo))
+    hi = Math.max(minimo, Math.min(maximo, Number.isNaN(hi) ? maximo : hi))
     if (lo > hi) { if (desde === 'min') hi = lo; else lo = hi }
     onChange(lo, hi)
   }
@@ -15,20 +13,20 @@ const PriceFilter = ({ min, max, onChange }) => {
       <h3>Precio</h3>
       <div className="dual">
         <div className="track" />
-        <div className="fill" style={{ left: `${(min / PRECIO_MAX) * 100}%`, right: `${100 - (max / PRECIO_MAX) * 100}%` }} />
-        <input type="range" min="0" max={PRECIO_MAX} step="10" value={min} aria-label="Precio mínimo"
+        <div className="fill" style={{ left: `${((min - minimo) / (maximo - minimo || 1)) * 100}%`, right: `${100 - ((max - minimo) / (maximo - minimo || 1)) * 100}%` }} />
+        <input type="range" min={minimo} max={maximo} step="1" value={min} aria-label="Precio mínimo"
           onChange={(e) => cambiar(+e.target.value, max, 'min')} />
-        <input type="range" min="0" max={PRECIO_MAX} step="10" value={max} aria-label="Precio máximo"
+        <input type="range" min={minimo} max={maximo} step="1" value={max} aria-label="Precio máximo"
           onChange={(e) => cambiar(min, +e.target.value, 'max')} />
       </div>
       <div className="prices">
         <label>Mínimo
-          <input type="number" min="0" max={PRECIO_MAX} step="10" placeholder="$ 0" value={min > 0 ? min : ''}
-            onChange={(e) => cambiar(num(e.target.value, 0), max, 'min')} />
+          <input type="number" min={minimo} max={maximo} step="1" placeholder={`$ ${minimo}`} value={min > minimo ? min : ''}
+            onChange={(e) => cambiar(num(e.target.value, minimo), max, 'min')} />
         </label>
         <label>Máximo
-          <input type="number" min="0" max={PRECIO_MAX} step="10" placeholder={`$ ${PRECIO_MAX}`} value={max < PRECIO_MAX ? max : ''}
-            onChange={(e) => cambiar(min, num(e.target.value, PRECIO_MAX), 'max')} />
+          <input type="number" min={minimo} max={maximo} step="1" placeholder={`$ ${maximo}`} value={max < maximo ? max : ''}
+            onChange={(e) => cambiar(min, num(e.target.value, maximo), 'max')} />
         </label>
       </div>
     </div>

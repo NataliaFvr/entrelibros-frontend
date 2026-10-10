@@ -108,7 +108,7 @@ export const aReseniaVendedorFront = (r) => ({
 // `id` es el id del LIBRO; `idItem` es el id de la fila del carrito que piden PATCH y DELETE.
 export const aItemCarritoFront = (i) => ({
   id: i.idLibro, q: i.cantidad, idItem: i.id, maxCantidad: i.maxCantidad, subtotal: i.subtotal ?? 0,
-  t: i.tituloLibro || 'Libro', p: i.precioUnitario ?? 0, v: i.nombreTienda || '', stock: i.stock ?? 0,
+  t: i.tituloLibro || 'Libro', a: i.autor || '', p: i.precioUnitario ?? 0, v: i.nombreTienda || '', stock: i.stock ?? 0,
   d: i.descuentoPct ?? 0, imgs: i.portada ? [`${RAIZ}${i.portada}`] : [],
   c: TONES[((i.tituloLibro || '').length + (i.nombreTienda || '').length) % TONES.length],
 })

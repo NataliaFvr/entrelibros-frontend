@@ -6,7 +6,7 @@ export const PRECIO_MAX = 500
 
 export const FILTROS_INICIALES = {
   estado: 'ambos', cats: [], envios: [], min: 0, max: PRECIO_MAX, desc: 0,
-  ed: '', autor: '', idioma: '', anio: '', vendedor: '', q: '', sort: 'best', page: 1,
+  ed: '', autor: '', idioma: '', anio: '', vendedor: '', vendedorId: '', q: '', sort: 'best', page: 1,
 }
 
 const porVentas = (a, b) => b.ventas - a.ventas
