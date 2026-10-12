@@ -40,3 +40,11 @@
 .mod-modal-btns{flex-wrap:wrap}
 .mod-modal-btns .btn{width:auto;flex:1 1 140px;padding:11px 22px}
 @media (min-width:600px){.mod-actions .btn{flex:0 0 auto}}
+
+/* Historial de moderación */
+.hist-total{font-size:.82rem;font-weight:600;opacity:.7;margin:0 0 8px}
+.hist-libro .lnk{text-align:left;overflow-wrap:anywhere}
+.hist-cambio{display:inline-flex;flex-wrap:wrap;align-items:center;gap:6px}
+.hist-coment{overflow-wrap:anywhere;min-width:160px}
+@media (max-width:899px){.hist-coment{min-width:0}.hist-libro{text-align:right}}
+.mod-hist{align-self:flex-start;padding:4px 0}

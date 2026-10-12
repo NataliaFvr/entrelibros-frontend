@@ -1,6 +1,6 @@
+import { useMemo } from 'react'
 import { Link, Navigate, useNavigate, useParams } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
-import { useLibros } from '../hooks/useLibros'
 import useVendedor from '../hooks/useVendedor'
 import useCalificacionesRecibidas from '../hooks/useCalificacionesRecibidas'
 import useVentas from '../hooks/useVentas'
@@ -31,10 +31,10 @@ const Migas = () => <div className="crumbs"><Link to="/">Inicio</Link> › <span
 const Vendedor = ({ user }) => {
   const navigate = useNavigate()
   const { tab = 'libros', id } = useParams()
-  const { libros } = useLibros()
   const { vendedor, estadoLibros, reintentar, solicitar, guardarLibro, alternarBaja } = useVendedor(user)
   const calificaciones = useCalificacionesRecibidas(vendedor.tienda, vendedor.pub, user.id)
-  const { ventas, cargando } = useVentas(user, vendedor.tienda, libros)
+  const { ventas, cargando, ocupado, registrarEnvio, cancelarVenta } = useVentas(user)
+  const activas = useMemo(() => ventas.filter((v) => !v.cancelada), [ventas]) // las canceladas no suman a totales ni estadísticas
 
   if (vendedor.estado !== 'aprobado') {
     return (
@@ -54,7 +54,7 @@ const Vendedor = ({ user }) => {
   const editado = tab === 'editar' ? vendedor.pub.find((p) => String(p.id) === id) : null
   if (!TABS.includes(tab) || (tab === 'editar' && (!editado || enRevision(editado)))) return <Navigate to="/vender" replace />
 
-  const vendido = ventas.reduce((suma, v) => suma + v.its.reduce((s, i) => s + i.p * i.q, 0), 0)
+  const vendido = activas.reduce((suma, v) => suma + v.its.reduce((s, i) => s + i.p * i.q, 0), 0)
   const pestanias = [['libros', 'Mis libros'], ['nuevo', editado ? 'Editar libro' : 'Publicar libro'], ['ventas', 'Historial de ventas'], ['estadisticas', 'Estadísticas'], ['reputacion', 'Reputación']]
   const guardar = async (datos) => {
     const respuesta = await guardarLibro(datos, editado && editado.id)
@@ -66,15 +66,15 @@ const Vendedor = ({ user }) => {
     <main className="usr">
       <Migas />
       <SellerHead tienda={vendedor.tienda} publicados={vendedor.pub.filter((p) => p.estado === 'activo').length}
-        ventas={ventas.length} vendido={vendido} onMiCuenta={() => navigate('/cuenta')} />
+        ventas={activas.length} vendido={vendido} onMiCuenta={() => navigate('/cuenta')} />
       <AccountTabs pestanias={pestanias} tab={tab === 'editar' ? 'nuevo' : tab} onIr={(t) => navigate(t === 'libros' ? '/vender' : `/vender/${t}`)} />
       {tab === 'libros' && <SellerBooks libros={vendedor.pub} estado={estadoLibros} onReintentar={reintentar} onBaja={alternarBaja} />}
       {(tab === 'nuevo' || tab === 'editar') && (
         <BookForm key={editado ? editado.id : 'nuevo'} libro={editado || {}}
           onGuardar={guardar} onCancelar={() => navigate('/vender')} />
       )}
-      {tab === 'ventas' && !cargando && <SellerSales ventas={ventas} />}
-      {tab === 'estadisticas' && !cargando && <Estadisticas ventas={ventas} />}
+      {tab === 'ventas' && !cargando && <SellerSales ventas={ventas} ocupado={ocupado} onEnviar={registrarEnvio} onCancelar={cancelarVenta} />}
+      {tab === 'estadisticas' && !cargando && <Estadisticas ventas={activas} />}
       {tab === 'reputacion' && <SellerReputation calificaciones={calificaciones} />}
     </main>
   )

@@ -62,7 +62,9 @@ const Catalogo = ({ inicial, categorias, filtros }) => {
         <SortSelect value={f.sort} onChange={(sort) => set({ sort })} />
       </div>
       <ActiveChips f={f} set={set} toggle={toggle} onLimpiar={limpiar} precioMinimo={filtros.precioMin ?? 0} precioMaximo={filtros.precioMax ?? 500} />
-      <button className="filters-btn" type="button" onClick={() => setFiltrosAbiertos((v) => !v)}>Filtros</button>
+      <button className="filters-btn" type="button" aria-expanded={filtrosAbiertos} aria-controls="filtros-catalogo" onClick={() => setFiltrosAbiertos((v) => !v)}>
+        {filtrosAbiertos ? 'Ocultar filtros' : 'Filtros'}
+      </button>
       <div className="cat-layout">
         <FilterSidebar f={f} set={set} toggle={toggle} categorias={categorias.map((c) => c.nombre)} filtros={filtros} abierto={filtrosAbiertos} envioDisponible={Boolean(provinciaComprador)} />
         <div>
@@ -82,7 +84,7 @@ const Catalogo = ({ inicial, categorias, filtros }) => {
 
 // Al cambiar la URL (menú, buscador, "Ver todo") se reinician los filtros desde la nueva búsqueda
 const CatalogPage = () => {
-  const { search } = useLocation()
+  const { search, key } = useLocation()
   const [datos, setDatos] = useState({ categorias: [], filtros: null })
   useEffect(() => {
     Promise.all([listarCategoriasApi(), getFiltrosDisponiblesApi()])
@@ -91,8 +93,16 @@ const CatalogPage = () => {
   }, [])
   if (!datos.filtros) return <main className="cat" />
   const base = filtrosDesdeURL(search, datos.categorias.map((c) => c.nombre))
-  const inicial = { ...base, min: datos.filtros.precioMin ?? 0, max: datos.filtros.precioMax ?? 500 }
-  return <Catalogo key={search} inicial={inicial} {...datos} />
+  // La URL trae el NOMBRE del vendedor; el selector trabaja con su ID. Se resuelve acá para que ambos queden sincronizados.
+  const vendedor = (datos.filtros.vendedores || []).find((v) => v.nombre === base.vendedor)
+  const inicial = {
+    ...base,
+    vendedorId: vendedor ? String(vendedor.id) : '',
+    min: datos.filtros.precioMin ?? 0,
+    max: datos.filtros.precioMax ?? 500,
+  }
+  // key = clave de la navegación: elegir otra vez el mismo enlace del menú también reinicia los filtros
+  return <Catalogo key={key} inicial={inicial} {...datos} />
 }
 
 export default CatalogPage

@@ -13,7 +13,7 @@ const VerifyPage = () => {
   if (!verificacion.usuario) return <Navigate to="/ingresar" replace state={state} />
 
   return (
-    <main className="usr">
+    <main className="usr au-page">
       <AuthHero titulo="Confirmá tu cuenta" sub="Un último paso antes de empezar a leer" />
       <div className="au-card">
         <div className="au-main">

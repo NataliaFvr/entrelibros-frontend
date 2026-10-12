@@ -6,9 +6,9 @@ const FlashCard = ({ libro }) => {
     <Link to={`/libro/${libro.id}`} className="fcard">
       <span className="badge">{libro.d}% off</span>
       <div className="mini" style={{ background: libro.c }}>
-        {libro.imgs?.[0] && <img src={libro.imgs[0]} alt={`Portada de ${libro.t}`} />}
+        {libro.imgs?.[0] && <img src={libro.imgs[0]} alt={`Portada de ${libro.t}`} loading="lazy" decoding="async" />}
       </div>
-      <div>
+      <div className="fcard-info">
         <h3>{libro.t}</h3>
         <small>{libro.a}</small>
         <div className="fprice">{fmt(libro.p)}<s>{fmt(libro.base)}</s></div>

@@ -11,3 +11,8 @@ export const listarVentasApi = async () => {
     throw err
   }
 }
+
+// PATCH /ordenes/vendedor/{idOrdenVendedor}/cancelar — el vendedor cancela SU parte de la orden (el back devuelve el stock).
+// Responde la OrdenVendedorResponse con estado 'CANCELADA'. Cancelar dos veces es inofensivo.
+export const cancelarVentaApi = async (idOrdenVendedor) =>
+  (await api.patch(`/ordenes/vendedor/${idOrdenVendedor}/cancelar`)).data

@@ -137,6 +137,8 @@ export const aPedidoFront = (o) => {
     est: ESTADO_TEXTO[o.estadoPago] || o.estadoPago, pago: o.estadoPago,
     venceEn: o.estadoPago === 'PENDIENTE' ? isoAMs(o.venceEn) ?? undefined : undefined,
     comprador: `${o.nombreComprador || ''}`.trim(),
+    // OrdenResponse.envios: estado de envío por vendedor [{ idVendedor, nombreVendedor, estado: 'ACTIVA' | 'CANCELADA', enviado }]
+    envios: (o.envios || []).map((e) => ({ idVendedor: e.idVendedor, nombre: e.nombreVendedor || '', cancelada: e.estado === 'CANCELADA', enviado: Boolean(e.enviado) })),
   }
 }
 
@@ -149,16 +151,20 @@ export const aTarifasEnvioFront = (lista = []) => ({
 })
 
 // OrdenVendedorResponse ya incluye los ítems de esa venta, fecha, comprador y destino.
-// -> { n, date, est, its, comprador }, el formato que consumen SellerSales y SaleCard.
+// -> { id, n, date, est, cancelada, its, comprador, destino }, el formato que consumen SellerSales y SaleCard.
+// `id` es el id de la OrdenVendedor (el que piden POST /envio-items y PATCH /ordenes/vendedor/{id}/cancelar);
+// `n` es el número de la orden. Las ventas canceladas se conservan (con `cancelada`) para que el vendedor vea qué pasó.
 export const aVentaFront = (ordenVendedor) => {
-  if (ordenVendedor.estado === 'CANCELADA' || ordenVendedor.estadoPago !== 'SIMULADO_APROBADO') return null
+  if (ordenVendedor.estadoPago !== 'SIMULADO_APROBADO') return null
   const its = (ordenVendedor.items || []).map((i) => ({
     t: i.tituloLibro || 'Libro', q: i.cantidad, p: i.precioUnitario,
     cat: (i.categorias || [])[0] || '', usado: i.estadoLibro === 'USADO',
   }))
   if (!its.length) return null
+  const cancelada = ordenVendedor.estado === 'CANCELADA'
   return {
-    n: String(ordenVendedor.idOrden), date: isoADia(ordenVendedor.fecha), est: ESTADO_TEXTO[ordenVendedor.estadoPago], its,
+    id: ordenVendedor.id, n: String(ordenVendedor.idOrden), date: isoADia(ordenVendedor.fecha),
+    est: cancelada ? 'Cancelada' : ESTADO_TEXTO[ordenVendedor.estadoPago], cancelada, its,
     comprador: `${ordenVendedor.nombreComprador || ''}`.trim(), destino: destinoTexto(aDestinoFront(ordenVendedor)),
   }
 }

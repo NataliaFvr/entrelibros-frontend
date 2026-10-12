@@ -3,7 +3,7 @@ import ComparadorCambios from './ComparadorCambios'
 const ETIQUETA = { NUEVO: 'Nueva publicación', MODIFICACION: 'Modificación' }
 
 // Una solicitud de la cola: título, vendedor, comparador y acciones Aprobar / Rechazar.
-const ModeracionItem = ({ solicitud, ocupado, onAprobar, onRechazar }) => {
+const ModeracionItem = ({ solicitud, ocupado, onAprobar, onRechazar, onHistorial }) => {
   const { id, tipoModeracion, nombreVendedor, fechaSolicitud, datosActuales, datosPropuestos } = solicitud
   return (
     <article className="card mod-item" aria-busy={ocupado}>
@@ -25,6 +25,7 @@ const ModeracionItem = ({ solicitud, ocupado, onAprobar, onRechazar }) => {
         <button className="btn main" type="button" disabled={ocupado} onClick={onAprobar}>{ocupado ? 'Procesando…' : 'Aprobar'}</button>
         <button className="btn alt" type="button" disabled={ocupado} onClick={onRechazar}>Rechazar</button>
       </div>
+      {onHistorial && <button className="lnk mod-hist" type="button" onClick={onHistorial}>Ver historial de moderación de este libro</button>}
     </article>
   )
 }

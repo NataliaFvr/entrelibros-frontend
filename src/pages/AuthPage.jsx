@@ -20,7 +20,7 @@ const AuthPage = ({ tab }) => {
   const pendiente = () => navigate('/confirmar', { replace: true, state })
 
   return (
-    <main className="usr">
+    <main className="usr au-page">
       <AuthHero titulo="Bienvenido a Entrelibros" sub="Entrá o creá tu cuenta para guardar, comprar y opinar" />
       <div className="au-card">
         <div className="au-main">

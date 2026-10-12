@@ -9,7 +9,7 @@ const ANIOS = [['2020', '2020 o después'], ['2010', '2010 o después'], ['2000'
 // `f` = filtros actuales, `set(cambios)` = actualiza, `toggle(clave, valor)` = agrega/quita de un array
 const FilterSidebar = ({ f, set, toggle, categorias, filtros, abierto, envioDisponible = true }) => {
   return (
-    <aside className={`filters${abierto ? ' open' : ''}`}>
+    <aside id="filtros-catalogo" className={`filters${abierto ? ' open' : ''}`}>
       <EstadoFilter value={f.estado} onChange={(estado) => set({ estado })} />
       <EnvioFilter value={f.envios} onToggle={(v) => toggle('envios', v)} disabled={!envioDisponible} />
       <CategoriasFilter categorias={categorias} value={f.cats} onToggle={(c) => toggle('cats', c)} />

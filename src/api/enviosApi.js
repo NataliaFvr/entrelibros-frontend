@@ -17,3 +17,8 @@ export const listarTarifasEnvioApi = async () => {
 // PATCH /envios/{id} { costoFijo } — solo ADMIN
 export const actualizarTarifaEnvioApi = async (idEnvio, costoFijo) =>
   (await api.patch(`/envios/${idEnvio}`, { costoFijo })).data
+
+// POST /envios { zona: 'misma' | 'distinta', costoFijo } — solo ADMIN. Crea la tarifa de esa zona
+// (el back responde 409 EnvioDuplicadoException si ya existe: ahí se usa PATCH /envios/{id}).
+export const crearTarifaEnvioApi = async (zona, costoFijo) =>
+  (await api.post('/envios', { zona, costoFijo })).data

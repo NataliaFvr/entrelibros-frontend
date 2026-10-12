@@ -25,13 +25,21 @@
   .nav-item:hover{color:var(--burnt)}
   .nav-item svg{width:12px;height:12px}
   .dropdown{position:absolute;top:100%;left:0;background:#fff;border:1px solid rgba(4,42,43,.12);border-radius:8px;box-shadow:0 12px 28px rgba(4,42,43,.15);padding:10px;display:none;flex-direction:column;min-width:190px;font-weight:600;z-index:60}
-  .nav-item:hover .dropdown{display:flex}
+  .nav-item.open>.dropdown{display:flex}
+  .nav-link{display:flex;align-items:center;color:inherit}
+  .nav-caret{display:flex;align-items:center;justify-content:center;width:22px;height:22px;margin-left:-2px;padding:0;border:0;border-radius:50%;background:none;color:inherit;cursor:pointer}
+  .nav-caret svg{transition:transform .2s}
+  .nav-item.open .nav-caret svg{transform:rotate(180deg)}
+  .nav-caret:focus-visible,.nav-link:focus-visible,.sub-btn:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
   .dropdown a{padding:8px 10px;border-radius:6px;font-size:.83rem;color:var(--evergreen)}
   .dropdown a:hover{background:var(--cyan)}
   .sub-item{position:relative;display:flex;justify-content:space-between;align-items:center;gap:14px;padding:8px 10px;border-radius:6px;font-size:.83rem;color:var(--evergreen)}
-  .sub-item:hover{background:var(--cyan)}
+  .sub-item:hover,.sub-item.open{background:var(--cyan)}
+  .sub-btn{display:flex;justify-content:space-between;align-items:center;gap:14px;width:100%;padding:0;border:0;background:none;font:inherit;font-weight:inherit;color:inherit;cursor:pointer;text-align:left}
   .sub-menu{position:absolute;top:-10px;left:100%;margin-left:6px;background:#fff;border:1px solid rgba(4,42,43,.12);border-radius:8px;box-shadow:0 12px 28px rgba(4,42,43,.15);padding:10px;display:none;flex-direction:column;min-width:190px}
-  .sub-item:hover .sub-menu{display:flex}
+  .sub-item.open .sub-menu{display:flex}
+  @media (hover:hover){.sub-item:hover .sub-menu{display:flex}}
+  .sub-menu::before{content:'';position:absolute;top:0;bottom:0;left:-8px;width:8px} /* puente: el cursor puede cruzar el hueco sin cerrar el submenú */
   .navbar-right{display:flex;align-items:center;gap:18px}
   .search input{width:230px;padding:9px 14px;border-radius:999px;border:1px solid rgba(4,42,43,.2);font-family:inherit;font-size:.85rem;background:#fff}
   .icon-btn{position:relative;width:20px;height:20px;flex-shrink:0;cursor:pointer}
@@ -117,19 +125,21 @@
   .flash{background:rgba(239,123,69,.1);margin-top:52px;padding:40px clamp(20px,4vw,56px)}
   .flash-inner{max-width:1240px;margin:0 auto;display:flex;gap:36px;align-items:center;flex-wrap:wrap}
   .flash-left{flex:0 0 260px}
+  @media (max-width:760px){.flash{padding:32px clamp(16px,5vw,32px)}.flash-inner{gap:20px}.flash-left{flex:1 1 100%}}
   .flash-left h2{font-size:1.7rem;line-height:1.15;font-weight:700;margin-bottom:8px}
   .flash-left p{font-size:.85rem;opacity:.7;margin-bottom:18px}
   .timer{display:flex;gap:8px}
   .tbox{background:var(--evergreen);color:#fff;border-radius:6px;width:54px;padding:8px 0;text-align:center}
   .tbox b{display:block;font-family:'Fraunces',serif;font-size:1.3rem}
   .tbox span{font-size:.55rem;letter-spacing:.06em;opacity:.7}
-  .flash-cards{flex:1;display:flex;gap:16px;overflow-x:auto;min-width:0;padding:4px 0}
-  .fcard{flex:0 0 300px;background:#fff;border-radius:10px;padding:14px;display:flex;gap:14px;position:relative;box-shadow:0 4px 14px rgba(4,42,43,.08)}
-  .fcard .mini{width:74px;height:104px;border-radius:6px;flex-shrink:0;overflow:hidden}
+  .flash-cards{flex:1 1 min(100%,320px);display:flex;gap:16px;overflow-x:auto;min-width:0;padding:4px 2px 12px;scroll-snap-type:x proximity;scrollbar-width:thin}
+  .fcard{flex:0 0 min(300px,86%);scroll-snap-align:start;min-width:0;background:#fff;border-radius:10px;padding:14px;display:flex;gap:14px;position:relative;box-shadow:0 4px 14px rgba(4,42,43,.08)}
+  .fcard .mini{width:74px;height:104px;border-radius:6px;flex-shrink:0;overflow:hidden;position:relative}
   .fcard .mini img{display:block;width:100%;height:100%;object-fit:cover}
   .fcard h3{font-family:'Fraunces',serif;font-size:1rem;margin-bottom:2px}
   .fcard small{opacity:.65;font-size:.75rem}
-  .badge{position:absolute;top:10px;right:12px;font-size:.72rem;font-weight:700;color:var(--burnt)}
+  .fcard-info{min-width:0;flex:1;overflow-wrap:anywhere}
+  .badge{position:absolute;top:20px;left:20px;z-index:1;font-size:.7rem;font-weight:700;color:#fff;background:var(--burnt);padding:2px 7px;border-radius:4px;box-shadow:0 2px 6px rgba(4,42,43,.25)}
   .fprice{margin-top:10px;font-weight:700;font-size:1.05rem}
   .fprice s{font-weight:400;font-size:.78rem;opacity:.5;margin-left:6px}
 
@@ -643,3 +653,41 @@
   .aviso span{color:var(--evergreen);opacity:.85;font-weight:500}
   .aviso-warning{border-left-color:var(--tangerine);background:rgba(239,123,69,.16);color:var(--evergreen)}
   .aviso-info{border-left-color:var(--blue);background:var(--cyan);color:var(--evergreen)}
+
+  /* ===== Ventas del vendedor: acciones por venta ===== */
+  .sale-acts{display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px;margin-top:14px}
+  .sale-acts .btn{width:auto;padding:10px 22px;font-size:.88rem}
+  .sale-acts .btn:disabled{opacity:.6;cursor:not-allowed}
+  .ord-off{opacity:.75}
+  @media (max-width:480px){.sale-acts .btn{width:100%}}
+
+  /* ===== Ingresar / Registrarse / Confirmar: se adaptan al ALTO de la pantalla =====
+     Una sola columna centrada (antes quedaba el formulario en media tarjeta y el resto vacío) y una cabecera que se
+     achica con el alto (vh) para que el formulario entre sin cortarse en notebooks, celulares y pantallas apaisadas.
+     Si igual no entra, la página hace scroll normal: nunca hay alturas fijas ni overflow oculto. */
+  .au-card{grid-template-columns:minmax(0,1fr);width:100%;max-width:480px}
+  .au-page{padding-top:clamp(10px,2.5vh,26px);padding-bottom:clamp(24px,6vh,60px)}
+  .au-page .tag-wrap.au-hero{padding:clamp(20px,6.5vh,56px) 20px clamp(38px,8vh,52px)}
+  .au-page .au-hero h1.tagline{font-size:clamp(1.55rem,min(5vw,7.5vh),3.2rem)}
+  .au-page .au-hero .tag-sub{margin-top:clamp(6px,1.5vh,14px)}
+  .au-page .au-card{margin-bottom:clamp(16px,4vh,30px)}
+  .au-page .au-main{padding:clamp(16px,3.5vh,28px) clamp(18px,4vw,32px)}
+  .au-page .atabs{margin-bottom:clamp(10px,2vh,18px)}
+  .au-page .aform{gap:clamp(8px,1.7vh,14px)}
+  @media (max-height:760px){
+    .au-page .au-hero .tag-sub{display:none}
+    .au-page .fld input{padding-top:8px;padding-bottom:8px}
+  }
+  @media (max-height:640px){
+    .au-page .au-hero .deco{display:none}
+    .au-page .tag-wrap.au-hero{padding-bottom:34px}
+  }
+  @media (max-height:520px){
+    .au-page .tag-wrap.au-hero{padding-top:14px;padding-bottom:30px}
+    .au-page .au-hero h1.tagline{font-size:1.4rem}
+  }
+
+  /* ===== Estado de envío en Historial de Compras ===== */
+  .ord-envios{list-style:none;display:flex;flex-direction:column;gap:6px;margin:12px 0;padding-top:10px;border-top:1px solid rgba(4,42,43,.08)}
+  .ord-envios li{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px 12px;font-size:.85rem;font-weight:600}
+  .ord-envios li>span:first-child{min-width:0;overflow-wrap:anywhere}

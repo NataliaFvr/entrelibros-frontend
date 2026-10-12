@@ -6,6 +6,7 @@ import useAhora from '../hooks/useAhora'
 import SummaryRow from './SummaryRow'
 import OrderLines from './OrderLines'
 import ConfirmLink from './ConfirmLink'
+import EstadoEnvios from './EstadoEnvios'
 
 const OrderCard = ({ pedido, libros }) => {
   const navigate = useNavigate()
@@ -29,6 +30,7 @@ const OrderCard = ({ pedido, libros }) => {
       <SummaryRow titulo="Envío" valor={fmt(pedido.env)} />
       <SummaryRow titulo="Total" valor={fmt(pedido.total)} total />
       <small className="ord-a">Envío a: {pedido.addr}</small>
+      {estado === 'SIMULADO_APROBADO' && <EstadoEnvios envios={pedido.envios} libros={libros} />}
       {pendiente && (
         <div className="rvf-b">
           <small className="dim">Reserva: te quedan {mmss(pedido.venceEn - ahora)} min</small>
