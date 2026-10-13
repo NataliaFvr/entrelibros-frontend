@@ -50,8 +50,10 @@ const Detalle = ({ libro, libros }) => {
     try {
       await publicar({ st, i: -Date.now(), u: `${user.nombre} ${user.apellido[0]}.`, t: texto, w: new Date().toLocaleDateString('es-AR') })
       toast(miResenia ? 'Opinión actualizada' : '¡Gracias por tu opinión!')
+      return true
     } catch (err) {
       toast(err.message) // con el back: ya reseñaste este ejemplar, compra sin pagar, etc.
+      return false
     }
   }
 

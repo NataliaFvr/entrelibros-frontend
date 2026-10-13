@@ -17,6 +17,7 @@ const AuthPage = ({ tab }) => {
 
   const irATab = (t) => navigate(t === 'login' ? '/ingresar' : '/registrarse', { replace: true, state })
   const listo = () => navigate(destino, { replace: true })
+  const olvide = (email) => navigate('/recuperar', { state: { ...state, email } })
   const pendiente = () => navigate('/confirmar', { replace: true, state })
 
   return (
@@ -26,7 +27,7 @@ const AuthPage = ({ tab }) => {
         <div className="au-main">
           <AuthTabs tab={tab} onCambiar={irATab} />
           {tab === 'login'
-            ? <LoginForm onListo={listo} onPendiente={pendiente} onIrARegistro={() => irATab('register')} />
+            ? <LoginForm onListo={listo} onPendiente={pendiente} onIrARegistro={() => irATab('register')} onOlvide={olvide} />
             : <RegisterForm onPendiente={pendiente} onIrALogin={() => irATab('login')} />}
         </div>
       </div>

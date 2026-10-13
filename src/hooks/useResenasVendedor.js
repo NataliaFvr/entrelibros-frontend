@@ -3,7 +3,7 @@ import { useAuth } from './useAuth'
 import { useCompra } from './useCompra'
 import { useLibros } from './useLibros'
 import { useToast } from './useToast'
-import { crearResenaVendedorApi, getResenasVendedorApi, modificarResenaVendedorApi } from '../api/resenasApi'
+import { crearResenaVendedorApi, eliminarResenaVendedorApi, getResenasVendedorApi, modificarResenaVendedorApi } from '../api/resenasApi'
 import { pagosDeOrdenApi } from '../api/comprasApi'
 import { mensajeError } from '../utils/errorApi'
 import { estadoPago } from '../utils/pedidos'
@@ -59,14 +59,30 @@ const useResenasVendedor = (tienda, idConocido = null) => {
       else await crearResenaVendedorApi(cuerpo)
       setResenias(await getResenasVendedorApi(idVendedor))
       toast(miResena ? 'Reseña actualizada' : '¡Gracias por calificar al vendedor!')
+      return true
     } catch (err) {
       toast(err.response ? mensajeError(err) : err.message)
+      return false
     }
   }
 
   const publicar = publicarApi
 
-  return { resenias, promedio, miResena, libroComprado, esPropio, puedeResenar, publicar }
+  // DELETE /resenas-vendedor/{id}: solo la puede borrar quien la escribió (el back lo valida)
+  const eliminar = async () => {
+    if (!miResena) return false
+    try {
+      await eliminarResenaVendedorApi(miResena.id)
+      setResenias(await getResenasVendedorApi(idVendedor))
+      toast('Reseña eliminada')
+      return true
+    } catch (err) {
+      toast(mensajeError(err))
+      return false
+    }
+  }
+
+  return { resenias, promedio, miResena, libroComprado, esPropio, puedeResenar, publicar, eliminar }
 }
 
 export default useResenasVendedor

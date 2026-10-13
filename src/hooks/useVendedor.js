@@ -3,19 +3,17 @@ import { useLibros } from './useLibros'
 import { useToast } from './useToast'
 import { enRevision, getVendedor } from '../api/vendedorApi'
 import { esModeracionError, modificarLibro } from '../api/moderacionApiExtra'
-import { darDeBajaApi, crearLibroApi, eliminarImagenApi, getImagenesApi, getImagenesConIdApi, reactivarApi, subirImagenApi } from '../api/librosApi'
+import { darDeBajaApi, crearLibroApi, getImagenesApi, reactivarApi } from '../api/librosApi'
+import { FotosError, sincronizarFotosApi } from '../api/fotosLibro'
 import { traerPublicaciones } from '../api/publicacionesApi'
 import useMisLibros from './useMisLibros'
 import { idsDeCategorias } from '../api/categoriasApi'
 import { solicitarVendedorApi } from '../api/usuariosApi'
-import { dataUrlAFile } from '../api/adaptadores'
 import { mensajeError } from '../utils/errorApi'
 import { aLibroRequest } from '../utils/libroRequest'
 import { categoriasDe } from '../utils/libro'
 
 const MENSAJE_REVISION = 'Tus cambios fueron enviados a revisión. El libro no se verá en el catálogo hasta que un administrador lo apruebe.'
-
-const esFotoNueva = (foto) => typeof foto === 'string' && foto.startsWith('data:')
 
 const useVendedor = (user) => {
   const toast = useToast()
@@ -50,15 +48,15 @@ const useVendedor = (user) => {
     cambiar({ ...vendedor, ...datos, estado: 'pendiente' }, 'Solicitud enviada')
   }
 
-  // Borra del servidor las fotos quitadas y sube las nuevas; el back todavía no permite persistir el reordenamiento.
-  const subirFotos = async (idLibro, fotos = []) => {
-    for (const img of await getImagenesConIdApi(idLibro)) {
-      if (!fotos.includes(img.url)) await eliminarImagenApi(img.id)
+  // Deja las fotos del servidor igual que el formulario (quitadas, nuevas y orden). Devuelve { imgs, aviso }:
+  // si algo falla, `aviso` explica qué pasó e `imgs` son las fotos que realmente quedaron guardadas.
+  const subirFotos = async (idLibro, fotos = [], respaldo = []) => {
+    try {
+      return { imgs: await sincronizarFotosApi(idLibro, fotos) }
+    } catch (err) {
+      const aviso = err instanceof FotosError ? err.message : mensajeError(err, 'libro')
+      return { imgs: await getImagenesApi(idLibro).catch(() => respaldo), aviso }
     }
-    for (let i = 0; i < fotos.length; i++) {
-      if (esFotoNueva(fotos[i])) await subirImagenApi(idLibro, await dataUrlAFile(fotos[i], `foto-${i + 1}`), i)
-    }
-    return getImagenesApi(idLibro)
   }
 
   // Publica un libro nuevo en el back: POST /libros (queda EN_REVISION) y después las fotos
@@ -71,14 +69,12 @@ const useVendedor = (user) => {
       toast(mensaje)
       return { error: mensaje }
     }
-    let imgs = []
-    let fallaronFotos = false
-    try { imgs = await subirFotos(creado.id, datos.imgs) } catch { fallaronFotos = true }
+    const { imgs, aviso } = await subirFotos(creado.id, datos.imgs)
     const resultado = cambiarLibros(
       (pub) => [{ ...datos, id: creado.id, imgs, estado: 'activo', mod: creado.estadoModeracion || 'EN_REVISION' }, ...pub],
       'Libro enviado a revisión del administrador',
     )
-    if (fallaronFotos) toast('El libro se creó, pero no pudimos subir las fotos. Editalo para volver a intentarlo.')
+    if (aviso) toast(`El libro se creó, pero las fotos no se guardaron bien. ${aviso} Editalo para volver a intentarlo.`)
     return resultado
   }
 
@@ -96,11 +92,15 @@ const useVendedor = (user) => {
     // PATCH /libros/{id}. El estado que manda el back es la verdad: solo si vuelve EN_REVISION se muestra como pendiente.
     let enviadoARevision = true
     let imgs = datos.imgs
+    let avisoFotos = ''
     try {
       const ids = await idsDeCategorias(categoriasDe(datos))
       const libro = await modificarLibro(idEditado, aLibroRequest(datos, ids.length ? ids : undefined))
       enviadoARevision = libro.estadoModeracion === 'EN_REVISION'
-      imgs = await subirFotos(idEditado, datos.imgs)
+      // El PATCH ya se aplicó: si fallan las fotos no es un error del guardado, se avisa aparte y se muestran las que quedaron
+      const fotos = await subirFotos(idEditado, datos.imgs, actual.imgs)
+      imgs = fotos.imgs
+      avisoFotos = fotos.aviso
     } catch (err) {
       const mensaje = esModeracionError(err) ? err.message : mensajeError(err, 'libro')
       toast(mensaje)
@@ -109,7 +109,7 @@ const useVendedor = (user) => {
     const nuevosDatos = { ...datos, imgs }
 
     const aceptado = (actual.mod || 'ACEPTADO') === 'ACEPTADO'
-    return cambiarLibros(
+    const resultado = cambiarLibros(
       (pub) => pub.map((p) => {
         if (p.id !== idEditado) return p
         if (!enviadoARevision) return { ...p, ...nuevosDatos, modC: '' } // el back ya aplicó los cambios: no hay nada que revisar
@@ -117,6 +117,8 @@ const useVendedor = (user) => {
       }),
       enviadoARevision ? MENSAJE_REVISION : 'Cambios guardados',
     )
+    if (avisoFotos) toast(`Guardamos los datos del libro, pero las fotos no se actualizaron bien. ${avisoFotos}`)
+    return resultado
   }
 
   const alternarBaja = async (id) => {

@@ -6,9 +6,9 @@ import ReviewForm from './ReviewForm'
 import ReviewItem from './ReviewItem'
 
 const ORDEN = {
-  hi: (x, y) => y.st - x.st || x.i - y.i,
-  lo: (x, y) => x.st - y.st || x.i - y.i,
-  new: (x, y) => x.i - y.i,
+  hi: (x, y) => y.st - x.st || y.i - x.i,
+  lo: (x, y) => x.st - y.st || y.i - x.i,
+  new: (x, y) => y.i - x.i, // las nuevas primero: el id crece con cada reseña
 }
 const POR_PAGINA = 5
 
@@ -31,8 +31,9 @@ const ReviewsSection = ({ resenias, promedio, miResenia, haComprado, onPublicar,
     setFormAbierto(true)
   }
 
-  const publicar = (puntos, texto) => {
-    onPublicar(puntos, texto)
+  // `onPublicar` devuelve false si el back lo rechazó: el formulario queda abierto para no perder lo escrito
+  const publicar = async (puntos, texto) => {
+    if ((await onPublicar(puntos, texto)) === false) return
     setFormAbierto(false)
     setEditando(null)
     setOrden('new')

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 
 // Botón de dos pasos: el primer toque pide confirmar, y si no se confirma en 4 s vuelve a lo normal
-const ConfirmLink = ({ texto, onConfirmar }) => {
+const ConfirmLink = ({ texto, onConfirmar, textoConfirmar = '¿Seguro? Tocá de nuevo para cancelar', className = 'lnk' }) => {
   const [armado, setArmado] = useState(false)
 
   useEffect(() => {
@@ -11,8 +11,8 @@ const ConfirmLink = ({ texto, onConfirmar }) => {
   }, [armado])
 
   return (
-    <button className="lnk" type="button" onClick={() => (armado ? onConfirmar() : setArmado(true))}>
-      {armado ? '¿Seguro? Tocá de nuevo para cancelar' : texto}
+    <button className={className} type="button" onClick={() => (armado ? onConfirmar() : setArmado(true))}>
+      {armado ? textoConfirmar : texto}
     </button>
   )
 }

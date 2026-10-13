@@ -6,7 +6,7 @@ import Aviso from './Aviso'
 import Field from './Field'
 import PasswordField from './PasswordField'
 
-const LoginForm = ({ onListo, onPendiente, onIrARegistro }) => {
+const LoginForm = ({ onListo, onPendiente, onIrARegistro, onOlvide }) => {
   const { login } = useAuth()
   const { valores, cambiar, errores, alSalir, validarTodo, error, tipoError, setError } = useFormulario({ ident: '', pw: '' }, validadoresLoginApi)
   const [enviando, setEnviando] = useState(false)
@@ -33,6 +33,7 @@ const LoginForm = ({ onListo, onPendiente, onIrARegistro }) => {
     <form className="aform" noValidate onSubmit={enviar}>
       <Field label="E-mail" name="ident" type="email" value={valores.ident} onChange={cambiar} onBlur={alSalir} error={errores.ident} autoComplete="email" />
       <PasswordField label="Contraseña" name="pw" value={valores.pw} onChange={cambiar} onBlur={alSalir} error={errores.pw} autoComplete="current-password" />
+      {onOlvide && <p className="alt-l forgot"><a href="#" onClick={(e) => { e.preventDefault(); onOlvide(valores.ident.trim()) }}>¿Olvidaste tu contraseña?</a></p>}
       <Aviso mensaje={error} tipo={tipoError} />
       <button className="btn main" type="submit" disabled={enviando}>{enviando ? 'Entrando…' : 'Entrar'}</button>
       <p className="alt-l">¿No tenés cuenta? <a href="#" onClick={(e) => { e.preventDefault(); onIrARegistro() }}>Registrate</a></p>

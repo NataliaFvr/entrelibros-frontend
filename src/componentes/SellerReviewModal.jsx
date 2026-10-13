@@ -34,7 +34,7 @@ const SellerReviewModal = ({ tienda, libro, inicial, onPublicar, onCerrar }) => 
           </label>
           <p className="ferr" role="alert">{error}</p>
           <div className="rvf-b">
-            <button className="btn main" type="submit">Publicar reseña</button>
+            <button className="btn main" type="submit">{inicial ? 'Guardar cambios' : 'Publicar reseña'}</button>
             <button className="btn alt" type="button" onClick={onCerrar}>Cancelar</button>
           </div>
         </form>

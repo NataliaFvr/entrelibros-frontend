@@ -1,4 +1,5 @@
 import Stars from './Stars'
+import ConfirmLink from './ConfirmLink'
 import { fechaCorta } from '../utils/format'
 
 const ReviewItem = ({ resenia, propia = false, onEditar, onEliminar }) => {
@@ -8,7 +9,7 @@ const ReviewItem = ({ resenia, propia = false, onEditar, onEliminar }) => {
       <div className="rv-n">{resenia.u}</div>
       {resenia.libro && <small className="rv-book">Sobre: {resenia.libro}</small>}
       <p>{resenia.t}</p>
-      {propia && <div className="rvf-b"><button className="more" type="button" onClick={onEditar}>Editar</button><button className="more" type="button" onClick={onEliminar}>Eliminar</button></div>}
+      {propia && <div className="rvf-b"><button className="more" type="button" onClick={onEditar}>Editar</button><ConfirmLink className="more" texto="Eliminar" textoConfirmar="¿Seguro? Tocá de nuevo para eliminar" onConfirmar={onEliminar} /></div>}
     </div>
   )
 }

@@ -99,11 +99,18 @@ export const eliminarImagenApi = async (idImagen) => (await api.delete(`/imagene
 export const getImagenesConIdApi = async (idLibro) => {
   try {
     const { data } = await api.get(`/imagenes-libro/libro/${idLibro}`)
-    return [...data].sort((a, b) => (a.orden ?? 0) - (b.orden ?? 0)).map((i) => ({ id: i.id, url: urlImagen(i.id) }))
+    return [...data].sort((a, b) => (a.orden ?? 0) - (b.orden ?? 0)).map((i) => ({ id: i.id, url: urlImagen(i.id), orden: i.orden ?? 0 }))
   } catch (err) {
     if (esListaVacia(err)) return []
     throw err
   }
+}
+
+// Baja el contenido de una foto ya guardada como File (para volver a subirla en otra posición: el back no tiene "reordenar")
+export const descargarImagenApi = async (idImagen, nombre = 'foto') => {
+  const { data } = await api.get(`/imagenes-libro/${idImagen}/contenido`, { responseType: 'blob' })
+  const tipo = data.type === 'image/png' ? 'image/png' : 'image/jpeg'
+  return new File([data], `${nombre}.${tipo === 'image/png' ? 'png' : 'jpg'}`, { type: tipo })
 }
 
 // POST /imagenes-libro (multipart: archivo, orden, idLibro). Solo VENDEDOR dueño del libro.

@@ -7,6 +7,7 @@ import BookDetailPage from "../pages/BookDetailPage"
 import AuthPage from "../pages/AuthPage"
 import AccountPage from "../pages/AccountPage"
 import VerifyPage from "../pages/VerifyPage"
+import RecoverPage from "../pages/RecoverPage"
 import CartPage from "../pages/CartPage"
 import PayPage from "../pages/PayPage"
 import SellerPage from "../pages/SellerPage"
@@ -47,6 +48,7 @@ const AppRoutes = () => {
         <Route path="/ingresar" element={<AuthPage tab="login" />} />
         <Route path="/registrarse" element={<AuthPage tab="register" />} />
         <Route path="/confirmar" element={<VerifyPage />} />
+        <Route path="/recuperar" element={<RecoverPage />} />
         {/* Solo compradores y vendedores: el administrador no tiene perfil de comprador y va a /admin */}
         <Route element={<RutaComprador />}>
           <Route path="/carrito" element={<CartPage />} />
