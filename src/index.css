@@ -687,10 +687,5 @@
     .au-page .au-hero h1.tagline{font-size:1.4rem}
   }
 
-  /* ===== Estado de envío en Historial de Compras ===== */
-  .ord-envios{list-style:none;display:flex;flex-direction:column;gap:6px;margin:12px 0;padding-top:10px;border-top:1px solid rgba(4,42,43,.08)}
-  .ord-envios li{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px 12px;font-size:.85rem;font-weight:600}
-  .ord-envios li>span:first-child{min-width:0;overflow-wrap:anywhere}
-
   /* ===== Recuperar contraseña ===== */
   .aform .forgot{text-align:right;margin-top:-6px}
