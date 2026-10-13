@@ -7,7 +7,7 @@ import { mensajeError } from '../utils/errorApi'
 // resultado antes de navegar (por ejemplo "Comprar ahora" espera a que el libro esté en el carrito).
 
 const useCarrito = (user, { esPropio, avisar }) => {
-  const idUsuario = user ? user.id : null
+  const idUsuario = user && user.rol !== 'ADMIN' ? user.id : null // el admin no tiene carrito
   const [carrito, setCarrito] = useState([])
   const ultimo = useRef([]) // último carrito conocido: las acciones en cola lo leen en vez de la copia vieja del render
   const cola = useRef(Promise.resolve())

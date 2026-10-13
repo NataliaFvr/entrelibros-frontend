@@ -28,7 +28,7 @@ const Detalle = ({ libro, libros }) => {
   const { resenias, promedio, miResenia, publicar, eliminar } = useResenias(libro.id)
 
   const { esPropio, rutaEdicion, enRevision } = useLibroPropio()
-  const esAdmin = useEsAdmin() // El administrador ve la ficha en modo lectura: sin comprar, guardar ni opinar.
+  const esAdmin = useEsAdmin() // El administrador ve la ficha en modo lectura: sin comprar, guardar ni opinar, pero puede eliminar opiniones.
 
   const esUsado = libroUsado(libro)
   const propio = esPropio(libro)
@@ -73,9 +73,9 @@ const Detalle = ({ libro, libros }) => {
     }
   }
 
-  const eliminarOpinion = async () => {
+  const eliminarOpinion = async (id) => {
     try {
-      await eliminar()
+      await eliminar(id)
       toast('Opinión eliminada')
     } catch (err) {
       toast(err.message)
@@ -139,6 +139,7 @@ const Detalle = ({ libro, libros }) => {
           onPublicar={publicarOpinion}
           onEliminar={eliminarOpinion}
           soloLectura={esAdmin}
+          moderar={esAdmin}
         />
       )}
 

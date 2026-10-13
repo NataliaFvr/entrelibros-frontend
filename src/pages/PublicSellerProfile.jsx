@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Navigate, useParams, useSearchParams } from 'react-router-dom'
 import useVendedorPublico from '../hooks/useVendedorPublico'
 import useResenasVendedor from '../hooks/useResenasVendedor'
+import useEsAdmin from '../hooks/useEsAdmin'
 import AccountTabs from '../componentes/AccountTabs'
 import Migas from '../componentes/Migas'
 import MiniDeco from '../componentes/MiniDeco'
@@ -13,6 +14,7 @@ import NotFoundPage from './NotFoundPage'
 
 const Perfil = ({ vendedor, libros }) => {
   const { resenias, promedio, miResena, libroComprado, esPropio, puedeResenar, publicar, eliminar } = useResenasVendedor(vendedor.tienda, vendedor.id)
+  const esAdmin = useEsAdmin()
   const [modal, setModal] = useState(false)
   const [params, setParams] = useSearchParams()
   const tab = params.get('tab') === 'resenias' ? 'resenias' : 'libros' // /vendedor/:id?tab=resenias
@@ -30,7 +32,7 @@ const Perfil = ({ vendedor, libros }) => {
       <AccountTabs pestanias={pestanias} tab={tab} onIr={(t) => setParams(t === 'libros' ? {} : { tab: t }, { replace: true })} />
       {tab === 'libros'
         ? <SellerCatalog tienda={vendedor.tienda} libros={libros} />
-        : <SellerReviews resenias={resenias} promedio={promedio} miResena={miResena} esPropio={esPropio} puedeResenar={puedeResenar} onEscribir={escribir} onEliminar={eliminar} />}
+        : <SellerReviews resenias={resenias} promedio={promedio} miResena={miResena} esPropio={esPropio} puedeResenar={puedeResenar} onEscribir={escribir} onEliminar={eliminar} moderar={esAdmin} />}
       <MiniDeco />
       {modal && puedeResenar && (
         <SellerReviewModal tienda={vendedor.tienda} libro={libroComprado} inicial={miResena} onPublicar={enviar} onCerrar={() => setModal(false)} />

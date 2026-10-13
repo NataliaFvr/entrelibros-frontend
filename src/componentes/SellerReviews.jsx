@@ -7,7 +7,7 @@ const POR_PAGINA = 5
 
 // Módulo de reseñas de compradores: resumen por estrellas + listado.
 // El botón de escribir solo aparece si `puedeResenar`; el dueño de la tienda ve un aviso en su lugar.
-const SellerReviews = ({ resenias, promedio, miResena, esPropio, puedeResenar, onEscribir, onEliminar }) => {
+const SellerReviews = ({ resenias, promedio, miResena, esPropio, puedeResenar, onEscribir, onEliminar, moderar = false }) => {
   const [cantidad, setCantidad] = useState(POR_PAGINA)
 
   return (
@@ -30,7 +30,7 @@ const SellerReviews = ({ resenias, promedio, miResena, esPropio, puedeResenar, o
           {!esPropio && !puedeResenar && (
             <p className="note" role="note">Solo los compradores que hayan adquirido un libro de este vendedor pueden dejar una reseña.</p>
           )}
-          {resenias.slice(0, cantidad).map((r) => <SellerReviewItem key={r.id} resenia={r} propia={miResena?.id === r.id}
+          {resenias.slice(0, cantidad).map((r) => <SellerReviewItem key={r.id} resenia={r} propia={miResena?.id === r.id} moderable={moderar}
             onEditar={puedeResenar ? onEscribir : undefined} onEliminar={onEliminar} />)}
           {resenias.length > cantidad && (
             <button className="more" type="button" onClick={() => setCantidad(cantidad + POR_PAGINA)}>Ver más reseñas</button>

@@ -14,7 +14,7 @@ const POR_PAGINA = 5
 
 // Solo puede opinar quien compró el libro (`haComprado`: sesión iniciada + pedido pagado con ese libro).
 // No se renderiza para ejemplares usados: las opiniones son de la obra, no de la publicación de un vendedor.
-const ReviewsSection = ({ resenias, promedio, miResenia, haComprado, onPublicar, onEliminar, soloLectura = false }) => {
+const ReviewsSection = ({ resenias, promedio, miResenia, haComprado, onPublicar, onEliminar, soloLectura = false, moderar = false }) => {
   const toast = useToast()
   const [orden, setOrden] = useState('new')
   const [filtro, setFiltro] = useState('')
@@ -51,7 +51,7 @@ const ReviewsSection = ({ resenias, promedio, miResenia, haComprado, onPublicar,
           {formAbierto && <ReviewForm key={editando?.id || 'nueva'} inicial={editando} onPublicar={publicar} onCancelar={() => { setFormAbierto(false); setEditando(null) }} />}
           <div>
             {visibles.slice(0, cantidad).map((r) => <ReviewItem key={`${r.u}-${r.i}`} resenia={r}
-              propia={!soloLectura && miResenia?.id === r.id} onEditar={() => { setEditando(r); setFormAbierto(true) }} onEliminar={onEliminar} />)}
+              propia={!soloLectura && miResenia?.id === r.id} moderable={moderar} onEditar={() => { setEditando(r); setFormAbierto(true) }} onEliminar={onEliminar} />)}
             {!resenias.length && (
               <div className="empty" style={{ marginTop: 12 }}>
                 <h3>Este libro todavía no tiene opiniones</h3>

@@ -39,10 +39,11 @@ const useResenias = (libroId) => {
     }
   }
 
-  const eliminar = async () => {
-    if (!miResenia) return
+  // Sin id borra la propia; el admin pasa el id de cualquier reseña
+  const eliminar = async (id = miResenia?.id) => {
+    if (!id) return
     try {
-      await eliminarResenaLibroApi(miResenia.id)
+      await eliminarResenaLibroApi(id)
       setBase(await getResenias(libroId))
     } catch (err) {
       throw new Error(mensajeError(err))

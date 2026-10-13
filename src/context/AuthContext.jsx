@@ -22,7 +22,7 @@ const AuthProvider = ({ children }) => {
 
   const entrar = (u, saludo) => {
     setUser(u)
-    listarMarcapaginasApi().then(setMarks).catch(() => setMarks([]))
+    setMarks([]) // los trae el efecto de abajo al cambiar de usuario
     setDirecciones([])
     toast(saludo || `¡Hola, ${u.nombre}!`)
   }
@@ -31,14 +31,15 @@ const AuthProvider = ({ children }) => {
     if (!user) return undefined
     let vigente = true
     traerUsuarioApi(user.id).then((u) => { if (vigente) setUser(u) }).catch(() => {})
-    listarMarcapaginasApi().then((ids) => { if (vigente) setMarks(ids) }).catch(() => {})
+    // El admin no compra: no tiene marcapáginas, direcciones, carrito ni pedidos
+    if (user.rol !== 'ADMIN') listarMarcapaginasApi().then((ids) => { if (vigente) setMarks(ids) }).catch(() => {})
     return () => { vigente = false }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id])
 
   const claveCuenta = user ? `${user.id ?? ''}|${user.nombreUsuario}` : null
   useEffect(() => {
-    if (!claveCuenta) return undefined
+    if (!claveCuenta || user.rol === 'ADMIN') return undefined
     let vigente = true
     servicioDirecciones.listar(user).then((lista) => { if (vigente) setDirecciones(lista) }).catch(() => {})
     return () => { vigente = false }

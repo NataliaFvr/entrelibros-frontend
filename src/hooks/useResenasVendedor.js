@@ -68,11 +68,12 @@ const useResenasVendedor = (tienda, idConocido = null) => {
 
   const publicar = publicarApi
 
-  // DELETE /resenas-vendedor/{id}: solo la puede borrar quien la escribió (el back lo valida)
-  const eliminar = async () => {
-    if (!miResena) return false
+  // DELETE /resenas-vendedor/{id}: la borra quien la escribió o un admin (el back lo valida).
+  // Sin id borra la propia; el admin pasa el id de cualquier reseña.
+  const eliminar = async (id = miResena?.id) => {
+    if (!id) return false
     try {
-      await eliminarResenaVendedorApi(miResena.id)
+      await eliminarResenaVendedorApi(id)
       setResenias(await getResenasVendedorApi(idVendedor))
       toast('Reseña eliminada')
       return true

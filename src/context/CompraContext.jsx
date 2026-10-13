@@ -34,7 +34,7 @@ const CompraProvider = ({ children }) => {
   const refrescarPedidos = useCallback(async () => {
     try { setPedidos(await listarPedidosApi()) } catch { /* se queda con lo que había */ }
   }, [])
-  const idApi = user ? user.id : null
+  const idApi = user && user.rol !== 'ADMIN' ? user.id : null // el admin no tiene compras
   useEffect(() => {
     if (!idApi) return undefined
     let vigente = true
