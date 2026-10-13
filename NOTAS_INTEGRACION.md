@@ -9,7 +9,7 @@
 | `PATCH /direcciones/{id}/principal` + `GET /direcciones` | Persiste y devuelve la dirección principal |
 | `GET /categorias` + `GET /categorias/{id}/imagen` | Carga categorías con `tieneImagen` y sus imágenes |
 
-El backend calcula el envío por **zona** (CABA / PROVINCIA_BA / RESTO_PAIS, `GET /envios`) y el checkout usa ese importe. `POST /carrito/items` siempre crea una fila nueva (no suma): el front usa `PATCH` si el libro ya está en el carrito.
+El backend ofrece tarifas por **misma provincia / distinta provincia** (`GET /envios`). En el checkout calcula un costo por vendedor y devuelve el importe definitivo en la orden. La web no ofrece seguimiento ni estados de envío: los estados visibles de una compra corresponden al pago (pendiente, aprobado, cancelado, rechazado o vencido). `POST /carrito/items` siempre crea una fila nueva (no suma): el front usa `PATCH` si el libro ya está en el carrito.
 
 ## 2. Integración actual
 `VITE_API_URL` (archivo `.env`, ver `.env.example`) configura la URL del backend.

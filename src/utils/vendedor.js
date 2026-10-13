@@ -6,7 +6,7 @@ export const slugVendedor = (tienda) => norm(tienda).replace(/[^a-z0-9]+/g, '-')
 export const rutaVendedor = (tienda, id = null) => `/vendedor/${id ?? slugVendedor(tienda)}`
 
 // Tiendas del catálogo cuyo nombre contiene `texto` (sin tildes ni mayúsculas), con su cantidad de libros.
-// Las que más libros tienen van primero. Back: GET /vendedores?q=
+// Las tiendas se derivan de los libros cargados en el catálogo; las que más libros tienen van primero
 export const buscarTiendas = (libros, texto) => {
   const q = norm(texto.trim())
   if (!q) return []

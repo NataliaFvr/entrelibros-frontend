@@ -7,51 +7,105 @@ import { getResenasVendedorApi } from '../api/resenasApi'
 import Stars from './Stars'
 import './SellerPanel.css'
 
-// Reputación del vendedor. En un usado (`destacar`) es lo primero que se ve, porque ahí no hay opiniones del libro.
+// Reputación del vendedor. En un usado es lo primero que se ve,
+// porque ahí no hay opiniones del libro.
 const Reputacion = ({ promedio, cantidad, destacar }) => {
-  if (!cantidad) return <div className="sv-meta">Sin reseñas de compradores todavía</div>
+  if (!cantidad) {
+    return <div className="sv-meta">Sin reseñas de compradores todavía</div>
+  }
+
   return (
     <div className={destacar ? 'sv-rep destacada' : 'sv-meta'}>
       {destacar ? (
         <>
           <b className="fr">{promedio.toFixed(1)}</b>
           <Stars value={promedio} />
-          <small>{cantidad} {plural(cantidad, 'reseña', 'reseñas')} de compradores</small>
+          <small>
+            {cantidad} {plural(cantidad, 'reseña', 'reseñas')} de compradores
+          </small>
         </>
-      ) : `★ ${promedio.toFixed(1)} · ${cantidad} ${plural(cantidad, 'reseña', 'reseñas')} de compradores`}
+      ) : (
+        `★ ${promedio.toFixed(1)} · ${cantidad} ${plural(cantidad, 'reseña', 'reseñas')} de compradores`
+      )}
     </div>
   )
 }
 
-// `propio`: el libro es de quien mira la ficha -> en lugar de "ver más libros" se lo lleva a gestionar su tienda
-const SellerBox = ({ vendedor, vendedorId = null, cantidad, destacarReputacion = false, propio = false, enlazar = true }) => {
+// Si el libro es propio, ofrece ir a gestionar la tienda.
+const SellerBox = ({
+  vendedor,
+  vendedorId = null,
+  cantidad,
+  destacarReputacion = false,
+  propio = false,
+}) => {
   const navigate = useNavigate()
   const [resenias, setResenias] = useState([])
+
   useEffect(() => {
     let vigente = true
+
     if (vendedorId == null) return undefined
-    getResenasVendedorApi(vendedorId).then((r) => { if (vigente) setResenias(r) }).catch(() => {})
-    return () => { vigente = false }
+
+    getResenasVendedorApi(vendedorId)
+      .then((r) => {
+        if (vigente) setResenias(r)
+      })
+      .catch(() => {})
+
+    return () => {
+      vigente = false
+    }
   }, [vendedorId])
+
   const rep = {
-    promedio: resenias.length ? resenias.reduce((suma, r) => suma + r.st, 0) / resenias.length : 0,
+    promedio: resenias.length
+      ? resenias.reduce((suma, r) => suma + r.st, 0) / resenias.length
+      : 0,
     cantidad: resenias.length,
   }
+
   return (
     <div className="buy">
       <div className="sv-head">
         <span className="sv-av">{initials(vendedor, 2)}</span>
-        <div><small>{propio ? 'Tu publicación' : 'Vendido por'}</small><b>{enlazar ? <Link to={rutaVendedor(vendedor, vendedorId)} className="lnk">{vendedor}</Link> : vendedor}</b></div>
+        <div>
+          <small>{propio ? 'Tu publicación' : 'Vendido por'}</small>
+          <b>
+            <Link to={rutaVendedor(vendedor, vendedorId)} className="lnk">
+              {vendedor}
+            </Link>
+          </b>
+        </div>
       </div>
+
       <Reputacion {...rep} destacar={destacarReputacion} />
-      <div className="sv-meta">{cantidad} {plural(cantidad, 'libro publicado', 'libros publicados')}</div>
+
+      <div className="sv-meta">
+        {cantidad} {plural(cantidad, 'libro publicado', 'libros publicados')}
+      </div>
+
       {propio ? (
         <>
-          <p className="note sv-preview">Estás viendo la vista de tu propia publicación.</p>
-          <button className="btn main" type="button" onClick={() => navigate('/vender')}>Ir a gestionar mi tienda</button>
+          <p className="note sv-preview">
+            Estás viendo la vista de tu propia publicación.
+          </p>
+          <button
+            className="btn main"
+            type="button"
+            onClick={() => navigate('/vender')}
+          >
+            Ir a gestionar mi tienda
+          </button>
         </>
       ) : (
-        <button className="btn alt" type="button" onClick={() => navigate(`/libros?vendedor=${encodeURIComponent(vendedor)}`)}>
+        <button
+          className="btn alt"
+          type="button"
+          onClick={() =>
+            navigate(`/libros?vendedor=${encodeURIComponent(vendedor)}`)
+          }
+        >
           Ver más libros del vendedor
         </button>
       )}
