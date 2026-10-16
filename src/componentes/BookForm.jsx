@@ -35,6 +35,12 @@ const BookForm = ({ libro = {}, onGuardar, onCancelar }) => {
   const enviar = async (e) => {
     e.preventDefault()
     if (enviando) return
+    // El libro se crea primero y las fotos se suben después, así que la foto obligatoria se pide acá:
+    // sin ella el administrador no lo puede aprobar
+    if (!imagenes.fotos.length) {
+      setError('Agregá al menos una foto del libro.')
+      return
+    }
     setError('')
     setEnviando(true)
     try {
