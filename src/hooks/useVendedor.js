@@ -11,6 +11,7 @@ import { idsDeCategorias } from '../api/categoriasApi'
 import { solicitarVendedorApi } from '../api/usuariosApi'
 import { mensajeError } from '../utils/errorApi'
 import { aLibroRequest } from '../utils/libroRequest'
+import { aLibroFront } from '../api/adaptadores'
 import { categoriasDe } from '../utils/libro'
 
 const MENSAJE_REVISION = 'Tus cambios fueron enviados a revisión. El libro no se verá en el catálogo hasta que un administrador lo apruebe.'
@@ -71,7 +72,8 @@ const useVendedor = (user) => {
     }
     const { imgs, aviso } = await subirFotos(creado.id, datos.imgs)
     const resultado = cambiarLibros(
-      (pub) => [{ ...datos, id: creado.id, imgs, estado: 'activo', mod: creado.estadoModeracion || 'EN_REVISION' }, ...pub],
+      // La fila nueva sale de lo que devolvió el back (precio final incluido), no del formulario
+      (pub) => [{ ...datos, ...aLibroFront(creado), imgs, estado: 'activo', mod: creado.estadoModeracion || 'EN_REVISION' }, ...pub],
       'Libro enviado a revisión del administrador',
     )
     if (aviso) toast(`El libro se creó, pero las fotos no se guardaron bien. ${aviso} Editalo para volver a intentarlo.`)
