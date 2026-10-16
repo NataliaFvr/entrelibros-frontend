@@ -1,27 +1,22 @@
 import { useState } from 'react'
 import { useAuth } from '../hooks/useAuth'
 import useFormulario from '../hooks/useFormulario'
-import { CAMPOS_CUENTA, validadoresCuenta } from '../utils/validaciones'
+import { CAMPOS_CUENTA } from '../utils/camposApi'
 import { mapearCampos } from '../utils/errorApi'
 import Aviso from './Aviso'
 import Field from './Field'
 import PasswordField from './PasswordField'
 
 const INICIAL = { nombre: '', apellido: '', nombreUsuario: '', email: '', pw: '', pw2: '' }
-const VALIDADORES = validadoresCuenta()
-// La contraseña se valida mientras se escribe; el resto, al salir del campo (y desde entonces, en vivo)
-const EN_VIVO = ['pw', 'pw2']
 
 const RegisterForm = ({ onPendiente, onIrALogin }) => {
   const { registrar } = useAuth()
-  const { valores, cambiar, errores, alSalir, validarTodo, setErroresCampos, error, tipoError, setError } = useFormulario(INICIAL, VALIDADORES, { enVivo: EN_VIVO })
+  const { valores, cambiar, errores, setErroresCampos, error, tipoError, setError } = useFormulario(INICIAL)
   const [enviando, setEnviando] = useState(false)
 
   const enviar = async (e) => {
     e.preventDefault()
     if (enviando) return
-    const malos = validarTodo(e.currentTarget)
-    if (Object.keys(malos).length) return setError('Revisá los campos marcados antes de continuar.')
     setError('')
     setEnviando(true)
     try {
@@ -36,7 +31,7 @@ const RegisterForm = ({ onPendiente, onIrALogin }) => {
     }
   }
 
-  const props = (nombre) => ({ name: nombre, value: valores[nombre], onChange: cambiar, onBlur: alSalir, error: errores[nombre] })
+  const props = (nombre) => ({ name: nombre, value: valores[nombre], onChange: cambiar, error: errores[nombre] })
 
   return (
     <form className="aform" noValidate onSubmit={enviar}>

@@ -8,7 +8,7 @@ import { useCompra } from '../hooks/useCompra'
 import useLibroPropio from '../hooks/useLibroPropio'
 import useEsAdmin from '../hooks/useEsAdmin'
 import { posicionBestseller } from '../utils/filtrarLibros'
-import { categoriasDe, esUsado as libroUsado } from '../utils/libro'
+import { categoriasDe, esUsado } from '../utils/libro'
 import BookBreadcrumb from '../componentes/BookBreadcrumb'
 import Gallery from '../componentes/Gallery'
 import BookInfo from '../componentes/BookInfo'
@@ -24,13 +24,13 @@ const Detalle = ({ libro, libros }) => {
   const navigate = useNavigate()
   const toast = useToast()
   const { user, requiereLogin, marks, toggleMark } = useAuth()
-  const { agregar, compro } = useCompra()
-  const { resenias, promedio, miResenia, publicar, eliminar } = useResenias(libro.id)
+  const { agregar } = useCompra()
+  const { resenias, promedio, miResenia, puedeResenar, motivo, publicar, eliminar } = useResenias(libro.id)
 
-  const { esPropio, rutaEdicion, enRevision } = useLibroPropio()
+  const { esPropio } = useLibroPropio()
   const esAdmin = useEsAdmin() // El administrador ve la ficha en modo lectura: sin comprar, guardar ni opinar, pero puede eliminar opiniones.
 
-  const esUsado = libroUsado(libro)
+  const usado = esUsado(libro)
   const propio = esPropio(libro)
 
   const { rank, delVendedor, mismoAutor, mismaCategoria } = useMemo(() => {
@@ -49,11 +49,11 @@ const Detalle = ({ libro, libros }) => {
   }, [libros, libro])
 
   const guardar = () => {
-    if (!propio && !requiereLogin('fav')) toggleMark(libro.id)
+    if (!requiereLogin('fav')) toggleMark(libro.id)
   }
 
   const alCarrito = () => {
-    if (!propio && !requiereLogin('cart')) agregar(libro)
+    if (!requiereLogin('cart')) agregar(libro)
   }
 
   const publicarOpinion = async (st, texto) => {
@@ -83,7 +83,7 @@ const Detalle = ({ libro, libros }) => {
   }
 
   const comprar = async () => {
-    if (propio || requiereLogin('cart')) return
+    if (requiereLogin('cart')) return
 
     // Solo suma el libro al carrito; el marcapáginas se limpia cuando se aprueba el pago.
     if (await agregar(libro)) navigate('/carrito')
@@ -101,7 +101,7 @@ const Detalle = ({ libro, libros }) => {
           rank={rank}
           resumen={{ promedio, cantidad: resenias.length }}
           guardado={marks.includes(libro.id)}
-          onGuardar={propio || esAdmin ? undefined : guardar}
+          onGuardar={esAdmin ? undefined : guardar}
         />
 
         <div className="buy-col">
@@ -110,17 +110,14 @@ const Detalle = ({ libro, libros }) => {
             stock={libro.stock}
             onComprar={comprar}
             onCarrito={alCarrito}
-            propio={propio}
             soloLectura={esAdmin}
-            onEditar={() => navigate(rutaEdicion(libro))}
-            editarDeshabilitado={propio && enRevision(libro)}
           />
 
           <SellerBox
             vendedor={libro.v}
             vendedorId={libro.vId}
             cantidad={delVendedor.length}
-            destacarReputacion={esUsado}
+            destacarReputacion={usado}
             propio={propio}
           />
         </div>
@@ -129,19 +126,17 @@ const Detalle = ({ libro, libros }) => {
       <SpecSection libro={libro} />
       <DescriptionSection libro={libro} />
 
-      {/* Las opiniones son de la obra: un ejemplar usado no tiene sección de opiniones */}
-      {!esUsado && (
-        <ReviewsSection
-          resenias={resenias}
-          promedio={promedio}
-          miResenia={miResenia}
-          haComprado={Boolean(user) && compro(libro.id)}
-          onPublicar={publicarOpinion}
-          onEliminar={eliminarOpinion}
-          soloLectura={esAdmin}
-          moderar={esAdmin}
-        />
-      )}
+      <ReviewsSection
+        resenias={resenias}
+        promedio={promedio}
+        miResenia={miResenia}
+        puedeResenar={puedeResenar}
+        motivo={motivo}
+        onPublicar={publicarOpinion}
+        onEliminar={eliminarOpinion}
+        soloLectura={esAdmin}
+        moderar={esAdmin}
+      />
 
       <RelatedSection titulo={`Más de ${libro.a}`} libros={mismoAutor} />
       <RelatedSection titulo={`Más de ${libro.cat}`} libros={mismaCategoria} />

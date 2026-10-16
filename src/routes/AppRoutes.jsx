@@ -1,35 +1,40 @@
+import { lazy, Suspense } from 'react'
 import { Routes, Route } from 'react-router-dom'
 import Layout from '../componentes/Layout'
 import RutaComprador from '../componentes/RutaComprador'
-import HomePage from '../pages/HomePage'
-import CatalogPage from '../pages/CatalogPage'
-import BookDetailPage from '../pages/BookDetailPage'
-import AuthPage from '../pages/AuthPage'
-import AccountPage from '../pages/AccountPage'
-import VerifyPage from '../pages/VerifyPage'
-import RecoverPage from '../pages/RecoverPage'
-import CartPage from '../pages/CartPage'
-import PayPage from '../pages/PayPage'
-import SellerPage from '../pages/SellerPage'
 import AdminLayout from '../componentes/AdminLayout'
-import AdminResumenPage from '../pages/AdminResumenPage'
-import AdminModeracionPage from '../pages/AdminModeracionPage'
-import AdminUsuariosPage from '../pages/AdminUsuariosPage'
-import AdminCategoriasPage from '../pages/AdminCategoriasPage'
-import AdminEnviosPage from '../pages/AdminEnviosPage'
-import AdminOrdenesPage from '../pages/AdminOrdenesPage'
-import AdminPagosPage from '../pages/AdminPagosPage'
-import AboutPage from '../pages/AboutPage'
 import { NOSOTROS } from '../data/nosotros'
-import HelpPage from '../pages/HelpPage'
-import FaqPage from '../pages/FaqPage'
-import ContactPage from '../pages/ContactPage'
-import ShippingPolicyPage from '../pages/ShippingPolicyPage'
-import PublicSellerProfile from '../pages/PublicSellerProfile'
-import NotFoundPage from '../pages/NotFoundPage'
+
+// Cada página se descarga recién al navegar a su ruta. Así el catálogo público no
+// arrastra el código de cuenta, ventas y administración en su primer render.
+const HomePage = lazy(() => import('../pages/HomePage'))
+const CatalogPage = lazy(() => import('../pages/CatalogPage'))
+const BookDetailPage = lazy(() => import('../pages/BookDetailPage'))
+const AuthPage = lazy(() => import('../pages/AuthPage'))
+const AccountPage = lazy(() => import('../pages/AccountPage'))
+const VerifyPage = lazy(() => import('../pages/VerifyPage'))
+const RecoverPage = lazy(() => import('../pages/RecoverPage'))
+const CartPage = lazy(() => import('../pages/CartPage'))
+const PayPage = lazy(() => import('../pages/PayPage'))
+const SellerPage = lazy(() => import('../pages/SellerPage'))
+const AdminResumenPage = lazy(() => import('../pages/AdminResumenPage'))
+const AdminModeracionPage = lazy(() => import('../pages/AdminModeracionPage'))
+const AdminUsuariosPage = lazy(() => import('../pages/AdminUsuariosPage'))
+const AdminCategoriasPage = lazy(() => import('../pages/AdminCategoriasPage'))
+const AdminEnviosPage = lazy(() => import('../pages/AdminEnviosPage'))
+const AdminOrdenesPage = lazy(() => import('../pages/AdminOrdenesPage'))
+const AdminPagosPage = lazy(() => import('../pages/AdminPagosPage'))
+const AboutPage = lazy(() => import('../pages/AboutPage'))
+const HelpPage = lazy(() => import('../pages/HelpPage'))
+const FaqPage = lazy(() => import('../pages/FaqPage'))
+const ContactPage = lazy(() => import('../pages/ContactPage'))
+const ShippingPolicyPage = lazy(() => import('../pages/ShippingPolicyPage'))
+const PublicSellerProfile = lazy(() => import('../pages/PublicSellerProfile'))
+const NotFoundPage = lazy(() => import('../pages/NotFoundPage'))
 
 const AppRoutes = () => {
   return (
+    <Suspense fallback={<main className="usr" aria-busy="true" />}>
     <Routes>
       <Route path="/admin" element={<AdminLayout />}>
         <Route index element={<AdminResumenPage />} />
@@ -71,6 +76,7 @@ const AppRoutes = () => {
         <Route path="*" element={<NotFoundPage />} />
       </Route>
     </Routes>
+    </Suspense>
   )
 }
 

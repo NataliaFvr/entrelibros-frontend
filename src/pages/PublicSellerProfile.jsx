@@ -16,14 +16,13 @@ const Perfil = ({ vendedor, libros }) => {
     resenias,
     promedio,
     miResena,
-    libroComprado,
     esPropio,
     esAdmin,
     puedeResenar,
+    motivo,
     publicar,
     eliminar,
   } = useResenasVendedor(vendedor.tienda, vendedor.id)
-
   const [modal, setModal] = useState(false)
   const [params, setParams] = useSearchParams()
   const tab = params.get('tab') === 'resenias' ? 'resenias' : 'libros'
@@ -35,56 +34,43 @@ const Perfil = ({ vendedor, libros }) => {
   const escribir = () => {
     if (puedeResenar) setModal(true)
   }
-
   const enviar = async (puntos, texto) => {
     if (await publicar(puntos, texto)) setModal(false)
   }
 
   return (
     <main className="usr">
-      <Migas
-        items={[
-          { label: 'Libros', to: '/libros' },
-          { label: vendedor.tienda },
-        ]}
-      />
-
+      <Migas items={[{ label: 'Libros', to: '/libros' }, { label: vendedor.tienda }]} />
       <SellerPublicHeader
         vendedor={vendedor}
         promedio={promedio}
         cantidad={resenias.length}
         publicados={libros.length}
       />
-
       <AccountTabs
         pestanias={pestanias}
         tab={tab}
-        onIr={(t) =>
-          setParams(t === 'libros' ? {} : { tab: t }, { replace: true })
-        }
+        onIr={(nuevaTab) => setParams(nuevaTab === 'libros' ? {} : { tab: nuevaTab }, { replace: true })}
       />
-
-      {tab === 'libros' ? (
-        <SellerCatalog tienda={vendedor.tienda} libros={libros} />
-      ) : (
-        <SellerReviews
-          resenias={resenias}
-          promedio={promedio}
-          miResena={miResena}
-          esPropio={esPropio}
-          esAdmin={esAdmin}
-          puedeResenar={puedeResenar}
-          onEscribir={escribir}
-          onEliminar={eliminar}
-        />
-      )}
-
+      {tab === 'libros'
+        ? <SellerCatalog tienda={vendedor.tienda} libros={libros} />
+        : (
+          <SellerReviews
+            resenias={resenias}
+            promedio={promedio}
+            miResena={miResena}
+            esPropio={esPropio}
+            esAdmin={esAdmin}
+            puedeResenar={puedeResenar}
+            motivo={motivo}
+            onEscribir={escribir}
+            onEliminar={eliminar}
+          />
+        )}
       <MiniDeco />
-
       {modal && puedeResenar && (
         <SellerReviewModal
           tienda={vendedor.tienda}
-          libro={libroComprado}
           inicial={miResena}
           onPublicar={enviar}
           onCerrar={() => setModal(false)}
@@ -99,10 +85,7 @@ const PublicSellerProfile = () => {
   const { id } = useParams()
   const { cargando, vendedor, libros, redirigirA } = useVendedorPublico(id)
 
-  if (redirigirA != null) {
-    return <Navigate to={`/vendedor/${redirigirA}`} replace />
-  }
-
+  if (redirigirA != null) return <Navigate to={`/vendedor/${redirigirA}`} replace />
   if (cargando) return <main className="usr" />
   if (!vendedor) return <NotFoundPage />
 

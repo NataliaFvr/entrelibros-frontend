@@ -7,8 +7,6 @@ export const ETIQUETAS_PAGO = {
   VENCIDO: ['Reserva vencida', 'off'],
 }
 
-// Estado real del pago: un pendiente con la reserva pasada cuenta como vencido
-export const estadoPago = (pedido, ahora = Date.now()) => {
-  const pago = pedido.pago || 'SIMULADO_APROBADO'
-  return pago === 'PENDIENTE' && pedido.venceEn && pedido.venceEn <= ahora ? 'VENCIDO' : pago
-}
+// El estado solo lo informa el backend. La cuenta regresiva se muestra como información visual,
+// pero no cambia localmente si una reserva sigue pendiente o ya venció.
+export const estadoPago = (pedido) => pedido.pago || 'SIMULADO_APROBADO'

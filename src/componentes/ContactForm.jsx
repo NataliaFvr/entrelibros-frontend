@@ -1,6 +1,5 @@
 import useFormulario from '../hooks/useFormulario'
 import { useToast } from '../hooks/useToast'
-import { MENSAJE_MAX, validadoresContacto } from '../utils/validaciones'
 import { enviarContactoApi } from '../api/cuentaApi'
 import { mapearCampos, mensajeError, normalizarError } from '../utils/errorApi'
 import Field from './Field'
@@ -12,20 +11,28 @@ const DEPARTAMENTOS = ['Compras', 'Ventas', 'Envíos', 'Mi cuenta', 'Otro']
 
 const Obligatorio = ({ children }) => <>{children} <span className="req">*</span></>
 
-// Formulario de contacto. POST /contacto recibe nombre, email y mensaje; los datos adicionales se agregan al texto.
+// Formulario de contacto. El backend recibe y valida todos los campos del formulario.
 const ContactForm = () => {
   const toast = useToast()
-  const { valores, cambiar, error, setError, reiniciar, errores, alSalir, validarTodo, setErroresCampos } = useFormulario(INICIAL, validadoresContacto)
-  const campo = (n) => ({ name: n, value: valores[n], onChange: cambiar, onBlur: alSalir, error: errores[n] })
+  const { valores, cambiar, error, setError, reiniciar, errores, setErroresCampos } = useFormulario(INICIAL)
+  const campo = (n) => ({ name: n, value: valores[n], onChange: cambiar, error: errores[n] })
 
   const enviar = async (e) => {
     e.preventDefault()
-    if (Object.keys(validarTodo(e.currentTarget)).length) return setError('')
-    const contacto = [valores.area || valores.tel ? `Tel: ${`${valores.area} ${valores.tel}`.trim()}` : '', `Departamento: ${valores.depto}`].filter(Boolean).join(' · ')
     try {
-      await enviarContactoApi({ nombre: `${valores.nombre} ${valores.apellido}`.trim(), email: valores.email.trim(), mensaje: `${valores.msg.trim()}\n\n${contacto}` })
+      await enviarContactoApi({
+        nombre: valores.nombre.trim(),
+        apellido: valores.apellido.trim(),
+        email: valores.email.trim(),
+        area: valores.area.trim(),
+        telefono: valores.tel.trim(),
+        departamento: valores.depto,
+        mensaje: valores.msg.trim(),
+      })
     } catch (err) {
-      const campos = mapearCampos(normalizarError(err).campos, { nombre: 'nombre', email: 'email', mensaje: 'msg' })
+      const campos = mapearCampos(normalizarError(err).campos, {
+        nombre: 'nombre', apellido: 'apellido', email: 'email', area: 'area', telefono: 'tel', departamento: 'depto', mensaje: 'msg',
+      })
       if (Object.keys(campos).length) return setErroresCampos(campos)
       return setError(mensajeError(err))
     }
@@ -46,7 +53,7 @@ const ContactForm = () => {
         <Field label="Teléfono" type="tel" {...campo('tel')} autoComplete="tel-national" />
       </div>
       <SelectField label={<Obligatorio>Departamento/Sección</Obligatorio>} name="depto" value={valores.depto} onChange={cambiar} opciones={DEPARTAMENTOS} />
-      <TextAreaField label={<Obligatorio>Mensaje</Obligatorio>} max={MENSAJE_MAX} {...campo('msg')} />
+      <TextAreaField label={<Obligatorio>Mensaje</Obligatorio>} {...campo('msg')} />
       <p className="ferr" role="alert">{error}</p>
       <button className="btn main" type="submit">Enviar mensaje</button>
     </form>

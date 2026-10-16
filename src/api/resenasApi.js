@@ -13,6 +13,11 @@ const lista = async (pedido) => {
 export const getResenasLibroApi = async (idLibro) => (await lista(() => api.get(`/resenas-libro/libro/${idLibro}`))).map(aReseniaLibroFront)
 export const getTodasResenasLibroApi = async () => (await lista(() => api.get('/resenas-libro'))).map(aReseniaLibroFront)
 
+export const getEstadoResenaLibroApi = async (idLibro) => {
+  const { data } = await api.get(`/resenas-libro/libro/${idLibro}/estado`)
+  return { ...data, miResenia: data.miResena ? aReseniaLibroFront(data.miResena) : null }
+}
+
 // El back pide el ítem de la orden que se compró (no el libro): solo quien lo compró y pagó puede reseñar
 export const crearResenaLibroApi = async ({ idOrdenItem, calificacion, comentario }) =>
   aReseniaLibroFront((await api.post('/resenas-libro', { idOrdenItem, calificacion, comentario })).data)
@@ -25,6 +30,11 @@ export const eliminarResenaVendedorApi = async (idResena) => (await api.delete(`
 export const getResenasVendedorApi = async (idVendedor) =>
   (await lista(() => api.get(`/resenas-vendedor/vendedor/${idVendedor}`))).map(aReseniaVendedorFront)
 export const getTodasResenasVendedorApi = async () => (await lista(() => api.get('/resenas-vendedor'))).map(aReseniaVendedorFront)
+
+export const getEstadoResenaVendedorApi = async (idVendedor) => {
+  const { data } = await api.get(`/resenas-vendedor/vendedor/${idVendedor}/estado`)
+  return { ...data, miResena: data.miResena ? aReseniaVendedorFront(data.miResena) : null }
+}
 
 // OJO: acá el campo se llama "clasificacion" (en las reseñas de libro es "calificacion")
 export const crearResenaVendedorApi = async ({ idPago, idVendedor, clasificacion, comentario }) =>

@@ -16,10 +16,6 @@ const RolModal = ({ usuario, onGuardar, onCerrar }) => {
 
   const enviar = async (e) => {
     e.preventDefault()
-    if (rol === 'VENDEDOR' && (!nombreTienda.trim() || !provincia.trim() || !telefono.trim())) {
-      setError('Para habilitar a un vendedor, completá nombre de tienda, provincia y teléfono.')
-      return
-    }
     const r = await onGuardar(rol, rol === 'VENDEDOR' ? { nombreTienda: nombreTienda.trim(), provincia, telefono: telefono.trim() } : undefined) // con el back es async
     if (r.error) setError(r.error)
     else onCerrar()

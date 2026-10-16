@@ -26,7 +26,6 @@ const Etiquetas = ({ libro, rank }) => {
 // `resumen` = { promedio, cantidad } de las opiniones. Sin `onGuardar` no se muestra el botón de Marcapáginas.
 const BookInfo = ({ libro, rank, resumen, guardado, onGuardar }) => {
   const { promedio, cantidad } = resumen
-  const usado = esUsado(libro) // un usado no muestra calificación del producto (opiniones solo de la obra)
   return (
     <div className="d-info">
       <div className="d-row">
@@ -39,12 +38,10 @@ const BookInfo = ({ libro, rank, resumen, guardado, onGuardar }) => {
       </div>
       <h1 className="d-title fr">{libro.t}</h1>
       <p className="d-author">de <Link to={`/libros?autor=${encodeURIComponent(libro.a)}`}>{libro.a}</Link></p>
-      {!usado && (
-        <a className="d-rate" href="#rev">
-          <Stars value={promedio} /><span>{promedio.toFixed(1)}</span>
-          <span className="dim">({cantidad} {plural(cantidad, 'opinión', 'opiniones')})</span>
-        </a>
-      )}
+      <a className="d-rate" href="#rev">
+        <Stars value={promedio} /><span>{promedio.toFixed(1)}</span>
+        <span className="dim">({cantidad} {plural(cantidad, 'opinión', 'opiniones')})</span>
+      </a>
       <div className="d-price">
         <b>{fmt(libro.p)}</b>
         {libro.d > 0 && <><s>{fmt(libro.base)}</s><em>{libro.d}% OFF</em></>}

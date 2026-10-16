@@ -5,8 +5,7 @@ import './SellerPanel.css'
 
 const POR_PAGINA = 5
 
-// El botón para escribir aparece solo si puedeResenar.
-// El administrador puede eliminar reseñas, pero no escribir ni editar.
+// El backend informa si se puede publicar; ADMIN solo puede moderar eliminando.
 const SellerReviews = ({
   resenias,
   promedio,
@@ -14,6 +13,7 @@ const SellerReviews = ({
   esPropio,
   esAdmin = false,
   puedeResenar,
+  motivo,
   onEscribir,
   onEliminar,
 }) => {
@@ -22,62 +22,39 @@ const SellerReviews = ({
   return (
     <section className="dsec" id="resenias">
       <h2>Reseñas de compradores</h2>
-
       {esPropio && (
         <p className="note sp-owner" role="status">
           <b>Esta es la vista pública de tu reputación</b>
         </p>
       )}
-
       <div className={`rev-wrap sp-rev-wrap${resenias.length ? '' : ' solo'}`}>
         {resenias.length > 0 && <ReviewSummary resenias={resenias} promedio={promedio} />}
-
         <div className="rev-list sp-rev-list">
           <div className="sp-rev-head">
             <small className="dim">
-              {resenias.length
-                ? 'Opiniones de quienes ya le compraron'
-                : 'Todavía no hay reseñas.'}
+              {resenias.length ? 'Opiniones de quienes ya le compraron' : 'Todavía no hay reseñas.'}
             </small>
-
             {puedeResenar && (
-              <button
-                className="more"
-                style={{ margin: 0 }}
-                type="button"
-                onClick={onEscribir}
-              >
-                {miResena
-                  ? 'Editar mi reseña'
-                  : 'Escribir una reseña al vendedor'}
+              <button className="more" style={{ margin: 0 }} type="button" onClick={onEscribir}>
+                {miResena ? 'Editar mi reseña' : 'Escribir una reseña al vendedor'}
               </button>
             )}
           </div>
-
-          {!esPropio && !puedeResenar && !esAdmin && (
-            <p className="note" role="note">
-              Solo los compradores que hayan adquirido un libro de este vendedor
-              pueden dejar una reseña.
-            </p>
+          {!esPropio && !esAdmin && !puedeResenar && motivo && (
+            <p className="note" role="note">{motivo}</p>
           )}
-
-          {resenias.slice(0, cantidad).map((r) => (
+          {resenias.slice(0, cantidad).map((resenia) => (
             <SellerReviewItem
-              key={r.id}
-              resenia={r}
-              propia={miResena?.id === r.id}
+              key={resenia.id}
+              resenia={resenia}
+              propia={miResena?.id === resenia.id}
               puedeEliminar={esAdmin}
-              onEditar={puedeResenar ? onEscribir : undefined}
-              onEliminar={() => onEliminar(r.id)}
+              onEditar={puedeResenar && !esAdmin ? onEscribir : undefined}
+              onEliminar={() => onEliminar(resenia.id)}
             />
           ))}
-
           {resenias.length > cantidad && (
-            <button
-              className="more"
-              type="button"
-              onClick={() => setCantidad(cantidad + POR_PAGINA)}
-            >
+            <button className="more" type="button" onClick={() => setCantidad(cantidad + POR_PAGINA)}>
               Ver más reseñas
             </button>
           )}
