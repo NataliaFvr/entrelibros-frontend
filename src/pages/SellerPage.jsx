@@ -28,7 +28,7 @@ const Estadisticas = ({ ventas }) => {
 const Migas = () => <div className="crumbs"><Link to="/">Inicio</Link> › <span>Vender</span></div>
 
 // /vender · /vender/nuevo · /vender/editar/:id · /vender/ventas · /vender/estadisticas · /vender/reputacion
-const Vendedor = ({ user }) => {
+const Vendedor = ({ user, perfil }) => {
   const navigate = useNavigate()
   const { tab = 'libros', id } = useParams()
   const { vendedor, estadoLibros, reintentar, solicitar, guardarLibro, alternarBaja } = useVendedor(user)
@@ -65,7 +65,7 @@ const Vendedor = ({ user }) => {
   return (
     <main className="usr">
       <Migas />
-      <SellerHead tienda={vendedor.tienda} publicados={vendedor.pub.filter((p) => p.estado === 'activo').length}
+      <SellerHead tienda={vendedor.tienda} user={user} perfil={perfil} publicados={vendedor.pub.filter((p) => p.estado === 'activo').length}
         ventas={activas.length} vendido={vendido} onMiCuenta={() => navigate('/cuenta')} />
       <AccountTabs pestanias={pestanias} tab={tab === 'editar' ? 'nuevo' : tab} onIr={(t) => navigate(t === 'libros' ? '/vender' : `/vender/${t}`)} />
       {tab === 'libros' && <SellerBooks libros={vendedor.pub} estado={estadoLibros} onReintentar={reintentar} onBaja={alternarBaja} />}
@@ -81,9 +81,9 @@ const Vendedor = ({ user }) => {
 }
 
 const SellerPage = () => {
-  const { user } = useAuth()
+  const { user, perfil } = useAuth()
   if (!user) return <Navigate to="/ingresar" replace state={{ from: '/vender' }} />
-  return <Vendedor key={user.nombreUsuario} user={user} />
+  return <Vendedor key={user.nombreUsuario} user={user} perfil={perfil} />
 }
 
 export default SellerPage

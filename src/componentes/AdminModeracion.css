@@ -48,3 +48,6 @@
 .hist-coment{overflow-wrap:anywhere;min-width:160px}
 @media (max-width:899px){.hist-coment{min-width:0}.hist-libro{text-align:right}}
 .mod-hist{align-self:flex-start;padding:4px 0}
+.mod-reviews{display:grid;gap:16px}
+.mod-reviews>.card{padding:clamp(16px,3vw,24px)}
+.mod-reviews h2{font-size:1.15rem;margin:0 0 6px}

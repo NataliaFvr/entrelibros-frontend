@@ -11,6 +11,7 @@ const lista = async (pedido) => {
 }
 
 export const getResenasLibroApi = async (idLibro) => (await lista(() => api.get(`/resenas-libro/libro/${idLibro}`))).map(aReseniaLibroFront)
+export const getTodasResenasLibroApi = async () => (await lista(() => api.get('/resenas-libro'))).map(aReseniaLibroFront)
 
 export const getEstadoResenaLibroApi = async (idLibro) => {
   const { data } = await api.get(`/resenas-libro/libro/${idLibro}/estado`)
@@ -28,6 +29,7 @@ export const eliminarResenaVendedorApi = async (idResena) => (await api.delete(`
 
 export const getResenasVendedorApi = async (idVendedor) =>
   (await lista(() => api.get(`/resenas-vendedor/vendedor/${idVendedor}`))).map(aReseniaVendedorFront)
+export const getTodasResenasVendedorApi = async () => (await lista(() => api.get('/resenas-vendedor'))).map(aReseniaVendedorFront)
 
 export const getEstadoResenaVendedorApi = async (idVendedor) => {
   const { data } = await api.get(`/resenas-vendedor/vendedor/${idVendedor}/estado`)

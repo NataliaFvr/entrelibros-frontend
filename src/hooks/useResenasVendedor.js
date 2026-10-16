@@ -2,52 +2,98 @@ import { useEffect, useMemo, useState } from 'react'
 import { useAuth } from './useAuth'
 import { useLibros } from './useLibros'
 import { useToast } from './useToast'
-import { crearResenaVendedorApi, eliminarResenaVendedorApi, getEstadoResenaVendedorApi, getResenasVendedorApi, modificarResenaVendedorApi } from '../api/resenasApi'
+import {
+  crearResenaVendedorApi,
+  eliminarResenaVendedorApi,
+  getEstadoResenaVendedorApi,
+  getResenasVendedorApi,
+  modificarResenaVendedorApi,
+} from '../api/resenasApi'
 import { mensajeError } from '../utils/errorApi'
 
-// Reseñas de compradores de un vendedor. El backend informa la autorización,
-// el pago asociado y la reseña de la sesión actual.
+// El backend determina el permiso, el pago asociado y la reseña del usuario actual.
 const useResenasVendedor = (tienda, idConocido = null) => {
   const { user } = useAuth()
   const { libros } = useLibros()
   const toast = useToast()
-  const idVendedor = idConocido ?? libros.find((l) => l.v === tienda)?.vId ?? null
+  const idVendedor = idConocido ?? libros.find((libro) => libro.v === tienda)?.vId ?? null
   const [resenias, setResenias] = useState([])
-  const [estado, setEstado] = useState({ puedeResenar: false, motivo: '', idPago: null, miResena: null })
+  const [estado, setEstado] = useState({
+    puedeResenar: false,
+    motivo: '',
+    idPago: null,
+    miResena: null,
+    usuarioId: null,
+    vendedorId: null,
+  })
 
   useEffect(() => {
     if (idVendedor == null) return undefined
     let vigente = true
-    getResenasVendedorApi(idVendedor).then((r) => { if (vigente) setResenias(r) }).catch(() => {})
+    getResenasVendedorApi(idVendedor)
+      .then((lista) => { if (vigente) setResenias(lista) })
+      .catch(() => {})
     return () => { vigente = false }
   }, [idVendedor])
 
   useEffect(() => {
-    if (idVendedor == null || !user) {
-      setEstado({ puedeResenar: false, motivo: user ? '' : 'Iniciá sesión para dejar una reseña.', idPago: null, miResena: null })
-      return undefined
-    }
+    if (idVendedor == null || !user) return undefined
+
     let vigente = true
-    getEstadoResenaVendedorApi(idVendedor).then((r) => { if (vigente) setEstado(r) }).catch(() => {
-      if (vigente) setEstado({ puedeResenar: false, motivo: '', idPago: null, miResena: null })
-    })
+    getEstadoResenaVendedorApi(idVendedor)
+      .then((nuevoEstado) => {
+        if (vigente) setEstado({ ...nuevoEstado, usuarioId: user.id, vendedorId: idVendedor })
+      })
+      .catch(() => {
+        if (vigente) {
+          setEstado({
+            puedeResenar: false,
+            motivo: '',
+            idPago: null,
+            miResena: null,
+            usuarioId: user.id,
+            vendedorId: idVendedor,
+          })
+        }
+      })
     return () => { vigente = false }
   }, [idVendedor, user])
 
   const promedio = useMemo(
-    () => (resenias.length ? resenias.reduce((a, r) => a + r.st, 0) / resenias.length : 0),
+    () => (resenias.length ? resenias.reduce((suma, resenia) => suma + resenia.st, 0) / resenias.length : 0),
     [resenias],
   )
+  const estadoActual = estado.usuarioId === user?.id && estado.vendedorId === idVendedor
+    ? estado
+    : {
+        puedeResenar: false,
+        motivo: user ? '' : 'Iniciá sesión para dejar una reseña.',
+        idPago: null,
+        miResena: null,
+      }
+  const miResena = estadoActual.miResena
+  const esPropio = Boolean(user) && idVendedor != null && user.id === idVendedor
+  const esAdmin = user?.rol === 'ADMIN'
 
-  const miResena = estado.miResena
-
-  const publicarApi = async (st, texto) => {
+  const publicar = async (clasificacion, comentario) => {
     try {
-      const cuerpo = { idPago: estado.idPago, idVendedor, clasificacion: st, comentario: texto }
+      const cuerpo = {
+        idPago: estadoActual.idPago,
+        idVendedor,
+        clasificacion,
+        comentario,
+      }
       if (miResena) await modificarResenaVendedorApi(miResena.id, cuerpo)
       else await crearResenaVendedorApi(cuerpo)
+
       setResenias(await getResenasVendedorApi(idVendedor))
-      if (user) setEstado(await getEstadoResenaVendedorApi(idVendedor))
+      if (user) {
+        setEstado({
+          ...await getEstadoResenaVendedorApi(idVendedor),
+          usuarioId: user.id,
+          vendedorId: idVendedor,
+        })
+      }
       toast(miResena ? 'Reseña actualizada' : '¡Gracias por calificar al vendedor!')
       return true
     } catch (err) {
@@ -56,15 +102,19 @@ const useResenasVendedor = (tienda, idConocido = null) => {
     }
   }
 
-  const publicar = publicarApi
-
-  // DELETE /resenas-vendedor/{id}: la borra quien la escribió o un admin (el back lo valida).
-  // Sin id borra la propia; el admin pasa el id de cualquier reseña.
-  const eliminar = async (id = miResena?.id) => {
-    if (!id) return false
+  // La API valida si el usuario puede borrar esta reseña.
+  const eliminar = async (idResena = miResena?.id) => {
+    if (idResena == null) return false
     try {
-      await eliminarResenaVendedorApi(id)
+      await eliminarResenaVendedorApi(idResena)
       setResenias(await getResenasVendedorApi(idVendedor))
+      if (user) {
+        setEstado({
+          ...await getEstadoResenaVendedorApi(idVendedor),
+          usuarioId: user.id,
+          vendedorId: idVendedor,
+        })
+      }
       toast('Reseña eliminada')
       return true
     } catch (err) {
@@ -73,7 +123,17 @@ const useResenasVendedor = (tienda, idConocido = null) => {
     }
   }
 
-  return { resenias, promedio, miResena, puedeResenar: estado.puedeResenar, motivo: estado.motivo, publicar, eliminar }
+  return {
+    resenias,
+    promedio,
+    miResena,
+    esPropio,
+    esAdmin,
+    puedeResenar: estadoActual.puedeResenar,
+    motivo: estadoActual.motivo,
+    publicar,
+    eliminar,
+  }
 }
 
 export default useResenasVendedor
