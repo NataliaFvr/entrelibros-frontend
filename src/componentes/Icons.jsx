@@ -19,6 +19,12 @@ export const ShelfIcon = () => (
   </svg>
 )
 
+export const BookmarkIcon = () => (
+  <svg {...base} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M6 4.75A1.75 1.75 0 017.75 3h8.5A1.75 1.75 0 0118 4.75V21l-6-4-6 4V4.75z" />
+  </svg>
+)
+
 export const BellIcon = () => (
   <svg {...base} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
     <path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 01-3.4 0" />

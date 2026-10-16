@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { useCompra } from '../hooks/useCompra'
-import { ShelfIcon, UserIcon } from './Icons'
+import { BookmarkIcon, ShelfIcon, UserIcon } from './Icons'
 import Avatar from './Avatar'
 import NotificationBell from './NotificationBell'
 
@@ -20,6 +20,10 @@ const HeaderIcons = () => {
     if (requiereLogin('cart')) return
     navigate('/carrito')
   }
+  const abrirMarcapaginas = () => {
+    if (requiereLogin('fav', '/cuenta/marcapaginas')) return
+    navigate('/cuenta/marcapaginas')
+  }
 
   return (
     <div className="header-icons">
@@ -27,6 +31,9 @@ const HeaderIcons = () => {
         {user ? <Avatar user={user} perfil={perfil} size={30} /> : <UserIcon />}
       </div>
       <NotificationBell />
+      <div className="icon-btn" role="button" tabIndex={0} aria-label="Mi Marcapáginas" title="Mi Marcapáginas" onClick={abrirMarcapaginas} onKeyDown={alTeclear(abrirMarcapaginas)}>
+        <BookmarkIcon />
+      </div>
       <div className="icon-btn" role="button" tabIndex={0} aria-label="Mi estantería" title="Mi estantería" onClick={abrirEstanteria} onKeyDown={alTeclear(abrirEstanteria)}>
         <ShelfIcon />
         <span className="cart-badge" hidden={cartCount === 0}>{cartCount > 99 ? '99+' : cartCount}</span>

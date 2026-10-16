@@ -94,12 +94,14 @@ const inicial = (apellido) => (apellido ? ` ${String(apellido).trim()[0]}.` : ''
 export const aReseniaLibroFront = (r) => ({
   id: r.id, i: r.id, st: r.calificacion, t: r.comentario || '', date: r.fecha, idComprador: r.idComprador,
   u: `${r.nombreComprador || ''}${inicial(r.apellidoComprador)}`.trim(), idLibro: r.idLibro,
+  libro: r.tituloLibro || '',
 })
 
 // ResenaVendedorResponse { id, clasificacion, comentario, fecha, idPago, idVendedor, nombreComprador }
 export const aReseniaVendedorFront = (r) => ({
   id: r.id, st: r.clasificacion, t: r.comentario || '', date: r.fecha, idComprador: r.idComprador,
-  u: r.nombreComprador || '', nc: r.nombreComprador || '', libro: r.libro || '',
+  u: `${r.nombreComprador || ''}${inicial(r.apellidoComprador)}`.trim(),
+  nc: r.nombreComprador || '', libro: r.libro || '',
 })
 
 /* ---------------- Carrito ---------------- */

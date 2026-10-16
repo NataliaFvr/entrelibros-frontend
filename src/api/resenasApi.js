@@ -11,6 +11,7 @@ const lista = async (pedido) => {
 }
 
 export const getResenasLibroApi = async (idLibro) => (await lista(() => api.get(`/resenas-libro/libro/${idLibro}`))).map(aReseniaLibroFront)
+export const getTodasResenasLibroApi = async () => (await lista(() => api.get('/resenas-libro'))).map(aReseniaLibroFront)
 
 // El back pide el ítem de la orden que se compró (no el libro): solo quien lo compró y pagó puede reseñar
 export const crearResenaLibroApi = async ({ idOrdenItem, calificacion, comentario }) =>
@@ -23,6 +24,7 @@ export const eliminarResenaVendedorApi = async (idResena) => (await api.delete(`
 
 export const getResenasVendedorApi = async (idVendedor) =>
   (await lista(() => api.get(`/resenas-vendedor/vendedor/${idVendedor}`))).map(aReseniaVendedorFront)
+export const getTodasResenasVendedorApi = async () => (await lista(() => api.get('/resenas-vendedor'))).map(aReseniaVendedorFront)
 
 // OJO: acá el campo se llama "clasificacion" (en las reseñas de libro es "calificacion")
 export const crearResenaVendedorApi = async ({ idPago, idVendedor, clasificacion, comentario }) =>

@@ -1,10 +1,10 @@
-import { initials } from '../utils/colors'
 import { fmt } from '../utils/format'
+import Avatar from './Avatar'
 
-const SellerHead = ({ tienda, publicados, ventas, vendido, onMiCuenta }) => {
+const SellerHead = ({ tienda, publicados, ventas, vendido, user, perfil, onMiCuenta }) => {
   return (
     <div className="u-head card">
-      <span className="uav ini" style={{ width: 84, height: 84, fontSize: 30 }}>{initials(tienda, 2).toUpperCase()}</span>
+      <Avatar user={user} perfil={perfil} size={84} />
       <div className="u-id">
         <h1 className="fr">{tienda}</h1>
         <p>Vendedor verificado · {publicados} publicados · {ventas} ventas · {fmt(vendido)} vendido</p>

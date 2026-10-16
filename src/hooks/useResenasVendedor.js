@@ -3,7 +3,12 @@ import { useAuth } from './useAuth'
 import { useCompra } from './useCompra'
 import { useLibros } from './useLibros'
 import { useToast } from './useToast'
-import { crearResenaVendedorApi, eliminarResenaVendedorApi, getResenasVendedorApi, modificarResenaVendedorApi } from '../api/resenasApi'
+import {
+  crearResenaVendedorApi,
+  eliminarResenaVendedorApi,
+  getResenasVendedorApi,
+  modificarResenaVendedorApi,
+} from '../api/resenasApi'
 import { pagosDeOrdenApi } from '../api/comprasApi'
 import { mensajeError } from '../utils/errorApi'
 import { estadoPago } from '../utils/pedidos'
@@ -22,41 +27,84 @@ const useResenasVendedor = (tienda, idConocido = null) => {
 
   useEffect(() => {
     if (idVendedor == null) return undefined
+
     let vigente = true
-    getResenasVendedorApi(idVendedor).then((r) => { if (vigente) setResenias(r) }).catch(() => {})
-    return () => { vigente = false }
+
+    getResenasVendedorApi(idVendedor)
+      .then((r) => {
+        if (vigente) setResenias(r)
+      })
+      .catch(() => {})
+
+    return () => {
+      vigente = false
+    }
   }, [idVendedor])
 
   const promedio = useMemo(
-    () => (resenias.length ? resenias.reduce((a, r) => a + r.st, 0) / resenias.length : 0),
+    () =>
+      resenias.length
+        ? resenias.reduce((a, r) => a + r.st, 0) / resenias.length
+        : 0,
     [resenias],
   )
 
   // Se toma el vendedor del ítem comprado, no de la muestra local de libros: esa
   // muestra puede estar paginada y no contener una compra anterior.
   const comprados = useMemo(
-    () => pedidos
-      .filter((p) => estadoPago(p) === 'SIMULADO_APROBADO')
-      .flatMap((p) => p.its.filter((i) => i.idVendedor === idVendedor)),
+    () =>
+      pedidos
+        .filter((p) => estadoPago(p) === 'SIMULADO_APROBADO')
+        .flatMap((p) => p.its.filter((i) => i.idVendedor === idVendedor)),
     [pedidos, idVendedor],
   )
 
   // ¿Es la tienda de la cuenta con sesión? (el vendedor mirando su propia vista pública)
-  const esPropio = Boolean(user) && idVendedor != null && user.id === idVendedor
-  const puedeResenar = Boolean(user) && user.rol === 'COMPRADOR' && !esPropio && comprados.length > 0
+  const esPropio =
+    Boolean(user) && idVendedor != null && user.id === idVendedor
+  const esAdmin = user?.rol === 'ADMIN'
+  const puedeResenar =
+    Boolean(user) &&
+    user.rol === 'COMPRADOR' &&
+    !esPropio &&
+    comprados.length > 0
 
-  const miResena = user ? resenias.find((r) => r.idComprador === user.id) || null : null
+  const miResena = user
+    ? resenias.find((r) => r.idComprador === user.id) || null
+    : null
   const libroComprado = comprados.length ? comprados[0].t : ''
 
   const publicarApi = async (st, texto) => {
     try {
       // El back liga la reseña a un pago aprobado de una orden que incluya libros de ese vendedor
-      const pedido = pedidos.find((p) => estadoPago(p) === 'SIMULADO_APROBADO' && p.its.some((i) => i.idVendedor === idVendedor))
-      const pago = pedido && (await pagosDeOrdenApi(pedido.idOrden)).find((p) => p.resultado === 'SIMULADO_APROBADO')
-      if (!pago) throw new Error('No encontramos el pago de tu compra a este vendedor.')
-      const cuerpo = { idPago: pago.id, idVendedor, clasificacion: st, comentario: texto }
-      if (miResena) await modificarResenaVendedorApi(miResena.id, cuerpo)
-      else await crearResenaVendedorApi(cuerpo)
+      const pedido = pedidos.find(
+        (p) =>
+          estadoPago(p) === 'SIMULADO_APROBADO' &&
+          p.its.some((i) => i.idVendedor === idVendedor),
+      )
+      const pago =
+        pedido &&
+        (await pagosDeOrdenApi(pedido.idOrden)).find(
+          (p) => p.resultado === 'SIMULADO_APROBADO',
+        )
+
+      if (!pago) {
+        throw new Error('No encontramos el pago de tu compra a este vendedor.')
+      }
+
+      const cuerpo = {
+        idPago: pago.id,
+        idVendedor,
+        clasificacion: st,
+        comentario: texto,
+      }
+
+      if (miResena) {
+        await modificarResenaVendedorApi(miResena.id, cuerpo)
+      } else {
+        await crearResenaVendedorApi(cuerpo)
+      }
+
       setResenias(await getResenasVendedorApi(idVendedor))
       toast(miResena ? 'Reseña actualizada' : '¡Gracias por calificar al vendedor!')
       return true
@@ -68,12 +116,14 @@ const useResenasVendedor = (tienda, idConocido = null) => {
 
   const publicar = publicarApi
 
-  // DELETE /resenas-vendedor/{id}: la borra quien la escribió o un admin (el back lo valida).
-  // Sin id borra la propia; el admin pasa el id de cualquier reseña.
-  const eliminar = async (id = miResena?.id) => {
-    if (!id) return false
+  // El autor o un ADMIN pueden eliminar; solo el autor puede editar.
+  const eliminar = async (idResena = miResena?.id) => {
+    if (idResena == null || (!esAdmin && miResena?.id !== idResena)) {
+      return false
+    }
+
     try {
-      await eliminarResenaVendedorApi(id)
+      await eliminarResenaVendedorApi(idResena)
       setResenias(await getResenasVendedorApi(idVendedor))
       toast('Reseña eliminada')
       return true
@@ -83,7 +133,17 @@ const useResenasVendedor = (tienda, idConocido = null) => {
     }
   }
 
-  return { resenias, promedio, miResena, libroComprado, esPropio, puedeResenar, publicar, eliminar }
+  return {
+    resenias,
+    promedio,
+    miResena,
+    libroComprado,
+    esPropio,
+    esAdmin,
+    puedeResenar,
+    publicar,
+    eliminar,
+  }
 }
 
 export default useResenasVendedor

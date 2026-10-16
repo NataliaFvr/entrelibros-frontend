@@ -7,6 +7,7 @@ import EmptyBlock from './EmptyBlock'
 import HistorialModeracion from './HistorialModeracion'
 import ModeracionItem from './ModeracionItem'
 import RechazoModal from './RechazoModal'
+import AdminResenas from './AdminResenas'
 import './AdminModeracion.css'
 
 const VACIO = {
@@ -24,9 +25,10 @@ const AdminModeracionPanel = () => {
   const pestanias = [
     ['NUEVO', `Nuevas (${cantidad('NUEVO')})`],
     ['MODIFICACION', `Modificaciones (${cantidad('MODIFICACION')})`],
+    ['RESEÑAS', 'Reseñas'],
     ['HISTORIAL', 'Historial'],
   ]
-  const enCola = tab !== 'HISTORIAL'
+  const enCola = tab === 'NUEVO' || tab === 'MODIFICACION'
   const verHistorialDe = (libro) => { setLibroHistorial(libro); setTab('HISTORIAL') }
   const irA = (t) => { if (t === 'HISTORIAL') setLibroHistorial(null); setTab(t) } // la pestaña muestra todo; el filtro por libro viene de una tarjeta o fila
 
@@ -51,7 +53,9 @@ const AdminModeracionPanel = () => {
           )} />
       )}
       {!enCola && (
-        <HistorialModeracion libro={libroHistorial} onLibro={setLibroHistorial} onTodos={() => setLibroHistorial(null)} />
+        tab === 'HISTORIAL'
+          ? <HistorialModeracion libro={libroHistorial} onLibro={setLibroHistorial} onTodos={() => setLibroHistorial(null)} />
+          : <AdminResenas />
       )}
       {aRechazar && (
         <RechazoModal titulo={aRechazar.datosPropuestos.titulo} onCerrar={() => setARechazar(null)}
