@@ -138,7 +138,7 @@ export const aPedidoFront = (o) => {
     sub: o.subtotal ?? 0, env: o.costoEnvio ?? 0, total: o.total ?? 0,
     est: ESTADO_TEXTO[o.estadoPago] || o.estadoPago, pago: o.estadoPago,
     venceEn: o.estadoPago === 'PENDIENTE' ? isoAMs(o.venceEn) ?? undefined : undefined,
-    comprador: `${o.nombreComprador || ''}`.trim(),
+    comprador: `${o.nombreComprador || ''}`.trim(), proveedor: o.proveedor || '',
   }
 }
 

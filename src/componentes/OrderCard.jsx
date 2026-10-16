@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import { useCompra } from '../hooks/useCompra'
-import { fmt, mmss } from '../utils/format'
+import { fechaCorta, fmt, mmss } from '../utils/format'
+import { nombreMetodo } from '../data/metodosPago'
 import { ETIQUETAS_PAGO, estadoPago } from '../utils/pedidos'
 import useAhora from '../hooks/useAhora'
 import SummaryRow from './SummaryRow'
@@ -23,12 +24,13 @@ const OrderCard = ({ pedido, libros }) => {
       <div className="ord-h">
         <b className="fr">Pedido {pedido.n}</b>
         <span className={`tg ${clase}`.trim()}>{estado === 'SIMULADO_APROBADO' ? pedido.est : texto}</span>
-        <small>{pedido.date}</small>
+        <small>{fechaCorta(pedido.date)}</small>
       </div>
       <OrderLines pedido={pedido} libros={libros} />
       <SummaryRow titulo="Envío" valor={fmt(pedido.env)} />
       <SummaryRow titulo="Total" valor={fmt(pedido.total)} total />
       <small className="ord-a">Envío a: {pedido.addr}</small>
+      {pedido.proveedor && <small className="ord-a">Pagado con: {nombreMetodo(pedido.proveedor)}</small>}
       
       {pendiente && (
         <div className="rvf-b">

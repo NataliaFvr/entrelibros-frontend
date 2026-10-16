@@ -56,6 +56,7 @@ const useResenias = (libroId) => {
     try {
       await eliminarResenaLibroApi(id)
       setBase(await getResenias(libroId))
+      if (user) setEstado(await getEstadoResenaLibroApi(libroId)) // si borró la suya, vuelve a poder opinar
     } catch (err) {
       throw new Error(mensajeError(err))
     }

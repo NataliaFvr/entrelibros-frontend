@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useLibros } from '../hooks/useLibros'
 import useResenias from '../hooks/useResenias'
@@ -23,7 +23,7 @@ import NotFoundPage from './NotFoundPage'
 const Detalle = ({ libro, libros }) => {
   const navigate = useNavigate()
   const toast = useToast()
-  const { user, requiereLogin, marks, toggleMark } = useAuth()
+  const { user, requiereLogin, marks, toggleMark, pendiente, limpiarPendiente } = useAuth()
   const { agregar } = useCompra()
   const { resenias, promedio, miResenia, puedeResenar, motivo, publicar, eliminar } = useResenias(libro.id)
 
@@ -48,12 +48,25 @@ const Detalle = ({ libro, libros }) => {
     }
   }, [libros, libro])
 
+  // Si tocó Añadir, Comprar o Guardar antes de iniciar sesión, al volver logueado se completa solo
+  useEffect(() => {
+    if (!user || !pendiente || pendiente.idLibro !== libro.id) return
+    limpiarPendiente()
+    if (esAdmin) return // el admin no compra ni guarda
+    if (pendiente.tipo === 'fav') {
+      if (!marks.includes(libro.id)) toggleMark(libro.id)
+      return
+    }
+    agregar(libro).then((ok) => { if (ok && pendiente.tipo === 'buy') navigate('/carrito') })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, pendiente, libro.id])
+
   const guardar = () => {
-    if (!requiereLogin('fav')) toggleMark(libro.id)
+    if (!requiereLogin('fav', null, { tipo: 'fav', idLibro: libro.id })) toggleMark(libro.id)
   }
 
   const alCarrito = () => {
-    if (!requiereLogin('cart')) agregar(libro)
+    if (!requiereLogin('cart', null, { tipo: 'cart', idLibro: libro.id })) agregar(libro)
   }
 
   const publicarOpinion = async (st, texto) => {
@@ -83,7 +96,7 @@ const Detalle = ({ libro, libros }) => {
   }
 
   const comprar = async () => {
-    if (requiereLogin('cart')) return
+    if (requiereLogin('cart', null, { tipo: 'buy', idLibro: libro.id })) return
 
     // Solo suma el libro al carrito; el marcapáginas se limpia cuando se aprueba el pago.
     if (await agregar(libro)) navigate('/carrito')

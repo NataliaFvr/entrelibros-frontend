@@ -19,6 +19,7 @@ const AuthProvider = ({ children }) => {
   const [direcciones, setDirecciones] = useState([])
   const [gate, setGate] = useState(null)
   const [gateDestino, setGateDestino] = useState(null)
+  const [pendiente, setPendiente] = useState(null) // acción que quedó esperando el login
 
   const entrar = (u, saludo) => {
     setUser(u)
@@ -139,13 +140,21 @@ const AuthProvider = ({ children }) => {
   const eliminarDireccion = (id) => cambiarDirecciones(() => servicioDirecciones.eliminar(user, id))
   const marcarPrincipal = (id) => cambiarDirecciones(() => servicioDirecciones.marcarPrincipal(user, id), 'Dirección principal actualizada')
 
-  const requiereLogin = (tipo, destino = null) => {
+  // `accion` = lo que el visitante quiso hacer ({ tipo: 'cart' | 'buy' | 'fav', idLibro }): se completa al volver logueado
+  const requiereLogin = (tipo, destino = null, accion = null) => {
     if (user) return false
     setGate(tipo)
     setGateDestino(destino)
+    setPendiente(accion)
     return true
   }
-  const cerrarGate = () => { setGate(null); setGateDestino(null) }
+  // Al ir a ingresar se conserva la acción pendiente; si cierra el cartel, se descarta
+  const cerrarGate = ({ conservarAccion = false } = {}) => {
+    setGate(null)
+    setGateDestino(null)
+    if (!conservarAccion) setPendiente(null)
+  }
+  const limpiarPendiente = () => setPendiente(null)
 
   const toggleMark = async (id) => {
     const estaba = marks.includes(id)
@@ -170,7 +179,7 @@ const AuthProvider = ({ children }) => {
   const value = {
     user, perfil, marks, direcciones, gate, gateDestino, verificacion,
     login, registrar, logout, actualizarPerfil, agregarDireccion, eliminarDireccion, marcarPrincipal,
-    requiereLogin, cerrarGate, toggleMark, quitarMarks,
+    requiereLogin, cerrarGate, toggleMark, quitarMarks, pendiente, limpiarPendiente,
   }
 
   return <AuthCtx.Provider value={value}><>{children}<LoginGate /></></AuthCtx.Provider>

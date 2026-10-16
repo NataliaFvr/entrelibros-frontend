@@ -16,9 +16,7 @@ const useAdminOrdenes = () => {
   }, [])
 
   const filtradas = useMemo(
-    () => ordenes
-      .filter((o) => !estado || o.estadoPago === estado)
-      .sort((a, b) => b.fecha.localeCompare(a.fecha) || b.n.localeCompare(a.n)),
+    () => ordenes.filter((o) => !estado || o.estadoPago === estado), // el back ya las manda de la más nueva a la más vieja
     [ordenes, estado],
   )
 

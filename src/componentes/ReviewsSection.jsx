@@ -44,7 +44,7 @@ const ReviewsSection = ({ resenias, promedio, miResenia, puedeResenar, motivo, o
       <div className="rev-wrap">
         <ReviewSummary resenias={resenias} promedio={promedio} />
         <div className="rev-list">
-          <ReviewControls orden={orden} filtro={filtro} onOrden={cambiar(setOrden)} onFiltro={cambiar(setFiltro)} onOpinar={soloLectura ? undefined : opinar} puedeOpinar={puedeResenar} motivo={motivo} />
+          <ReviewControls orden={orden} filtro={filtro} onOrden={cambiar(setOrden)} onFiltro={cambiar(setFiltro)} onOpinar={soloLectura ? undefined : opinar} puedeOpinar={puedeResenar} motivo={motivo} yaOpino={Boolean(miResenia)} />
           {formAbierto && <ReviewForm key={editando?.id || 'nueva'} inicial={editando} onPublicar={publicar} onCancelar={() => { setFormAbierto(false); setEditando(null) }} />}
           <div>
             {visibles.slice(0, cantidad).map((r) => <ReviewItem key={`${r.u}-${r.i}`} resenia={r}

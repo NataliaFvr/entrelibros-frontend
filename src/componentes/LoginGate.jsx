@@ -30,7 +30,7 @@ const LoginGate = () => {
   // Al entrar, el login te lleva al destino pedido o, si no hay, a la página desde la que llegaste
   const ir = (ruta) => {
     const from = gateDestino || pathname + search
-    cerrarGate()
+    cerrarGate({ conservarAccion: true })
     navigate(ruta, { state: { from } })
   }
 
