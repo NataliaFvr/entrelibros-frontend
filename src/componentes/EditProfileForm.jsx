@@ -11,7 +11,7 @@ import PasswordField from './PasswordField'
 
 const EditProfileForm = ({ user, perfil, onGuardar, onCancelar }) => {
   const { valores, cambiar, errores, setErroresCampos, error, tipoError, setError } = useFormulario({
-    nombre: user.nombre, apellido: user.apellido, nombreUsuario: user.nombreUsuario, email: user.email, contrasena: '',
+    nombre: user.nombre, apellido: user.apellido, nombreUsuario: user.nombreUsuario, email: user.email, contrasena: '', contrasenaActual: '',
   })
   // Avatar/foto en borrador: recién se guardan con "Guardar cambios"
   const [borrador, setBorrador] = useState({ avatar: perfil.avatar || '', foto: perfil.foto || '' })
@@ -54,6 +54,7 @@ const EditProfileForm = ({ user, perfil, onGuardar, onCancelar }) => {
       <Field label="Nombre de usuario" {...props('nombreUsuario')} autoComplete="username" />
       <Field label="E-mail" type="email" {...props('email')} autoComplete="email" />
       <PasswordField label="Nueva contraseña (vacía = no cambia)" {...props('contrasena')} autoComplete="new-password" />
+      {valores.contrasena && <PasswordField label="Contraseña actual" {...props('contrasenaActual')} autoComplete="current-password" />}
       <Aviso mensaje={error} tipo={tipoError} />
       <div className="rvf-b">
         <button className="btn main" type="submit" disabled={enviando}>{enviando ? 'Guardando…' : 'Guardar cambios'}</button>

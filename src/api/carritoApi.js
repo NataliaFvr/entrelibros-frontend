@@ -27,3 +27,7 @@ export const cambiarCantidadItemApi = async (idItem, cantidad) =>
   aItemCarritoFront((await api.patch(`/carrito/items/${idItem}`, { cantidad })).data)
 
 export const quitarItemApi = async (idItem) => (await api.delete(`/carrito/items/${idItem}`)).data
+
+// GET /carrito/envio?idDireccion= -> { subtotal, costoEnvio, total, cantidadEnvios }: el total antes de confirmar
+export const cotizarEnvioApi = async (idDireccion) =>
+  (await api.get('/carrito/envio', { params: { idDireccion } })).data

@@ -3,6 +3,7 @@ import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { useCompra } from '../hooks/useCompra'
 import { useToast } from '../hooks/useToast'
+import useCotizacionEnvio from '../hooks/useCotizacionEnvio'
 import Stepper from '../componentes/Stepper'
 import EmptyBlock from '../componentes/EmptyBlock'
 import CartList from '../componentes/CartList'
@@ -23,6 +24,8 @@ const CartPage = () => {
 
   const items = carrito.map((libro) => ({ libro, q: libro.q }))
   const subtotalCarrito = carrito.reduce((suma, item) => suma + item.subtotal, 0)
+  // El back cotiza el envío para la dirección elegida: se ve el total antes de confirmar
+  const cotizacion = useCotizacionEnvio(direccion?.id, carrito.map((c) => `${c.id}:${c.q}`).join(','))
   if (!user) return <Navigate to="/ingresar" replace state={{ from: '/carrito' }} />
 
   const finalizar = async () => {
@@ -49,7 +52,7 @@ const CartPage = () => {
       ) : (
         <div className="cart-grid">
           <CartList items={items} />
-          <CartSummary sub={subtotalCarrito} direcciones={direcciones}
+          <CartSummary sub={subtotalCarrito} cotizacion={cotizacion} direcciones={direcciones}
             elegida={elegida} onElegir={setElegida} onFinalizar={finalizar} enviando={enviando} />
         </div>
       )}
