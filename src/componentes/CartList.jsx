@@ -8,7 +8,7 @@ const CartList = ({ items }) => {
     <div className="cart-list">
       <div className="estante">
         {items.map(({ libro, q }) => (
-          <CartRow key={libro.id} libro={libro} q={q}
+          <CartRow key={libro.id} libro={libro} q={q} max={libro.maxCantidad}
             onMas={() => cambiarCantidad(libro, 1)} onMenos={() => cambiarCantidad(libro, -1)} onQuitar={() => quitar(libro.id)} />
         ))}
       </div>

@@ -49,6 +49,12 @@ const useCarrito = (user, { avisar }) => {
   }
 
   const agregar = (libro) => {
+    // Ya están todas las unidades que el back permite (maxCantidad): no se manda un pedido que va a rechazar
+    const enCarrito = ultimo.current.find((c) => c.id === libro.id)
+    if (enCarrito && enCarrito.q >= enCarrito.maxCantidad) {
+      avisar('Ya tenés en tu estantería todas las unidades disponibles')
+      return Promise.resolve(true)
+    }
     return ejecutar(async () => {
       const actual = ultimo.current.find((c) => c.id === libro.id)
       if (actual) {
