@@ -6,6 +6,10 @@
 |---|---|---|
 | `GET /libros/mios` + `GET /imagenes-libro/libro/{id}` | Lista las publicaciones del vendedor autenticado y carga sus imágenes |
 | `GET /vendedores/{id}` | Carga el perfil público del vendedor; si no existe, muestra 404 |
+| `GET /usuarios/{id}/foto` + `PATCH /usuarios/{id}` | La foto y el avatar pertenecen al usuario; el perfil vendedor reutiliza los mismos datos que se editan en Mi cuenta |
+| `GET /marcapaginas` + `POST /marcapaginas` + `DELETE /marcapaginas/{idLibro}` | Persiste la lista Marcapáginas, accesible desde `/cuenta/marcapaginas` |
+| `GET /resenas-libro` + `GET /resenas-vendedor` | Carga las reseñas para la pestaña de moderación administrativa |
+| `DELETE /resenas-libro/{id}` + `DELETE /resenas-vendedor/{id}` | El autor puede borrar su reseña y ADMIN puede eliminar reseñas inadecuadas; solo se borra, no se edita desde moderación |
 | `PATCH /direcciones/{id}/principal` + `GET /direcciones` | Persiste y devuelve la dirección principal |
 | `GET /categorias` + `GET /categorias/{id}/imagen` | Carga categorías con `tieneImagen` y sus imágenes |
 
