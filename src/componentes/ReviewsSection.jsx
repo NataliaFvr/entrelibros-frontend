@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { useToast } from '../hooks/useToast'
 import ReviewSummary from './ReviewSummary'
 import ReviewControls from './ReviewControls'
 import ReviewForm from './ReviewForm'
@@ -12,10 +11,9 @@ const ORDEN = {
 }
 const POR_PAGINA = 5
 
-// Solo puede opinar quien compró el libro (`haComprado`: sesión iniciada + pedido pagado con ese libro).
-// No se renderiza para ejemplares usados: las opiniones son de la obra, no de la publicación de un vendedor.
-const ReviewsSection = ({ resenias, promedio, miResenia, haComprado, onPublicar, onEliminar, soloLectura = false, moderar = false }) => {
-  const toast = useToast()
+// El backend informa si la sesión puede opinar. No se renderiza para ejemplares
+// usados: las opiniones son de la obra, no de la publicación de un vendedor.
+const ReviewsSection = ({ resenias, promedio, miResenia, puedeResenar, motivo, onPublicar, onEliminar, soloLectura = false, moderar = false }) => {
   const [orden, setOrden] = useState('new')
   const [filtro, setFiltro] = useState('')
   const [cantidad, setCantidad] = useState(POR_PAGINA)
@@ -26,7 +24,6 @@ const ReviewsSection = ({ resenias, promedio, miResenia, haComprado, onPublicar,
   const cambiar = (setter) => (v) => { setter(v); setCantidad(POR_PAGINA) }
 
   const opinar = () => {
-    if (!haComprado) return toast('Solo los compradores verificados de este libro pueden dejar una opinión')
     setEditando(miResenia)
     setFormAbierto(true)
   }
@@ -47,7 +44,7 @@ const ReviewsSection = ({ resenias, promedio, miResenia, haComprado, onPublicar,
       <div className="rev-wrap">
         <ReviewSummary resenias={resenias} promedio={promedio} />
         <div className="rev-list">
-          <ReviewControls orden={orden} filtro={filtro} onOrden={cambiar(setOrden)} onFiltro={cambiar(setFiltro)} onOpinar={soloLectura ? undefined : opinar} puedeOpinar={haComprado} />
+          <ReviewControls orden={orden} filtro={filtro} onOrden={cambiar(setOrden)} onFiltro={cambiar(setFiltro)} onOpinar={soloLectura ? undefined : opinar} puedeOpinar={puedeResenar} motivo={motivo} />
           {formAbierto && <ReviewForm key={editando?.id || 'nueva'} inicial={editando} onPublicar={publicar} onCancelar={() => { setFormAbierto(false); setEditando(null) }} />}
           <div>
             {visibles.slice(0, cantidad).map((r) => <ReviewItem key={`${r.u}-${r.i}`} resenia={r}
@@ -55,7 +52,7 @@ const ReviewsSection = ({ resenias, promedio, miResenia, haComprado, onPublicar,
             {!resenias.length && (
               <div className="empty" style={{ marginTop: 12 }}>
                 <h3>Este libro todavía no tiene opiniones</h3>
-                <p>{haComprado ? 'Si ya lo leíste, ¡sé la primera persona en opinar!' : 'Las opiniones las dejan quienes compraron el libro.'}</p>
+                <p>{puedeResenar ? 'Si ya lo leíste, ¡sé la primera persona en opinar!' : (motivo || 'Las opiniones las dejan quienes compraron el libro.')}</p>
               </div>
             )}
             {resenias.length > 0 && !visibles.length && <p className="d-rate dim" style={{ padding: '16px 0' }}>No hay opiniones con esa calificación.</p>}

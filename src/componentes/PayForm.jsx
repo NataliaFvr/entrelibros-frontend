@@ -1,4 +1,3 @@
-import { validarTarjeta } from '../utils/tarjeta'
 import PayMethods from './PayMethods'
 import CardFields from './CardFields'
 
@@ -9,9 +8,8 @@ const PayForm = ({ form, usuario, nota, error, onError, onPagar }) => {
 
   const enviar = (e) => {
     e.preventDefault()
-    const mensaje = valores.pm === 'tarjeta' ? validarTarjeta(valores) : ''
-    onError(mensaje)
-    if (!mensaje) onPagar(valores.pm)
+    onError('')
+    onPagar(valores.pm)
   }
 
   const tarjetaDePrueba = () => {

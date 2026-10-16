@@ -43,6 +43,7 @@ export const loginApi = async (email, contrasena) =>
 export const registrarApi = async (v) => {
   const body = {
     nombreUsuario: v.nombreUsuario.trim(), email: v.email.trim(), contrasena: v.pw, nombre: v.nombre.trim(), apellido: v.apellido.trim(),
+    repetirContrasena: v.pw2,
   }
   await api.post(`${RUTA_AUTH}/register`, body)
   return { email: body.email, nombre: body.nombre, nombreUsuario: body.nombreUsuario }
@@ -56,5 +57,5 @@ export const reenviarCodigoApi = async (email) => (await api.post(`${RUTA_AUTH}/
 
 export const recuperarContraseniaApi = async (email) => (await api.post(`${RUTA_AUTH}/recuperar-contrasenia`, { email })).data
 
-export const cambiarContraseniaApi = async ({ email, codigo, nuevaContrasenia }) =>
-  (await api.post(`${RUTA_AUTH}/cambiar-contrasenia`, { email, codigo, nuevaContrasenia })).data
+export const cambiarContraseniaApi = async ({ email, codigo, nuevaContrasenia, repetirNuevaContrasenia }) =>
+  (await api.post(`${RUTA_AUTH}/cambiar-contrasenia`, { email, codigo, nuevaContrasenia, repetirNuevaContrasenia })).data

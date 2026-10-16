@@ -1,39 +1,26 @@
 import useFormulario from '../hooks/useFormulario'
 import { ROLES_CREABLES } from '../data/admin'
-import { validarEmail, validarNombrePersona, validarPasswordNueva, validarUsuario } from '../utils/validaciones'
 import AdminModal from './AdminModal'
 import Aviso from './Aviso'
 import Field from './Field'
 import PasswordField from './PasswordField'
 import SelectField from './SelectField'
 
-// Al editar, la contraseña vacía significa "no cambia"
-const validadores = (editando) => ({
-  nombre: validarNombrePersona('el nombre'),
-  apellido: validarNombrePersona('el apellido'),
-  nombreUsuario: validarUsuario,
-  email: validarEmail,
-  rol: (v) => (editando || ['COMPRADOR', 'VENDEDOR'].includes(v) ? '' : 'Elegí comprador o vendedor.'),
-  pw: (v) => (editando && !v ? '' : validarPasswordNueva(v)),
-})
-
 // Crear (sin `usuario`) o editar (con `usuario`). `onGuardar(valores)` devuelve { ok } o { error }.
 const UsuarioFormModal = ({ usuario, onGuardar, onCerrar }) => {
   const editando = Boolean(usuario)
   const f = useFormulario(
     { nombre: usuario?.nombre ?? '', apellido: usuario?.apellido ?? '', nombreUsuario: usuario?.nombreUsuario ?? '', email: usuario?.email ?? '', pw: '', rol: 'COMPRADOR' },
-    validadores(editando),
   )
 
   const enviar = async (e) => {
     e.preventDefault()
-    if (Object.keys(f.validarTodo(e.currentTarget)).length) return
     const r = await onGuardar(f.valores) // con el back es async
     if (r.error) f.setError(r.error, 'DUPLICADO')
     else onCerrar()
   }
 
-  const campo = (nombre) => ({ name: nombre, value: f.valores[nombre], onChange: f.cambiar, onBlur: f.alSalir, error: f.errores[nombre] })
+  const campo = (nombre) => ({ name: nombre, value: f.valores[nombre], onChange: f.cambiar, error: f.errores[nombre] })
 
   return (
     <AdminModal titulo={editando ? `Editar a ${usuario.nombre}` : 'Crear usuario'} onCerrar={onCerrar}>

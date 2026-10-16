@@ -1,13 +1,12 @@
 import { useState } from 'react'
 import ImageCropper from './ImageCropper'
-import { MAX_FOTOS, MIN_FOTOS } from '../utils/imagen'
 import './ImageUploader.css'
 
 // Subida de 1 a 5 fotos del ejemplar con vista previa antes de publicar.
 // La primera es la portada; las demás aparecen como carrusel en la ficha del libro.
 // El estado vive en `useImagenesLibro` (lo recibe por props: `imagenes`).
 const ImageUploader = ({ imagenes }) => {
-  const { fotos, errores, recorte, elegir, confirmarRecorte, cancelarRecorte, recortar, puedeRecortar, quitar, mover } = imagenes
+  const { fotos, recorte, elegir, confirmarRecorte, cancelarRecorte, recortar, puedeRecortar, quitar, mover } = imagenes
   const [activa, setActiva] = useState(0)
   const actual = Math.min(activa, Math.max(fotos.length - 1, 0))
 
@@ -17,13 +16,13 @@ const ImageUploader = ({ imagenes }) => {
   }
   const alQuitar = () => { quitar(actual); setActiva(Math.max(actual - 1, 0)) }
   const alMover = (paso) => { mover(actual, paso); setActiva(actual + paso) }
-  const entrada = <input type="file" accept="image/jpeg,image/png" multiple onChange={alElegir} disabled={fotos.length >= MAX_FOTOS} />
+  const entrada = <input type="file" multiple onChange={alElegir} />
 
   return (
     <div className="iu">
       <span className="iu-lead">
-        Fotos del libro ({MIN_FOTOS} a {MAX_FOTOS})
-        <small className="iu-hint">JPG o PNG, hasta 10 MB cada una. En los usados, mostrá el estado real: tapa, lomo y páginas.</small>
+        Fotos del libro
+        <small className="iu-hint">Podés recortar y ordenar las fotos antes de enviarlas. El backend valida los archivos.</small>
       </span>
 
       <div className="iu-stage">
@@ -41,7 +40,7 @@ const ImageUploader = ({ imagenes }) => {
                 {i === 0 && <span className="iu-cv">Portada</span>}
               </button>
             ))}
-            {fotos.length > 0 && fotos.length < MAX_FOTOS && <label className="iu-add" title="Agregar fotos" aria-label="Agregar fotos">+{entrada}</label>}
+            {fotos.length > 0 && <label className="iu-add" title="Agregar fotos" aria-label="Agregar fotos">+{entrada}</label>}
           </div>
 
           {fotos.length > 0 && (
@@ -52,13 +51,10 @@ const ImageUploader = ({ imagenes }) => {
               <button className="lnk" type="button" onClick={alQuitar}>Quitar esta foto</button>
             </div>
           )}
-          <span className="iu-count" role="status">
-            {`${fotos.length} de ${MAX_FOTOS} fotos`}
-          </span>
+          <span className="iu-count" role="status">{`${fotos.length} fotos seleccionadas`}</span>
         </div>
       </div>
 
-      <p className="iu-err" role="alert">{errores.join(' ')}</p>
       {recorte && (
         <ImageCropper key={recorte.restantes + String(recorte.origen).slice(-20)} origen={recorte.origen} aspecto={recorte.aspecto} anchoMax={recorte.anchoMax}
           titulo={recorte.restantes ? `${recorte.titulo} (faltan ${recorte.restantes} más)` : recorte.titulo}

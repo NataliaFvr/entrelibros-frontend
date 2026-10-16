@@ -13,14 +13,14 @@ import SellerCatalog from '../componentes/SellerCatalog'
 import NotFoundPage from './NotFoundPage'
 
 const Perfil = ({ vendedor, libros }) => {
-  const { resenias, promedio, miResena, libroComprado, esPropio, puedeResenar, publicar, eliminar } = useResenasVendedor(vendedor.tienda, vendedor.id)
+  const { resenias, promedio, miResena, puedeResenar, motivo, publicar, eliminar } = useResenasVendedor(vendedor.tienda, vendedor.id)
   const esAdmin = useEsAdmin()
   const [modal, setModal] = useState(false)
   const [params, setParams] = useSearchParams()
   const tab = params.get('tab') === 'resenias' ? 'resenias' : 'libros' // /vendedor/:id?tab=resenias
   const pestanias = [['libros', `Libros publicados (${libros.length})`], ['resenias', `Reputación y reseñas (${resenias.length})`]]
 
-  const escribir = () => { if (puedeResenar) setModal(true) } // el botón solo existe si puede; esto es una red de seguridad
+  const escribir = () => setModal(true)
   const enviar = async (puntos, texto) => {
     if (await publicar(puntos, texto)) setModal(false) // si el back lo rechazó, el modal queda abierto para no perder lo escrito
   }
@@ -32,10 +32,10 @@ const Perfil = ({ vendedor, libros }) => {
       <AccountTabs pestanias={pestanias} tab={tab} onIr={(t) => setParams(t === 'libros' ? {} : { tab: t }, { replace: true })} />
       {tab === 'libros'
         ? <SellerCatalog tienda={vendedor.tienda} libros={libros} />
-        : <SellerReviews resenias={resenias} promedio={promedio} miResena={miResena} esPropio={esPropio} puedeResenar={puedeResenar} onEscribir={escribir} onEliminar={eliminar} moderar={esAdmin} />}
+        : <SellerReviews resenias={resenias} promedio={promedio} miResena={miResena} puedeResenar={puedeResenar} motivo={motivo} onEscribir={escribir} onEliminar={eliminar} moderar={esAdmin} />}
       <MiniDeco />
-      {modal && puedeResenar && (
-        <SellerReviewModal tienda={vendedor.tienda} libro={libroComprado} inicial={miResena} onPublicar={enviar} onCerrar={() => setModal(false)} />
+      {modal && (
+        <SellerReviewModal tienda={vendedor.tienda} inicial={miResena} onPublicar={enviar} onCerrar={() => setModal(false)} />
       )}
     </main>
   )

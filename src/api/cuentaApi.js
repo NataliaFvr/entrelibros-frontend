@@ -28,5 +28,5 @@ export const listarMarcapaginasApi = async () => (await traerPaginas('/marcapagi
 export const agregarMarcapaginaApi = async (idLibro) => (await api.post('/marcapaginas', { idLibro })).data
 export const quitarMarcapaginaApi = async (idLibro) => (await api.delete(`/marcapaginas/${idLibro}`)).data
 
-// POST /contacto { nombre, email, mensaje } (público)
-export const enviarContactoApi = async ({ nombre, email, mensaje }) => (await api.post('/contacto', { nombre, email, mensaje })).data
+// POST /contacto (público). El payload coincide con ContactoRequest del backend.
+export const enviarContactoApi = async (contacto) => (await api.post('/contacto', contacto)).data

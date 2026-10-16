@@ -1,21 +1,18 @@
 import { useState } from 'react'
 import { useAuth } from '../hooks/useAuth'
 import useFormulario from '../hooks/useFormulario'
-import { validadoresLoginApi } from '../utils/validaciones'
 import Aviso from './Aviso'
 import Field from './Field'
 import PasswordField from './PasswordField'
 
 const LoginForm = ({ onListo, onPendiente, onIrARegistro, onOlvide }) => {
   const { login } = useAuth()
-  const { valores, cambiar, errores, alSalir, validarTodo, error, tipoError, setError } = useFormulario({ ident: '', pw: '' }, validadoresLoginApi)
+  const { valores, cambiar, errores, error, tipoError, setError } = useFormulario({ ident: '', pw: '' })
   const [enviando, setEnviando] = useState(false)
 
   const enviar = async (e) => {
     e.preventDefault()
     if (enviando) return
-    const malos = validarTodo(e.currentTarget) // formato de e-mail y largo de la contraseña, antes de llamar a la API
-    if (Object.keys(malos).length) return setError('Revisá los campos marcados antes de continuar.')
     setError('')
     setEnviando(true)
     try {
@@ -31,8 +28,8 @@ const LoginForm = ({ onListo, onPendiente, onIrARegistro, onOlvide }) => {
 
   return (
     <form className="aform" noValidate onSubmit={enviar}>
-      <Field label="E-mail" name="ident" type="email" value={valores.ident} onChange={cambiar} onBlur={alSalir} error={errores.ident} autoComplete="email" />
-      <PasswordField label="Contraseña" name="pw" value={valores.pw} onChange={cambiar} onBlur={alSalir} error={errores.pw} autoComplete="current-password" />
+      <Field label="E-mail" name="ident" type="email" value={valores.ident} onChange={cambiar} error={errores.ident} autoComplete="email" />
+      <PasswordField label="Contraseña" name="pw" value={valores.pw} onChange={cambiar} error={errores.pw} autoComplete="current-password" />
       {onOlvide && <p className="alt-l forgot"><a href="#" onClick={(e) => { e.preventDefault(); onOlvide(valores.ident.trim()) }}>¿Olvidaste tu contraseña?</a></p>}
       <Aviso mensaje={error} tipo={tipoError} />
       <button className="btn main" type="submit" disabled={enviando}>{enviando ? 'Entrando…' : 'Entrar'}</button>

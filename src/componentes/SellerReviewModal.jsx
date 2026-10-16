@@ -5,7 +5,6 @@ import RatingInput from './RatingInput'
 const SellerReviewModal = ({ tienda, libro, inicial, onPublicar, onCerrar }) => {
   const [puntos, setPuntos] = useState(inicial ? inicial.st : 0)
   const [texto, setTexto] = useState(inicial ? inicial.t : '')
-  const [error, setError] = useState('')
 
   useEffect(() => {
     const alEscape = (e) => { if (e.key === 'Escape') onCerrar() }
@@ -15,8 +14,6 @@ const SellerReviewModal = ({ tienda, libro, inicial, onPublicar, onCerrar }) => 
 
   const enviar = (e) => {
     e.preventDefault()
-    if (!puntos) return setError('Elegí una calificación de 1 a 5 estrellas.')
-    if (texto.trim().length < 3) return setError('Contanos brevemente cómo fue tu experiencia.')
     onPublicar(puntos, texto.trim())
   }
 
@@ -30,9 +27,8 @@ const SellerReviewModal = ({ tienda, libro, inicial, onPublicar, onCerrar }) => 
           <RatingInput value={puntos} onChange={setPuntos} />
           <label className="fld">
             Tu comentario
-            <textarea rows={4} maxLength={300} placeholder="Contá cómo fue tu experiencia con el vendedor" value={texto} onChange={(e) => setTexto(e.target.value)} />
+            <textarea rows={4} placeholder="Contá cómo fue tu experiencia con el vendedor" value={texto} onChange={(e) => setTexto(e.target.value)} />
           </label>
-          <p className="ferr" role="alert">{error}</p>
           <div className="rvf-b">
             <button className="btn main" type="submit">{inicial ? 'Guardar cambios' : 'Publicar reseña'}</button>
             <button className="btn alt" type="button" onClick={onCerrar}>Cancelar</button>

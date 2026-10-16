@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import useFormulario from '../hooks/useFormulario'
-import { CAMPOS_CUENTA, validadoresCuenta } from '../utils/validaciones'
+import { CAMPOS_CUENTA } from '../utils/camposApi'
 import { mapearCampos, normalizarError } from '../utils/errorApi'
 import Avatar from './Avatar'
 import AvatarPicker from './AvatarPicker'
@@ -9,13 +9,10 @@ import PhotoControls from './PhotoControls'
 import Field from './Field'
 import PasswordField from './PasswordField'
 
-// Al editar, la contraseña es opcional (vacía = no cambia): solo se valida si se escribe algo
-const VALIDADORES = validadoresCuenta({ pwObligatoria: false })
-
 const EditProfileForm = ({ user, perfil, onGuardar, onCancelar }) => {
-  const { valores, cambiar, errores, alSalir, validarTodo, setErroresCampos, error, tipoError, setError } = useFormulario({
+  const { valores, cambiar, errores, setErroresCampos, error, tipoError, setError } = useFormulario({
     nombre: user.nombre, apellido: user.apellido, nombreUsuario: user.nombreUsuario, email: user.email, pw: '',
-  }, VALIDADORES, { enVivo: ['pw'] })
+  })
   // Avatar/foto en borrador: recién se guardan con "Guardar cambios"
   const [borrador, setBorrador] = useState({ avatar: perfil.avatar || '', foto: perfil.foto || '' })
   const [enviando, setEnviando] = useState(false)
@@ -23,8 +20,6 @@ const EditProfileForm = ({ user, perfil, onGuardar, onCancelar }) => {
   const enviar = async (e) => {
     e.preventDefault()
     if (enviando) return
-    const malos = validarTodo(e.currentTarget)
-    if (Object.keys(malos).length) return setError('Revisá los campos marcados antes de continuar.')
     setError('')
     setEnviando(true)
     try {
@@ -38,7 +33,7 @@ const EditProfileForm = ({ user, perfil, onGuardar, onCancelar }) => {
     }
   }
 
-  const props = (nombre) => ({ name: nombre, value: valores[nombre], onChange: cambiar, onBlur: alSalir, error: errores[nombre] })
+  const props = (nombre) => ({ name: nombre, value: valores[nombre], onChange: cambiar, error: errores[nombre] })
 
   return (
     <form className="card aform" noValidate onSubmit={enviar}>

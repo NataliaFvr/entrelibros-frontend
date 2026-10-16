@@ -5,17 +5,13 @@ import './SellerPanel.css'
 
 const POR_PAGINA = 5
 
-// Módulo de reseñas de compradores: resumen por estrellas + listado.
-// El botón de escribir solo aparece si `puedeResenar`; el dueño de la tienda ve un aviso en su lugar.
-const SellerReviews = ({ resenias, promedio, miResena, esPropio, puedeResenar, onEscribir, onEliminar, moderar = false }) => {
+// Módulo de reseñas de compradores. El permiso para publicar llega del backend.
+const SellerReviews = ({ resenias, promedio, miResena, puedeResenar, motivo, onEscribir, onEliminar, moderar = false }) => {
   const [cantidad, setCantidad] = useState(POR_PAGINA)
 
   return (
     <section className="dsec" id="resenias">
       <h2>Reseñas de compradores</h2>
-      {esPropio && (
-        <p className="note sp-owner" role="status"><b>Esta es la vista pública de tu reputación</b></p>
-      )}
       <div className={`rev-wrap sp-rev-wrap${resenias.length ? '' : ' solo'}`}>
         {resenias.length > 0 && <ReviewSummary resenias={resenias} promedio={promedio} />}
         <div className="rev-list sp-rev-list">
@@ -27,8 +23,8 @@ const SellerReviews = ({ resenias, promedio, miResena, esPropio, puedeResenar, o
               </button>
             )}
           </div>
-          {!esPropio && !puedeResenar && (
-            <p className="note" role="note">Solo los compradores que hayan adquirido un libro de este vendedor pueden dejar una reseña.</p>
+          {!puedeResenar && motivo && (
+            <p className="note" role="note">{motivo}</p>
           )}
           {resenias.slice(0, cantidad).map((r) => <SellerReviewItem key={r.id} resenia={r} propia={miResena?.id === r.id} moderable={moderar}
             onEditar={puedeResenar ? onEscribir : undefined} onEliminar={onEliminar} />)}

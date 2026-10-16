@@ -1,8 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import Aviso from './Aviso'
 
-const MIN_MOTIVO = 3 // mismo mínimo que valida el servicio
-
 // Pop-up para rechazar: el motivo es obligatorio y el vendedor lo ve. Se cierra con Escape, la cruz, "Cancelar" o el fondo.
 // `onConfirmar(motivo)` devuelve { ok } o { error }: si hay error el pop-up sigue abierto y lo muestra.
 const RechazoModal = ({ titulo, onConfirmar, onCerrar }) => {
@@ -26,10 +24,6 @@ const RechazoModal = ({ titulo, onConfirmar, onCerrar }) => {
   const enviar = async (e) => {
     e.preventDefault()
     if (enviando) return
-    if (motivo.trim().length < MIN_MOTIVO) {
-      setError('Explicale al vendedor por qué rechazás el libro.')
-      return campoRef.current?.focus()
-    }
     setError('')
     setEnviando(true)
     const respuesta = await onConfirmar(motivo.trim())
@@ -46,10 +40,9 @@ const RechazoModal = ({ titulo, onConfirmar, onCerrar }) => {
         <p className="modal-msg">“{titulo}” volverá al vendedor con tu motivo.</p>
         <label className="fld mod-motivo">
           Motivo del rechazo (obligatorio)
-          <textarea ref={campoRef} value={motivo} maxLength={500} rows={4} required aria-invalid={Boolean(error)}
+          <textarea ref={campoRef} value={motivo} rows={4} aria-invalid={Boolean(error)}
             onChange={(e) => setMotivo(e.target.value)} placeholder="Ej.: las fotos no se ven bien o el precio no corresponde." />
         </label>
-        <small className="iu-hint">{motivo.length} / 500</small>
         <Aviso mensaje={error} tipo="VALIDACION" />
         <div className="modal-btns mod-modal-btns">
           <button className="btn alt" type="button" onClick={onCerrar}>Cancelar</button>
