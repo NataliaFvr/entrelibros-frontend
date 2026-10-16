@@ -4,7 +4,7 @@ import useFormulario from '../hooks/useFormulario'
 import Field from './Field'
 import SelectField from './SelectField'
 
-const INICIAL = { alias: '', calle: '', ciudad: '', cp: '', prov: PROVINCIAS[0] }
+const INICIAL = { alias: '', calle: '', ciudad: '', cp: '', provincia: PROVINCIAS[0] }
 
 // Formulario a todo el ancho: los campos se acomodan en una grilla que se adapta al contenedor
 // `embebido`: dentro de otra tarjeta (el resumen del carrito): sin tarjeta propia y en una sola columna.
@@ -16,9 +16,9 @@ const AddressForm = ({ embebido = false, onGuardada }) => {
 
   const enviar = async (e) => {
     e.preventDefault()
-    const { alias, calle, ciudad, prov, cp } = f.valores
+    const { alias, calle, ciudad, provincia, cp } = f.valores
     // Solo se limpia el formulario si se guardó: si el back falla, la persona conserva lo que escribió
-    const guardada = await agregarDireccion({ alias: alias.trim(), calle: calle.trim(), ciudad: ciudad.trim(), prov, cp: cp.trim().toUpperCase() })
+    const guardada = await agregarDireccion({ alias: alias.trim(), calle: calle.trim(), ciudad: ciudad.trim(), prov: provincia, cp: cp.trim().toUpperCase() })
     if (guardada) { f.reiniciar(); if (onGuardada) onGuardada() }
   }
 
@@ -29,7 +29,7 @@ const AddressForm = ({ embebido = false, onGuardada }) => {
       <Field label="Calle, número, piso y depto" autoComplete="street-address" {...campo('calle')} />
       <Field label="Ciudad / localidad" autoComplete="address-level2" {...campo('ciudad')} />
       <Field label="Código postal" autoComplete="postal-code" {...campo('cp')} />
-      <SelectField label="Provincia" opciones={PROVINCIAS} {...campo('prov')} />
+      <SelectField label="Provincia" opciones={PROVINCIAS} {...campo('provincia')} />
       <button className="btn main" type="submit">Guardar dirección</button>
     </form>
   )

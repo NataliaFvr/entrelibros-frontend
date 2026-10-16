@@ -9,7 +9,7 @@ const DescriptionSection = ({ libro }) => {
     <section className="dsec">
       <h2>Descripción</h2>
       <div className="card desc-card">
-        {texto.split(/\n{2,}/).map((parrafo, i) => <p key={i}>{parrafo}</p>)}
+        {texto.split(/\n{2,}/).map((parrafo) => <p key={parrafo}>{parrafo}</p>)}
       </div>
     </section>
   )

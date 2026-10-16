@@ -16,7 +16,7 @@ const ImageCropper = ({ origen, aspecto = 1, anchoMax = 600, circular = false, t
   const arrastre = useRef(null)
   const cancelarRef = useRef(onCancelar)
 
-  useEffect(() => { cancelarRef.current = onCancelar })
+  useEffect(() => { cancelarRef.current = onCancelar }, [onCancelar])
 
   useEffect(() => {
     let vigente = true

@@ -29,7 +29,7 @@ const Gallery = ({ libro }) => {
     <div className="gal">
       <div className="thumbs">
         {Array.from({ length: total }, (_, i) => (
-          <button key={i} className={`thumb${i === indice ? ' on' : ''}`} type="button" aria-label={etiqueta(i)} aria-current={i === indice} onClick={() => ir(i)}>
+          <button key={reales ? fotos[i] : VISTAS[i]} className={`thumb${i === indice ? ' on' : ''}`} type="button" aria-label={etiqueta(i)} aria-current={i === indice} onClick={() => ir(i)}>
             <CoverArt libro={libroConFotos} k={i} />
           </button>
         ))}

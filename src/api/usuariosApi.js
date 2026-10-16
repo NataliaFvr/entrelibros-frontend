@@ -8,7 +8,7 @@ export const listarUsuariosApi = async () => (await traerPaginas('/usuarios')).m
 
 export const crearUsuarioApi = async (v) =>
   aUsuarioFront((await api.post('/usuarios', {
-    nombreUsuario: v.nombreUsuario.trim(), email: v.email.trim(), contrasena: v.pw, nombre: v.nombre.trim(), apellido: v.apellido.trim(), rol: v.rol,
+    nombreUsuario: v.nombreUsuario.trim(), email: v.email.trim(), contrasena: v.contrasena, nombre: v.nombre.trim(), apellido: v.apellido.trim(), rol: v.rol,
   })).data)
 
 // PATCH /usuarios/{id}: solo se aplican los campos que vienen (UsuarioUpdateRequest)

@@ -13,7 +13,7 @@ const LibrosProvider = ({ children }) => {
   const [errorCarga, setErrorCarga] = useState(false) // true si el catálogo no se pudo leer (red, 500…): distinto de "no hay libros"
   const toast = useToast()
   const avisar = useRef(toast)
-  useEffect(() => { avisar.current = toast })
+  useEffect(() => { avisar.current = toast }, [toast])
 
   useEffect(() => {
     Promise.all([getLibros(), getCategorias()])

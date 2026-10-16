@@ -5,7 +5,7 @@ const AdminModal = ({ titulo, onCerrar, children }) => {
   const tarjetaRef = useRef(null)
   const cerrarRef = useRef(onCerrar)
 
-  useEffect(() => { cerrarRef.current = onCerrar })
+  useEffect(() => { cerrarRef.current = onCerrar }, [onCerrar])
 
   useEffect(() => {
     const alEscape = (e) => { if (e.key === 'Escape') cerrarRef.current() }

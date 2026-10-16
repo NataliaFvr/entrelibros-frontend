@@ -20,7 +20,7 @@ export const aLibroRequest = (d, idCategorias) => ({
 
 // Campo de LibroRequest -> campo del formulario (para pintar los errores que devuelve la API en cada input)
 export const CAMPOS_LIBRO = {
-  titulo: 't', autor: 'a', editorial: 'ed', idCategorias: 'cats', idioma: 'idioma',
-  anio: 'anio', estadoLibro: 'estado', precio: 'base', descuentoPct: 'd',
+  titulo: 'titulo', autor: 'autor', editorial: 'editorial', idCategorias: 'cats', idioma: 'idioma',
+  anio: 'anio', estadoLibro: 'estadoLibro', precio: 'precio', descuentoPct: 'descuentoPct',
   stock: 'stock', descripcion: 'descripcion',
 }

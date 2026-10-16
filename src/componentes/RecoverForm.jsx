@@ -2,14 +2,11 @@ import { useState } from 'react'
 import { cambiarContraseniaApi, recuperarContraseniaApi } from '../api/authApi'
 import useCuentaRegresiva from '../hooks/useCuentaRegresiva'
 import useFormulario from '../hooks/useFormulario'
-import { mapearCampos, normalizarError } from '../utils/errorApi'
+import { normalizarError } from '../utils/errorApi'
 import { enmascararMail } from '../utils/format'
 import Aviso from './Aviso'
 import Field from './Field'
 import PasswordField from './PasswordField'
-
-// Campos del back (CambiarContraseniaRequest) -> campos del formulario
-const CAMPOS_CAMBIO = { nuevaContrasenia: 'pw', repetirNuevaContrasenia: 'pw2', codigo: 'codigo', email: 'email' }
 
 // Paso 1: pedir el código. POST /api/v1/auth/recuperar-contrasenia { email } -> el back lo manda por e-mail (vale 15 min).
 const PedirCodigo = ({ emailInicial, onEnviado, onVolver }) => {
@@ -47,7 +44,7 @@ const PedirCodigo = ({ emailInicial, onEnviado, onVolver }) => {
 
 // Paso 2: código + contraseña nueva. POST /api/v1/auth/cambiar-contrasenia { email, codigo, nuevaContrasenia }
 const NuevaContrasena = ({ email, onListo, onOtroMail }) => {
-  const { valores, cambiar, errores, setErroresCampos, error, tipoError, setError } = useFormulario({ codigo: '', pw: '', pw2: '' })
+  const { valores, cambiar, errores, setErroresCampos, error, tipoError, setError } = useFormulario({ codigo: '', nuevaContrasenia: '', repetirNuevaContrasenia: '' })
   const [restante, reiniciarCuenta] = useCuentaRegresiva(30)
   const [enviando, setEnviando] = useState(false)
   const [aviso, setAviso] = useState('')
@@ -61,13 +58,13 @@ const NuevaContrasena = ({ email, onListo, onOtroMail }) => {
       await cambiarContraseniaApi({
         email,
         codigo: valores.codigo.trim(),
-        nuevaContrasenia: valores.pw,
-        repetirNuevaContrasenia: valores.pw2,
+        nuevaContrasenia: valores.nuevaContrasenia,
+        repetirNuevaContrasenia: valores.repetirNuevaContrasenia,
       })
       onListo()
     } catch (err) {
       const info = normalizarError(err, 'verificacion') // código inválido o vencido
-      setErroresCampos(mapearCampos(info.campos, CAMPOS_CAMBIO))
+      setErroresCampos(info.campos || {}) // los campos se llaman igual que en el back
       setError(info.mensaje, info.tipo)
     } finally {
       setEnviando(false)
@@ -98,8 +95,8 @@ const NuevaContrasena = ({ email, onListo, onOtroMail }) => {
       </p>
       <Field label="Código de recuperación" className="code-in" {...props('codigo')}
         inputMode="numeric" autoComplete="one-time-code" placeholder="000000" />
-      <PasswordField label="Contraseña nueva (mín. 8, mayúscula, número y símbolo)" {...props('pw')} autoComplete="new-password" />
-      <PasswordField label="Repetir contraseña" {...props('pw2')} autoComplete="new-password" />
+      <PasswordField label="Contraseña nueva (mín. 8, mayúscula, número y símbolo)" {...props('nuevaContrasenia')} autoComplete="new-password" />
+      <PasswordField label="Repetir contraseña" {...props('repetirNuevaContrasenia')} autoComplete="new-password" />
       <Aviso mensaje={error} tipo={tipoError} />
       <button className="btn main" type="submit" disabled={enviando}>{enviando ? 'Guardando…' : 'Cambiar contraseña'}</button>
       <button className="btn alt" type="button" disabled={restante > 0} onClick={reenviar}>

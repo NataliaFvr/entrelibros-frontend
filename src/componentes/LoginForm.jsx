@@ -7,7 +7,7 @@ import PasswordField from './PasswordField'
 
 const LoginForm = ({ onListo, onPendiente, onIrARegistro, onOlvide }) => {
   const { login } = useAuth()
-  const { valores, cambiar, errores, error, tipoError, setError } = useFormulario({ ident: '', pw: '' })
+  const { valores, cambiar, errores, error, tipoError, setError } = useFormulario({ email: '', contrasena: '' })
   const [enviando, setEnviando] = useState(false)
 
   const enviar = async (e) => {
@@ -17,7 +17,7 @@ const LoginForm = ({ onListo, onPendiente, onIrARegistro, onOlvide }) => {
     setEnviando(true)
     try {
       // login() ya traduce los errores HTTP de la API (401, 403, 404…) a { error, tipo }
-      const r = await login(valores.ident, valores.pw)
+      const r = await login(valores.email, valores.contrasena)
       if (r.error) return setError(r.error, r.tipo)
       if (r.pendiente) return onPendiente()
       onListo()
@@ -28,9 +28,9 @@ const LoginForm = ({ onListo, onPendiente, onIrARegistro, onOlvide }) => {
 
   return (
     <form className="aform" noValidate onSubmit={enviar}>
-      <Field label="E-mail" name="ident" type="email" value={valores.ident} onChange={cambiar} error={errores.ident} autoComplete="email" />
-      <PasswordField label="Contraseña" name="pw" value={valores.pw} onChange={cambiar} error={errores.pw} autoComplete="current-password" />
-      {onOlvide && <p className="alt-l forgot"><a href="#" onClick={(e) => { e.preventDefault(); onOlvide(valores.ident.trim()) }}>¿Olvidaste tu contraseña?</a></p>}
+      <Field label="E-mail" name="email" type="email" value={valores.email} onChange={cambiar} error={errores.email} autoComplete="email" />
+      <PasswordField label="Contraseña" name="contrasena" value={valores.contrasena} onChange={cambiar} error={errores.contrasena} autoComplete="current-password" />
+      {onOlvide && <p className="alt-l forgot"><a href="#" onClick={(e) => { e.preventDefault(); onOlvide(valores.email.trim()) }}>¿Olvidaste tu contraseña?</a></p>}
       <Aviso mensaje={error} tipo={tipoError} />
       <button className="btn main" type="submit" disabled={enviando}>{enviando ? 'Entrando…' : 'Entrar'}</button>
       <p className="alt-l">¿No tenés cuenta? <a href="#" onClick={(e) => { e.preventDefault(); onIrARegistro() }}>Registrate</a></p>

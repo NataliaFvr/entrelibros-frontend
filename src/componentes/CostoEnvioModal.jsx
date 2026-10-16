@@ -5,11 +5,11 @@ import Field from './Field'
 
 // Crear o cambiar el costo de un tipo de envío (sin `costoActual` es una tarifa nueva). `onGuardar(costo)` devuelve (una Promesa de) { ok } o { error }.
 const CostoEnvioModal = ({ titulo, costoActual, onGuardar, onCerrar }) => {
-  const f = useFormulario({ costo: costoActual == null ? '' : String(costoActual) })
+  const f = useFormulario({ costoFijo: costoActual == null ? '' : String(costoActual) })
 
   const enviar = async (e) => {
     e.preventDefault()
-    const r = await onGuardar(Number(f.valores.costo))
+    const r = await onGuardar(Number(f.valores.costoFijo))
     if (r.error) f.setError(r.error, 'DESCONOCIDO')
     else onCerrar()
   }
@@ -17,8 +17,8 @@ const CostoEnvioModal = ({ titulo, costoActual, onGuardar, onCerrar }) => {
   return (
     <AdminModal titulo={titulo} onCerrar={onCerrar}>
       <form className="aform" noValidate onSubmit={enviar}>
-        <Field label="Costo del envío ($)" name="costo" inputMode="decimal" autoComplete="off"
-          value={f.valores.costo} onChange={f.cambiar} error={f.errores.costo} />
+        <Field label="Costo del envío ($)" name="costoFijo" inputMode="decimal" autoComplete="off"
+          value={f.valores.costoFijo} onChange={f.cambiar} error={f.errores.costoFijo} />
         <Aviso mensaje={f.error} tipo={f.tipoError} />
         <div className="modal-btns">
           <button className="btn main" type="submit">{costoActual == null ? 'Crear tarifa' : 'Guardar precio'}</button>

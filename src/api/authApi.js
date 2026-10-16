@@ -42,8 +42,8 @@ export const loginApi = async (email, contrasena) =>
 // Body de UsuarioRequest. La cuenta nace sin verificar: el back manda el código por mail (201 { mensaje }).
 export const registrarApi = async (v) => {
   const body = {
-    nombreUsuario: v.nombreUsuario.trim(), email: v.email.trim(), contrasena: v.pw, nombre: v.nombre.trim(), apellido: v.apellido.trim(),
-    repetirContrasena: v.pw2,
+    nombreUsuario: v.nombreUsuario.trim(), email: v.email.trim(), contrasena: v.contrasena, nombre: v.nombre.trim(), apellido: v.apellido.trim(),
+    repetirContrasena: v.repetirContrasena,
   }
   await api.post(`${RUTA_AUTH}/register`, body)
   return { email: body.email, nombre: body.nombre, nombreUsuario: body.nombreUsuario }
