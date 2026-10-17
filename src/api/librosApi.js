@@ -74,7 +74,9 @@ export const getMisLibrosApi = async () => {
   return (await traerPaginas('/libros/mios')).map(aLibroFront)
 }
 
-export const getLibroApi = async (id) => aLibroFront((await api.get(`/libros/${id}`)).data)
+// Con `provinciaComprador` el back agrega `envio`: 'misma' o 'distinta' provincia que el vendedor
+export const getLibroApi = async (id, provinciaComprador) =>
+  aLibroFront((await api.get(`/libros/${id}`, { params: { provinciaComprador } })).data)
 export const crearLibroApi = async (request) => (await api.post('/libros', request)).data
 export const darDeBajaApi = async (id) => (await api.patch(`/libros/${id}/baja`)).data
 export const reactivarApi = async (id) => (await api.patch(`/libros/${id}/reactivar`)).data

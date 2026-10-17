@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import { esUsado } from '../utils/libro'
+import { fmt } from '../utils/format'
+import useEnvioFicha from '../hooks/useEnvioFicha'
 
 // `soloLectura`: administrador mirando la ficha -> sin botones de compra
 const BuyBox = ({ libro, stock, onComprar, onCarrito, soloLectura = false }) => {
@@ -8,6 +10,7 @@ const BuyBox = ({ libro, stock, onComprar, onCarrito, soloLectura = false }) => 
   // Cantidad a comprar: solo para libros nuevos con más de una unidad (un usado es una pieza única)
   const [cantidad, setCantidad] = useState(1)
   const elegible = !esUsado(libro) && stock > 1
+  const envio = useEnvioFicha(libro.id)
   if (stock <= 0) {
     return (
       <div className="buy">
@@ -26,7 +29,9 @@ const BuyBox = ({ libro, stock, onComprar, onCarrito, soloLectura = false }) => 
         <>
           <div className="ship">
             <b>{libro.provV ? `Vendedor en ${libro.provV}` : 'Provincia del vendedor no informada'}</b>
-            <small>El costo y el plazo de envío se calculan al finalizar la compra.</small>
+            {envio?.provincia && <small>Envío a {envio.provincia}: <b>{fmt(envio.costo)}</b> ({envio.misma ? 'misma provincia' : 'otra provincia'})</small>}
+            {envio?.desde != null && <small>Envío desde <b>{fmt(envio.desde)}</b>. El costo exacto se calcula con tu dirección principal.</small>}
+            <small>Un envío por vendedor: el total se confirma al finalizar la compra.</small>
           </div>
           {elegible && (
             <div className="buy-q">
