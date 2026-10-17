@@ -5,7 +5,8 @@ import AddressSelect from './AddressSelect'
 import AddressForm from './AddressForm'
 
 // Resumen de la estantería + dirección de envío + botón para pasar al pago.
-// `cotizacion` = { costoEnvio, total, cantidadEnvios } que calcula el back para la dirección elegida (null si todavía no llegó)
+// `cotizacion` = { costoEnvio, total, cantidadEnvios, envios } que calcula el back para la dirección elegida (null si todavía no llegó).
+// `envios` = [{ idVendedor, vendedor, zona: 'misma' | 'distinta', costo }]: un envío por vendedor.
 const CartSummary = ({ sub, cotizacion, direcciones, elegida, onElegir, onFinalizar, enviando = false }) => {
   const [agregando, setAgregando] = useState(false) // formulario de nueva dirección abierto (si ya hay direcciones)
   return (
@@ -15,6 +16,16 @@ const CartSummary = ({ sub, cotizacion, direcciones, elegida, onElegir, onFinali
       {cotizacion ? (
         <>
           <SummaryRow titulo="Envío" detalle={`${cotizacion.cantidadEnvios} ${plural(cotizacion.cantidadEnvios, 'envío', 'envíos')} (uno por vendedor)`} valor={fmt(cotizacion.costoEnvio)} />
+          {(cotizacion.envios || []).length > 1 && (
+            <ul className="env-det">
+              {cotizacion.envios.map((e) => (
+                <li key={e.idVendedor}>
+                  <span>{e.vendedor} · {e.zona === 'misma' ? 'misma provincia' : 'otra provincia'}</span>
+                  <span>{fmt(e.costo)}</span>
+                </li>
+              ))}
+            </ul>
+          )}
           <SummaryRow titulo="Total" valor={fmt(cotizacion.total)} total />
         </>
       ) : (
