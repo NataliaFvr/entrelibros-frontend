@@ -52,7 +52,7 @@ const useCarrito = (user, { avisar }) => {
     // Ya están todas las unidades que el back permite (maxCantidad): no se manda un pedido que va a rechazar
     const enCarrito = ultimo.current.find((c) => c.id === libro.id)
     if (enCarrito && enCarrito.q >= enCarrito.maxCantidad) {
-      avisar('Ya tenés en tu estantería todas las unidades disponibles')
+      avisar('Ya tenés en tu estantería todas las unidades disponibles', { texto: 'Ir a mi estantería', a: '/carrito' })
       return Promise.resolve(true)
     }
     return ejecutar(async () => {
@@ -63,7 +63,7 @@ const useCarrito = (user, { avisar }) => {
       } else {
         poner([...ultimo.current, await agregarItemApi(libro.id, 1)]) // POST: fila nueva
       }
-      avisar('Añadido a tu estantería')
+      avisar('Añadido a tu estantería', { texto: 'Ir a mi estantería', a: '/carrito' })
     })
   }
 
