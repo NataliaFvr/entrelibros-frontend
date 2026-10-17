@@ -4,6 +4,14 @@ import { esUsado } from '../utils/libro'
 const BuyBox = ({ libro, stock, onComprar, onCarrito, soloLectura = false }) => {
   // Un usado es una pieza única: ahí no corresponde la alerta de "¡Última unidad!"
   const ultima = stock === 1 && !esUsado(libro)
+  if (stock <= 0) {
+    return (
+      <div className="buy">
+        <div className="stk last">Sin stock</div>
+        <small className="sv-meta">Este libro se agotó. Guardalo en tu Marcapáginas para encontrarlo cuando vuelva.</small>
+      </div>
+    )
+  }
   return (
     <div className="buy">
       <div className={`stk${ultima ? ' last' : ''}`}>{ultima ? '¡Última unidad!' : 'Stock disponible'}</div>

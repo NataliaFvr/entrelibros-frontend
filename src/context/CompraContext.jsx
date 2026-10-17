@@ -4,7 +4,7 @@ import { useAuth } from '../hooks/useAuth'
 import { useToast } from '../hooks/useToast'
 import useCarrito from '../hooks/useCarrito'
 import { cancelarOrdenApi, checkoutApi, crearPagoApi, listarPedidosApi } from '../api/comprasApi'
-import { mensajeError } from '../utils/errorApi'
+import { mensajeError, normalizarError } from '../utils/errorApi'
 
 // Carrito y pedidos de la cuenta que tiene la sesión.
 // El carrito lo maneja hooks/useCarrito.js: cada acción se sincroniza con /carrito/items y el
@@ -57,16 +57,19 @@ const CompraProvider = ({ children }) => {
   }
 
   // POST /pagos {idOrden, proveedor}: devuelve el resultado del pago (el back hoy aprueba siempre: SIMULADO_APROBADO)
-  const pagarPedidoApi = async (n, proveedor) => {
+  const pagarPedidoApi = async (n, proveedor, tarjeta = {}) => {
     const pedido = pedidos.find((o) => o.n === n)
     try {
-      const pago = await crearPagoApi(Number(n), proveedor)
+      const pago = await crearPagoApi(Number(n), proveedor, tarjeta)
       await refrescarPedidos()
       if (pago.resultado === 'SIMULADO_APROBADO' && pedido) quitarMarks(pedido.its.map((i) => i.id))
       return pago.resultado
     } catch (err) {
       await refrescarPedidos() // por ejemplo, la reserva venció mientras se pagaba
-      throw new Error(mensajeError(err))
+      const info = normalizarError(err)
+      const error = new Error(info.mensaje)
+      error.campos = info.campos // errores por campo (ej.: datos de la tarjeta)
+      throw error
     }
   }
 

@@ -1,6 +1,7 @@
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useLibros } from '../hooks/useLibros'
+import { getLibroApi } from '../api/librosApi'
 import useResenias from '../hooks/useResenias'
 import { useAuth } from '../hooks/useAuth'
 import { useToast } from '../hooks/useToast'
@@ -164,10 +165,23 @@ const Detalle = ({ libro, libros }) => {
 const BookDetailPage = () => {
   const { id } = useParams()
   const { libros, cargando } = useLibros()
+  const delCatalogo = libros.find((l) => l.id === +id)
+  // El catálogo no lista los agotados: si no está, se pide el libro al back (si existe y está publicado, se muestra "Sin stock")
+  const [suelto, setSuelto] = useState({ id: null, libro: null, buscando: false })
 
-  if (cargando) return <main className="det" />
+  useEffect(() => {
+    if (cargando || delCatalogo) return undefined
+    let vigente = true
+    setSuelto({ id: +id, libro: null, buscando: true })
+    getLibroApi(id)
+      .then((l) => { if (vigente) setSuelto({ id: +id, libro: l, buscando: false }) })
+      .catch(() => { if (vigente) setSuelto({ id: +id, libro: null, buscando: false }) })
+    return () => { vigente = false }
+  }, [id, cargando, delCatalogo])
 
-  const libro = libros.find((l) => l.id === +id)
+  if (cargando || (!delCatalogo && (suelto.id !== +id || suelto.buscando))) return <main className="det" />
+
+  const libro = delCatalogo || suelto.libro
   if (!libro) return <NotFoundPage ruta={`/libro/${id}`} />
 
   return <Detalle key={libro.id} libro={libro} libros={libros} />

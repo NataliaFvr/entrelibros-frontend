@@ -51,7 +51,11 @@ const CartPage = () => {
         <EmptyBlock titulo="Tu estantería está vacía" texto="Sumá libros desde el catálogo para llenarla." boton="Ver libros" onClick={() => navigate('/libros')} />
       ) : (
         <div className="cart-grid">
-          <CartList items={items} />
+          <div style={{ minWidth: 0 }}>
+            <CartList items={items} />
+            {/* El carrito está guardado en el back: se puede ir al catálogo y volver sin perder nada */}
+            <Link className="lnk" to="/libros" style={{ display: 'inline-block', marginTop: 14 }}>← Seguir comprando</Link>
+          </div>
           <CartSummary sub={subtotalCarrito} cotizacion={cotizacion} direcciones={direcciones}
             elegida={elegida} onElegir={setElegida} onFinalizar={finalizar} enviando={enviando} />
         </div>

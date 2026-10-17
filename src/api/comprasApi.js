@@ -28,7 +28,8 @@ export const listarPedidosApi = async () => (await lista(() => api.get('/ordenes
 export const cancelarOrdenApi = async (idOrden) => (await api.patch(`/ordenes/${idOrden}/cancelar`)).data
 
 // POST /pagos { idOrden, proveedor } -> PagoResponse { id, resultado, … } (hoy el back aprueba siempre: SIMULADO_APROBADO)
-export const crearPagoApi = async (idOrden, proveedor) => (await api.post('/pagos', { idOrden, proveedor })).data
+// `tarjeta` = { numeroTarjeta, titular, vencimiento, codigoSeguridad } solo si se paga con tarjeta
+export const crearPagoApi = async (idOrden, proveedor, tarjeta = {}) => (await api.post('/pagos', { idOrden, proveedor, ...tarjeta })).data
 export const pagosDeOrdenApi = async (idOrden) => lista(() => api.get(`/pagos/orden/${idOrden}`))
 
 // ADMIN: GET /ordenes y GET /pagos. Las órdenes ya incluyen sus ítems.
