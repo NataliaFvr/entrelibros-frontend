@@ -58,7 +58,7 @@ const Detalle = ({ libro, libros }) => {
       if (!marks.includes(libro.id)) toggleMark(libro.id)
       return
     }
-    agregar(libro).then((ok) => { if (ok && pendiente.tipo === 'buy') navigate('/carrito') })
+    agregar(libro, pendiente.cantidad).then((ok) => { if (ok && pendiente.tipo === 'buy') navigate('/carrito') })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, pendiente, libro.id])
 
@@ -66,8 +66,8 @@ const Detalle = ({ libro, libros }) => {
     if (!requiereLogin('fav', null, { tipo: 'fav', idLibro: libro.id })) toggleMark(libro.id)
   }
 
-  const alCarrito = () => {
-    if (!requiereLogin('cart', null, { tipo: 'cart', idLibro: libro.id })) agregar(libro)
+  const alCarrito = (cantidad) => {
+    if (!requiereLogin('cart', null, { tipo: 'cart', idLibro: libro.id, cantidad })) agregar(libro, cantidad)
   }
 
   const publicarOpinion = async (st, texto) => {
@@ -96,11 +96,11 @@ const Detalle = ({ libro, libros }) => {
     }
   }
 
-  const comprar = async () => {
-    if (requiereLogin('cart', null, { tipo: 'buy', idLibro: libro.id })) return
+  const comprar = async (cantidad) => {
+    if (requiereLogin('cart', null, { tipo: 'buy', idLibro: libro.id, cantidad })) return
 
     // Solo suma el libro al carrito; el marcapáginas se limpia cuando se aprueba el pago.
-    if (await agregar(libro)) navigate('/carrito')
+    if (await agregar(libro, cantidad)) navigate('/carrito')
   }
 
   return (

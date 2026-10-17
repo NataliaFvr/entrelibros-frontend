@@ -48,7 +48,7 @@ const useCarrito = (user, { avisar }) => {
     return turno
   }
 
-  const agregar = (libro) => {
+  const agregar = (libro, cantidad = 1) => {
     // Ya están todas las unidades que el back permite (maxCantidad): no se manda un pedido que va a rechazar
     const enCarrito = ultimo.current.find((c) => c.id === libro.id)
     if (enCarrito && enCarrito.q >= enCarrito.maxCantidad) {
@@ -58,10 +58,11 @@ const useCarrito = (user, { avisar }) => {
     return ejecutar(async () => {
       const actual = ultimo.current.find((c) => c.id === libro.id)
       if (actual) {
-        const item = await cambiarCantidadItemApi(actual.idItem, actual.q + 1)
+        // Se suma a lo que ya había, sin pasar el máximo que permite el back
+        const item = await cambiarCantidadItemApi(actual.idItem, Math.min(actual.q + cantidad, actual.maxCantidad))
         poner(ultimo.current.map((c) => (c.id === libro.id ? item : c)))
       } else {
-        poner([...ultimo.current, await agregarItemApi(libro.id, 1)]) // POST: fila nueva
+        poner([...ultimo.current, await agregarItemApi(libro.id, cantidad)]) // POST: fila nueva
       }
       avisar('Añadido a tu estantería', { texto: 'Ir a mi estantería', a: '/carrito' })
     })

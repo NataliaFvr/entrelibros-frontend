@@ -441,6 +441,7 @@
   .crow .cmini{align-self:end;box-shadow:3px 0 8px rgba(70,42,20,.25)}
   .crow .cprice{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
   .cinfo{display:flex;flex-direction:column;gap:3px;min-width:0}.cinfo b{text-align:left;font-size:.92rem}.cinfo small,.sl small,.ord-a{font-size:.75rem;opacity:.65;display:block}
+  .buy-q{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:2px 0 4px;font-size:.88rem}
   .qty{display:flex;align-items:center;gap:8px;font-weight:700}.qty button{width:28px;height:28px;border-radius:50%;border:1px solid rgba(4,42,43,.2);background:#fff;font-weight:700;cursor:pointer;color:var(--evergreen)}.qty button:disabled{opacity:.35;cursor:default}
   .cunit{font-size:.78rem;display:flex;gap:6px;align-items:baseline;flex-wrap:wrap}.cunit s{opacity:.55}.cunit em{font-style:normal;font-weight:700;color:var(--burnt)}
   .cprice{font-weight:700;min-width:70px;text-align:right}.csub{margin:22px 0 6px;font-size:1.05rem}
