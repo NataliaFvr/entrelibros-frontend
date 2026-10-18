@@ -8,8 +8,13 @@ export const textOn = (c) => (DARK_TEXT.has(c) ? '#042A2B' : '#fff')
 // Fondo de la tapa: primera imagen si existe, si no el color
 export const coverBg = (l) => (l.imgs && l.imgs[0] ? `url(${l.imgs[0]}) center/cover` : l.c)
 
-export const initials = (name, max = 3) =>
-  name.split(' ').map((x) => x[0]).slice(0, max).join('')
+// Iniciales sin las palabras chicas ("Libros del Sur" -> "LS", no "Ld")
+const CONECTORES = new Set(['de', 'del', 'la', 'las', 'el', 'los', 'y'])
+export const initials = (name, max = 3) => {
+  const palabras = name.split(' ').filter(Boolean)
+  const importantes = palabras.filter((x) => !CONECTORES.has(x.toLowerCase()))
+  return (importantes.length ? importantes : palabras).map((x) => x[0].toUpperCase()).slice(0, max).join('')
+}
 
 // Colores que toman las letras al pasar el cursor (efecto del tagline)
 export const COLORES_LETRA = ['#5EB1BF', '#EF7B45', '#D84727', '#2f7d89']

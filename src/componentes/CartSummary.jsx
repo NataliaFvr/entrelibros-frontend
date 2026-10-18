@@ -1,18 +1,39 @@
 import { useState } from 'react'
-import { fmt } from '../utils/format'
+import { fmt, plural } from '../utils/format'
 import SummaryRow from './SummaryRow'
 import AddressSelect from './AddressSelect'
 import AddressForm from './AddressForm'
 
 // Resumen de la estantería + dirección de envío + botón para pasar al pago.
-const CartSummary = ({ sub, direcciones, elegida, onElegir, onFinalizar, enviando = false }) => {
+// `cotizacion` = { costoEnvio, total, cantidadEnvios, envios } que calcula el back para la dirección elegida (null si todavía no llegó).
+// `envios` = [{ idVendedor, vendedor, zona: 'misma' | 'distinta', costo }]: un envío por vendedor.
+const CartSummary = ({ sub, cotizacion, direcciones, elegida, onElegir, onFinalizar, enviando = false }) => {
   const [agregando, setAgregando] = useState(false) // formulario de nueva dirección abierto (si ya hay direcciones)
   return (
     <div className="card csum">
       <h3 className="fr">Resumen</h3>
       <SummaryRow titulo="Libros" valor={fmt(sub)} />
-      <SummaryRow titulo="Envío" valor="Se calcula al confirmar" />
-      <SummaryRow titulo="Total" valor="Se calcula al confirmar" total />
+      {cotizacion ? (
+        <>
+          <SummaryRow titulo="Envío" detalle={`${cotizacion.cantidadEnvios} ${plural(cotizacion.cantidadEnvios, 'envío', 'envíos')} (uno por vendedor)`} valor={fmt(cotizacion.costoEnvio)} />
+          {(cotizacion.envios || []).length > 1 && (
+            <ul className="env-det">
+              {cotizacion.envios.map((e) => (
+                <li key={e.idVendedor}>
+                  <span>{e.vendedor} · {e.zona === 'misma' ? 'misma provincia' : 'otra provincia'}</span>
+                  <span>{fmt(e.costo)}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+          <SummaryRow titulo="Total" valor={fmt(cotizacion.total)} total />
+        </>
+      ) : (
+        <>
+          <SummaryRow titulo="Envío" valor="Elegí una dirección" />
+          <SummaryRow titulo="Total" valor={fmt(sub)} total />
+        </>
+      )}
       {direcciones.length ? (
         <>
           <AddressSelect direcciones={direcciones} elegida={elegida} onElegir={onElegir} />

@@ -6,7 +6,7 @@ import { getEstadisticas } from '../api/estadisticasApiExtra'
 const useEstadisticasVendedor = (ventas) => {
   const [estado, setEstado] = useState({ datos: null, error: false })
   const ultimas = useRef(ventas)
-  useEffect(() => { ultimas.current = ventas })
+  useEffect(() => { ultimas.current = ventas }, [ventas])
   const firma = ventas.map((v) => `${v.n}:${v.its.length}`).join('|')
   useEffect(() => {
     let vigente = true

@@ -19,7 +19,7 @@ export const crearUsuario = (v) => {
 
 export const editarUsuario = (id, v) => {
   const cambios = { nombre: v.nombre.trim(), apellido: v.apellido.trim(), nombreUsuario: v.nombreUsuario, email: v.email.trim() }
-  if (v.pw) cambios.contrasena = v.pw
+  if (v.contrasena) cambios.contrasena = v.contrasena
   return conBack(() => actualizarUsuarioApi(id, cambios))
 }
 

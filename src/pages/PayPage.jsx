@@ -28,11 +28,23 @@ const PayPage = () => {
   const { pedidos, pagarPedido, cancelarPedido } = useCompra()
   const { libros } = useLibros()
   const [error, setError] = useState('')
-  const form = useFormulario({ pm: 'tarjeta', numero: '', titular: '', venc: '', cvv: '' })
+  const form = useFormulario({ proveedor: 'tarjeta', numeroTarjeta: '', titular: '', vencimiento: '', codigoSeguridad: '' })
   const { procesando, nota, pagar } = useProcesoPago(async (proveedor) => {
-    const resultado = await pagarPedido(n, proveedor) // con el back: 'SIMULADO_APROBADO' | 'RECHAZADO'
-    if (resultado !== 'RECHAZADO') toast('¡Pago aprobado!')
-    return resultado
+    form.setErroresCampos({})
+    // Con tarjeta viajan sus datos: el back los valida (y no los guarda)
+    const { numeroTarjeta, titular, vencimiento, codigoSeguridad } = form.valores
+    const tarjeta = proveedor === 'tarjeta' ? { numeroTarjeta, titular, vencimiento, codigoSeguridad } : {}
+    try {
+      const resultado = await pagarPedido(n, proveedor, tarjeta) // con el back: 'SIMULADO_APROBADO' | 'RECHAZADO'
+      if (resultado !== 'RECHAZADO') toast('¡Pago aprobado!')
+      return resultado
+    } catch (err) {
+      if (err.campos && Object.keys(err.campos).length) {
+        form.setErroresCampos(err.campos) // cada error del back debajo de su campo
+        throw new Error('Revisá los datos de la tarjeta.')
+      }
+      throw err
+    }
   })
 
   if (!user) return <Navigate to="/ingresar" replace state={{ from: `/pago/${n}` }} />

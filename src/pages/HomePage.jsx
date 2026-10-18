@@ -13,10 +13,11 @@ import AuthorGrid from '../componentes/AuthorGrid'
 const HomePage = () => {
   const { libros, categorias } = useLibros()
 
-  const { best, usados, conDesc, topDesc, autores, topCategorias } = useMemo(() => {
+  const { best, nuevos, usados, conDesc, topDesc, autores, topCategorias } = useMemo(() => {
     const best = masVendidos(libros) // solo nuevos: los usados no son bestsellers
     const ordenados = ordenarPorVentas(libros)
     const usados = ordenados.filter(esUsado)
+    const nuevos = libros.filter((l) => !esUsado(l)).sort((a, b) => b.id - a.id) // los recién publicados primero
     const conDesc = ordenados.filter((l) => l.d > 0)
     const topDesc = [...conDesc].sort((a, b) => b.d - a.d)
     const porMasLibros = (a, b) => b.cantidad - a.cantidad
@@ -28,7 +29,7 @@ const HomePage = () => {
     })
     const autores = [...cuentaAutores].map(([nombre, cantidad]) => ({ nombre, cantidad })).sort(porMasLibros)
     const topCategorias = [...cuentaCats].map(([nombre, cantidad]) => ({ nombre, cantidad })).sort(porMasLibros).map((c) => c.nombre)
-    return { best, usados, conDesc, topDesc, autores, topCategorias }
+    return { best, nuevos, usados, conDesc, topDesc, autores, topCategorias }
   }, [libros, categorias])
 
   return (
@@ -37,7 +38,7 @@ const HomePage = () => {
       <SeccionLibros titulo="Bestsellers" to="/libros?sort=best" libros={best} />
       <SeccionLibros titulo="En Oferta" to="/libros?desc=1" libros={conDesc} />
       <FlashSale libros={topDesc} />
-      <SeccionLibros titulo="Libros Nuevos" to="/libros?estado=nuevos" libros={best} />
+      <SeccionLibros titulo="Libros Nuevos" to="/libros?estado=nuevos&sort=new" libros={nuevos} />
       <SeccionLibros titulo="Libros Usados" to="/libros?estado=usados" libros={usados} />
       <Tagline />
       <CategoryGrid categorias={topCategorias} />

@@ -8,8 +8,8 @@ const FaqItem = ({ item, abierto, onAlternar }) => {
     <details open={abierto}>
       <summary onClick={(e) => { e.preventDefault(); onAlternar() }}>{item.q}</summary>
       <p>
-        {item.a.map((parte, i) => (
-          <Fragment key={i}>
+        {item.a.map((parte) => (
+          <Fragment key={typeof parte === 'string' ? parte : parte.to}>
             {typeof parte === 'string' ? parte : <Link to={parte.to}>{parte.label}</Link>}
           </Fragment>
         ))}

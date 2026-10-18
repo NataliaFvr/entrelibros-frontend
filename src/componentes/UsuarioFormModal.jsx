@@ -10,7 +10,7 @@ import SelectField from './SelectField'
 const UsuarioFormModal = ({ usuario, onGuardar, onCerrar }) => {
   const editando = Boolean(usuario)
   const f = useFormulario(
-    { nombre: usuario?.nombre ?? '', apellido: usuario?.apellido ?? '', nombreUsuario: usuario?.nombreUsuario ?? '', email: usuario?.email ?? '', pw: '', rol: 'COMPRADOR' },
+    { nombre: usuario?.nombre ?? '', apellido: usuario?.apellido ?? '', nombreUsuario: usuario?.nombreUsuario ?? '', email: usuario?.email ?? '', contrasena: '', rol: 'COMPRADOR' },
   )
 
   const enviar = async (e) => {
@@ -31,7 +31,7 @@ const UsuarioFormModal = ({ usuario, onGuardar, onCerrar }) => {
         </div>
         <Field label="Nombre de usuario" autoComplete="off" {...campo('nombreUsuario')} />
         <Field label="E-mail" type="email" autoComplete="off" {...campo('email')} />
-        <PasswordField label={editando ? 'Nueva contraseña (vacía = no cambia)' : 'Contraseña (mín. 8, mayúscula, número y símbolo)'} autoComplete="new-password" {...campo('pw')} />
+        <PasswordField label={editando ? 'Nueva contraseña (vacía = no cambia)' : 'Contraseña (mín. 8, mayúscula, número y símbolo)'} autoComplete="new-password" {...campo('contrasena')} />
         {!editando && <SelectField label="Rol" opciones={ROLES_CREABLES} {...campo('rol')} />}
         <Aviso mensaje={f.error} tipo={f.tipoError} />
         <div className="modal-btns">

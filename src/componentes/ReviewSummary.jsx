@@ -1,3 +1,4 @@
+import { plural } from '../utils/format'
 import Stars from './Stars'
 
 const ReviewSummary = ({ resenias, promedio }) => {
@@ -6,7 +7,7 @@ const ReviewSummary = ({ resenias, promedio }) => {
     <div className="rev-sum">
       <div className="score fr">{promedio.toFixed(1)}</div>
       <Stars value={promedio} />
-      <small>{n} calificaciones</small>
+      <small>{n} {plural(n, 'calificación', 'calificaciones')}</small>
       {[5, 4, 3, 2, 1].map((k) => {
         const c = resenias.filter((r) => r.st === k).length
         return (

@@ -1,9 +1,24 @@
+import { useState } from 'react'
 import { esUsado } from '../utils/libro'
+import { fmt } from '../utils/format'
+import useEnvioFicha from '../hooks/useEnvioFicha'
 
 // `soloLectura`: administrador mirando la ficha -> sin botones de compra
 const BuyBox = ({ libro, stock, onComprar, onCarrito, soloLectura = false }) => {
   // Un usado es una pieza única: ahí no corresponde la alerta de "¡Última unidad!"
   const ultima = stock === 1 && !esUsado(libro)
+  // Cantidad a comprar: solo para libros nuevos con más de una unidad (un usado es una pieza única)
+  const [cantidad, setCantidad] = useState(1)
+  const elegible = !esUsado(libro) && stock > 1
+  const envio = useEnvioFicha(libro.id)
+  if (stock <= 0) {
+    return (
+      <div className="buy">
+        <div className="stk last">Sin stock</div>
+        <small className="sv-meta">Este libro se agotó. Guardalo en tu Marcapáginas para encontrarlo cuando vuelva.</small>
+      </div>
+    )
+  }
   return (
     <div className="buy">
       <div className={`stk${ultima ? ' last' : ''}`}>{ultima ? '¡Última unidad!' : 'Stock disponible'}</div>
@@ -14,10 +29,22 @@ const BuyBox = ({ libro, stock, onComprar, onCarrito, soloLectura = false }) => 
         <>
           <div className="ship">
             <b>{libro.provV ? `Vendedor en ${libro.provV}` : 'Provincia del vendedor no informada'}</b>
-            <small>El costo y el plazo de envío se calculan al finalizar la compra.</small>
+            {envio?.provincia && <small>Envío a {envio.provincia}: <b>{fmt(envio.costo)}</b> ({envio.misma ? 'misma provincia' : 'otra provincia'})</small>}
+            {envio?.desde != null && <small>Envío desde <b>{fmt(envio.desde)}</b>. El costo exacto se calcula con tu dirección principal.</small>}
+            <small>Un envío por vendedor: el total se confirma al finalizar la compra.</small>
           </div>
-          <button className="btn main" type="button" onClick={onComprar}>Comprar ahora</button>
-          <button className="btn alt" type="button" onClick={onCarrito}>Añadir a mi estantería</button>
+          {elegible && (
+            <div className="buy-q">
+              <span>Cantidad</span>
+              <div className="qty">
+                <button type="button" aria-label="Menos" onClick={() => setCantidad(cantidad - 1)} disabled={cantidad <= 1}>−</button>
+                <span>{cantidad}</span>
+                <button type="button" aria-label="Más" onClick={() => setCantidad(cantidad + 1)} disabled={cantidad >= stock}>+</button>
+              </div>
+            </div>
+          )}
+          <button className="btn main" type="button" onClick={() => onComprar(cantidad)}>Comprar ahora</button>
+          <button className="btn alt" type="button" onClick={() => onCarrito(cantidad)}>Añadir a mi estantería</button>
         </>
       )}
     </div>

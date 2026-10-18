@@ -1,6 +1,7 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useLibros } from '../hooks/useLibros'
+import { getLibroApi } from '../api/librosApi'
 import useResenias from '../hooks/useResenias'
 import { useAuth } from '../hooks/useAuth'
 import { useToast } from '../hooks/useToast'
@@ -23,7 +24,7 @@ import NotFoundPage from './NotFoundPage'
 const Detalle = ({ libro, libros }) => {
   const navigate = useNavigate()
   const toast = useToast()
-  const { user, requiereLogin, marks, toggleMark } = useAuth()
+  const { user, requiereLogin, marks, toggleMark, pendiente, limpiarPendiente } = useAuth()
   const { agregar } = useCompra()
   const { resenias, promedio, miResenia, puedeResenar, motivo, publicar, eliminar } = useResenias(libro.id)
 
@@ -48,12 +49,25 @@ const Detalle = ({ libro, libros }) => {
     }
   }, [libros, libro])
 
+  // Si tocó Añadir, Comprar o Guardar antes de iniciar sesión, al volver logueado se completa solo
+  useEffect(() => {
+    if (!user || !pendiente || pendiente.idLibro !== libro.id) return
+    limpiarPendiente()
+    if (esAdmin) return // el admin no compra ni guarda
+    if (pendiente.tipo === 'fav') {
+      if (!marks.includes(libro.id)) toggleMark(libro.id)
+      return
+    }
+    agregar(libro, pendiente.cantidad).then((ok) => { if (ok && pendiente.tipo === 'buy') navigate('/carrito') })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, pendiente, libro.id])
+
   const guardar = () => {
-    if (!requiereLogin('fav')) toggleMark(libro.id)
+    if (!requiereLogin('fav', null, { tipo: 'fav', idLibro: libro.id })) toggleMark(libro.id)
   }
 
-  const alCarrito = () => {
-    if (!requiereLogin('cart')) agregar(libro)
+  const alCarrito = (cantidad) => {
+    if (!requiereLogin('cart', null, { tipo: 'cart', idLibro: libro.id, cantidad })) agregar(libro, cantidad)
   }
 
   const publicarOpinion = async (st, texto) => {
@@ -82,11 +96,11 @@ const Detalle = ({ libro, libros }) => {
     }
   }
 
-  const comprar = async () => {
-    if (requiereLogin('cart')) return
+  const comprar = async (cantidad) => {
+    if (requiereLogin('cart', null, { tipo: 'buy', idLibro: libro.id, cantidad })) return
 
     // Solo suma el libro al carrito; el marcapáginas se limpia cuando se aprueba el pago.
-    if (await agregar(libro)) navigate('/carrito')
+    if (await agregar(libro, cantidad)) navigate('/carrito')
   }
 
   return (
@@ -151,10 +165,23 @@ const Detalle = ({ libro, libros }) => {
 const BookDetailPage = () => {
   const { id } = useParams()
   const { libros, cargando } = useLibros()
+  const delCatalogo = libros.find((l) => l.id === +id)
+  // El catálogo no lista los agotados: si no está, se pide el libro al back (si existe y está publicado, se muestra "Sin stock")
+  const [suelto, setSuelto] = useState({ id: null, libro: null, buscando: false })
 
-  if (cargando) return <main className="det" />
+  useEffect(() => {
+    if (cargando || delCatalogo) return undefined
+    let vigente = true
+    setSuelto({ id: +id, libro: null, buscando: true })
+    getLibroApi(id)
+      .then((l) => { if (vigente) setSuelto({ id: +id, libro: l, buscando: false }) })
+      .catch(() => { if (vigente) setSuelto({ id: +id, libro: null, buscando: false }) })
+    return () => { vigente = false }
+  }, [id, cargando, delCatalogo])
 
-  const libro = libros.find((l) => l.id === +id)
+  if (cargando || (!delCatalogo && (suelto.id !== +id || suelto.buscando))) return <main className="det" />
+
+  const libro = delCatalogo || suelto.libro
   if (!libro) return <NotFoundPage ruta={`/libro/${id}`} />
 
   return <Detalle key={libro.id} libro={libro} libros={libros} />

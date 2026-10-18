@@ -7,7 +7,7 @@ import Aviso from './Aviso'
 import Field from './Field'
 import PasswordField from './PasswordField'
 
-const INICIAL = { nombre: '', apellido: '', nombreUsuario: '', email: '', pw: '', pw2: '' }
+const INICIAL = { nombre: '', apellido: '', nombreUsuario: '', email: '', contrasena: '', repetirContrasena: '' }
 
 const RegisterForm = ({ onPendiente, onIrALogin }) => {
   const { registrar } = useAuth()
@@ -41,8 +41,8 @@ const RegisterForm = ({ onPendiente, onIrALogin }) => {
       </div>
       <Field label="Nombre de usuario" {...props('nombreUsuario')} autoComplete="username" />
       <Field label="E-mail" type="email" {...props('email')} autoComplete="email" />
-      <PasswordField label="Contraseña (mín. 8, mayúscula, número y símbolo)" {...props('pw')} autoComplete="new-password" />
-      <PasswordField label="Repetir contraseña" {...props('pw2')} autoComplete="new-password" />
+      <PasswordField label="Contraseña (mín. 8, mayúscula, número y símbolo)" {...props('contrasena')} autoComplete="new-password" />
+      <PasswordField label="Repetir contraseña" {...props('repetirContrasena')} autoComplete="new-password" />
       <Aviso mensaje={error} tipo={tipoError} />
       <button className="btn main" type="submit" disabled={enviando}>{enviando ? 'Creando cuenta…' : 'Crear cuenta'}</button>
       <p className="alt-l">¿Ya tenés cuenta? <a href="#" onClick={(e) => { e.preventDefault(); onIrALogin() }}>Ingresá</a></p>

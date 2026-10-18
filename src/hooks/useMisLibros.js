@@ -11,7 +11,7 @@ import { useToast } from './useToast'
 const useMisLibros = (activo, cargar) => {
   const toast = useToast()
   const ultimo = useRef({ toast, cargar })
-  useEffect(() => { ultimo.current = { toast, cargar } })
+  useEffect(() => { ultimo.current = { toast, cargar } }, [toast, cargar])
 
   const [estado, setEstado] = useState(activo ? 'cargando' : 'ok')
   const [intento, setIntento] = useState(0)

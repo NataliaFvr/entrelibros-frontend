@@ -280,6 +280,7 @@
   .sgi{width:28px;height:38px;border-radius:4px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:'Fraunces',serif;font-weight:700;font-size:.7rem;background:var(--cyan)}
   .sgi.au{width:34px;height:34px;border-radius:50%}
   .toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--evergreen);color:#fff;padding:11px 20px;border-radius:999px;font-size:.85rem;font-weight:600;z-index:90;box-shadow:0 10px 24px rgba(4,42,43,.3);max-width:90vw;text-align:center}
+  .toast-a{color:#fff;margin-left:12px;text-decoration:underline;white-space:nowrap}
   /* DETALLE */
   .det{max-width:1240px;margin:0 auto;padding:26px clamp(20px,4vw,56px) 60px}
   .det-top{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;align-items:center;margin-bottom:18px}
@@ -440,9 +441,12 @@
   .crow .cmini{align-self:end;box-shadow:3px 0 8px rgba(70,42,20,.25)}
   .crow .cprice{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
   .cinfo{display:flex;flex-direction:column;gap:3px;min-width:0}.cinfo b{text-align:left;font-size:.92rem}.cinfo small,.sl small,.ord-a{font-size:.75rem;opacity:.65;display:block}
-  .qty{display:flex;align-items:center;gap:8px;font-weight:700}.qty button{width:28px;height:28px;border-radius:50%;border:1px solid rgba(4,42,43,.2);background:#fff;font-weight:700;cursor:pointer;color:var(--evergreen)}
+  .buy-q{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:2px 0 4px;font-size:.88rem}
+  .qty{display:flex;align-items:center;gap:8px;font-weight:700}.qty button{width:28px;height:28px;border-radius:50%;border:1px solid rgba(4,42,43,.2);background:#fff;font-weight:700;cursor:pointer;color:var(--evergreen)}.qty button:disabled{opacity:.35;cursor:default}
+  .cunit{font-size:.78rem;display:flex;gap:6px;align-items:baseline;flex-wrap:wrap}.cunit s{opacity:.55}.cunit em{font-style:normal;font-weight:700;color:var(--burnt)}
   .cprice{font-weight:700;min-width:70px;text-align:right}.csub{margin:22px 0 6px;font-size:1.05rem}
   .sl{display:flex;justify-content:space-between;gap:12px;padding:8px 0;font-size:.88rem}.sl.tot{border-top:1px solid rgba(4,42,43,.1);font-weight:700;font-size:1rem;margin-top:4px;padding-top:12px}
+  .env-det{list-style:none;margin:-4px 0 0;padding:0 0 0 10px;border-left:2px solid rgba(4,42,43,.12);display:flex;flex-direction:column;gap:3px;font-size:.78rem;opacity:.8}.env-det li{display:flex;justify-content:space-between;gap:10px}
   .csum{display:flex;flex-direction:column;gap:10px;position:sticky;top:90px}
   .ord{margin-bottom:16px}.ord-h{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-bottom:8px}.ord-h span:nth-child(2){opacity:.6;font-size:.85rem}.ord-a{margin-top:10px}
   /* DIRECCIONES: una sola columna a todo el ancho (tarjetas arriba, formulario abajo) */

@@ -6,7 +6,7 @@ import Field from './Field'
 import SelectField from './SelectField'
 import TextAreaField from './TextAreaField'
 
-const INICIAL = { nombre: '', apellido: '', email: '', area: '', tel: '', depto: 'Compras', msg: '' }
+const INICIAL = { nombre: '', apellido: '', email: '', area: '', telefono: '', departamento: 'Compras', mensaje: '' }
 const DEPARTAMENTOS = ['Compras', 'Ventas', 'Envíos', 'Mi cuenta', 'Otro']
 
 const Obligatorio = ({ children }) => <>{children} <span className="req">*</span></>
@@ -25,13 +25,13 @@ const ContactForm = () => {
         apellido: valores.apellido.trim(),
         email: valores.email.trim(),
         area: valores.area.trim(),
-        telefono: valores.tel.trim(),
-        departamento: valores.depto,
-        mensaje: valores.msg.trim(),
+        telefono: valores.telefono.trim(),
+        departamento: valores.departamento,
+        mensaje: valores.mensaje.trim(),
       })
     } catch (err) {
       const campos = mapearCampos(normalizarError(err).campos, {
-        nombre: 'nombre', apellido: 'apellido', email: 'email', area: 'area', telefono: 'tel', departamento: 'depto', mensaje: 'msg',
+        nombre: 'nombre', apellido: 'apellido', email: 'email', area: 'area', telefono: 'telefono', departamento: 'departamento', mensaje: 'mensaje',
       })
       if (Object.keys(campos).length) return setErroresCampos(campos)
       return setError(mensajeError(err))
@@ -50,10 +50,10 @@ const ContactForm = () => {
       <Field label={<Obligatorio>Correo</Obligatorio>} type="email" {...campo('email')} autoComplete="email" />
       <div className="two">
         <Field label="Código de área" {...campo('area')} placeholder="+54" inputMode="tel" />
-        <Field label="Teléfono" type="tel" {...campo('tel')} autoComplete="tel-national" />
+        <Field label="Teléfono" type="tel" {...campo('telefono')} autoComplete="tel-national" />
       </div>
-      <SelectField label={<Obligatorio>Departamento/Sección</Obligatorio>} name="depto" value={valores.depto} onChange={cambiar} opciones={DEPARTAMENTOS} />
-      <TextAreaField label={<Obligatorio>Mensaje</Obligatorio>} {...campo('msg')} />
+      <SelectField label={<Obligatorio>Departamento/Sección</Obligatorio>} name="departamento" value={valores.departamento} onChange={cambiar} opciones={DEPARTAMENTOS} />
+      <TextAreaField label={<Obligatorio>Mensaje</Obligatorio>} {...campo('mensaje')} />
       <p className="ferr" role="alert">{error}</p>
       <button className="btn main" type="submit">Enviar mensaje</button>
     </form>

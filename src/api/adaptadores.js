@@ -109,8 +109,8 @@ export const aReseniaVendedorFront = (r) => ({
 // CarritoItemResponse incluye un snapshot del libro para que el carrito siga siendo visible aunque salga del catálogo.
 // `id` es el id del LIBRO; `idItem` es el id de la fila del carrito que piden PATCH y DELETE.
 export const aItemCarritoFront = (i) => ({
-  id: i.idLibro, q: i.cantidad, idItem: i.id, subtotal: i.subtotal ?? 0,
-  t: i.tituloLibro || 'Libro', a: i.autor || '', p: i.precioUnitario ?? 0, v: i.nombreTienda || '', stock: i.stock ?? 0,
+  id: i.idLibro, q: i.cantidad, idItem: i.id, maxCantidad: i.maxCantidad ?? 1, subtotal: i.subtotal ?? 0,
+  t: i.tituloLibro || 'Libro', a: i.autor || '', p: i.precioUnitario ?? 0, base: i.precioOriginal ?? i.precioUnitario ?? 0, v: i.nombreTienda || '', stock: i.stock ?? 0,
   d: i.descuentoPct ?? 0, imgs: i.portada ? [`${RAIZ}${i.portada}`] : [],
   c: TONES[((i.tituloLibro || '').length + (i.nombreTienda || '').length) % TONES.length],
 })
@@ -138,7 +138,7 @@ export const aPedidoFront = (o) => {
     sub: o.subtotal ?? 0, env: o.costoEnvio ?? 0, total: o.total ?? 0,
     est: ESTADO_TEXTO[o.estadoPago] || o.estadoPago, pago: o.estadoPago,
     venceEn: o.estadoPago === 'PENDIENTE' ? isoAMs(o.venceEn) ?? undefined : undefined,
-    comprador: `${o.nombreComprador || ''}`.trim(),
+    comprador: `${o.nombreComprador || ''}`.trim(), proveedor: o.proveedor || '',
   }
 }
 

@@ -1,15 +1,16 @@
 import Field from './Field'
 
-const CardFields = ({ valores, onChange, onCompletar }) => {
+// Los nombres son los de PagoRequest; los errores (`errores`) los manda el back
+const CardFields = ({ valores, errores = {}, onChange, onCompletar }) => {
   return (
     <div className="pm-body">
-      <Field label="Número de tarjeta" name="numero" value={valores.numero} onChange={onChange}
+      <Field label="Número de tarjeta" name="numeroTarjeta" value={valores.numeroTarjeta} onChange={onChange} error={errores.numeroTarjeta}
         inputMode="numeric" autoComplete="cc-number" placeholder="4242 4242 4242 4242" />
-      <Field label="Nombre del titular" name="titular" value={valores.titular} onChange={onChange} autoComplete="cc-name" />
+      <Field label="Nombre del titular" name="titular" value={valores.titular} onChange={onChange} error={errores.titular} autoComplete="cc-name" />
       <div className="two">
-        <Field label="Vencimiento (MM/AA)" name="venc" value={valores.venc} onChange={onChange}
+        <Field label="Vencimiento (MM/AA)" name="vencimiento" value={valores.vencimiento} onChange={onChange} error={errores.vencimiento}
           inputMode="numeric" autoComplete="cc-exp" placeholder="08/29" />
-        <Field label="Código de seguridad" name="cvv" type="password" value={valores.cvv} onChange={onChange}
+        <Field label="Código de seguridad" name="codigoSeguridad" type="password" value={valores.codigoSeguridad} onChange={onChange} error={errores.codigoSeguridad}
           inputMode="numeric" autoComplete="cc-csc" placeholder="•••" />
       </div>
       <small className="dim">No guardamos los datos de tu tarjeta.</small>
