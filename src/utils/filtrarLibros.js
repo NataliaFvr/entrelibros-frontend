@@ -2,7 +2,9 @@ import { norm } from './format'
 import { categoriasDe, esUsado } from './libro'
 
 export const PAGE_SIZE = 12
-export const PRECIO_MAX = 500
+// Los precios llegan en pesos argentinos; el valor anterior (500) dejaba
+// fuera todo el catálogo real, cuyos libros cuestan varios miles.
+export const PRECIO_MAX = 100000
 
 export const FILTROS_INICIALES = {
   estado: 'ambos', cats: [], envios: [], min: 0, max: PRECIO_MAX, desc: 0,
