@@ -111,7 +111,7 @@ export const aReseniaVendedorFront = (r) => ({
 export const aItemCarritoFront = (i) => ({
   id: i.idLibro, q: i.cantidad, idItem: i.id, maxCantidad: i.maxCantidad ?? 1, subtotal: i.subtotal ?? 0,
   t: i.tituloLibro || 'Libro', a: i.autor || '', p: i.precioUnitario ?? 0, base: i.precioOriginal ?? i.precioUnitario ?? 0, v: i.nombreTienda || '', stock: i.stock ?? 0,
-  d: i.descuentoPct ?? 0, imgs: i.portada ? [`${RAIZ}${i.portada}`] : [],
+  d: i.descuentoPct ?? 0, imgs: i.portada ? [`${RAIZ}${i.portada}`] : [], disponible: i.disponible ?? true,
   c: TONES[((i.tituloLibro || '').length + (i.nombreTienda || '').length) % TONES.length],
 })
 

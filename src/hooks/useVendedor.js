@@ -53,7 +53,8 @@ const useVendedor = (user) => {
   // si algo falla, `aviso` explica qué pasó e `imgs` son las fotos que realmente quedaron guardadas.
   const subirFotos = async (idLibro, fotos = [], respaldo = []) => {
     try {
-      return { imgs: await sincronizarFotosApi(idLibro, fotos) }
+      const imgs = await sincronizarFotosApi(idLibro, fotos)
+      return { imgs, cambiaron: imgs !== fotos } // devuelve la misma lista si no hubo nada que subir ni borrar
     } catch (err) {
       const aviso = err instanceof FotosError ? err.message : mensajeError(err, 'libro')
       return { imgs: await getImagenesApi(idLibro).catch(() => respaldo), aviso }
@@ -101,6 +102,8 @@ const useVendedor = (user) => {
       enviadoARevision = libro.estadoModeracion === 'EN_REVISION'
       // El PATCH ya se aplicó: si fallan las fotos no es un error del guardado, se avisa aparte y se muestran las que quedaron
       const fotos = await subirFotos(idEditado, datos.imgs, actual.imgs)
+      // Cambiar las fotos también manda el libro a revisión (lo decide el back al subirlas)
+      if (fotos.cambiaron) enviadoARevision = true
       imgs = fotos.imgs
       avisoFotos = fotos.aviso
     } catch (err) {
