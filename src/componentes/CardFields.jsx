@@ -1,7 +1,23 @@
 import Field from './Field'
 
+const soloDigitos = (texto) => texto.replace(/\D/g, '')
+
+// Da formato mientras se escribe: el número en grupos de 4, la barra del vencimiento sola y el código solo con números.
+// Al borrar, la barra no vuelve a aparecer (si no, no se podría borrar el mes).
+const formatear = (nombre, valor, anterior) => {
+  if (nombre === 'numeroTarjeta') return soloDigitos(valor).slice(0, 19).replace(/(\d{4})(?=\d)/g, '$1 ')
+  if (nombre === 'codigoSeguridad') return soloDigitos(valor).slice(0, 4)
+  if (nombre === 'vencimiento') {
+    const d = soloDigitos(valor).slice(0, 4)
+    if (d.length > 2) return `${d.slice(0, 2)}/${d.slice(2)}`
+    return d.length === 2 && valor.length > anterior.length ? `${d}/` : d
+  }
+  return valor
+}
+
 // Los nombres son los de PagoRequest; los errores (`errores`) los manda el back
-const CardFields = ({ valores, errores = {}, onChange, onCompletar }) => {
+const CardFields = ({ valores, errores = {}, onChange: cambiar, onCompletar }) => {
+  const onChange = (nombre, valor) => cambiar(nombre, formatear(nombre, valor, valores[nombre] || ''))
   return (
     <div className="pm-body">
       <Field label="Número de tarjeta" name="numeroTarjeta" value={valores.numeroTarjeta} onChange={onChange} error={errores.numeroTarjeta}

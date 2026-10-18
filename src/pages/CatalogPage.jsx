@@ -21,7 +21,10 @@ const Catalogo = ({ inicial, categorias, filtros }) => {
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState(false)
   const solicitudActual = useRef(0)
-  const provinciaComprador = ((direcciones || []).find((d) => d.principal) || (direcciones || [])[0])?.prov || user?.provincia
+  const provinciaDireccion = ((direcciones || []).find((d) => d.principal) || (direcciones || [])[0])?.prov || user?.provincia
+  // Sin dirección, la provincia la elige la persona en el filtro de envíos (no hace falta cuenta)
+  const [provinciaElegida, setProvinciaElegida] = useState('')
+  const provinciaComprador = provinciaDireccion || provinciaElegida
 
   const cargar = () => {
     const solicitud = ++solicitudActual.current
@@ -66,7 +69,7 @@ const Catalogo = ({ inicial, categorias, filtros }) => {
         {filtrosAbiertos ? 'Ocultar filtros' : 'Filtros'}
       </button>
       <div className="cat-layout">
-        <FilterSidebar f={f} set={set} toggle={toggle} categorias={categorias.map((c) => c.nombre)} filtros={filtros} abierto={filtrosAbiertos} envioDisponible={Boolean(provinciaComprador)} />
+        <FilterSidebar f={f} set={set} toggle={toggle} categorias={categorias.map((c) => c.nombre)} filtros={filtros} abierto={filtrosAbiertos} envio={{ provincia: provinciaComprador, desdeDireccion: Boolean(provinciaDireccion), onProvincia: setProvinciaElegida }} />
         <div>
           {sinCoincidencias ? (
             <SearchNoResults termino={f.q.trim()} destacados={[]} onLimpiar={limpiar} />

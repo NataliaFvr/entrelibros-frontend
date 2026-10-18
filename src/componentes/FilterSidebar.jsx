@@ -7,11 +7,12 @@ import SelectFilter from './SelectFilter'
 const DESCUENTOS = [['1', 'Con descuento'], ['10', '10% o más'], ['20', '20% o más'], ['30', '30% o más']]
 const ANIOS = [['2020', '2020 o después'], ['2010', '2010 o después'], ['2000', '2000 o después'], ['0', 'Antes del 2000']]
 // `f` = filtros actuales, `set(cambios)` = actualiza, `toggle(clave, valor)` = agrega/quita de un array
-const FilterSidebar = ({ f, set, toggle, categorias, filtros, abierto, envioDisponible = true }) => {
+// `envio` = { provincia, desdeDireccion, onProvincia }: con qué provincia filtrar por envío (ver EnvioFilter)
+const FilterSidebar = ({ f, set, toggle, categorias, filtros, abierto, envio }) => {
   return (
     <aside id="filtros-catalogo" className={`filters${abierto ? ' open' : ''}`}>
       <EstadoFilter value={f.estado} onChange={(estado) => set({ estado })} />
-      <EnvioFilter value={f.envios} onToggle={(v) => toggle('envios', v)} disabled={!envioDisponible} />
+      <EnvioFilter value={f.envios} onToggle={(v) => toggle('envios', v)} {...envio} />
       <CategoriasFilter categorias={categorias} value={f.cats} onToggle={(c) => toggle('cats', c)} />
       <PriceFilter min={f.min} max={f.max} minimo={filtros.precioMin} maximo={filtros.precioMax} onChange={(min, max) => set({ min, max })} />
       <SelectFilter titulo="Descuento" primera="Todos" opciones={DESCUENTOS} value={f.desc ? String(f.desc) : ''}
