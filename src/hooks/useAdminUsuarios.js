@@ -21,7 +21,7 @@ const useAdminUsuarios = () => {
     admin.cargarUsuarios().then((lista) => { if (vigente) setUsuarios(lista) }).catch(() => {})
     return () => { vigente = false }
   }, [])
-  const [filtros, setFiltros] = useState({ q: '', rol: '', est: '' })
+  const [filtros, setFiltros] = useState({ q: '', rol: '', est: '', solicitud: '' })
   const [pagina, setPagina] = useState(1)
 
   const filtrados = useMemo(() => {
@@ -29,6 +29,7 @@ const useAdminUsuarios = () => {
     return usuarios.filter((u) =>
       (!filtros.rol || u.rol === filtros.rol) &&
       (!filtros.est || u.estado === filtros.est) &&
+      (!filtros.solicitud || (filtros.solicitud === 'PENDIENTE' && u.quiereVender)) &&
       (!q || norm(`${u.nombre} ${u.apellido} ${u.nombreUsuario} ${u.email}`).includes(q)))
   }, [usuarios, filtros])
 
@@ -81,7 +82,9 @@ const useAdminUsuarios = () => {
     ejecutar(() => admin.resolverSolicitudVenta(u.id, aprobada, comentario), aprobada ? 'Vendedor aprobado' : 'Solicitud rechazada')
 
   return {
-    filtros, filtrar, total: filtrados.length, visibles, pagina: paginaActual, paginas, setPagina,
+    filtros, filtrar, total: filtrados.length,
+    solicitudesPendientes: usuarios.filter((u) => u.quiereVender).length,
+    visibles, pagina: paginaActual, paginas, setPagina,
     crear, editar, cambiarRol, darDeBaja, reactivar, resolverVenta,
   }
 }

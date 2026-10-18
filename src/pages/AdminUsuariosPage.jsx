@@ -23,6 +23,24 @@ const AdminUsuariosPage = () => {
         <button className="btn main" type="button" onClick={() => setModal({ tipo: 'crear' })}>Crear usuario</button>
       </AdminHead>
 
+      <section className="adm-requests" aria-labelledby="adm-requests-title">
+        <div>
+          <h2 id="adm-requests-title">Solicitudes de venta</h2>
+          <p>Revisá a los compradores que pidieron publicar libros y resolvé su solicitud.</p>
+        </div>
+        <button
+          className={`btn ${adm.filtros.solicitud === 'PENDIENTE' ? 'main' : 'alt'}`}
+          type="button"
+          aria-pressed={adm.filtros.solicitud === 'PENDIENTE'}
+          disabled={!adm.solicitudesPendientes && adm.filtros.solicitud !== 'PENDIENTE'}
+          onClick={() => adm.filtrar('solicitud', adm.filtros.solicitud === 'PENDIENTE' ? '' : 'PENDIENTE')}
+        >
+          {adm.solicitudesPendientes
+            ? `Ver solicitudes pendientes (${adm.solicitudesPendientes})`
+            : 'No hay solicitudes pendientes'}
+        </button>
+      </section>
+
       <div className="adm-filters">
         <input type="search" placeholder="Buscar por nombre, usuario o e-mail" aria-label="Buscar usuarios"
           value={adm.filtros.q} onChange={(e) => adm.filtrar('q', e.target.value)} />
@@ -41,7 +59,14 @@ const AdminUsuariosPage = () => {
           <UsuariosTabla usuarios={adm.visibles} onEditar={abrir('editar')} onRol={abrir('rol')} onBaja={abrir('baja')}
             onReactivar={adm.reactivar} onVenta={adm.resolverVenta} />
         )
-        : <EmptyBlock titulo="No encontramos usuarios" texto="Probá con otra búsqueda o quitá algún filtro." />}
+        : (
+          <EmptyBlock
+            titulo={adm.filtros.solicitud === 'PENDIENTE' ? 'No hay solicitudes para revisar' : 'No encontramos usuarios'}
+            texto={adm.filtros.solicitud === 'PENDIENTE'
+              ? 'Cuando un comprador solicite vender, aparecerá acá para que puedas aprobarlo o rechazarlo.'
+              : 'Probá con otra búsqueda o quitá algún filtro.'}
+          />
+        )}
       <Pager page={adm.pagina} pages={adm.paginas} onChange={adm.setPagina} />
 
       {modal?.tipo === 'crear' && <UsuarioFormModal onGuardar={adm.crear} onCerrar={cerrar} />}

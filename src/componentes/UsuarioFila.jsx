@@ -12,7 +12,7 @@ const UsuarioFila = ({ usuario: u, onEditar, onRol, onBaja, onReactivar, onVenta
       <td data-label="Rol">
         <span className="adm-tags">
           <span className="tg b">{ETIQUETA_ROL[u.rol]}</span>
-          {u.quiereVender && <span className="tg">Quiere vender</span>}
+          {u.quiereVender && <span className="tg pend">Solicitud pendiente</span>}
         </span>
       </td>
       <td data-label="Estado">
