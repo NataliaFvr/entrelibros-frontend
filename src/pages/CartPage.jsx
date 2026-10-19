@@ -8,11 +8,12 @@ import Stepper from '../componentes/Stepper'
 import EmptyBlock from '../componentes/EmptyBlock'
 import CartList from '../componentes/CartList'
 import CartSummary from '../componentes/CartSummary'
+import AvisoCompraPendiente from '../componentes/AvisoCompraPendiente'
 
 const CartPage = () => {
   const navigate = useNavigate()
   const { user, direcciones } = useAuth()
-  const { carrito, crearPedido } = useCompra()
+  const { carrito, crearPedido, pedidos } = useCompra()
   const toast = useToast()
   const [elegidaPorUsuario, setElegida] = useState(null) // null = todavía no tocó el selector: se usa la principal
   const [enviando, setEnviando] = useState(false)
@@ -47,6 +48,8 @@ const CartPage = () => {
       <div className="crumbs"><Link to="/">Inicio</Link> › <span>Mi Estantería de Lectura</span></div>
       <Stepper actual={0} />
       <h1 className="fr cart-t">Mi Estantería de Lectura</h1>
+      {/* Lo que se confirmó y falta pagar ya no está en la estantería: está en una orden pendiente */}
+      <AvisoCompraPendiente pedidos={pedidos} onPagar={(n) => navigate(`/pago/${n}`)} />
       {items.length === 0 ? (
         <EmptyBlock titulo="Tu estantería está vacía" texto="Sumá libros desde el catálogo para llenarla." boton="Ver libros" onClick={() => navigate('/libros')} />
       ) : (
