@@ -18,11 +18,11 @@ const OrderCard = ({ pedido, libros }) => {
   // Solo se califica a los vendedores que mandaron algo (no a los que cancelaron su parte)
   const vendedores = [...new Map(pedido.its
     .filter((i) => i.idVendedor != null && !i.cancelado)
-    .map((i) => [i.idVendedor, libros.find((l) => l.vId === i.idVendedor)?.v || 'vendedor']))]
+    .map((i) => [i.idVendedor, libros.find((l) => l.vId === i.idVendedor)?.v || i.tiendaV]))]
   // Con la compra pagada el back manda el contacto de cada vendedor, para coordinar la entrega
   const contactos = [...new Map(pedido.its
     .filter((i) => i.emailV)
-    .map((i) => [i.idVendedor, { nombre: libros.find((l) => l.vId === i.idVendedor)?.v || 'el vendedor', email: i.emailV, tel: i.telV }]))]
+    .map((i) => [i.idVendedor, { nombre: libros.find((l) => l.vId === i.idVendedor)?.v || i.tiendaV, email: i.emailV, tel: i.telV }]))]
 
   return (
     <div className="card ord">
@@ -37,7 +37,7 @@ const OrderCard = ({ pedido, libros }) => {
       <small className="ord-a">Envío a: {pedido.addr}</small>
       {pedido.proveedor && <small className="ord-a">Pagado con: {nombreMetodo(pedido.proveedor)}</small>}
       {contactos.map(([id, c]) => (
-        <small key={id} className="ord-a">Contacto de {c.nombre}: {c.email}{c.tel ? ` · ${c.tel}` : ''}</small>
+        <small key={id} className="ord-a">{c.nombre ? `Contacto de ${c.nombre}` : 'Contacto del vendedor'}: {c.email}{c.tel ? ` · ${c.tel}` : ''}</small>
       ))}
       
       {pendiente && (
@@ -51,7 +51,7 @@ const OrderCard = ({ pedido, libros }) => {
         <div className="rvf-b">
           {vendedores.map(([idVendedor, nombre]) => (
             <button key={idVendedor} className="btn alt" type="button" onClick={() => navigate(`/vendedor/${idVendedor}?tab=resenias`)}>
-              Calificar a {nombre}
+              {nombre ? `Calificar a ${nombre}` : 'Calificar al vendedor'}
             </button>
           ))}
         </div>

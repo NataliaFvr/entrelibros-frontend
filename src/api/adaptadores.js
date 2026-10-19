@@ -134,7 +134,7 @@ export const aPedidoFront = (o) => {
   return {
     n: String(o.id), idOrden: o.id, date: isoADia(o.fecha),
     its: (o.items || []).map((i) => ({ id: i.idLibro, q: i.cantidad, p: i.precioUnitario, t: i.tituloLibro, idItem: i.idOrdenItem, idVendedor: i.idVendedor, cancelado: Boolean(i.cancelado),
-      emailV: i.emailVendedor || '', telV: i.telefonoVendedor || '' })),
+      emailV: i.emailVendedor || '', telV: i.telefonoVendedor || '', tiendaV: i.nombreTienda || '' })),
     dest, addr: destinoTexto(dest), // addr = texto listo para mostrar: "calle, ciudad, Provincia (CP)"
     sub: o.subtotal ?? 0, env: o.costoEnvio ?? 0, total: o.total ?? 0,
     est: ESTADO_TEXTO[o.estadoPago] || o.estadoPago, pago: o.estadoPago,
