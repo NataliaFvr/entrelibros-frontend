@@ -15,8 +15,9 @@ const OrderCard = ({ pedido, libros }) => {
   const estado = estadoPago(pedido, ahora)
   const [texto, clase] = ETIQUETAS_PAGO[estado]
   const pendiente = estado === 'PENDIENTE'
+  // Solo se califica a los vendedores que mandaron algo (no a los que cancelaron su parte)
   const vendedores = [...new Map(pedido.its
-    .filter((i) => i.idVendedor != null)
+    .filter((i) => i.idVendedor != null && !i.cancelado)
     .map((i) => [i.idVendedor, libros.find((l) => l.vId === i.idVendedor)?.v || 'vendedor']))]
 
   return (
