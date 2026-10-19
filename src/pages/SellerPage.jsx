@@ -53,6 +53,8 @@ const Vendedor = ({ user, perfil }) => {
   }
 
   const editado = tab === 'editar' ? vendedor.pub.find((p) => String(p.id) === id) : null
+  // Al abrir o recargar /vender/editar/:id hay que esperar a que lleguen los libros antes de decidir si existe
+  if (tab === 'editar' && estadoLibros === 'cargando') return <main className="usr" />
   if (!TABS.includes(tab) || (tab === 'editar' && (!editado || enRevision(editado)))) return <Navigate to="/vender" replace />
 
   const vendido = activas.reduce((suma, v) => suma + v.its.reduce((s, i) => s + i.p * i.q, 0), 0)

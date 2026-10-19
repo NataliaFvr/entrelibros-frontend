@@ -22,6 +22,7 @@ const SaleCard = ({ venta, onCancelar }) => {
       <SummaryRow titulo="Total" valor={fmt(total)} total />
       <small className="ord-a">Comprador: {venta.comprador}</small>
       {venta.destino && <small className="ord-a">Enviar a: {venta.destino}</small>}
+      {venta.emailComprador && <small className="ord-a">Contacto del comprador: {venta.emailComprador}</small>}
       {venta.estado === 'pendiente' && (
         <div className="rvf-b">
           {hasta && <small className="dim">El comprador tiene los libros reservados hasta las {hasta}.</small>}

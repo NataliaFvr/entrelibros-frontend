@@ -19,6 +19,10 @@ const OrderCard = ({ pedido, libros }) => {
   const vendedores = [...new Map(pedido.its
     .filter((i) => i.idVendedor != null && !i.cancelado)
     .map((i) => [i.idVendedor, libros.find((l) => l.vId === i.idVendedor)?.v || 'vendedor']))]
+  // Con la compra pagada el back manda el contacto de cada vendedor, para coordinar la entrega
+  const contactos = [...new Map(pedido.its
+    .filter((i) => i.emailV)
+    .map((i) => [i.idVendedor, { nombre: libros.find((l) => l.vId === i.idVendedor)?.v || 'el vendedor', email: i.emailV, tel: i.telV }]))]
 
   return (
     <div className="card ord">
@@ -32,6 +36,9 @@ const OrderCard = ({ pedido, libros }) => {
       <SummaryRow titulo="Total" valor={fmt(pedido.total)} total />
       <small className="ord-a">Envío a: {pedido.addr}</small>
       {pedido.proveedor && <small className="ord-a">Pagado con: {nombreMetodo(pedido.proveedor)}</small>}
+      {contactos.map(([id, c]) => (
+        <small key={id} className="ord-a">Contacto de {c.nombre}: {c.email}{c.tel ? ` · ${c.tel}` : ''}</small>
+      ))}
       
       {pendiente && (
         <div className="rvf-b">

@@ -133,7 +133,8 @@ export const aPedidoFront = (o) => {
   const dest = aDestinoFront(o)
   return {
     n: String(o.id), idOrden: o.id, date: isoADia(o.fecha),
-    its: (o.items || []).map((i) => ({ id: i.idLibro, q: i.cantidad, p: i.precioUnitario, t: i.tituloLibro, idItem: i.idOrdenItem, idVendedor: i.idVendedor, cancelado: Boolean(i.cancelado) })),
+    its: (o.items || []).map((i) => ({ id: i.idLibro, q: i.cantidad, p: i.precioUnitario, t: i.tituloLibro, idItem: i.idOrdenItem, idVendedor: i.idVendedor, cancelado: Boolean(i.cancelado),
+      emailV: i.emailVendedor || '', telV: i.telefonoVendedor || '' })),
     dest, addr: destinoTexto(dest), // addr = texto listo para mostrar: "calle, ciudad, Provincia (CP)"
     sub: o.subtotal ?? 0, env: o.costoEnvio ?? 0, total: o.total ?? 0,
     est: ESTADO_TEXTO[o.estadoPago] || o.estadoPago, pago: o.estadoPago,
@@ -172,7 +173,8 @@ export const aVentaFront = (ordenVendedor) => {
     id: ordenVendedor.id, n: String(ordenVendedor.idOrden), date: isoADia(ordenVendedor.fecha),
     estado, est: ESTADO_VENTA[estado], cancelada: estado === 'cancelada' || estado === 'vencida',
     venceEn: estado === 'pendiente' ? isoAMs(ordenVendedor.venceEn) ?? undefined : undefined, its,
-    comprador: `${ordenVendedor.nombreComprador || ''}`.trim(), destino: destinoTexto(aDestinoFront(ordenVendedor)),
+    comprador: `${ordenVendedor.nombreComprador || ''} ${ordenVendedor.apellidoComprador || ''}`.trim(), destino: destinoTexto(aDestinoFront(ordenVendedor)),
+    emailComprador: ordenVendedor.emailComprador || '', // solo llega con la venta pagada
   }
 }
 

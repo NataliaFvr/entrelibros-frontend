@@ -98,7 +98,10 @@ const useVendedor = (user) => {
     let avisoFotos = ''
     try {
       const ids = await idsDeCategorias(categoriasDe(datos))
-      const libro = await modificarLibro(idEditado, aLibroRequest(datos, ids.length ? ids : undefined))
+      const pedido = aLibroRequest(datos, ids.length ? ids : undefined)
+      // Un usado vendido tiene stock 0: si no se tocó el stock, no se manda (así se puede editar sin reponerlo)
+      if (datos.usado && actual.usado && Number(datos.stock) === Number(actual.stock)) delete pedido.stock
+      const libro = await modificarLibro(idEditado, pedido)
       enviadoARevision = libro.estadoModeracion === 'EN_REVISION'
       // El PATCH ya se aplicó: si fallan las fotos no es un error del guardado, se avisa aparte y se muestran las que quedaron
       const fotos = await subirFotos(idEditado, datos.imgs, actual.imgs)

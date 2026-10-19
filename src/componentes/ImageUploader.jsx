@@ -16,7 +16,7 @@ const ImageUploader = ({ imagenes }) => {
   }
   const alQuitar = () => { quitar(actual); setActiva(Math.max(actual - 1, 0)) }
   const alMover = (paso) => { mover(actual, paso); setActiva(actual + paso) }
-  const entrada = <input type="file" multiple onChange={alElegir} />
+  const entrada = <input type="file" accept="image/jpeg,image/png,image/webp" multiple onChange={alElegir} />
 
   return (
     <div className="iu">
