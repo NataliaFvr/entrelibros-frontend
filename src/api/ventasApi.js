@@ -11,3 +11,8 @@ export const listarVentasApi = async () => {
     throw err
   }
 }
+
+// PATCH /ordenes/vendedor/{id}/cancelar: solo una venta sin pagar. El back saca esos libros de la orden del
+// comprador, devuelve el stock y le recalcula el total.
+export const cancelarVentaApi = async (idOrdenVendedor) =>
+  (await api.patch(`/ordenes/vendedor/${idOrdenVendedor}/cancelar`)).data

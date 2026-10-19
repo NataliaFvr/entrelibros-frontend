@@ -151,20 +151,27 @@ export const aTarifasEnvioFront = (lista = []) => ({
 })
 
 // OrdenVendedorResponse ya incluye los ítems de esa venta, fecha, comprador y destino.
-// -> { id, n, date, est, cancelada, its, comprador, destino }, el formato que consumen SellerSales y SaleCard.
-// `id` es el id de la OrdenVendedor (el que pide PATCH /ordenes/vendedor/{id}/cancelar);
-// `n` es el número de la orden. Las ventas canceladas se conservan (con `cancelada`) para que el vendedor vea qué pasó.
+// -> { id, n, date, estado, est, cancelada, venceEn, its, comprador, destino }, el formato de SellerSales y SaleCard.
+// `id` es el id de la OrdenVendedor (el que pide PATCH /ordenes/vendedor/{id}/cancelar); `n` es el número de la orden.
+// `estado`: 'pendiente' (reservada, sin pagar) · 'pagada' · 'cancelada' · 'vencida'. Se muestran todas, de la más nueva
+// a la más vieja, para que el vendedor vea también las reservas y pueda cancelarlas.
+const ESTADO_VENTA = { pendiente: 'Pendiente de pago', pagada: 'Pagada', cancelada: 'Cancelada', vencida: 'Vencida' }
+const estadoVenta = (ov) => {
+  if (ov.estadoPago === 'VENCIDO') return 'vencida'
+  if (ov.estado === 'CANCELADA' || ov.estadoPago === 'CANCELADO' || ov.estadoPago === 'RECHAZADO') return 'cancelada'
+  return ov.estadoPago === 'PENDIENTE' ? 'pendiente' : 'pagada'
+}
 export const aVentaFront = (ordenVendedor) => {
-  if (ordenVendedor.estadoPago !== 'SIMULADO_APROBADO') return null
   const its = (ordenVendedor.items || []).map((i) => ({
     t: i.tituloLibro || 'Libro', q: i.cantidad, p: i.precioUnitario,
     cat: (i.categorias || [])[0] || '', usado: i.estadoLibro === 'USADO',
   }))
   if (!its.length) return null
-  const cancelada = ordenVendedor.estado === 'CANCELADA'
+  const estado = estadoVenta(ordenVendedor)
   return {
     id: ordenVendedor.id, n: String(ordenVendedor.idOrden), date: isoADia(ordenVendedor.fecha),
-    est: cancelada ? 'Cancelada' : ESTADO_TEXTO[ordenVendedor.estadoPago], cancelada, its,
+    estado, est: ESTADO_VENTA[estado], cancelada: estado === 'cancelada' || estado === 'vencida',
+    venceEn: estado === 'pendiente' ? isoAMs(ordenVendedor.venceEn) ?? undefined : undefined, its,
     comprador: `${ordenVendedor.nombreComprador || ''}`.trim(), destino: destinoTexto(aDestinoFront(ordenVendedor)),
   }
 }

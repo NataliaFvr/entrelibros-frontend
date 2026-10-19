@@ -10,7 +10,9 @@ const useImagenesLibro = (inicial = []) => {
   const [reedicion, setReedicion] = useState(null) // índice de una foto ya cargada que se vuelve a recortar
 
   const elegir = (archivos) => {
-    setCola((c) => [...c, ...Array.from(archivos)])
+    // Se copian YA: después el input se limpia (value = '') y en algunos navegadores esa lista queda vacía
+    const nuevos = Array.from(archivos)
+    setCola((c) => [...c, ...nuevos])
   }
 
   // Lo que el recortador tiene que mostrar ahora: un archivo nuevo o una foto ya cargada (solo las base64 se pueden re-recortar)

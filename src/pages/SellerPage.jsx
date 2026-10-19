@@ -33,8 +33,9 @@ const Vendedor = ({ user, perfil }) => {
   const { tab = 'libros', id } = useParams()
   const { vendedor, estadoLibros, reintentar, solicitar, guardarLibro, alternarBaja } = useVendedor(user)
   const calificaciones = useCalificacionesRecibidas(vendedor.tienda, vendedor.pub, user.id)
-  const { ventas, cargando } = useVentas(user)
-  const activas = useMemo(() => ventas.filter((v) => !v.cancelada), [ventas]) // las canceladas no suman a totales ni estadísticas
+  // Se recargan al entrar a "Historial de ventas" o "Estadísticas"
+  const { ventas, cargando, cancelar } = useVentas(user, tab === 'ventas' || tab === 'estadisticas')
+  const activas = useMemo(() => ventas.filter((v) => v.estado === 'pagada'), [ventas]) // solo las pagadas suman a totales y estadísticas
 
   if (vendedor.estado !== 'aprobado') {
     return (
@@ -73,7 +74,7 @@ const Vendedor = ({ user, perfil }) => {
         <BookForm key={editado ? editado.id : 'nuevo'} libro={editado || {}}
           onGuardar={guardar} onCancelar={() => navigate('/vender')} />
       )}
-      {tab === 'ventas' && !cargando && <SellerSales ventas={ventas} />}
+      {tab === 'ventas' && !cargando && <SellerSales ventas={ventas} onCancelar={cancelar} />}
       {tab === 'estadisticas' && !cargando && <Estadisticas ventas={activas} />}
       {tab === 'reputacion' && <SellerReputation calificaciones={calificaciones} />}
     </main>
