@@ -15,14 +15,15 @@ const OrderCard = ({ pedido, libros }) => {
   const estado = estadoPago(pedido, ahora)
   const [texto, clase] = ETIQUETAS_PAGO[estado]
   const pendiente = estado === 'PENDIENTE'
-  // Solo se califica a los vendedores que mandaron algo (no a los que cancelaron su parte)
+  const pagada = estado === 'SIMULADO_APROBADO'
+  // Con la compra pagada, una fila por vendedor: su contacto (lo manda el back para coordinar la entrega) y el botón
+  // para calificarlo. No aparecen los vendedores que cancelaron su parte.
   const vendedores = [...new Map(pedido.its
     .filter((i) => i.idVendedor != null && !i.cancelado)
-    .map((i) => [i.idVendedor, libros.find((l) => l.vId === i.idVendedor)?.v || i.tiendaV]))]
-  // Con la compra pagada el back manda el contacto de cada vendedor, para coordinar la entrega
-  const contactos = [...new Map(pedido.its
-    .filter((i) => i.emailV)
-    .map((i) => [i.idVendedor, { nombre: libros.find((l) => l.vId === i.idVendedor)?.v || i.tiendaV, email: i.emailV, tel: i.telV }]))]
+    .map((i) => [i.idVendedor, {
+      nombre: libros.find((l) => l.vId === i.idVendedor)?.v || i.tiendaV,
+      contacto: [i.emailV, i.telV].filter(Boolean).join(' · '),
+    }]))]
 
   return (
     <div className="card ord">
@@ -31,15 +32,13 @@ const OrderCard = ({ pedido, libros }) => {
         <span className={`tg ${clase}`.trim()}>{estado === 'SIMULADO_APROBADO' ? pedido.est : texto}</span>
         <small>{fechaCorta(pedido.date)}</small>
       </div>
-      <OrderLines pedido={pedido} libros={libros} conOpinion={estado === 'SIMULADO_APROBADO'} />
+      <OrderLines pedido={pedido} libros={libros} conOpinion={pagada} />
       <SummaryRow titulo="Envío" valor={fmt(pedido.env)} />
       <SummaryRow titulo="Total" valor={fmt(pedido.total)} total />
-      <small className="ord-a">Envío a: {pedido.addr}</small>
-      {pedido.proveedor && <small className="ord-a">Pagado con: {nombreMetodo(pedido.proveedor)}</small>}
-      {contactos.map(([id, c]) => (
-        <small key={id} className="ord-a">{c.nombre ? `Contacto de ${c.nombre}` : 'Contacto del vendedor'}: {c.email}{c.tel ? ` · ${c.tel}` : ''}</small>
-      ))}
-      
+      <small className="ord-a">
+        Envío a: {pedido.addr}{pedido.proveedor && ` · Pagado con ${nombreMetodo(pedido.proveedor)}`}
+      </small>
+
       {pendiente && (
         <div className="rvf-b">
           <small className="dim">Reserva: te quedan {mmss(pedido.venceEn - ahora)} min</small>
@@ -47,12 +46,15 @@ const OrderCard = ({ pedido, libros }) => {
           <ConfirmLink texto="Cancelar compra" onConfirmar={() => cancelarPedido(pedido.n)} />
         </div>
       )}
-      {estado === 'SIMULADO_APROBADO' && vendedores.length > 0 && (
-        <div className="rvf-b">
-          {vendedores.map(([idVendedor, nombre]) => (
-            <button key={idVendedor} className="btn alt" type="button" onClick={() => navigate(`/vendedor/${idVendedor}?tab=resenias`)}>
-              {nombre ? `Calificar a ${nombre}` : 'Calificar al vendedor'}
-            </button>
+      {pagada && vendedores.length > 0 && (
+        <div className="ord-vend">
+          <h4>{vendedores.length > 1 ? 'Vendedores' : 'Vendedor'}</h4>
+          {vendedores.map(([idVendedor, v]) => (
+            <div key={idVendedor} className="ord-v">
+              <b>{v.nombre || 'Vendedor'}</b>
+              <small>{v.contacto}</small>
+              <button className="btn alt" type="button" onClick={() => navigate(`/vendedor/${idVendedor}?tab=resenias`)}>Calificar</button>
+            </div>
           ))}
         </div>
       )}

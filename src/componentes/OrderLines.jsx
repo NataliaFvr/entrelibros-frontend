@@ -12,12 +12,13 @@ const OrderLines = ({ pedido, libros, conOpinion = false }) => {
     if (i.cancelado) {
       return <SummaryRow key={i.id} titulo={<s>{titulo}</s>} detalle="Cancelado por el vendedor" valor={<s>{fmt(i.p * i.q)}</s>} />
     }
-    return (
-      <div key={i.id}>
-        <SummaryRow titulo={titulo} detalle={l ? `${l.a} · x${i.q}` : `x${i.q}`} valor={fmt(i.p * i.q)} />
-        {conOpinion && <Link className="lnk opinar-lnk" to={`/libro/${i.id}?opinar=1`}>Opinar sobre este libro</Link>}
-      </div>
+    const detalle = (
+      <>
+        {l ? `${l.a} · ` : ''}x{i.q}
+        {conOpinion && <> · <Link className="opinar-lnk" to={`/libro/${i.id}?opinar=1`}>Opinar</Link></>}
+      </>
     )
+    return <SummaryRow key={i.id} titulo={titulo} detalle={detalle} valor={fmt(i.p * i.q)} />
   })
 }
 

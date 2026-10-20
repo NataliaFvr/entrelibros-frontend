@@ -507,7 +507,11 @@
   .btn:disabled{opacity:.5;cursor:default;filter:none}
   .tg.pend{background:var(--tangerine)}
   .aviso-pend{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 16px;margin:0 0 18px}.aviso-pend .btn{width:auto;padding:8px 16px}
-  .opinar-lnk{display:inline-block;font-size:.78rem;margin:-2px 0 6px}
+  .opinar-lnk{color:var(--burnt);font-weight:700;text-decoration:underline}
+  .ord-vend{margin-top:14px;padding-top:12px;border-top:1px solid rgba(4,42,43,.12);display:flex;flex-direction:column;gap:8px}
+  .ord-vend h4{margin:0;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;opacity:.6}
+  .ord-v{display:flex;flex-wrap:wrap;align-items:center;gap:4px 14px}.ord-v b{min-width:130px;font-size:.92rem}
+  .ord-v small{flex:1 1 200px;min-width:0;font-size:.78rem;opacity:.7;overflow-wrap:anywhere}.ord-v .btn{width:auto;padding:7px 18px;font-size:.85rem}
   .note{background:var(--cyan);border-radius:8px;padding:10px 12px;font-size:.85rem;line-height:1.5}
   .note.bad{background:rgba(216,71,39,.12);color:var(--burnt);font-weight:600}
   .fld input.code-in{font-family:'Fraunces',serif;font-size:1.8rem;letter-spacing:.5em;text-align:center;font-weight:700;padding:12px 8px 12px calc(8px + .5em)}
