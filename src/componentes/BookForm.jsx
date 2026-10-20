@@ -20,7 +20,8 @@ const desdeLibro = (p) => ({
   estadoLibro: p.usado ? 'Usado' : 'Nuevo', descripcion: p.descripcion || '', precio: String(p.base || ''), descuentoPct: String(p.d || 0), stock: p.stock == null ? '' : String(p.stock),
 })
 
-// Publicar o editar (`libro`). El backend decide si los datos son válidos.
+// Publicar o editar (`libro`). El backend también valida los datos, pero un usado
+// representa una sola pieza, así que el formulario no permite publicarlo con otro stock.
 const BookForm = ({ libro = {}, onGuardar, onCancelar }) => {
   const { categorias, libros } = useLibros()
   // Editoriales y autores que ya hay en el catálogo: se ofrecen como sugerencias para que todos escriban el mismo nombre
@@ -31,10 +32,22 @@ const BookForm = ({ libro = {}, onGuardar, onCancelar }) => {
   )
   const imagenes = useImagenesLibro(libro.imgs || [])
   const [enviando, setEnviando] = useState(false)
+  const esUsado = valores.estadoLibro === 'Usado'
+  // Un usado ya vendido conserva stock 0 al editarlo: no se lo debe reponer por cambiar otro dato.
+  const esUsadoVendido = Boolean(libro.id && libro.usado && Number(valores.stock) === 0)
+
+  const cambiarCampo = (nombre, valor) => {
+    cambiar(nombre, valor)
+    if (nombre === 'estadoLibro' && valor === 'Usado') cambiar('stock', '1')
+  }
 
   const enviar = async (e) => {
     e.preventDefault()
     if (enviando) return
+    if (esUsado && !esUsadoVendido && Number(valores.stock) !== 1) {
+      setErroresCampos({ stock: 'Un libro usado debe tener exactamente una unidad.' })
+      return
+    }
     // El libro se crea primero y las fotos se suben después, así que la foto obligatoria se pide acá:
     // sin ella el administrador no lo puede aprobar
     if (!imagenes.fotos.length) {
@@ -63,7 +76,7 @@ const BookForm = ({ libro = {}, onGuardar, onCancelar }) => {
     }
   }
 
-  const props = (nombre) => ({ name: nombre, value: valores[nombre], onChange: cambiar, error: errores[nombre] })
+  const props = (nombre) => ({ name: nombre, value: valores[nombre], onChange: cambiarCampo, error: errores[nombre] })
   return (
     <form className="card aform" noValidate onSubmit={enviar}>
       <h3 className="fr">{libro.id ? 'Editar libro' : 'Publicar libro'}</h3>
@@ -79,7 +92,8 @@ const BookForm = ({ libro = {}, onGuardar, onCancelar }) => {
       <CategoriasField {...props('cats')} opciones={categorias} />
       <div className="two">
         <Field label="Año de edición" type="number" {...props('anio')} />
-        <Field label="Stock" type="number" {...props('stock')} />
+        <Field label="Stock" type="number" min="1" step="1" max={esUsado ? '1' : undefined}
+          readOnly={esUsado} {...props('stock')} />
       </div>
       <div className="two">
         <Field label="Precio ($)" type="number" {...props('precio')} />
