@@ -1,19 +1,13 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useState } from 'react'
 
-// Abrir/cerrar de un panel flotante. Con Escape se cierra.
+// Abrir/cerrar de un panel flotante. `alTeclear` va en el onKeyDown del contenedor: con Escape se cierra.
 const usePopover = () => {
   const [abierto, setAbierto] = useState(false)
   const cerrar = useCallback(() => setAbierto(false), [])
   const alternar = () => setAbierto((a) => !a)
+  const alTeclear = (e) => { if (abierto && e.key === 'Escape') cerrar() }
 
-  useEffect(() => {
-    if (!abierto) return undefined
-    const alTeclear = (e) => { if (e.key === 'Escape') cerrar() }
-    document.addEventListener('keydown', alTeclear)
-    return () => document.removeEventListener('keydown', alTeclear)
-  }, [abierto, cerrar])
-
-  return { abierto, alternar, cerrar }
+  return { abierto, alternar, cerrar, alTeclear }
 }
 
 export default usePopover

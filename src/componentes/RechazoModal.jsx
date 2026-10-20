@@ -9,17 +9,8 @@ const RechazoModal = ({ titulo, onConfirmar, onCerrar }) => {
   const [enviando, setEnviando] = useState(false)
   const campoRef = useRef(null)
 
-  useEffect(() => {
-    campoRef.current?.focus()
-    const alEscape = (e) => { if (e.key === 'Escape') onCerrar() }
-    const overflowPrevio = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
-    window.addEventListener('keydown', alEscape)
-    return () => {
-      document.body.style.overflow = overflowPrevio
-      window.removeEventListener('keydown', alEscape)
-    }
-  }, [onCerrar])
+  // El foco entra al campo para que Escape (onKeyDown) cierre el pop-up. El scroll de atrás lo traba el CSS.
+  useEffect(() => { campoRef.current?.focus() }, [])
 
   const enviar = async (e) => {
     e.preventDefault()
@@ -33,7 +24,8 @@ const RechazoModal = ({ titulo, onConfirmar, onCerrar }) => {
   }
 
   return (
-    <div className="modal" onClick={(e) => { if (e.target === e.currentTarget) onCerrar() }}>
+    <div className="modal" onClick={(e) => { if (e.target === e.currentTarget) onCerrar() }}
+      onKeyDown={(e) => { if (e.key === 'Escape') onCerrar() }}>
       <form className="modal-card mod-modal" role="dialog" aria-modal="true" aria-labelledby="rechazo-t" noValidate onSubmit={enviar}>
         <button className="modal-x" type="button" aria-label="Cerrar" onClick={onCerrar}>✕</button>
         <h2 className="fr" id="rechazo-t">Rechazar libro</h2>

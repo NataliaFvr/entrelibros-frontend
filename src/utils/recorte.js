@@ -49,11 +49,11 @@ export const cargarImagen = (origen) =>
     img.src = url
   })
 
-// Dibuja el recorte y lo devuelve como JPEG en base64 (el fondo blanco evita que un PNG transparente quede negro)
-export const recortarAImagen = (img, estado, { anchoMax = 600, calidad = 0.85 } = {}) => {
+// Dibuja el recorte en `canvas` (el <canvas> oculto de ImageCropper) y lo devuelve como JPEG en base64
+// (el fondo blanco evita que un PNG transparente quede negro)
+export const recortarAImagen = (canvas, img, estado, { anchoMax = 600, calidad = 0.85 } = {}) => {
   const v = ventanaOrigen({ imgW: img.naturalWidth, imgH: img.naturalHeight, ...estado })
   const { w, h } = tamanioSalida(v, anchoMax, estado.aspecto)
-  const canvas = document.createElement('canvas')
   canvas.width = w
   canvas.height = h
   const ctx = canvas.getContext('2d')

@@ -13,7 +13,7 @@ const Campana = ({ user }) => {
   const etiqueta = noLeidas ? `Notificaciones (${noLeidas} sin leer)` : 'Notificaciones'
 
   return (
-    <div className="notif">
+    <div className="notif" onKeyDown={popover.alTeclear}>
       <button className={`icon-btn notif-btn${popover.abierto ? ' on' : ''}`} type="button" aria-label={etiqueta} title="Notificaciones"
         aria-haspopup="dialog" aria-expanded={popover.abierto} aria-controls={ID_PANEL} onClick={() => { if (!popover.abierto) refrescar(); popover.alternar() }}>
         <BellIcon />

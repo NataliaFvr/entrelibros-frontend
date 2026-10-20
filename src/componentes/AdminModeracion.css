@@ -9,7 +9,7 @@
 .mcar-btn:hover:not(:disabled){border-color:var(--burnt);color:var(--burnt)}
 .mcar-btn:disabled{opacity:.35;cursor:default}
 .mcar-btn:focus-visible,.mcar-pista:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
-.mcar-pista{position:relative;display:flex;align-items:flex-start;gap:16px;overflow-x:auto;padding:6px 0 16px;scroll-snap-type:x mandatory;overscroll-behavior-x:contain;scrollbar-width:thin}
+.mcar-pista{scroll-behavior:smooth;position:relative;display:flex;align-items:flex-start;gap:16px;overflow-x:auto;padding:6px 0 16px;scroll-snap-type:x mandatory;overscroll-behavior-x:contain;scrollbar-width:thin}
 .mcar-slide{flex:0 0 100%;min-width:0;scroll-snap-align:start;scroll-snap-stop:always}
 @media (prefers-reduced-motion:reduce){.mcar-pista{scroll-behavior:auto}}
 .mod-item{display:flex;flex-direction:column;gap:14px;padding:clamp(14px,3vw,24px);min-width:0}

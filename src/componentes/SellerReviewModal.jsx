@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import RatingInput from './RatingInput'
 
 // Modal "Escribir una reseña al vendedor": calificación 1-5 + comentario
@@ -6,11 +6,9 @@ const SellerReviewModal = ({ tienda, libro, inicial, onPublicar, onCerrar }) => 
   const [puntos, setPuntos] = useState(inicial ? inicial.st : 0)
   const [texto, setTexto] = useState(inicial ? inicial.t : '')
 
-  useEffect(() => {
-    const alEscape = (e) => { if (e.key === 'Escape') onCerrar() }
-    window.addEventListener('keydown', alEscape)
-    return () => window.removeEventListener('keydown', alEscape)
-  }, [onCerrar])
+  const tarjetaRef = useRef(null)
+  // El foco entra al pop-up para que Escape (onKeyDown) lo cierre
+  useEffect(() => { tarjetaRef.current?.focus() }, [])
 
   const enviar = (e) => {
     e.preventDefault()
@@ -18,8 +16,9 @@ const SellerReviewModal = ({ tienda, libro, inicial, onPublicar, onCerrar }) => 
   }
 
   return (
-    <div className="modal" onClick={(e) => { if (e.target === e.currentTarget) onCerrar() }}>
-      <div className="modal-card sp-modal" role="dialog" aria-modal="true" aria-labelledby="sp-rt">
+    <div className="modal" onClick={(e) => { if (e.target === e.currentTarget) onCerrar() }}
+      onKeyDown={(e) => { if (e.key === 'Escape') onCerrar() }}>
+      <div className="modal-card sp-modal" role="dialog" aria-modal="true" aria-labelledby="sp-rt" tabIndex={-1} ref={tarjetaRef}>
         <button className="modal-x" type="button" aria-label="Cerrar" onClick={onCerrar}>✕</button>
         <h2 className="fr" id="sp-rt">{inicial ? 'Editar tu reseña' : 'Escribir una reseña'}</h2>
         <p className="modal-msg">Vendedor: <b>{tienda}</b>{libro && <> · Tu compra: {libro}</>}</p>

@@ -13,7 +13,7 @@ const Header = () => {
   const esAdmin = useEsAdmin()
 
   return (
-    <header>
+    <header onKeyDown={menu.alTeclear}>
       <div className="navbar">
         <Link to="/" className="logo-block">
           <span className="logo-mark" role="img" aria-label="Logo Entrelibros" />

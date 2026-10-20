@@ -5,8 +5,8 @@ import { useToast } from './useToast'
 import { mensajeError } from '../utils/errorApi'
 
 // Ventas del vendedor en el formato { id, n, date, estado, est, cancelada, venceEn, its, comprador }.
-// Se vuelven a pedir cada vez que se abre la pestaña de ventas (`activo`): una compra hecha con el panel ya abierto
-// aparece sin recargar la página.
+// Se piden al entrar al panel (la cabecera muestra cuántas ventas hay) y se vuelven a pedir cada vez que se abre la
+// pestaña de ventas o estadísticas (`activo`): una compra hecha con el panel ya abierto aparece sin recargar la página.
 const useVentas = (user, activo = true) => {
   const idVendedor = user.id
   const toast = useToast()
@@ -15,7 +15,7 @@ const useVentas = (user, activo = true) => {
   const [version, setVersion] = useState(0)
 
   useEffect(() => {
-    if (idVendedor == null || !activo) return undefined
+    if (idVendedor == null) return undefined
     let vigente = true
     listarVentasApi()
       .then((ventas) => { if (vigente) setCrudas(ventas) })

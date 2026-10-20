@@ -52,10 +52,11 @@ const Catalogo = ({ inicial, categorias, filtros }) => {
   const pages = Math.max(1, resultado.pages)
   const page = Math.min(f.page, pages)
 
-  const cambiarPagina = (p) => { setPage(p); window.scrollTo({ top: 0, behavior: 'smooth' }) }
+  const arriba = useRef(null)
+  const cambiarPagina = (p) => { setPage(p); arriba.current?.scrollIntoView({ block: 'start' }) }
 
   return (
-    <main className="cat">
+    <main className="cat" ref={arriba}>
       <div className="crumbs"><Link to="/">Inicio</Link> › <span>Libros</span></div>
       <div className="cat-top">
         <div>

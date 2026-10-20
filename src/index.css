@@ -512,6 +512,10 @@
   .ord-vend h4{margin:0;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;opacity:.6}
   .ord-v{display:flex;flex-wrap:wrap;align-items:center;gap:4px 14px}.ord-v b{min-width:130px;font-size:.92rem}
   .ord-v small{flex:1 1 200px;min-width:0;font-size:.78rem;opacity:.7;overflow-wrap:anywhere}.ord-v .btn{width:auto;padding:7px 18px;font-size:.85rem}
+  /* Con un pop-up abierto la página de atrás no se mueve (antes se hacía con document.body.style) */
+  body:has(.modal){overflow:hidden}
+  @media (max-width:1023px){body:has(.mmenu),body:has(.adm-bar.open){overflow:hidden}}
+  .scroll-top{display:block;height:0}
   .note{background:var(--cyan);border-radius:8px;padding:10px 12px;font-size:.85rem;line-height:1.5}
   .note.bad{background:rgba(216,71,39,.12);color:var(--burnt);font-weight:600}
   .fld input.code-in{font-family:'Fraunces',serif;font-size:1.8rem;letter-spacing:.5em;text-align:center;font-weight:700;padding:12px 8px 12px calc(8px + .5em)}

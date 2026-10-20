@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { AuthCtx } from './authCtx'
 import { useToast } from '../hooks/useToast'
 import useVerificacion from '../hooks/useVerificacion'
-import { EVENTO_SESION_EXPIRADA } from '../api/axiosConfig'
+import { escucharSesionVencida } from '../api/axiosConfig'
 import { cerrarSesionApi, getSesionApi, loginApi, reenviarCodigoApi, registrarApi, traerUsuarioApi } from '../api/authApi'
 import { actualizarUsuarioApi, quitarFotoUsuarioApi, subirFotoUsuarioApi, urlFotoUsuario } from '../api/usuariosApi'
 import { agregarMarcapaginaApi, listarMarcapaginasApi, quitarMarcapaginaApi } from '../api/cuentaApi'
@@ -93,8 +93,7 @@ const AuthProvider = ({ children }) => {
       setDirecciones([])
       toast('Tu sesión venció. Volvé a ingresar para continuar.')
     }
-    window.addEventListener(EVENTO_SESION_EXPIRADA, alVencer)
-    return () => window.removeEventListener(EVENTO_SESION_EXPIRADA, alVencer)
+    return escucharSesionVencida(alVencer)
   }, [toast])
 
   const actualizarPerfil = async (v, nuevoPerfil) => {

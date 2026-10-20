@@ -28,7 +28,7 @@ const AdminLayout = () => {
   return (
     <div className="adm-shell">
       <ScrollToTop />
-      <header>
+      <header onKeyDown={menu.alTeclear}>
         <div className="adm-navbar">
           <Link to="/admin" className="logo-block">
             <span className="logo-mark" role="img" aria-label="Logo Entrelibros" />

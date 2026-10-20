@@ -7,20 +7,12 @@ const AdminModal = ({ titulo, onCerrar, children }) => {
 
   useEffect(() => { cerrarRef.current = onCerrar }, [onCerrar])
 
-  useEffect(() => {
-    const alEscape = (e) => { if (e.key === 'Escape') cerrarRef.current() }
-    const overflowPrevio = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
-    window.addEventListener('keydown', alEscape)
-    tarjetaRef.current?.focus()
-    return () => {
-      document.body.style.overflow = overflowPrevio
-      window.removeEventListener('keydown', alEscape)
-    }
-  }, [])
+  // El foco entra al pop-up para que Escape (onKeyDown) lo cierre. El scroll de atrás lo traba el CSS.
+  useEffect(() => { tarjetaRef.current?.focus() }, [])
 
   return (
-    <div className="modal" onClick={(e) => { if (e.target === e.currentTarget) onCerrar() }}>
+    <div className="modal" onClick={(e) => { if (e.target === e.currentTarget) onCerrar() }}
+      onKeyDown={(e) => { if (e.key === 'Escape') cerrarRef.current() }}>
       <div className="modal-card adm-modal" role="dialog" aria-modal="true" aria-labelledby="adm-modal-t" tabIndex={-1} ref={tarjetaRef}>
         <button className="modal-x" type="button" aria-label="Cerrar" onClick={onCerrar}>✕</button>
         <h2 className="fr" id="adm-modal-t">{titulo}</h2>

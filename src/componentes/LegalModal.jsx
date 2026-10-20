@@ -6,20 +6,12 @@ import MiniDeco from './MiniDeco'
 const LegalModal = ({ doc, onCerrar }) => {
   const cerrarRef = useRef(null)
 
-  useEffect(() => {
-    cerrarRef.current?.focus()
-    const alEscape = (e) => { if (e.key === 'Escape') onCerrar() }
-    const overflowPrevio = document.body.style.overflow
-    document.body.style.overflow = 'hidden' // la página de atrás no se mueve mientras el pop-up está abierto
-    window.addEventListener('keydown', alEscape)
-    return () => {
-      document.body.style.overflow = overflowPrevio
-      window.removeEventListener('keydown', alEscape)
-    }
-  }, [onCerrar])
+  // El foco entra al pop-up para que Escape (onKeyDown) lo cierre. El scroll de atrás lo traba el CSS.
+  useEffect(() => { cerrarRef.current?.focus() }, [])
 
   return (
-    <div className="modal" onClick={(e) => { if (e.target === e.currentTarget) onCerrar() }}>
+    <div className="modal" onClick={(e) => { if (e.target === e.currentTarget) onCerrar() }}
+      onKeyDown={(e) => { if (e.key === 'Escape') onCerrar() }}>
       <div className="modal-card legal-card" role="dialog" aria-modal="true" aria-labelledby="legal-t">
         <button ref={cerrarRef} className="modal-x" type="button" aria-label="Cerrar" onClick={onCerrar}>✕</button>
         <MiniDeco />

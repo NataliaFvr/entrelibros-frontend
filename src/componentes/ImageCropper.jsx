@@ -31,13 +31,10 @@ const ImageCropper = ({ origen, aspecto = 1, anchoMax = 600, circular = false, t
     return () => { vigente = false; liberarImagen(cargada) }
   }, [origen])
 
-  useEffect(() => {
-    const alEscape = (e) => { if (e.key === 'Escape') cancelarRef.current() }
-    const previo = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
-    window.addEventListener('keydown', alEscape)
-    return () => { document.body.style.overflow = previo; window.removeEventListener('keydown', alEscape) }
-  }, [])
+  const tarjetaRef = useRef(null)
+  const lienzoRef = useRef(null) // canvas oculto donde se dibuja el recorte
+  // El foco entra al pop-up para que Escape (onKeyDown) lo cierre. El scroll de atrás lo traba el CSS.
+  useEffect(() => { tarjetaRef.current?.focus() }, [])
 
   const estado = useCallback((v) => ({ imgW: img.naturalWidth, imgH: img.naturalHeight, aspecto, ...v }), [img, aspecto])
   const ventana = img ? ventanaOrigen(estado(vista)) : null
@@ -81,7 +78,7 @@ const ImageCropper = ({ origen, aspecto = 1, anchoMax = 600, circular = false, t
     if (!img || trabajando) return
     setTrabajando(true)
     try {
-      onListo(recortarAImagen(img, { aspecto, ...vista }, { anchoMax }))
+      onListo(recortarAImagen(lienzoRef.current, img, { aspecto, ...vista }, { anchoMax }))
     } catch {
       // un canvas "contaminado" (imagen de otro dominio sin CORS) no se puede exportar
       setError('No pudimos recortar esta imagen. Probá subiéndola de nuevo desde tu dispositivo.')
@@ -97,8 +94,10 @@ const ImageCropper = ({ origen, aspecto = 1, anchoMax = 600, circular = false, t
   }
 
   return (
-    <div className="modal" onClick={(e) => { if (e.target === e.currentTarget) onCancelar() }}>
-      <div className="modal-card crop-card" role="dialog" aria-modal="true" aria-labelledby="crop-t">
+    <div className="modal" onClick={(e) => { if (e.target === e.currentTarget) onCancelar() }}
+      onKeyDown={(e) => { if (e.key === 'Escape') cancelarRef.current() }}>
+      <div className="modal-card crop-card" role="dialog" aria-modal="true" aria-labelledby="crop-t" tabIndex={-1} ref={tarjetaRef}>
+        <canvas ref={lienzoRef} hidden />
         <button className="modal-x" type="button" aria-label="Cerrar" onClick={onCancelar}>✕</button>
         <h2 className="fr" id="crop-t">{titulo}</h2>
         {error ? (

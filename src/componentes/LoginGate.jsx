@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import GateColumn from './GateColumn'
@@ -18,12 +18,9 @@ const LoginGate = () => {
   const navigate = useNavigate()
   const { pathname, search } = useLocation()
 
-  useEffect(() => {
-    if (!gate) return
-    const alEscape = (e) => { if (e.key === 'Escape') cerrarGate() }
-    window.addEventListener('keydown', alEscape)
-    return () => window.removeEventListener('keydown', alEscape)
-  }, [gate, cerrarGate])
+  const tarjetaRef = useRef(null)
+  // El foco entra al pop-up para que Escape (onKeyDown) lo cierre
+  useEffect(() => { if (gate) tarjetaRef.current?.focus() }, [gate])
 
   if (!gate) return null
 
@@ -35,8 +32,9 @@ const LoginGate = () => {
   }
 
   return (
-    <div className="modal" onClick={(e) => { if (e.target === e.currentTarget) cerrarGate() }}>
-      <div className="modal-card" role="dialog" aria-modal="true" aria-labelledby="gt">
+    <div className="modal" onClick={(e) => { if (e.target === e.currentTarget) cerrarGate() }}
+      onKeyDown={(e) => { if (e.key === 'Escape') cerrarGate() }}>
+      <div className="modal-card" role="dialog" aria-modal="true" aria-labelledby="gt" tabIndex={-1} ref={tarjetaRef}>
         <button className="modal-x" type="button" aria-label="Cerrar" onClick={cerrarGate}>✕</button>
         <h2 className="fr" id="gt">¿Empezamos un nuevo capítulo?</h2>
         <p className="modal-msg">{MENSAJES[gate] || MENSAJES.cart}</p>

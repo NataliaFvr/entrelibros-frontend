@@ -33,8 +33,8 @@ const useCarruselScroll = (total) => {
     const el = pista.current
     const destino = el && el.children[i]
     if (!destino) return
-    const reducir = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    el.scrollTo({ left: destino.offsetLeft, behavior: reducir ? 'auto' : 'smooth' })
+    // Suave o instantáneo lo decide el CSS (scroll-behavior), que respeta "reducir movimiento"
+    el.scrollTo({ left: destino.offsetLeft })
   }
 
   const alTeclear = (e) => {

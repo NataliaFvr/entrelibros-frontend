@@ -8,7 +8,9 @@ export const RAIZ = (import.meta.env.VITE_API_URL || 'http://localhost:8080').re
 export const RUTA_AUTH = '/api/v1/auth'
 
 // Aviso global de "la sesión venció": AuthContext lo escucha y cierra la sesión
-export const EVENTO_SESION_EXPIRADA = 'entrelibros:sesion-expirada'
+// Quien quiera enterarse de que la sesión venció se anota acá (AuthContext); devuelve cómo darse de baja
+const alVencerSesion = new Set()
+export const escucharSesionVencida = (fn) => { alVencerSesion.add(fn); return () => alVencerSesion.delete(fn) }
 
 const CLAVE_TOKEN = 'token'
 const CLAVE_REFRESH = 'refresh_token'
@@ -52,7 +54,7 @@ const refrescar = () => {
 
 const vencer = () => {
   borrarTokens()
-  window.dispatchEvent(new Event(EVENTO_SESION_EXPIRADA))
+  alVencerSesion.forEach((fn) => fn())
 }
 
 // Un 401 en cualquier endpoint que NO sea /auth/* con un token guardado = el token venció: se intenta renovarlo con el
