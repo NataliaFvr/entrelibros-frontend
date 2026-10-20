@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { useLibros } from '../hooks/useLibros'
 import { getLibroApi } from '../api/librosApi'
 import useResenias from '../hooks/useResenias'
@@ -23,6 +23,7 @@ import NotFoundPage from './NotFoundPage'
 
 const Detalle = ({ libro, libros }) => {
   const navigate = useNavigate()
+  const [params] = useSearchParams()
   const toast = useToast()
   const { user, requiereLogin, marks, toggleMark, pendiente, limpiarPendiente } = useAuth()
   const { agregar } = useCompra()
@@ -150,6 +151,7 @@ const Detalle = ({ libro, libros }) => {
         onEliminar={eliminarOpinion}
         soloLectura={esAdmin}
         moderar={esAdmin}
+        abrirAlCargar={params.get('opinar') === '1'}
       />
 
       <RelatedSection titulo={`Más de ${libro.a}`} libros={mismoAutor} />

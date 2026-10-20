@@ -31,7 +31,7 @@ const OrderCard = ({ pedido, libros }) => {
         <span className={`tg ${clase}`.trim()}>{estado === 'SIMULADO_APROBADO' ? pedido.est : texto}</span>
         <small>{fechaCorta(pedido.date)}</small>
       </div>
-      <OrderLines pedido={pedido} libros={libros} />
+      <OrderLines pedido={pedido} libros={libros} conOpinion={estado === 'SIMULADO_APROBADO'} />
       <SummaryRow titulo="Envío" valor={fmt(pedido.env)} />
       <SummaryRow titulo="Total" valor={fmt(pedido.total)} total />
       <small className="ord-a">Envío a: {pedido.addr}</small>

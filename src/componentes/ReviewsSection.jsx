@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import ReviewSummary from './ReviewSummary'
 import ReviewControls from './ReviewControls'
 import ReviewForm from './ReviewForm'
@@ -13,7 +13,8 @@ const POR_PAGINA = 5
 
 // El backend informa si la sesión puede opinar. No se renderiza para ejemplares
 // usados: las opiniones son de la obra, no de la publicación de un vendedor.
-const ReviewsSection = ({ resenias, promedio, miResenia, puedeResenar, motivo, onPublicar, onEliminar, soloLectura = false, moderar = false }) => {
+// `abrirAlCargar`: se llegó desde «Opinar sobre este libro» en Mis compras: baja hasta acá y abre el formulario
+const ReviewsSection = ({ resenias, promedio, miResenia, puedeResenar, motivo, onPublicar, onEliminar, soloLectura = false, moderar = false, abrirAlCargar = false }) => {
   const [orden, setOrden] = useState('new')
   const [filtro, setFiltro] = useState('')
   const [cantidad, setCantidad] = useState(POR_PAGINA)
@@ -28,6 +29,19 @@ const ReviewsSection = ({ resenias, promedio, miResenia, puedeResenar, motivo, o
     setFormAbierto(true)
   }
 
+  const seccion = useRef(null)
+  useEffect(() => {
+    if (!abrirAlCargar) return
+    if (puedeResenar && !soloLectura) {
+      setEditando(miResenia)
+      setFormAbierto(true)
+    }
+    // Se espera a que la ficha termine de dibujarse (fotos, descripción) para bajar hasta las opiniones
+    const t = setTimeout(() => seccion.current?.scrollIntoView({ block: 'start' }), 300)
+    return () => clearTimeout(t)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [abrirAlCargar, puedeResenar])
+
   // `onPublicar` devuelve false si el back lo rechazó: el formulario queda abierto para no perder lo escrito
   const publicar = async (puntos, texto) => {
     if ((await onPublicar(puntos, texto)) === false) return
@@ -39,7 +53,7 @@ const ReviewsSection = ({ resenias, promedio, miResenia, puedeResenar, motivo, o
   }
 
   return (
-    <section className="dsec" id="rev">
+    <section className="dsec" id="rev" ref={seccion}>
       <h2>Opiniones</h2>
       <div className="rev-wrap">
         <ReviewSummary resenias={resenias} promedio={promedio} />
