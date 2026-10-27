@@ -7,12 +7,12 @@ import { normalizarError } from '../utils/errorApi'
 // `cambiar` y `crear` devuelven (una Promesa de) { ok } o { error }.
 const useAdminEnvios = () => {
   const toast = useToast()
-  const { recargar, ids, cargada, ...tarifas } = useTarifasEnvio()
+  const { aplicar, ids, cargada, ...tarifas } = useTarifasEnvio()
 
   const guardar = async (accion, mensaje) => {
     try {
-      await accion()
-      recargar()
+      // La respuesta del PATCH/POST ya trae la tarifa actualizada: se usa esa, sin un GET nuevo
+      aplicar(await accion())
       toast(mensaje)
       return { ok: true }
     } catch (err) {
