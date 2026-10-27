@@ -3,11 +3,12 @@ import CardFields from './CardFields'
 
 // El botón "Pagar" está en el resumen y usa form="fPay" para enviar este formulario.
 // `form` (valores, cambiar, completar) vive en la página, así no se pierde mientras se procesa el pago.
-const PayForm = ({ form, usuario, nota, error, onError, onPagar }) => {
-  const { valores, cambiar, completar, errores } = form
+const PayForm = ({ form, usuario, nota, error, completo, onError, onPagar }) => {
+  const { valores, cambiar, completar } = form
 
   const enviar = (e) => {
     e.preventDefault()
+    if (!completo) return // también al apretar Enter en un campo
     onError('')
     onPagar(valores.proveedor)
   }
@@ -23,7 +24,7 @@ const PayForm = ({ form, usuario, nota, error, onError, onPagar }) => {
       <form id="fPay" className="aform" noValidate onSubmit={enviar}>
         {nota && <div className="note bad" role="alert">{nota}</div>}
         <PayMethods value={valores.proveedor} onChange={cambiar} />
-        {valores.proveedor === 'tarjeta' && <CardFields valores={valores} errores={errores} onChange={cambiar} onCompletar={tarjetaDePrueba} />}
+        {valores.proveedor === 'tarjeta' && <CardFields valores={valores} onChange={cambiar} onCompletar={tarjetaDePrueba} />}
         {valores.proveedor === 'mercadopago' && (
           <div className="note">Al confirmar te llevamos a Mercado Pago para completar el pago. <b>Simulado:</b> no salís de Entrelibros.</div>
         )}

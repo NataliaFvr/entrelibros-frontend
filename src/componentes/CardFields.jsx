@@ -15,18 +15,18 @@ const formatear = (nombre, valor, anterior) => {
   return valor
 }
 
-// Los nombres son los de PagoRequest; los errores (`errores`) los manda el back
-const CardFields = ({ valores, errores = {}, onChange: cambiar, onCompletar }) => {
+// Pago simulado: los datos no se validan ni se mandan al back; solo se piden completos para habilitar "Pagar"
+const CardFields = ({ valores, onChange: cambiar, onCompletar }) => {
   const onChange = (nombre, valor) => cambiar(nombre, formatear(nombre, valor, valores[nombre] || ''))
   return (
     <div className="pm-body">
-      <Field label="Número de tarjeta" name="numeroTarjeta" value={valores.numeroTarjeta} onChange={onChange} error={errores.numeroTarjeta}
+      <Field label="Número de tarjeta" name="numeroTarjeta" value={valores.numeroTarjeta} onChange={onChange}
         inputMode="numeric" autoComplete="cc-number" placeholder="4242 4242 4242 4242" />
-      <Field label="Nombre del titular" name="titular" value={valores.titular} onChange={onChange} error={errores.titular} autoComplete="cc-name" />
+      <Field label="Nombre del titular" name="titular" value={valores.titular} onChange={onChange} autoComplete="cc-name" />
       <div className="two">
-        <Field label="Vencimiento (MM/AA)" name="vencimiento" value={valores.vencimiento} onChange={onChange} error={errores.vencimiento}
+        <Field label="Vencimiento (MM/AA)" name="vencimiento" value={valores.vencimiento} onChange={onChange}
           inputMode="numeric" autoComplete="cc-exp" placeholder="08/29" />
-        <Field label="Código de seguridad" name="codigoSeguridad" type="password" value={valores.codigoSeguridad} onChange={onChange} error={errores.codigoSeguridad}
+        <Field label="Código de seguridad" name="codigoSeguridad" type="password" value={valores.codigoSeguridad} onChange={onChange}
           inputMode="numeric" autoComplete="cc-csc" placeholder="•••" />
       </div>
       <small className="dim">No guardamos los datos de tu tarjeta.</small>

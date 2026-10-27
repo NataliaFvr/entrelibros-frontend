@@ -11,25 +11,30 @@ const lista = async (pedido) => {
   }
 }
 
-// POST /carrito/checkout { idDireccion, provinciaDestino } -> OrdenResponse PENDIENTE con costoEnvio y venceEn.
+// POST /carrito/checkout { idDireccion, provinciaDestino } -> OrdenResponse PENDIENTE completa (con sus ítems, costoEnvio y venceEn),
+// ya en el formato del front: se agrega a la lista de pedidos sin volver a pedirla.
 // El carrito ya está en el back (api/carritoApi.js): el checkout lo convierte en orden y lo vacía.
 // idDireccion es lo que manda la interfaz: el back copia calle/ciudad/CP de esa dirección a la orden y la provincia sale de
 // ella (ignora provinciaDestino). provinciaDestino se manda igual como respaldo, por si la dirección no tuviera id.
 // El usuario NO viaja en el cuerpo: el back lo saca del token.
-export const checkoutApi = async ({ idDireccion, provincia }) =>
-  (await api.post('/carrito/checkout', {
-    ...(idDireccion != null ? { idDireccion } : {}),
-    ...(provincia ? { provinciaDestino: provinciaParaBack(provincia) } : {}),
-  })).data
+export const checkoutApi = async ({ idDireccion, provincia }) => aPedidoFront((await api.post('/carrito/checkout', {
+  ...(idDireccion != null ? { idDireccion } : {}),
+  ...(provincia ? { provinciaDestino: provinciaParaBack(provincia) } : {}),
+})).data)
 
 // GET /ordenes/comprador ya devuelve cada orden con sus ítems.
 export const listarPedidosApi = async () => (await lista(() => api.get('/ordenes/comprador'))).map(aPedidoFront)
 
-export const cancelarOrdenApi = async (idOrden) => (await api.patch(`/ordenes/${idOrden}/cancelar`)).data
+// PATCH /ordenes/{id}/cancelar -> la orden completa ya cancelada, en el formato del front
+export const cancelarOrdenApi = async (idOrden) => aPedidoFront((await api.patch(`/ordenes/${idOrden}/cancelar`)).data)
 
-// POST /pagos { idOrden, proveedor } -> PagoResponse { id, resultado, … } (hoy el back aprueba siempre: SIMULADO_APROBADO)
-// `tarjeta` = { numeroTarjeta, titular, vencimiento, codigoSeguridad } solo si se paga con tarjeta
-export const crearPagoApi = async (idOrden, proveedor, tarjeta = {}) => (await api.post('/pagos', { idOrden, proveedor, ...tarjeta })).data
+// POST /pagos { idOrden, proveedor } -> PagoResponse { id, resultado, orden, … } (hoy el back aprueba siempre: SIMULADO_APROBADO).
+// `orden` es la orden completa como quedó después del pago: se devuelve ya en el formato del front.
+// El pago es simulado: los datos de la tarjeta no viajan.
+export const crearPagoApi = async (idOrden, proveedor) => {
+  const pago = (await api.post('/pagos', { idOrden, proveedor })).data
+  return { ...pago, orden: aPedidoFront(pago.orden) }
+}
 export const pagosDeOrdenApi = async (idOrden) => lista(() => api.get(`/pagos/orden/${idOrden}`))
 
 // ADMIN: GET /ordenes y GET /pagos. Las órdenes ya incluyen sus ítems.

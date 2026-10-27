@@ -4,7 +4,7 @@ import { useAuth } from '../hooks/useAuth'
 import { useToast } from '../hooks/useToast'
 import useCarrito from '../hooks/useCarrito'
 import { cancelarOrdenApi, checkoutApi, crearPagoApi, listarPedidosApi } from '../api/comprasApi'
-import { mensajeError, normalizarError } from '../utils/errorApi'
+import { mensajeError } from '../utils/errorApi'
 
 // Carrito y pedidos de la cuenta que tiene la sesión.
 // El carrito lo maneja hooks/useCarrito.js: cada acción se sincroniza con /carrito/items y el
@@ -26,9 +26,12 @@ const CompraProvider = ({ children }) => {
   }
 
   // Los pedidos salen del servidor; cada orden ya incluye sus ítems.
+  // Solo se vuelven a pedir si algo falló (por ejemplo, la reserva venció): si todo sale bien, se usa lo que respondió el back.
   const refrescarPedidos = useCallback(async () => {
     try { setPedidos(await listarPedidosApi()) } catch { /* se queda con lo que había */ }
   }, [])
+  // Reemplaza en la lista la orden que devolvió el back (después de pagar o cancelar)
+  const reemplazar = (orden) => setPedidos((lista) => lista.map((p) => (p.n === orden.n ? orden : p)))
   const idApi = user && user.rol !== 'ADMIN' ? user.id : null // el admin no tiene compras
   useEffect(() => {
     if (!idApi) return undefined
@@ -48,28 +51,25 @@ const CompraProvider = ({ children }) => {
     try {
       const orden = await checkoutApi({ idDireccion: direccion.id, provincia: direccion.prov })
       vaciar() // el back ya vació el carrito al crear la orden
-      await refrescarPedidos()
+      setPedidos((lista) => [orden, ...lista]) // la orden nueva va primero (la lista va de la más nueva a la más vieja)
       toast('Reservamos tus libros por 1 hora')
-      return String(orden.id)
+      return orden.n
     } catch (err) {
       throw new Error(mensajeError(err))
     }
   }
 
   // POST /pagos {idOrden, proveedor}: devuelve el resultado del pago (el back hoy aprueba siempre: SIMULADO_APROBADO)
-  const pagarPedidoApi = async (n, proveedor, tarjeta = {}) => {
+  const pagarPedidoApi = async (n, proveedor) => {
     const pedido = pedidos.find((o) => o.n === n)
     try {
-      const pago = await crearPagoApi(Number(n), proveedor, tarjeta)
-      await refrescarPedidos()
+      const pago = await crearPagoApi(Number(n), proveedor)
+      reemplazar(pago.orden)
       if (pago.resultado === 'SIMULADO_APROBADO' && pedido) quitarMarks(pedido.its.map((i) => i.id))
       return pago.resultado
     } catch (err) {
-      await refrescarPedidos() // por ejemplo, la reserva venció mientras se pagaba
-      const info = normalizarError(err)
-      const error = new Error(info.mensaje)
-      error.campos = info.campos // errores por campo (ej.: datos de la tarjeta)
-      throw error
+      await refrescarPedidos() // si falló (por ejemplo, la reserva venció mientras se pagaba), la orden pudo cambiar
+      throw new Error(mensajeError(err))
     }
   }
 
@@ -78,12 +78,11 @@ const CompraProvider = ({ children }) => {
 
   const cancelarPedidoApi = async (n) => {
     try {
-      await cancelarOrdenApi(Number(n))
-      await refrescarPedidos()
+      reemplazar(await cancelarOrdenApi(Number(n)))
       toast('Compra cancelada. Liberamos tus libros.')
     } catch (err) {
       toast(mensajeError(err))
-      await refrescarPedidos()
+      await refrescarPedidos() // por ejemplo, ya estaba pagada o vencida: se trae cómo quedó
     }
   }
 

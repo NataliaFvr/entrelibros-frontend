@@ -31,12 +31,14 @@ const useVentas = (user, activo = true) => {
 
   const cancelar = useCallback(async (idOrdenVendedor) => {
     try {
-      await cancelarVentaApi(idOrdenVendedor)
+      // El back devuelve la venta completa ya cancelada: se reemplaza en la lista sin volver a pedirla
+      const venta = await cancelarVentaApi(idOrdenVendedor)
+      setCrudas((lista) => lista.map((v) => (v.id === venta.id ? venta : v)))
       toast('Venta cancelada. Los libros volvieron a tu stock.')
     } catch (err) {
       toast(mensajeError(err))
+      setVersion((v) => v + 1) // por ejemplo, el comprador ya pagó: se trae cómo quedó
     }
-    setVersion((v) => v + 1)
   }, [toast])
 
   return { ventas, cargando, cancelar }

@@ -29,23 +29,15 @@ const PayPage = () => {
   const { libros } = useLibros()
   const [error, setError] = useState('')
   const form = useFormulario({ proveedor: 'tarjeta', numeroTarjeta: '', titular: '', vencimiento: '', codigoSeguridad: '' })
+  // El pago es simulado: los datos de la tarjeta no se validan ni viajan al back, solo tienen que estar completos
   const { procesando, nota, pagar } = useProcesoPago(async (proveedor) => {
-    form.setErroresCampos({})
-    // Con tarjeta viajan sus datos: el back los valida (y no los guarda)
-    const { numeroTarjeta, titular, vencimiento, codigoSeguridad } = form.valores
-    const tarjeta = proveedor === 'tarjeta' ? { numeroTarjeta, titular, vencimiento, codigoSeguridad } : {}
-    try {
-      const resultado = await pagarPedido(n, proveedor, tarjeta) // con el back: 'SIMULADO_APROBADO' | 'RECHAZADO'
-      if (resultado !== 'RECHAZADO') toast('¡Pago aprobado!')
-      return resultado
-    } catch (err) {
-      if (err.campos && Object.keys(err.campos).length) {
-        form.setErroresCampos(err.campos) // cada error del back debajo de su campo
-        throw new Error('Revisá los datos de la tarjeta.')
-      }
-      throw err
-    }
+    const resultado = await pagarPedido(n, proveedor) // con el back: 'SIMULADO_APROBADO' | 'RECHAZADO'
+    if (resultado !== 'RECHAZADO') toast('¡Pago aprobado!')
+    return resultado
   })
+  const { proveedor, numeroTarjeta, titular, vencimiento, codigoSeguridad } = form.valores
+  // "Pagar" queda deshabilitado hasta que estén todos los datos de la tarjeta (con los otros medios no hay nada que completar)
+  const completo = proveedor !== 'tarjeta' || [numeroTarjeta, titular, vencimiento, codigoSeguridad].every((v) => v.trim())
 
   if (!user) return <Navigate to="/ingresar" replace state={{ from: `/pago/${n}` }} />
 
@@ -86,8 +78,8 @@ const PayPage = () => {
       <Migas /><Stepper actual={1} />
       <h1 className="fr cart-t">Pagá tu pedido</h1>
       <div className="cart-grid">
-        <PayForm form={form} usuario={user} nota={nota} error={error} onError={setError} onPagar={pagar} />
-        <OrderSummary pedido={pedido} libros={libros} error={error} onCancelar={() => cancelarPedido(pedido.n)} />
+        <PayForm form={form} usuario={user} nota={nota} error={error} completo={completo} onError={setError} onPagar={pagar} />
+        <OrderSummary pedido={pedido} libros={libros} error={error} puedePagar={completo} onCancelar={() => cancelarPedido(pedido.n)} />
       </div>
     </main>
   )
