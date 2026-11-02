@@ -1,7 +1,6 @@
 import axios from 'axios'
 
 // Cliente HTTP único hacia el back (Spring Boot).
-// OJO con la URL: en el back solo /auth cuelga de /api/v1 (AuthenticationController); el resto de los controllers
 // está en la raíz (/libros, /carrito, /ordenes…). Por eso baseURL es la RAÍZ del servidor (VITE_API_URL sin el
 // sufijo /api/v1) y las rutas de auth se arman con RUTA_AUTH.
 export const RAIZ = (import.meta.env.VITE_API_URL || 'http://localhost:8080').replace(/\/api\/v1\/?$/, '').replace(/\/+$/, '')
