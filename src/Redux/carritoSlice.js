@@ -2,7 +2,7 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { agregarItemApi, cambiarCantidadItemApi, listarCarritoApi, quitarItemApi } from "../api/carritoApi";
 import { mensajeError } from "../utils/errorApi";
 
-// Cada thunk hace su pedido al back y devuelve el carrito que queda: [{ id: idLibro, q: cantidad, idItem, maxCantidad }]
+// Carrito: [{ id: idLibro, q: cantidad, idItem, maxCantidad }]. fetchCarrito lo lee entero; las demás acciones devuelven solo el ítem que cambió.
 export const fetchCarrito = createAsyncThunk("carrito/fetchcarrito", async (idUsuario) => {
   if (idUsuario == null) return []; // sin sesión (o admin): carrito vacío
   try {
@@ -12,36 +12,43 @@ export const fetchCarrito = createAsyncThunk("carrito/fetchcarrito", async (idUs
   }
 });
 
-export const agregarAlCarrito = createAsyncThunk("carrito/agregaralcarrito", async ({ libro, cantidad }) => {
+export const agregarAlCarrito = createAsyncThunk("carrito/agregaralcarrito", async ({ libro, cantidad }, { getState }) => {
   try {
-    const actual = (await listarCarritoApi()).find((c) => c.id === libro.id);
-    if (actual) await cambiarCantidadItemApi(actual.idItem, Math.min(actual.q + cantidad, actual.maxCantidad));
-    else await agregarItemApi(libro.id, cantidad); // POST siempre crea una fila nueva: solo si el libro no estaba
-    return await listarCarritoApi();
+    const actual = getState().carrito.items.find((c) => c.id === libro.id);
+    if (actual) return await cambiarCantidadItemApi(actual.idItem, Math.min(actual.q + cantidad, actual.maxCantidad));
+    return await agregarItemApi(libro.id, cantidad); // POST siempre crea una fila nueva: solo si el libro no estaba
   } catch (err) {
     throw new Error(mensajeError(err));
   }
 });
 
-export const cambiarCantidad = createAsyncThunk("carrito/cambiarcantidad", async ({ libro, delta }) => {
+export const cambiarCantidad = createAsyncThunk("carrito/cambiarcantidad", async ({ libro, delta }, { getState }) => {
   try {
-    const actual = (await listarCarritoApi()).find((c) => c.id === libro.id);
-    if (actual) await cambiarCantidadItemApi(actual.idItem, actual.q + delta);
-    return await listarCarritoApi();
+    const actual = getState().carrito.items.find((c) => c.id === libro.id);
+    if (!actual) return null;
+    return await cambiarCantidadItemApi(actual.idItem, actual.q + delta);
   } catch (err) {
     throw new Error(mensajeError(err));
   }
 });
 
-export const quitarDelCarrito = createAsyncThunk("carrito/quitardelcarrito", async (id) => {
+export const quitarDelCarrito = createAsyncThunk("carrito/quitardelcarrito", async (id, { getState }) => {
   try {
-    const actual = (await listarCarritoApi()).find((c) => c.id === id);
+    const actual = getState().carrito.items.find((c) => c.id === id);
     if (actual) await quitarItemApi(actual.idItem);
-    return await listarCarritoApi();
+    return id;
   } catch (err) {
     throw new Error(mensajeError(err));
   }
 });
+
+// El back devuelve el ítem ya actualizado: se reemplaza en la lista (o se agrega si es nuevo)
+const guardarItem = (state, item) => {
+  if (!item) return;
+  const i = state.items.findIndex((c) => c.id === item.id);
+  if (i >= 0) state.items[i] = item;
+  else state.items.push(item);
+};
 
 const carritoSlice = createSlice({
   name: "carrito",
@@ -63,19 +70,19 @@ const carritoSlice = createSlice({
         (state.loading = false), (state.error = action.error.message);
       })
       .addCase(agregarAlCarrito.fulfilled, (state, action) => {
-        state.items = action.payload;
+        guardarItem(state, action.payload);
       })
       .addCase(agregarAlCarrito.rejected, (state, action) => {
         state.error = action.error.message;
       })
       .addCase(cambiarCantidad.fulfilled, (state, action) => {
-        state.items = action.payload;
+        guardarItem(state, action.payload);
       })
       .addCase(cambiarCantidad.rejected, (state, action) => {
         state.error = action.error.message;
       })
       .addCase(quitarDelCarrito.fulfilled, (state, action) => {
-        state.items = action.payload;
+        state.items = state.items.filter((c) => c.id !== action.payload);
       })
       .addCase(quitarDelCarrito.rejected, (state, action) => {
         state.error = action.error.message;
