@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import useCuentaRegresiva from '../hooks/useCuentaRegresiva'
 import useFormulario from '../hooks/useFormulario'
-import { normalizarError } from '../utils/errorApi'
 import { enmascararMail } from '../utils/format'
 import Aviso from './Aviso'
 import Field from './Field'
@@ -26,14 +25,10 @@ const VerifyForm = ({ usuario, nota, onConfirmar, onReenviar, onVolver }) => {
   }
 
   const reenviar = async () => {
-    try {
-      await onReenviar()
-      reiniciarCuenta()
-      reiniciar()
-    } catch (err) {
-      const info = normalizarError(err, 'verificacion')
-      setError(info.mensaje, info.tipo)
-    }
+    const r = await onReenviar()
+    if (r && r.error) { setError(r.error, r.tipo); return }
+    reiniciarCuenta()
+    reiniciar()
   }
 
   return (
