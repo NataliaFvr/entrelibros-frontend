@@ -1,8 +1,17 @@
 // Fila del resumen. Con `detalle` muestra título en negrita + detalle chico; `total` la resalta.
-const SummaryRow = ({ titulo, detalle, valor, total }) => {
+// Con `miniatura` (URL) muestra la foto del libro en chico a la izquierda.
+const SummaryRow = ({ titulo, detalle, valor, total, miniatura }) => {
+  const texto = detalle ? <><b>{titulo}</b><small>{detalle}</small></> : titulo
   return (
     <div className={`sl${total ? ' tot' : ''}`}>
-      <span>{detalle ? <><b>{titulo}</b><small>{detalle}</small></> : titulo}</span>
+      {miniatura
+        ? (
+          <span className="sl-con-foto">
+            <img className="sl-foto" src={miniatura} alt="" loading="lazy" />
+            <span>{texto}</span>
+          </span>
+        )
+        : <span>{texto}</span>}
       <span>{valor}</span>
     </div>
   )

@@ -9,8 +9,9 @@ const OrderLines = ({ pedido, libros, conOpinion = false }) => {
   return pedido.its.map((i) => {
     const l = libros.find((x) => x.id === i.id)
     const titulo = l ? l.t : i.t || `Libro #${i.id}`
+    const miniatura = i.img || l?.imgs?.[0] || undefined
     if (i.cancelado) {
-      return <SummaryRow key={i.id} titulo={<s>{titulo}</s>} detalle="Cancelado por el vendedor" valor={<s>{fmt(i.p * i.q)}</s>} />
+      return <SummaryRow key={i.id} titulo={<s>{titulo}</s>} detalle="Cancelado por el vendedor" valor={<s>{fmt(i.p * i.q)}</s>} miniatura={miniatura} />
     }
     const detalle = (
       <>
@@ -18,7 +19,7 @@ const OrderLines = ({ pedido, libros, conOpinion = false }) => {
         {conOpinion && <> · <Link className="opinar-lnk" to={`/libro/${i.id}?opinar=1`}>Opinar</Link></>}
       </>
     )
-    return <SummaryRow key={i.id} titulo={titulo} detalle={detalle} valor={fmt(i.p * i.q)} />
+    return <SummaryRow key={i.id} titulo={titulo} detalle={detalle} valor={fmt(i.p * i.q)} miniatura={miniatura} />
   })
 }
 

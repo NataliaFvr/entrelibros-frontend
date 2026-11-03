@@ -1,6 +1,6 @@
 import { fmt } from '../utils/format'
-import SummaryRow from './SummaryRow'
 import ConfirmLink from './ConfirmLink'
+import SummaryRow from './SummaryRow'
 
 const CLASE = { pendiente: 'pend', pagada: 'used', cancelada: 'off', vencida: 'off' }
 
@@ -18,7 +18,7 @@ const SaleCard = ({ venta, onCancelar }) => {
         <span>{new Date(`${venta.date}T00:00`).toLocaleDateString('es-AR')}</span>
         <span className={`tg ${CLASE[venta.estado]}`}>{venta.est}</span>
       </div>
-      {venta.its.map((i) => <SummaryRow key={i.t} titulo={i.t} detalle={`x${i.q}`} valor={fmt(i.p * i.q)} />)}
+      {venta.its.map((i) => <SummaryRow key={i.t} titulo={i.t} detalle={`x${i.q}`} valor={fmt(i.p * i.q)} miniatura={i.img || undefined} />)}
       <SummaryRow titulo="Total" valor={fmt(total)} total />
       <small className="ord-a">Comprador: {venta.comprador}</small>
       {venta.destino && <small className="ord-a">Enviar a: {venta.destino}</small>}
