@@ -6,8 +6,8 @@ import axios from 'axios'
 export const RAIZ = (import.meta.env.VITE_API_URL || 'http://localhost:8080').replace(/\/api\/v1\/?$/, '').replace(/\/+$/, '')
 export const RUTA_AUTH = '/api/v1/auth'
 
-// Aviso global de "la sesión venció": AuthContext lo escucha y cierra la sesión
-// Quien quiera enterarse de que la sesión venció se anota acá (AuthContext); devuelve cómo darse de baja
+// Aviso global de "la sesión venció": App.jsx lo escucha y cierra la sesión
+// Quien quiera enterarse de que la sesión venció se anota acá (App.jsx); devuelve cómo darse de baja
 const alVencerSesion = new Set()
 export const escucharSesionVencida = (fn) => { alVencerSesion.add(fn); return () => alVencerSesion.delete(fn) }
 

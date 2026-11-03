@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { useAuth } from './useAuth'
-import { useLibros } from './useLibros'
-import { useToast } from './useToast'
 import * as admin from '../api/adminApi'
 import { ETIQUETA_ROL, POR_PAGINA } from '../data/admin'
 import { norm } from '../utils/format'
+import { useAuth } from './useAuth'
+import { useLibros } from './useLibros'
+import { useToast } from './useToast'
 
 const mensajeDe = (err) => (err && err.message) || 'No pudimos completar la acción. Intentá de nuevo.'
 
@@ -60,7 +60,7 @@ const useAdminUsuarios = () => {
 
   const crear = (v) => ejecutar(() => admin.crearUsuario(v), 'Usuario creado')
 
-  // Editar la propia cuenta pasa por AuthContext: así la sesión sigue al día si cambia el usuario
+ // Editar la propia cuenta pasa por authSlice: así la sesión sigue al día si cambia el usuario
   const editar = (u, v) => ejecutar(async () => {
     if (!u.propio) return admin.editarUsuario(u.id, v)
     const duplicado = admin.mensajeDuplicado(v, u.nombreUsuario)
