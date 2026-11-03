@@ -1,6 +1,6 @@
 import { useDispatch, useSelector } from 'react-redux'
 import { Link } from 'react-router-dom'
-import { cerrarToast } from '../Redux/toastSlice'
+import { cerrarToast } from '../redux/toastSlice'
 
 // Aviso breve al pie de la pantalla. Lo abre mostrarToast (Redux/toastSlice.js) y se cierra solo.
 const Toast = () => {

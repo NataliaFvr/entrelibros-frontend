@@ -1,18 +1,18 @@
 import { useEffect, useState } from 'react'
-import { useLibros } from './useLibros'
-import { useToast } from './useToast'
-import { enRevision, getVendedor } from '../api/vendedorApi'
-import { esModeracionError, modificarLibro } from '../api/moderacionApiExtra'
-import { darDeBajaApi, crearLibroApi, getImagenesApi, reactivarApi } from '../api/librosApi'
-import { FotosError, sincronizarFotosApi } from '../api/fotosLibro'
-import { traerPublicaciones } from '../api/publicacionesApi'
-import useMisLibros from './useMisLibros'
+import { aLibroFront, publicacionAFront } from '../api/adaptadores'; // CAMBIO: se agrega publicacionAFront
 import { idsDeCategorias } from '../api/categoriasApi'
+import { FotosError, sincronizarFotosApi } from '../api/fotosLibro'
+import { crearLibroApi, darDeBajaApi, getImagenesApi, reactivarApi } from '../api/librosApi'
+import { esModeracionError, modificarLibro } from '../api/moderacionApiExtra'
+import { traerPublicaciones } from '../api/publicacionesApi'
 import { solicitarVendedorApi } from '../api/usuariosApi'
+import { enRevision, getVendedor } from '../api/vendedorApi'
 import { mensajeError } from '../utils/errorApi'
-import { aLibroRequest } from '../utils/libroRequest'
-import { aLibroFront } from '../api/adaptadores'
 import { categoriasDe } from '../utils/libro'
+import { aLibroRequest } from '../utils/libroRequest'
+import { useLibros } from './useLibros'
+import useMisLibros from './useMisLibros'
+import { useToast } from './useToast'
 
 const MENSAJE_REVISION = 'Tus cambios fueron enviados a revisión. El libro no se verá en el catálogo hasta que un administrador lo apruebe.'
 
@@ -90,10 +90,12 @@ const useVendedor = (user) => {
     }
     const actual = vendedor.pub.find((p) => p.id === idEditado)
     if (!actual) return { error: 'No encontramos ese libro. Puede que ya no exista.' }
-    if (enRevision(actual)) return { error: 'Este libro ya tiene una revisión pendiente. Esperá a que un administrador la resuelva.' }
+    // CAMBIO: un libro dado de baja (ej. por quedarse sin categoría) se puede editar aunque esté en revisión
+    if (enRevision(actual) && actual.estado !== 'baja') return { error: 'Este libro ya tiene una revisión pendiente. Esperá a que un administrador la resuelva.' }
 
     // PATCH /libros/{id}. El estado que manda el back es la verdad: solo si vuelve EN_REVISION se muestra como pendiente.
     let enviadoARevision = true
+    let estadoPub = actual.estado // CAMBIO
     let imgs = datos.imgs
     let avisoFotos = ''
     try {
@@ -103,6 +105,8 @@ const useVendedor = (user) => {
       if (datos.usado && actual.usado && Number(datos.stock) === Number(actual.stock)) delete pedido.stock
       const libro = await modificarLibro(idEditado, pedido)
       enviadoARevision = libro.estadoModeracion === 'EN_REVISION'
+      // CAMBIO: el back lo vuelve a publicar si se había dado de baja por quedarse sin categoría
+      if (libro.estadoPublicacion) estadoPub = publicacionAFront(libro.estadoPublicacion)
       // El PATCH ya se aplicó: si fallan las fotos no es un error del guardado, se avisa aparte y se muestran las que quedaron
       const fotos = await subirFotos(idEditado, datos.imgs, actual.imgs)
       // Cambiar las fotos también manda el libro a revisión (lo decide el back al subirlas)
@@ -120,8 +124,11 @@ const useVendedor = (user) => {
     const resultado = cambiarLibros(
       (pub) => pub.map((p) => {
         if (p.id !== idEditado) return p
-        if (!enviadoARevision) return { ...p, ...nuevosDatos, modC: '' } // el back ya aplicó los cambios: no hay nada que revisar
-        return aceptado ? { ...p, revision: nuevosDatos, modC: '' } : { ...p, ...nuevosDatos, mod: 'EN_REVISION', modC: '' }
+        // CAMBIO: los tres retornos llevan `estado: estadoPub`
+        if (!enviadoARevision) return { ...p, ...nuevosDatos, estado: estadoPub, modC: '' } // el back ya aplicó los cambios: no hay nada que revisar
+        return aceptado
+          ? { ...p, revision: nuevosDatos, estado: estadoPub, modC: '' }
+          : { ...p, ...nuevosDatos, mod: 'EN_REVISION', estado: estadoPub, modC: '' }
       }),
       enviadoARevision ? MENSAJE_REVISION : 'Cambios guardados',
     )

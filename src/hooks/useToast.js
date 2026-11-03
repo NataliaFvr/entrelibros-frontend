@@ -1,6 +1,6 @@
 import { useCallback } from 'react'
 import { useDispatch } from 'react-redux'
-import { mostrarToast } from '../Redux/toastSlice'
+import { mostrarToast } from '../redux/toastSlice'
 
 // `accion` es opcional: un link dentro del aviso (ej. "Ir a mi estantería" después de añadir un libro)
 export const useToast = () => {

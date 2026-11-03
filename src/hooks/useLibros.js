@@ -1,8 +1,8 @@
 import { useMemo } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { fetchCategorias } from '../Redux/categoriasSlice'
-import { fetchLibros } from '../Redux/librosSlice'
 import { urlImagenCategoria } from '../api/categoriasApi'
+import { fetchCategorias } from '../redux/categoriasSlice'
+import { fetchLibros } from '../redux/librosSlice'
 
 export const useLibros = () => {
   const dispatch = useDispatch()

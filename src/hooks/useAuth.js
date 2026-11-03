@@ -7,7 +7,7 @@ import {
     reenviarCodigo,
     registrar,
     toggleMark,
-} from '../Redux/authSlice'
+} from '../redux/authSlice'
 import { useToast } from './useToast'
 
 // Sesión y datos de la cuenta (Redux/authSlice.js). Acá se arman los avisos y las respuestas que esperan los formularios.

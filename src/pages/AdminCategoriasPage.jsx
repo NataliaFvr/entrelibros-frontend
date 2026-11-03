@@ -1,11 +1,11 @@
 import { useState } from 'react'
-import useAdminCategorias from '../hooks/useAdminCategorias'
 import AdminHead from '../componentes/AdminHead'
 import AdminModal from '../componentes/AdminModal'
 import Aviso from '../componentes/Aviso'
 import CategoriaForm from '../componentes/CategoriaForm'
 import CategoriasActuales from '../componentes/CategoriasActuales'
 import NuevaCategoriaForm from '../componentes/NuevaCategoriaForm'
+import useAdminCategorias from '../hooks/useAdminCategorias'
 
 // /admin/categorias — las categorías organizan el catálogo: se crean con foto, se editan y se dan de baja (sin borrarlas)
 const AdminCategoriasPage = () => {
@@ -34,7 +34,7 @@ const AdminCategoriasPage = () => {
       )}
       {baja && (
         <AdminModal titulo={`¿Dar de baja "${baja.nombre}"?`} onCerrar={() => { setBaja(null); setErrorBaja('') }}>
-          <p className="note">Deja de ofrecerse en el catálogo, el inicio y al publicar libros. Los libros que ya la tienen no se borran, y podés reactivarla cuando quieras.</p>
+          <p className="note">Deja de ofrecerse en el catálogo, el inicio y al publicar libros. Los libros que se queden sin ninguna otra categoría activa vuelven a revisión (salen del catálogo) y a sus vendedores les llega un aviso para que elijan otra. Podés reactivar la categoría cuando quieras.</p>
           <Aviso mensaje={errorBaja} tipo="DESCONOCIDO" />
           <div className="modal-btns">
             <button className="btn main" type="button" onClick={confirmarBaja}>Dar de baja</button>

@@ -1,6 +1,6 @@
 import { useDispatch, useSelector } from 'react-redux'
-import { agregarAlCarrito, cambiarCantidad, fetchCarrito, quitarDelCarrito } from '../Redux/carritoSlice'
-import { cancelarPedido, crearPedido, fetchPedidos, pagarPedido } from '../Redux/pedidosSlice'
+import { agregarAlCarrito, cambiarCantidad, fetchCarrito, quitarDelCarrito } from '../redux/carritoSlice'
+import { cancelarPedido, crearPedido, fetchPedidos, pagarPedido } from '../redux/pedidosSlice'
 import { useAuth } from './useAuth'
 import { useToast } from './useToast'
 
