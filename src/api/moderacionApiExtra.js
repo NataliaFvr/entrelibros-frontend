@@ -1,5 +1,5 @@
-import api, { RAIZ } from './axiosConfig'
 import { esListaVacia, normalizarError } from '../utils/errorApi'
+import api, { RAIZ } from './axiosConfig'
 
 const RUTAS = {
   libro: (id) => `/libros/${id}`,
@@ -91,12 +91,23 @@ export async function obtenerHistorialDeLibro(id, page = 0, size = 20) {
   }
 }
 
+// Categorias del libro como texto; una dada de baja se marca para que el admin lo vea al moderar
+const aTextoCategorias = (l) => {
+  const lista = Array.isArray(l.categoriasModeracion)
+    ? l.categoriasModeracion.map((c) => (c.activa ? c.nombre : `${c.nombre} (categoría dada de baja)`))
+    : (l.categorias || [])
+  return lista.length ? lista.join(', ') : null
+}
+
 const aDatos = (l) => ({
   titulo: l.titulo, autor: l.autor, editorial: l.editorial, anio: l.anio, idioma: l.idioma, estadoLibro: l.estadoLibro,
   precio: l.precio, descuentoPct: l.descuentoPct, stock: l.stock, descripcion: l.descripcion,
+  categorias: aTextoCategorias(l), imagenUrl: l.portada ? `${RAIZ}${l.portada}` : null,
 })
 
+// El servidor no guarda foto ni categorias anteriores: se repiten las actuales para no marcar un cambio falso
 const aDatosAnteriores = (l) => (l.snapshotTitulo == null ? null : {
+  categorias: aTextoCategorias(l), imagenUrl: l.portada ? `${RAIZ}${l.portada}` : null,
   titulo: l.snapshotTitulo, autor: l.snapshotAutor, editorial: l.snapshotEditorial, anio: l.snapshotAnio,
   idioma: l.snapshotIdioma, estadoLibro: l.snapshotEstadoLibro, precio: l.snapshotPrecio,
   descuentoPct: l.snapshotDescuentoPct, stock: l.snapshotStock, descripcion: l.snapshotDescripcion,

@@ -14,7 +14,8 @@ export const CAMPOS_COMPARADOS = [
   ['descuentoPct', 'Descuento', (v) => (typeof v === 'number' ? `${v}%` : '—')],
   ['stock', 'Stock'],
   ['descripcion', 'Descripción'],
-  ['imagenUrl', 'Imagen'],
+  ['categorias', 'Categorías'],
+  ['imagenUrl', 'Foto'],
 ]
 
 export const textoCampo = (campo, valor) => {

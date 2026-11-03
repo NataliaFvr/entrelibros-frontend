@@ -5,14 +5,15 @@ const Columna = ({ titulo, datos, cambiados = new Set(), propuesta = false }) =>
     <h4 className="fr">{titulo}</h4>
     <dl>
       {CAMPOS_COMPARADOS.map(([campo, etiqueta]) => {
-        if (campo === 'imagenUrl' && !datos.imagenUrl) return null
         const cambio = cambiados.has(campo)
         return (
           <div key={campo} className={`cmp-row${cambio ? ' chg' : ''}`}>
             <dt>{etiqueta}{cambio && propuesta && <span className="cmp-flag">Cambió</span>}</dt>
             <dd>
               {campo === 'imagenUrl'
-                ? <img className="cmp-img" src={datos.imagenUrl} alt={`Portada ${propuesta ? 'propuesta' : 'actual'}`} />
+                ? (datos.imagenUrl
+                  ? <img className="cmp-img" src={datos.imagenUrl} alt={`Portada ${propuesta ? 'propuesta' : 'actual'}`} />
+                  : 'Sin foto')
                 : textoCampo(campo, datos[campo])}
             </dd>
           </div>

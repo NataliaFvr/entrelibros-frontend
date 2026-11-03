@@ -1,7 +1,4 @@
 import { useState } from 'react'
-import useAdminUsuarios from '../hooks/useAdminUsuarios'
-import { ESTADOS_USUARIO, ROLES } from '../data/admin'
-import { plural } from '../utils/format'
 import AdminHead from '../componentes/AdminHead'
 import ConfirmarBajaModal from '../componentes/ConfirmarBajaModal'
 import EmptyBlock from '../componentes/EmptyBlock'
@@ -9,8 +6,11 @@ import Pager from '../componentes/Pager'
 import RolModal from '../componentes/RolModal'
 import UsuarioFormModal from '../componentes/UsuarioFormModal'
 import UsuariosTabla from '../componentes/UsuariosTabla'
+import { ESTADOS_USUARIO, ROLES } from '../data/admin'
+import useAdminUsuarios from '../hooks/useAdminUsuarios'
+import { plural } from '../utils/format'
 
-// /admin/usuarios — crear, editar, cambiar rol, dar de baja / reactivar y resolver solicitudes de venta
+// /admin/usuarios — crear, editar, cambiar rol, dar de baja / reactivar y resolver solicitudes para ser vendedor
 const AdminUsuariosPage = () => {
   const adm = useAdminUsuarios()
   const [modal, setModal] = useState(null) // { tipo: 'crear' | 'editar' | 'rol' | 'baja', usuario? }
@@ -25,7 +25,7 @@ const AdminUsuariosPage = () => {
 
       <section className="adm-requests" aria-labelledby="adm-requests-title">
         <div>
-          <h2 id="adm-requests-title">Solicitudes de venta</h2>
+          <h2 id="adm-requests-title">Solicitudes para ser vendedor</h2>
           <p>Revisá a los compradores que pidieron publicar libros y resolvé su solicitud.</p>
         </div>
         <button
