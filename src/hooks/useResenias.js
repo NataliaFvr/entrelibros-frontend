@@ -1,35 +1,27 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import { eliminarResenaLibro, fetchEstadoResenaLibro, fetchResenasLibro, publicarResenaLibro } from '../redux/resenasSlice'
 import { useAuth } from './useAuth'
-import { getResenias } from '../api/librosApiExtra'
-import { crearResenaLibroApi, eliminarResenaLibroApi, getEstadoResenaLibroApi, modificarResenaLibroApi } from '../api/resenasApi'
-import { mensajeError } from '../utils/errorApi'
 
-// Reseñas de un libro. El backend informa si la sesión actual puede publicar,
-// cuál es su reseña y el ítem de compra que corresponde usar.
+const SIN_PERMISO = { puedeResenar: false, motivo: '', idOrdenItem: null, miResenia: null }
+
+// Reseñas de un libro y si la sesión actual puede opinar (lo decide el back)
 const useResenias = (libroId) => {
+  const dispatch = useDispatch()
   const { user } = useAuth()
-  const [base, setBase] = useState([])
-  const [estado, setEstado] = useState({ puedeResenar: false, motivo: '', idOrdenItem: null, miResenia: null })
+  const guardadas = useSelector((state) => state.resenas.libros[libroId])
+  const estadoGuardado = useSelector((state) => state.resenas.estadosLibro[libroId])
 
   useEffect(() => {
-    let vigente = true
-    getResenias(libroId).then((r) => { if (vigente) setBase(r) }).catch(() => { if (vigente) setBase([]) })
-    return () => { vigente = false }
-  }, [libroId])
+    if (guardadas === undefined) dispatch(fetchResenasLibro(libroId))
+  }, [dispatch, libroId, guardadas])
 
   useEffect(() => {
-    if (!user) {
-      setEstado({ puedeResenar: false, motivo: 'Iniciá sesión para dejar una opinión.', idOrdenItem: null, miResenia: null })
-      return undefined
-    }
-    let vigente = true
-    getEstadoResenaLibroApi(libroId).then((r) => { if (vigente) setEstado(r) }).catch(() => {
-      if (vigente) setEstado({ puedeResenar: false, motivo: '', idOrdenItem: null, miResenia: null })
-    })
-    return () => { vigente = false }
-  }, [libroId, user])
+    if (user && estadoGuardado === undefined) dispatch(fetchEstadoResenaLibro(libroId))
+  }, [dispatch, libroId, user, estadoGuardado])
 
-  const resenias = base
+  const resenias = useMemo(() => guardadas || [], [guardadas])
+  const estado = !user ? { ...SIN_PERMISO, motivo: 'Iniciá sesión para dejar una opinión.' } : estadoGuardado || SIN_PERMISO
   const miResenia = estado.miResenia
   const promedio = useMemo(
     () => (resenias.length ? resenias.reduce((a, r) => a + r.st, 0) / resenias.length : 0),
@@ -37,29 +29,16 @@ const useResenias = (libroId) => {
   )
 
   const publicar = async (opinion) => {
-    try {
-      if (miResenia) {
-        await modificarResenaLibroApi(miResenia.id, { calificacion: opinion.st, comentario: opinion.t })
-      } else {
-        await crearResenaLibroApi({ idOrdenItem: estado.idOrdenItem, calificacion: opinion.st, comentario: opinion.t })
-      }
-      setBase(await getResenias(libroId))
-      if (user) setEstado(await getEstadoResenaLibroApi(libroId))
-    } catch (err) {
-      throw new Error(mensajeError(err))
-    }
+    const resultado = await dispatch(publicarResenaLibro({ idOrdenItem: estado.idOrdenItem, miResenia, opinion }))
+    if (resultado.error) throw new Error(resultado.error.message)
   }
 
   // Sin id borra la propia; el admin pasa el id de cualquier reseña
   const eliminar = async (id = miResenia?.id) => {
-    if (!id) return
-    try {
-      await eliminarResenaLibroApi(id)
-      setBase(await getResenias(libroId))
-      if (user) setEstado(await getEstadoResenaLibroApi(libroId)) // si borró la suya, vuelve a poder opinar
-    } catch (err) {
-      throw new Error(mensajeError(err))
-    }
+    const resena = resenias.find((r) => r.id === id) || miResenia
+    if (!resena) return
+    const resultado = await dispatch(eliminarResenaLibro(resena))
+    if (resultado.error) throw new Error(resultado.error.message)
   }
 
   return { resenias, promedio, miResenia, puedeResenar: estado.puedeResenar, motivo: estado.motivo, publicar, eliminar }

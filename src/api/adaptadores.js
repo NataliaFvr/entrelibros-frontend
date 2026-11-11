@@ -93,7 +93,7 @@ const inicial = (apellido) => (apellido ? ` ${String(apellido).trim()[0]}.` : ''
 // ResenaLibroResponse { id, calificacion, comentario, fecha, idLibro, nombreComprador, apellidoComprador }
 export const aReseniaLibroFront = (r) => ({
   id: r.id, i: r.id, st: r.calificacion, t: r.comentario || '', date: r.fecha, idComprador: r.idComprador,
-  u: `${r.nombreComprador || ''}${inicial(r.apellidoComprador)}`.trim(), idLibro: r.idLibro,
+  u: `${r.nombreComprador || ''}${inicial(r.apellidoComprador)}`.trim(), idLibro: r.idLibro, idOrdenItem: r.idOrdenItem ?? null,
   libro: r.tituloLibro || '',
 })
 
@@ -101,7 +101,7 @@ export const aReseniaLibroFront = (r) => ({
 export const aReseniaVendedorFront = (r) => ({
   id: r.id, st: r.clasificacion, t: r.comentario || '', date: r.fecha, idComprador: r.idComprador,
   u: `${r.nombreComprador || ''}${inicial(r.apellidoComprador)}`.trim(),
-  nc: r.nombreComprador || '', libro: r.libro || '',
+  nc: r.nombreComprador || '', libro: r.libro || '', idPago: r.idPago ?? null, idVendedor: r.idVendedor ?? null,
 })
 
 /* ---------------- Carrito ---------------- */

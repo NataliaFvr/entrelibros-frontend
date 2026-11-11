@@ -1,68 +1,34 @@
-import { useCallback, useEffect, useState } from 'react'
-import {
-  eliminarResenaLibroApi, eliminarResenaVendedorApi, getTodasResenasLibroApi, getTodasResenasVendedorApi,
-} from '../api/resenasApi'
-import { mensajeError } from '../utils/errorApi'
+import { useEffect, useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import { eliminarResenaLibro, eliminarResenaVendedor, fetchTodasResenas } from '../redux/resenasSlice'
 import { useToast } from '../hooks/useToast'
 import Aviso from './Aviso'
 import EmptyBlock from './EmptyBlock'
 import ReviewItem from './ReviewItem'
 
 const AdminResenas = () => {
+  const dispatch = useDispatch()
   const toast = useToast()
-  const [libros, setLibros] = useState([])
-  const [vendedores, setVendedores] = useState([])
-  const [cargando, setCargando] = useState(true)
-  const [error, setError] = useState('')
+  const { todasLibro: libros, todasVendedor: vendedores, todasCargadas, errorTodas } = useSelector((state) => state.resenas)
+  const [errorAccion, setErrorAccion] = useState('')
   const [eliminando, setEliminando] = useState(null)
-
-  const cargar = useCallback(async () => {
-    setCargando(true)
-    try {
-      const [resenasLibro, resenasVendedor] = await Promise.all([
-        getTodasResenasLibroApi(), getTodasResenasVendedorApi(),
-      ])
-      setLibros(resenasLibro)
-      setVendedores(resenasVendedor)
-      setError('')
-    } catch (err) {
-      setError(mensajeError(err, 'registro'))
-    } finally {
-      setCargando(false)
-    }
-  }, [])
+  const cargando = !todasCargadas && !errorTodas
+  const error = errorAccion || errorTodas || ''
 
   useEffect(() => {
-    let vigente = true
-    Promise.all([getTodasResenasLibroApi(), getTodasResenasVendedorApi()])
-      .then(([resenasLibro, resenasVendedor]) => {
-        if (!vigente) return
-        setLibros(resenasLibro)
-        setVendedores(resenasVendedor)
-      })
-      .catch((err) => { if (vigente) setError(mensajeError(err, 'registro')) })
-      .finally(() => { if (vigente) setCargando(false) })
-    return () => { vigente = false }
-  }, [])
+    if (!todasCargadas) dispatch(fetchTodasResenas())
+  }, [dispatch, todasCargadas])
+
+  const cargar = () => { setErrorAccion(''); dispatch(fetchTodasResenas()) }
 
   const eliminar = async (tipo, id) => {
-    const clave = `${tipo}:${id}`
-    setEliminando(clave)
-    setError('')
-    try {
-      if (tipo === 'libro') {
-        await eliminarResenaLibroApi(id)
-        setLibros((actuales) => actuales.filter((resena) => resena.id !== id))
-      } else {
-        await eliminarResenaVendedorApi(id)
-        setVendedores((actuales) => actuales.filter((resena) => resena.id !== id))
-      }
-      toast('Reseña eliminada')
-    } catch (err) {
-      setError(mensajeError(err, 'registro'))
-    } finally {
-      setEliminando(null)
-    }
+    setEliminando(`${tipo}:${id}`)
+    setErrorAccion('')
+    const resena = (tipo === 'libro' ? libros : vendedores).find((r) => r.id === id)
+    const resultado = await dispatch(tipo === 'libro' ? eliminarResenaLibro(resena) : eliminarResenaVendedor(resena))
+    setEliminando(null)
+    if (resultado.error) setErrorAccion(resultado.error.message)
+    else toast('Reseña eliminada')
   }
 
   if (cargando) return <p className="sell-note" role="status">Cargando reseñas…</p>
