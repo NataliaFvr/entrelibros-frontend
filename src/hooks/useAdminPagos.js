@@ -1,15 +1,15 @@
 import { useEffect, useMemo, useState } from 'react'
-import { cargarPagos } from '../api/adminApi'
+import { useDispatch, useSelector } from 'react-redux'
 import { POR_PAGINA } from '../data/admin'
+import { fetchPagosAdmin } from '../redux/adminSlice'
 
-// Pagos registrados con sus totales (aprobados, rechazados y monto cobrado) y paginación.
+// Pagos registrados con sus totales (aprobados, rechazados y monto cobrado) y paginación
 const useAdminPagos = () => {
-  const [pagos, setPagos] = useState([])
+  const dispatch = useDispatch()
+  const { pagos, pagosCargados } = useSelector((state) => state.admin)
   useEffect(() => {
-    let vigente = true
-    cargarPagos().then((lista) => { if (vigente) setPagos(lista) }).catch(() => {}) // GET /pagos (ADMIN)
-    return () => { vigente = false }
-  }, [])
+    if (!pagosCargados) dispatch(fetchPagosAdmin())
+  }, [dispatch, pagosCargados])
   const [pagina, setPagina] = useState(1)
 
   const resumen = useMemo(() => {

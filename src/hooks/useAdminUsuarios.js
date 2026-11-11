@@ -1,28 +1,26 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
-import * as admin from '../api/adminApi'
+import { useEffect, useMemo, useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
 import { ETIQUETA_ROL, POR_PAGINA } from '../data/admin'
+import { fetchLibros } from '../redux/librosSlice'
+import {
+  cambiarRol as cambiarRolAccion, crearUsuario, darDeBajaUsuario, editarUsuario, fetchUsuarios, reactivarUsuario, resolverSolicitud,
+} from '../redux/usuariosSlice'
 import { norm } from '../utils/format'
 import { useAuth } from './useAuth'
-import { useLibros } from './useLibros'
 import { useToast } from './useToast'
 
-const mensajeDe = (err) => (err && err.message) || 'No pudimos completar la acción. Intentá de nuevo.'
-
-// Lista de usuarios con búsqueda, filtros, paginación y las acciones del administrador.
-// Cada acción devuelve { ok } o { error }: los pop-ups muestran el error sin cerrarse.
+// Cada acción devuelve { ok } o { error }: los pop-ups muestran el error sin cerrarse
 const useAdminUsuarios = () => {
+  const dispatch = useDispatch()
   const { user, perfil, actualizarPerfil } = useAuth()
   const toast = useToast()
-  const { recargar } = useLibros()
-  const [usuarios, setUsuarios] = useState([])
-  const refrescar = useCallback(async () => setUsuarios(await admin.cargarUsuarios()), [])
-  useEffect(() => { // GET /usuarios
-    let vigente = true
-    admin.cargarUsuarios().then((lista) => { if (vigente) setUsuarios(lista) }).catch(() => {})
-    return () => { vigente = false }
-  }, [])
+  const { items: usuarios, cargados } = useSelector((state) => state.usuarios)
   const [filtros, setFiltros] = useState({ q: '', rol: '', est: '', solicitud: '' })
   const [pagina, setPagina] = useState(1)
+
+  useEffect(() => {
+    if (!cargados) dispatch(fetchUsuarios())
+  }, [dispatch, cargados])
 
   const filtrados = useMemo(() => {
     const q = norm(filtros.q.trim())
@@ -44,42 +42,49 @@ const useAdminUsuarios = () => {
     setPagina(1)
   }
 
-  // Corre la acción, refresca la lista y el catálogo (un vendedor dado de baja deja de mostrar sus libros)
-  // (con el back las acciones son async: se espera la respuesta antes de refrescar)
   const ejecutar = async (accion, mensaje) => {
-    try {
-      await accion()
-      await refrescar()
-      recargar()
-      if (mensaje) toast(mensaje)
-      return { ok: true }
-    } catch (err) {
-      return { error: mensajeDe(err) }
-    }
+    const resultado = await dispatch(accion)
+    if (resultado.error) return { error: resultado.error.message }
+    if (mensaje) toast(mensaje)
+    return { ok: true }
   }
 
-  const crear = (v) => ejecutar(() => admin.crearUsuario(v), 'Usuario creado')
+  const crear = (v) => ejecutar(crearUsuario(v), 'Usuario creado')
 
- // Editar la propia cuenta pasa por authSlice: así la sesión sigue al día si cambia el usuario
-  const editar = (u, v) => ejecutar(async () => {
-    if (!u.propio) return admin.editarUsuario(u.id, v)
-    const duplicado = admin.mensajeDuplicado(v, u.nombreUsuario)
-    if (duplicado) throw new Error(duplicado)
-    return actualizarPerfil(v, perfil)
-  }, u.propio ? '' : 'Cambios guardados')
+  const editar = async (u, v) => {
+    // La propia cuenta pasa por authSlice: así la sesión sigue al día
+    if (u.propio) {
+      try {
+        await actualizarPerfil(v, perfil)
+        return { ok: true }
+      } catch (err) {
+        return { error: err.message }
+      }
+    }
+    const cambios = { nombre: v.nombre.trim(), apellido: v.apellido.trim(), nombreUsuario: v.nombreUsuario, email: v.email.trim() }
+    if (v.contrasena) cambios.contrasena = v.contrasena
+    return ejecutar(editarUsuario({ id: u.id, cambios }), 'Cambios guardados')
+  }
 
   const cambiarRol = (u, rol, datosVendedor) => {
     if (rol === u.rol) {
       toast(`El rol ya era ${ETIQUETA_ROL[rol]}`)
       return { ok: true }
     }
-    return ejecutar(() => admin.cambiarRol(u.id, rol, datosVendedor), `Rol actualizado a ${ETIQUETA_ROL[rol]}`)
+    return ejecutar(cambiarRolAccion({ id: u.id, rol, datosVendedor }), `Rol actualizado a ${ETIQUETA_ROL[rol]}`)
   }
 
-  const darDeBaja = (u) => ejecutar(() => admin.darDeBaja(u.id), 'Usuario dado de baja')
-  const reactivar = (u) => ejecutar(() => admin.reactivar(u.id), 'Usuario reactivado')
+  const darDeBaja = (u) => ejecutar(darDeBajaUsuario(u.id), 'Usuario dado de baja')
+
+  const reactivar = async (u) => {
+    const respuesta = await ejecutar(reactivarUsuario(u.id), 'Usuario reactivado')
+    // El back vuelve a publicar todos sus libros y solo devuelve el usuario: hay que pedir el catálogo
+    if (respuesta.ok && u.rol === 'VENDEDOR') dispatch(fetchLibros())
+    return respuesta
+  }
+
   const resolverVenta = (u, aprobada, comentario) =>
-    ejecutar(() => admin.resolverSolicitudVenta(u.id, aprobada, comentario), aprobada ? 'Vendedor aprobado' : 'Solicitud rechazada')
+    ejecutar(resolverSolicitud({ id: u.id, aprobada, comentario }), aprobada ? 'Vendedor aprobado' : 'Solicitud rechazada')
 
   return {
     filtros, filtrar, total: filtrados.length,

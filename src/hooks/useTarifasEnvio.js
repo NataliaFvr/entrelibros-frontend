@@ -1,28 +1,16 @@
-import { useEffect, useState } from 'react'
-import { listarTarifasEnvioApi } from '../api/enviosApi'
+import { useEffect } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import { fetchTarifas } from '../redux/enviosSlice'
 
 const useTarifasEnvio = () => {
-  const [tarifas, setTarifas] = useState({})
-  const [cargada, setCargada] = useState(false) // true cuando el back ya respondió (aunque no haya tarifas)
-  const [version, setVersion] = useState(0)
+  const dispatch = useDispatch()
+  const { tarifas, cargada, error } = useSelector((state) => state.envios)
 
   useEffect(() => {
-    let vigente = true
-    listarTarifasEnvioApi()
-      .then((t) => { if (vigente) { setTarifas(t); setCargada(true) } })
-      .catch(() => {})
-    return () => { vigente = false }
-  }, [version])
+    if (!cargada && !error) dispatch(fetchTarifas())
+  }, [dispatch, cargada, error])
 
-  const recargar = () => setVersion((v) => v + 1)
-  // Guardar en el back y en el estado a la vez: con la tarifa que devolvió el PATCH o el POST
-  // ({ id, zona: 'misma' | 'distinta', costoFijo }) se actualiza el estado, sin volver a pedir la lista con GET.
-  const aplicar = (tarifa) => setTarifas((t) => ({
-    ...t,
-    [tarifa.zona]: tarifa.costoFijo,
-    ids: { ...t.ids, [tarifa.zona]: tarifa.id },
-  }))
-  return { ...tarifas, cargada, recargar, aplicar }
+  return { ...tarifas, cargada }
 }
 
 export default useTarifasEnvio

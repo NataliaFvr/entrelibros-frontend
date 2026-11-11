@@ -1,5 +1,8 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { aLibroFront } from "../api/adaptadores";
+import { editarCategoria } from "./categoriasSlice";
+import { moderar } from "./moderacionSlice";
+import { cambiarRol, darDeBajaUsuario } from "./usuariosSlice";
 import { cambiarEstadoLibro, editarLibro } from "./vendedorSlice";
 import { cancelarVenta } from "./ventasSlice";
 import api from "../api/axiosConfig";
@@ -44,6 +47,28 @@ const librosSlice = createSlice({
         if (index === -1) return;
         if (enviadoARevision) state.items.splice(index, 1); // no se ve en el catálogo hasta que el admin lo apruebe
         else if (libro) state.items[index] = { ...libro, imgs: pub.imgs.slice(0, 1) };
+      })
+      .addCase(editarCategoria.fulfilled, (state, action) => {
+        const { actual } = action.meta.arg;
+        const nuevo = action.payload.nombre;
+        state.items.forEach((l) => {
+          l.cats = l.cats.map((c) => (c === actual ? nuevo : c));
+          if (l.cat === actual) l.cat = nuevo;
+        });
+      })
+      // Un libro aprobado aparece en el catálogo con la respuesta del back
+      .addCase(moderar.fulfilled, (state, action) => {
+        if (!action.meta.arg.accion.aprobado || action.payload.estadoPublicacion !== "ACTIVA") return;
+        const index = state.items.findIndex((l) => l.id === action.payload.id);
+        if (index !== -1) state.items[index] = action.payload;
+        else state.items.push(action.payload);
+      })
+      // El back da de baja los libros del vendedor que se da de baja o deja de ser vendedor
+      .addCase(darDeBajaUsuario.fulfilled, (state, action) => {
+        state.items = state.items.filter((l) => l.vId !== action.payload.id);
+      })
+      .addCase(cambiarRol.fulfilled, (state, action) => {
+        if (action.payload.rol !== "VENDEDOR") state.items = state.items.filter((l) => l.vId !== action.payload.id);
       })
       .addCase(cancelarVenta.fulfilled, (state, action) => {
         (action.payload.items || []).forEach((item) => {

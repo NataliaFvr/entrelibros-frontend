@@ -15,7 +15,9 @@ import { cancelarVenta } from "./ventasSlice";
 // y el slice lo reemplaza en la lista: después de guardar no se vuelve a pedir nada.
 
 // `idUsuario` queda guardado para saber de qué cuenta son los libros (si se cambia de cuenta, se vuelven a pedir)
-export const fetchMisLibros = createAsyncThunk("vendedor/fetchmislibros", async () => traerPublicaciones());
+export const fetchMisLibros = createAsyncThunk("vendedor/fetchmislibros", async () => traerPublicaciones(), {
+  condition: (_, { getState }) => !getState().vendedor.loading,
+});
 
 // GET /imagenes-libro/libro/{id}: todas las fotos de un libro, en orden (solo hacen falta para editarlo)
 export const fetchFotosLibro = createAsyncThunk("vendedor/fetchfotoslibro", async (id) => getImagenesApi(id));

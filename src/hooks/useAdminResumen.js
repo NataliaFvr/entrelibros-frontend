@@ -1,35 +1,22 @@
-import { useEffect, useMemo, useState } from 'react'
-import { fuenteModeracion } from '../api/moderacionApi'
-import { cargarOrdenes, cargarUsuarios } from '../api/adminApi'
+import { useEffect, useMemo } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import { fetchOrdenesAdmin } from '../redux/adminSlice'
+import { fetchSolicitudes } from '../redux/moderacionSlice'
+import { fetchUsuarios } from '../redux/usuariosSlice'
 import { ETIQUETAS_PAGO } from '../utils/pedidos'
 
-const mensajeDe = (err) => (err && err.message) || 'No pudimos traer las solicitudes. Intentá de nuevo.'
-
-// Números del resumen: libros por moderar (misma cola que el panel de moderación), usuarios activos,
-// órdenes, total cobrado y órdenes por estado de pago.
+// Usa las mismas listas que las otras pantallas del admin: si ya estaban, no se piden de nuevo
 const useAdminResumen = () => {
-  const [pendientes, setPendientes] = useState([])
-  const [cargando, setCargando] = useState(true)
-  const [error, setError] = useState('')
+  const dispatch = useDispatch()
+  const moderacion = useSelector((state) => state.moderacion)
+  const { items: usuarios, cargados: usuariosCargados } = useSelector((state) => state.usuarios)
+  const { ordenes, ordenesCargadas } = useSelector((state) => state.admin)
 
   useEffect(() => {
-    let vivo = true
-    fuenteModeracion.obtenerSolicitudes()
-      .then((lista) => { if (vivo) setPendientes(lista) })
-      .catch((err) => { if (vivo) setError(mensajeDe(err)) })
-      .finally(() => { if (vivo) setCargando(false) })
-    return () => { vivo = false }
-  }, [])
-
-  // Usuarios y órdenes (con el back: GET /usuarios y GET /ordenes)
-  const [usuarios, setUsuarios] = useState([])
-  const [ordenes, setOrdenes] = useState([])
-  useEffect(() => {
-    let vigente = true
-    cargarUsuarios().then((l) => { if (vigente) setUsuarios(l) }).catch(() => {})
-    cargarOrdenes().then((l) => { if (vigente) setOrdenes(l) }).catch(() => {})
-    return () => { vigente = false }
-  }, [])
+    if (!moderacion.cargadas) dispatch(fetchSolicitudes())
+    if (!usuariosCargados) dispatch(fetchUsuarios())
+    if (!ordenesCargadas) dispatch(fetchOrdenesAdmin())
+  }, [dispatch, moderacion.cargadas, usuariosCargados, ordenesCargadas])
 
   const datos = useMemo(() => {
     const cobrado = ordenes.filter((o) => o.estadoPago === 'SIMULADO_APROBADO').reduce((suma, o) => suma + o.total, 0)
@@ -42,7 +29,12 @@ const useAdminResumen = () => {
     }
   }, [usuarios, ordenes])
 
-  return { pendientes, cargando, error, ...datos }
+  return {
+    pendientes: moderacion.items,
+    cargando: moderacion.loading || (!moderacion.cargadas && !moderacion.error),
+    error: moderacion.error || '',
+    ...datos,
+  }
 }
 
 export default useAdminResumen

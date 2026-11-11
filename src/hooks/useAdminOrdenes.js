@@ -1,19 +1,18 @@
 import { useEffect, useMemo, useState } from 'react'
-import { cargarOrdenes } from '../api/adminApi'
+import { useDispatch, useSelector } from 'react-redux'
 import { POR_PAGINA } from '../data/admin'
+import { fetchOrdenesAdmin } from '../redux/adminSlice'
 
-// Órdenes de la plataforma: las más recientes primero, con filtro por estado de pago y paginación.
-// Con el back: GET /ordenes (ADMIN) + el detalle de cada una.
+// Órdenes de la plataforma (las más nuevas primero) con filtro por estado de pago y paginación
 const useAdminOrdenes = () => {
-  const [ordenes, setOrdenes] = useState([])
+  const dispatch = useDispatch()
+  const { ordenes, ordenesCargadas } = useSelector((state) => state.admin)
   const [estado, setEstado] = useState('')
   const [pagina, setPagina] = useState(1)
 
   useEffect(() => {
-    let vigente = true
-    cargarOrdenes().then((lista) => { if (vigente) setOrdenes(lista) }).catch(() => {})
-    return () => { vigente = false }
-  }, [])
+    if (!ordenesCargadas) dispatch(fetchOrdenesAdmin())
+  }, [dispatch, ordenesCargadas])
 
   const filtradas = useMemo(
     () => ordenes.filter((o) => !estado || o.estadoPago === estado), // el back ya las manda de la más nueva a la más vieja

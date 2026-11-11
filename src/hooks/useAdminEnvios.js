@@ -1,28 +1,24 @@
-import { useToast } from './useToast'
+import { useDispatch } from 'react-redux'
+import { actualizarTarifa, crearTarifa } from '../redux/enviosSlice'
 import useTarifasEnvio from './useTarifasEnvio'
-import { actualizarTarifaEnvioApi, crearTarifaEnvioApi } from '../api/enviosApi'
-import { normalizarError } from '../utils/errorApi'
+import { useToast } from './useToast'
 
-// Tarifas de envío vigentes, alta de las que faltan y cambio de precio.
-// `cambiar` y `crear` devuelven (una Promesa de) { ok } o { error }.
+// `cambiar` y `crear` devuelven { ok } o { error }
 const useAdminEnvios = () => {
+  const dispatch = useDispatch()
   const toast = useToast()
-  const { aplicar, ids, cargada, ...tarifas } = useTarifasEnvio()
+  const { cargada, ...tarifas } = useTarifasEnvio()
 
   const guardar = async (accion, mensaje) => {
-    try {
-      // La respuesta del PATCH/POST ya trae la tarifa actualizada: se usa esa, sin un GET nuevo
-      aplicar(await accion())
-      toast(mensaje)
-      return { ok: true }
-    } catch (err) {
-      return { error: normalizarError(err).mensaje || 'No pudimos guardar la tarifa. Intentá de nuevo.' }
-    }
+    const resultado = await dispatch(accion)
+    if (resultado.error) return { error: resultado.error.message }
+    toast(mensaje)
+    return { ok: true }
   }
 
-  const cambiar = (tipo, costo) => guardar(() => actualizarTarifaEnvioApi(ids[tipo], costo), 'Tarifa actualizada')
-  // POST /envios: sin tarifa creada el checkout responde 404, así que el panel permite sembrarla.
-  const crear = (tipo, costo) => guardar(() => crearTarifaEnvioApi(tipo, costo), 'Tarifa creada')
+  const cambiar = (zona, costo) => guardar(actualizarTarifa({ zona, costo }), 'Tarifa actualizada')
+  // Sin tarifa creada el checkout responde 404: el panel permite crearla
+  const crear = (zona, costo) => guardar(crearTarifa({ zona, costo }), 'Tarifa creada')
 
   return { tarifas, cargada, cambiar, crear }
 }

@@ -1,50 +1,13 @@
 import { listarOrdenesAdminApi, listarPagosAdminApi } from './comprasApi'
-import { crearCategoriaApi } from './categoriasApi'
-import {
-  actualizarUsuarioApi, cambiarRolApi, crearUsuarioApi, darDeBajaUsuarioApi, listarUsuariosApi, reactivarUsuarioApi, resolverSolicitudApi,
-} from './usuariosApi'
-import { mensajeError } from '../utils/errorApi'
 
-const conBack = async (fn) => {
-  try { return await fn() } catch (err) { throw new Error(mensajeError(err, 'registro')) }
-}
+const aOrdenAdmin = (o) => ({
+  n: o.n, fecha: o.date, comprador: o.comprador, provincia: o.dest.prov || o.addr, destino: o.addr,
+  subtotal: o.sub, envio: o.env, total: o.total, estadoPago: o.pago,
+  proveedor: o.proveedor || 'tarjeta', items: o.its,
+})
 
-export const mensajeDuplicado = () => ''
+const aPagoAdmin = (p) => ({ id: p.id, n: p.idOrden, proveedor: p.proveedor, monto: p.totalOrden, resultado: p.resultado })
 
-export const cambiarRol = (id, rol, datosVendedor) => conBack(() => cambiarRolApi(id, rol, datosVendedor))
-export const crearUsuario = (v) => {
-  if (!['COMPRADOR', 'VENDEDOR'].includes(v.rol)) throw new Error('Desde el panel solo se pueden crear compradores o vendedores.')
-  return conBack(() => crearUsuarioApi(v))
-}
+export const cargarOrdenes = async () => (await listarOrdenesAdminApi()).map(aOrdenAdmin)
 
-export const editarUsuario = (id, v) => {
-  const cambios = { nombre: v.nombre.trim(), apellido: v.apellido.trim(), nombreUsuario: v.nombreUsuario, email: v.email.trim() }
-  if (v.contrasena) cambios.contrasena = v.contrasena
-  return conBack(() => actualizarUsuarioApi(id, cambios))
-}
-
-export const darDeBaja = (id) => conBack(() => darDeBajaUsuarioApi(id))
-export const reactivar = (id) => conBack(() => reactivarUsuarioApi(id))
-export const resolverSolicitudVenta = (id, aprobada, comentario) => conBack(() => resolverSolicitudApi(id, aprobada, comentario))
-
-export const cargarUsuarios = async () => {
-  const lista = await conBack(() => listarUsuariosApi())
-  return lista.map((u) => ({ ...u, quiereVender: u.estadoSolicitud === 'PENDIENTE' }))
-}
-
-export const cargarOrdenes = async () => {
-  const [ordenes, pagos] = await conBack(() => Promise.all([listarOrdenesAdminApi(), listarPagosAdminApi()]))
-  const proveedores = new Map(pagos.map((p) => [p.idOrden, p.proveedor]))
-  return ordenes.map((o) => ({
-    n: o.n, fecha: o.date, comprador: o.comprador, provincia: o.dest.prov || o.addr, destino: o.addr,
-    subtotal: o.sub, envio: o.env, total: o.total, estadoPago: o.pago,
-    proveedor: proveedores.get(o.idOrden) || 'tarjeta', items: o.its,
-  }))
-}
-
-export const cargarPagos = async () => {
-  const pagos = await conBack(() => listarPagosAdminApi())
-  return pagos.map((p) => ({ id: p.id, n: p.idOrden, proveedor: p.proveedor, monto: p.totalOrden, resultado: p.resultado }))
-}
-
-export const crearCategoria = (nombre) => conBack(() => crearCategoriaApi(nombre.trim().replace(/\s+/g, ' ')))
+export const cargarPagos = async () => (await listarPagosAdminApi()).map(aPagoAdmin)

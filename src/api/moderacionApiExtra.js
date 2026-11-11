@@ -130,5 +130,5 @@ export async function obtenerSolicitudes() {
 }
 
 export async function moderarSolicitud(id, accion) {
-  await (accion.aprobado ? aprobarLibro(id) : rechazarLibro(id, accion.motivoRechazo ?? ''))
+  return accion.aprobado ? aprobarLibro(id) : rechazarLibro(id, accion.motivoRechazo ?? '')
 }

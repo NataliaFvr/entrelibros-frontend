@@ -5,7 +5,9 @@ import { cancelarVentaApi, listarVentasApi } from "../api/ventasApi";
 // Ventas del vendedor (OrdenVendedorResponse tal cual llega del back; useVentas las adapta para la pantalla)
 // y sus estadísticas. `idUsuario` = de qué cuenta son (si se cambia de cuenta, se vuelven a pedir).
 
-export const fetchVentas = createAsyncThunk("ventas/fetchventas", async () => listarVentasApi());
+export const fetchVentas = createAsyncThunk("ventas/fetchventas", async () => listarVentasApi(), {
+  condition: (_, { getState }) => !getState().ventas.loading,
+});
 
 // PATCH /ordenes/vendedor/{id}/cancelar: devuelve la venta completa ya cancelada
 export const cancelarVenta = createAsyncThunk("ventas/cancelarventa", async (idOrdenVendedor) => cancelarVentaApi(idOrdenVendedor));

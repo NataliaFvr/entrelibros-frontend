@@ -1,11 +1,8 @@
 import { useMemo } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
+import { useSelector } from 'react-redux'
 import { urlImagenCategoria } from '../api/categoriasApi'
-import { fetchCategorias } from '../redux/categoriasSlice'
-import { fetchLibros } from '../redux/librosSlice'
 
 export const useLibros = () => {
-  const dispatch = useDispatch()
   const { items: libros, loading, error } = useSelector((state) => state.libros)
   const { items: listaCategorias } = useSelector((state) => state.categorias)
   const categorias = useMemo(() => listaCategorias.map((c) => c.nombre), [listaCategorias])
@@ -17,7 +14,5 @@ export const useLibros = () => {
     libros, categorias, imagenesCategorias,
     cargando: loading && libros.length === 0, // recargar no vuelve a mostrar "cargando"
     errorCarga: Boolean(error),
-    recargar: () => dispatch(fetchLibros()), // cuando un vendedor publica o da de baja un libro
-    recargarCategorias: () => dispatch(fetchCategorias()), // cuando el administrador crea una nueva
   }
 }

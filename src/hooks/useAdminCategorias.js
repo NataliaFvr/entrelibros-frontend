@@ -1,38 +1,47 @@
-import { useCallback, useEffect, useState } from 'react'
-import { useLibros } from './useLibros'
+import { useEffect, useMemo } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import { urlImagenCategoria } from '../api/categoriasApi'
+import { cambiarEstadoCategoria, crearCategoria, editarCategoria, fetchCategoriasAdmin } from '../redux/categoriasSlice'
+import { fetchLibros } from '../redux/librosSlice'
 import { useToast } from './useToast'
-import { cambiarEstadoCategoria, crearCategoriaConFoto, editarCategoria, listarCategoriasAdmin } from '../api/categoriasApiExtra'
 
-// Categorías del panel (activas y de baja) con alta, edición y baja/reactivación. Cada acción devuelve { ok } o { error }.
+// Categorías del panel (activas y de baja). Cada acción devuelve { ok } o { error }.
 const useAdminCategorias = () => {
+  const dispatch = useDispatch()
   const toast = useToast()
-  const { recargar, recargarCategorias } = useLibros()
-  const [categorias, setCategorias] = useState([])
+  const { todas, todasCargadas } = useSelector((state) => state.categorias)
 
-  const leer = useCallback(() => listarCategoriasAdmin().then(setCategorias), [])
   useEffect(() => {
-    let vigente = true
-    listarCategoriasAdmin().then((c) => { if (vigente) setCategorias(c) })
-    return () => { vigente = false }
-  }, [])
+    if (!todasCargadas) dispatch(fetchCategoriasAdmin())
+  }, [dispatch, todasCargadas])
 
-  const correr = async (fn, aviso) => {
-    try {
-      await fn()
-      await Promise.all([leer(), recargarCategorias(), recargar()]) // el catálogo y el inicio se actualizan al instante
-      toast(aviso)
-      return { ok: true }
-    } catch (err) {
-      return { error: (err && err.message) || 'No pudimos guardar la categoría. Intentá de nuevo.' }
-    }
+  const categorias = useMemo(
+    () => todas.map((c) => ({ nombre: c.nombre, imagen: c.tieneImagen ? urlImagenCategoria(c.id) : '', activa: c.activa })),
+    [todas],
+  )
+
+  const correr = async (accion, aviso) => {
+    const resultado = await dispatch(accion)
+    if (resultado.error) return { error: resultado.error.message }
+    toast(aviso)
+    if (resultado.payload.aviso) toast(resultado.payload.aviso)
+    return { ok: true }
   }
 
-  const crear = (datos) => correr(() => crearCategoriaConFoto(datos), 'Categoría creada')
-  const editar = (actual, datos) => correr(() => editarCategoria(actual, datos), 'Categoría actualizada')
-  const darDeBaja = (nombre) => correr(() => cambiarEstadoCategoria(nombre, false), 'Categoría dada de baja')
-  const reactivar = (nombre) => correr(() => cambiarEstadoCategoria(nombre, true), 'Categoría reactivada')
+  const cambiarEstado = async (nombre, activa) => {
+    const r = await correr(cambiarEstadoCategoria({ nombre, activa }), activa ? 'Categoría reactivada' : 'Categoría dada de baja')
+    // Cambia el estado de muchos libros y el back solo devuelve la categoría: hay que pedir el catálogo
+    if (r.ok) dispatch(fetchLibros())
+    return r
+  }
 
-  return { categorias, crear, editar, darDeBaja, reactivar }
+  return {
+    categorias,
+    crear: (datos) => correr(crearCategoria(datos), 'Categoría creada'),
+    editar: (actual, datos) => correr(editarCategoria({ actual, ...datos }), 'Categoría actualizada'),
+    darDeBaja: (nombre) => cambiarEstado(nombre, false),
+    reactivar: (nombre) => cambiarEstado(nombre, true),
+  }
 }
 
 export default useAdminCategorias
