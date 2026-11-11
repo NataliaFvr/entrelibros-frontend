@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { urlFotoUsuario } from '../api/usuariosApi'
 import {
     abrirGate, cancelarVerificacion, cerrarGate, confirmarEmail, crearDireccion, eliminarDireccion, fetchUsuario, guardarPerfil,
-    limpiarPendiente, login, logout, marcarPrincipal, quitarMarks,
+    limpiarPendiente, login, logout, marcarPrincipal, NOTA_SIN_CONFIRMAR, quitarMarks,
     reenviarCodigo,
     registrar,
     toggleMark,
@@ -17,19 +17,23 @@ export const useAuth = () => {
   const { user, marks, direcciones, gate, gateDestino, pendiente, verif } = useSelector((state) => state.auth)
   const perfil = useMemo(() => (user ? { avatar: user.avatar || '', foto: user.tieneFoto ? urlFotoUsuario(user.id) : '' } : {}), [user])
 
-  // Los thunks de sesión devuelven { user }, { verif } o { error, tipo, campos }; si falló de forma inesperada no hay payload
-  const respuesta = (resultado) => resultado.payload || { error: resultado.error.message }
+  // Si la acción terminó en `rejected`, los formularios reciben { error, tipo, campos } para mostrar qué pasó
+  const errorDe = (resultado) => ({ error: resultado.error.message, tipo: resultado.error.tipo, campos: resultado.error.campos || {} })
 
   const iniciarSesion = async (ident, contrasena) => {
-    const r = respuesta(await dispatch(login({ ident, contrasena })))
-    if (r.user) { toast(`¡Hola, ${r.user.nombre}!`); return {} }
-    if (r.verif) return { pendiente: true } // la cuenta no estaba confirmada: se abre la verificación
-    return r
+    const resultado = await dispatch(login({ ident, contrasena }))
+    if (!resultado.error) { toast(`¡Hola, ${resultado.payload.nombre}!`); return {} }
+    // La cuenta no estaba confirmada: el slice ya abrió la verificación; acá se pide un código nuevo
+    if (resultado.error.tipo === 'CUENTA_NO_CONFIRMADA') {
+      dispatch(reenviarCodigo({ email: ident.trim(), nota: NOTA_SIN_CONFIRMAR }))
+      return { pendiente: true }
+    }
+    return errorDe(resultado)
   }
 
   const registrarCuenta = async (valores) => {
-    const r = respuesta(await dispatch(registrar(valores)))
-    return r.verif ? {} : r
+    const resultado = await dispatch(registrar(valores))
+    return resultado.error ? errorDe(resultado) : {}
   }
 
   const cerrarSesion = () => {
@@ -41,11 +45,15 @@ export const useAuth = () => {
   const verificacion = {
     usuario: verif && verif.cuenta,
     nota: verif ? verif.nota : '',
-    reenviar: async () => respuesta(await dispatch(reenviarCodigo(verif.id))),
+    reenviar: async () => {
+      const resultado = await dispatch(reenviarCodigo({ email: verif.id }))
+      return resultado.error ? errorDe(resultado) : {}
+    },
     confirmar: async (codigo) => {
-      const r = respuesta(await dispatch(confirmarEmail({ id: verif.id, codigo })))
-      if (r.user) { toast(`¡Cuenta confirmada! Hola, ${r.user.nombre}`); return {} }
-      return r
+      const resultado = await dispatch(confirmarEmail({ email: verif.id, codigo }))
+      if (resultado.error) return errorDe(resultado)
+      toast(`¡Cuenta confirmada! Hola, ${resultado.payload.nombre}`)
+      return {}
     },
     cancelar: () => dispatch(cancelarVerificacion()),
   }
@@ -93,9 +101,9 @@ export const useAuth = () => {
   return {
     user, perfil, marks, direcciones, gate, gateDestino, pendiente, verificacion,
     login: iniciarSesion, registrar: registrarCuenta, logout: cerrarSesion, actualizarPerfil,
-    agregarDireccion: (direccion) => cambiarDirecciones(crearDireccion({ user, direccion }), 'Dirección guardada'),
-    eliminarDireccion: (id) => cambiarDirecciones(eliminarDireccion({ user, id })),
-    marcarPrincipal: (id) => cambiarDirecciones(marcarPrincipal({ user, id }), 'Dirección principal actualizada'),
+    agregarDireccion: (direccion) => cambiarDirecciones(crearDireccion(direccion), 'Dirección guardada'),
+    eliminarDireccion: (id) => cambiarDirecciones(eliminarDireccion(id)),
+    marcarPrincipal: (id) => cambiarDirecciones(marcarPrincipal(id), 'Dirección principal actualizada'),
     requiereLogin,
     cerrarGate: ({ conservarAccion = false } = {}) => dispatch(cerrarGate({ conservarAccion })),
     limpiarPendiente: () => dispatch(limpiarPendiente()),

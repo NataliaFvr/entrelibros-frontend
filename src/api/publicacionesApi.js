@@ -1,4 +1,4 @@
-import { getImagenesApi, getMisLibrosApi } from './librosApi'
+import { getMisLibrosApi } from './librosApi'
 import { publicacionAFront } from './adaptadores'
 
 // Publicaciones del vendedor en el formato del panel { id, t, a, ed, cat, idioma, anio, usado, base, d, stock, imgs, descripcion,
@@ -8,7 +8,8 @@ import { publicacionAFront } from './adaptadores'
 const desdeBack = (l) => {
   const publicacion = {
     ...l, mod: l.estadoModeracion, estado: publicacionAFront(l.estadoPublicacion), modC: l.motivoRechazo || '',
-    imgs: [],
+    // En la lista alcanza con la portada (ya viene en la respuesta); todas las fotos se piden recién al editar el libro
+    imgs: l.imgs || [], fotosCompletas: false,
   }
   if (l.estadoModeracion === 'EN_REVISION' && l.snapshotTitulo != null) {
     publicacion.revision = {
@@ -22,11 +23,4 @@ const desdeBack = (l) => {
   return publicacion
 }
 
-export const traerPublicaciones = async () => {
-  const mios = await getMisLibrosApi()
-  return Promise.all(mios.map(async (l) => {
-    const p = desdeBack(l)
-    p.imgs = await getImagenesApi(l.id).catch(() => [])
-    return p
-  }))
-}
+export const traerPublicaciones = async () => (await getMisLibrosApi()).map(desdeBack)

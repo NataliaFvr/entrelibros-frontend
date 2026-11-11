@@ -6,10 +6,11 @@ import { esListaVacia } from '../utils/errorApi'
 //   GET    /direcciones      -> [{ id, alias, calle, ciudad, provincia, cp }]
 //   POST   /direcciones      { alias, calle, ciudad, provincia, cp } -> 201 con la dirección creada
 //   DELETE /direcciones/{id} -> { mensaje }
+//   PATCH  /direcciones/{id}/principal -> la lista entera
 // El front usa `prov`; el back `provincia` (el mapeo vive en aDireccionFront / acá al enviar).
 
 // El backend persiste la dirección principal y devuelve el campo `principal`.
-const resolverPrincipal = (lista) => {
+export const resolverPrincipal = (lista) => {
   if (!lista.length) return lista
   const i = Math.max(0, lista.findIndex((d) => d.principal))
   return lista.map((d, j) => ({ ...d, principal: j === i }))
@@ -31,4 +32,6 @@ export const crearDireccionApi = async ({ alias, calle, ciudad, prov, cp }) =>
 
 export const eliminarDireccionApi = async (id) => (await api.delete(`/direcciones/${id}`)).data
 
-export const marcarPrincipalApi = async (id) => (await api.patch(`/direcciones/${id}/principal`)).data
+// PATCH /direcciones/{id}/principal -> la lista entera, porque también cambia la que antes era principal
+export const marcarPrincipalApi = async (id) =>
+  resolverPrincipal((await api.patch(`/direcciones/${id}/principal`)).data.map(aDireccionFront))

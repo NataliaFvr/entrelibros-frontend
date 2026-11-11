@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { normalizarError } from '../utils/errorApi'
 
 // Cliente HTTP único hacia el back (Spring Boot).
 // está en la raíz (/libros, /carrito, /ordenes…). Por eso baseURL es la RAÍZ del servidor (VITE_API_URL sin el
@@ -56,6 +57,16 @@ const vencer = () => {
   alVencerSesion.forEach((fn) => fn())
 }
 
+// El mismo código HTTP significa cosas distintas según la pantalla (un 401 en el login son credenciales incorrectas)
+const contextoDe = (config) => {
+  const url = config.url || ''
+  if (url.endsWith('/auth/login')) return 'login'
+  if (url.endsWith('/auth/register')) return 'registro'
+  if (/\/auth\/(verificar-email|reenviar-codigo)/.test(url)) return 'verificacion'
+  if (url.startsWith('/usuarios') && config.method !== 'get') return 'registro' // 409 = usuario o e-mail repetido
+  return ''
+}
+
 // Un 401 en cualquier endpoint que NO sea /auth/* con un token guardado = el token venció: se intenta renovarlo con el
 // refresh token y se repite la llamada una vez; si tampoco sirve, se cierra la sesión.
 // En /auth/* (login, verificar…) un 401 es un resultado normal y lo maneja cada formulario con normalizarError().
@@ -79,6 +90,11 @@ api.interceptors.response.use(
         vencer()
       }
     }
+    // El error sigue su camino con el mensaje claro para la persona (y el detalle en `info`): así las acciones de Redux
+    // no necesitan try/catch y el slice muestra action.error.message tal cual.
+    const info = normalizarError(error, contextoDe(config))
+    error.message = info.mensaje
+    error.info = info
     return Promise.reject(error)
   },
 )

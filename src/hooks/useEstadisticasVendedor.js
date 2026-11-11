@@ -1,21 +1,19 @@
-import { useEffect, useRef, useState } from 'react'
-import { getEstadisticas } from '../api/estadisticasApiExtra'
+import { useEffect } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import { fetchEstadisticas } from '../redux/ventasSlice'
 
 // Estadísticas del vendedor { ingresos, unidades, ventas, promedio, categorias, estados } (null mientras cargan).
-// Se vuelven a pedir si cambia el conjunto de ventas (la lista llega como un array nuevo en cada render: se compara por contenido).
-const useEstadisticasVendedor = (ventas) => {
-  const [estado, setEstado] = useState({ datos: null, error: false })
-  const ultimas = useRef(ventas)
-  useEffect(() => { ultimas.current = ventas }, [ventas])
-  const firma = ventas.map((v) => `${v.n}:${v.its.length}`).join('|')
+// GET /vendedores/estadisticas la primera vez que se abre la pestaña; después quedan en Redux (redux/ventasSlice.js).
+const useEstadisticasVendedor = () => {
+  const dispatch = useDispatch()
+  const { estadisticas, errorEstadisticas } = useSelector((state) => state.ventas)
+  const pedir = estadisticas === null && !errorEstadisticas
+
   useEffect(() => {
-    let vigente = true
-    getEstadisticas(ultimas.current)
-      .then((datos) => { if (vigente) setEstado({ datos, error: false }) })
-      .catch(() => { if (vigente) setEstado({ datos: null, error: true }) })
-    return () => { vigente = false }
-  }, [firma])
-  return estado
+    if (pedir) dispatch(fetchEstadisticas())
+  }, [dispatch, pedir])
+
+  return { datos: estadisticas, error: Boolean(errorEstadisticas) }
 }
 
 export default useEstadisticasVendedor

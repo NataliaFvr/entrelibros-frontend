@@ -2,9 +2,24 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { dataUrlAFile } from "../api/adaptadores";
 import { cerrarSesionApi, getSesionApi, loginApi, reenviarCodigoApi, registrarApi, traerUsuarioApi, verificarEmailApi } from "../api/authApi";
 import { agregarMarcapaginaApi, listarMarcapaginasApi, quitarMarcapaginaApi } from "../api/cuentaApi";
-import { direcciones as servicioDirecciones } from "../api/direccionesApiExtra";
+import {
+  crearDireccionApi, eliminarDireccionApi, listarDireccionesApi, marcarPrincipalApi, resolverPrincipal,
+} from "../api/direccionesApi";
 import { actualizarUsuarioApi, quitarFotoUsuarioApi, subirFotoUsuarioApi } from "../api/usuariosApi";
-import { mensajeError, normalizarError } from "../utils/errorApi";
+import { solicitarVendedor } from "./vendedorSlice";
+
+// Los errores ya llegan con el mensaje claro (lo arma el interceptor de api/axiosConfig.js), así que las acciones no
+// necesitan try/catch: si la llamada falla, createAsyncThunk despacha el `rejected` solo.
+// En los formularios de sesión además hace falta saber qué pasó (tipo) y qué campo está mal (campos): se agregan al error.
+const conDetalle = {
+  serializeError: (err) => ({
+    message: err.message,
+    tipo: err.info ? err.info.tipo : undefined,
+    campos: err.info ? err.info.campos : {},
+  }),
+};
+
+export const NOTA_SIN_CONFIRMAR = "Tu cuenta todavía no está confirmada. Te mandamos un código nuevo.";
 
 // --- Datos de la cuenta (los pide App.jsx al tener sesión) ---
 export const fetchUsuario = createAsyncThunk("auth/fetchusuario", async (id) => traerUsuarioApi(id));
@@ -14,56 +29,29 @@ export const fetchMarks = createAsyncThunk("auth/fetchmarks", async (idUsuario) 
   ids: await listarMarcapaginasApi(),
 }));
 
-export const fetchDirecciones = createAsyncThunk("auth/fetchdirecciones", async (user) => ({
-  idUsuario: user.id,
-  lista: await servicioDirecciones.listar(user),
+export const fetchDirecciones = createAsyncThunk("auth/fetchdirecciones", async (idUsuario) => ({
+  idUsuario,
+  lista: await listarDireccionesApi(),
 }));
 
-// --- Sesión. Los thunks devuelven { user }, { verif } o { error, tipo, campos } para que el formulario muestre el error ---
-export const login = createAsyncThunk("auth/login", async ({ ident, contrasena }) => {
-  try {
-    return { user: await loginApi(ident, contrasena) };
-  } catch (err) {
-    const info = normalizarError(err, "login");
-    if (info.tipo !== "CUENTA_NO_CONFIRMADA") return { error: info.mensaje, tipo: info.tipo, campos: info.campos };
-    await reenviarCodigoApi(ident.trim()).catch(() => {});
-    return { verif: { email: ident.trim(), nombre: "", nota: "Tu cuenta todavía no está confirmada. Te mandamos un código nuevo." } };
-  }
-});
+// --- Sesión ---
+export const login = createAsyncThunk("auth/login", async ({ ident, contrasena }) => loginApi(ident, contrasena), conDetalle);
 
-export const registrar = createAsyncThunk("auth/registrar", async (valores) => {
-  try {
-    const cuenta = await registrarApi(valores);
-    return { verif: { email: cuenta.email, nombre: cuenta.nombre || "", nota: "Te creamos la cuenta. Falta un paso: confirmá tu e-mail." } };
-  } catch (err) {
-    const info = normalizarError(err, "registro");
-    return { error: info.mensaje, tipo: info.tipo, campos: info.campos };
-  }
-});
+export const registrar = createAsyncThunk("auth/registrar", async (valores) => registrarApi(valores), conDetalle);
 
 export const logout = createAsyncThunk("auth/logout", async () => {
   cerrarSesionApi();
 });
 
 // --- Confirmación del e-mail ---
-export const confirmarEmail = createAsyncThunk("auth/confirmaremail", async ({ id, codigo }) => {
-  try {
-    return { user: await verificarEmailApi(id, codigo) };
-  } catch (err) {
-    const info = normalizarError(err, "verificacion");
-    return { error: info.mensaje, tipo: info.tipo, campos: info.campos };
-  }
-});
+export const confirmarEmail = createAsyncThunk(
+  "auth/confirmaremail",
+  async ({ email, codigo }) => verificarEmailApi(email, codigo),
+  conDetalle,
+);
 
-export const reenviarCodigo = createAsyncThunk("auth/reenviarcodigo", async (id) => {
-  try {
-    await reenviarCodigoApi(id);
-    return {};
-  } catch (err) {
-    const info = normalizarError(err, "verificacion");
-    return { error: info.mensaje, tipo: info.tipo };
-  }
-});
+// `nota` (opcional) = el texto que queda arriba del formulario una vez enviado el código
+export const reenviarCodigo = createAsyncThunk("auth/reenviarcodigo", async ({ email }) => reenviarCodigoApi(email), conDetalle);
 
 // --- Perfil ---
 export const guardarPerfil = createAsyncThunk("auth/guardarperfil", async ({ valores: v, nuevoPerfil, user }) => {
@@ -72,50 +60,27 @@ export const guardarPerfil = createAsyncThunk("auth/guardarperfil", async ({ val
   const fotoNueva = typeof nuevoPerfil.foto === "string" && nuevoPerfil.foto.startsWith("data:");
   const avatar = nuevoPerfil.foto ? "" : nuevoPerfil.avatar || "";
   if (avatar !== (user.avatar || "")) cambios.avatar = avatar;
-  try {
-    if (fotoNueva) await subirFotoUsuarioApi(user.id, await dataUrlAFile(nuevoPerfil.foto, "perfil"));
-    else if (!nuevoPerfil.foto && user.tieneFoto) await quitarFotoUsuarioApi(user.id);
-    const nuevo = await actualizarUsuarioApi(user.id, cambios);
-    if (nuevo.email !== user.email) cerrarSesionApi(); // cambió el e-mail: tiene que volver a ingresar
-    return { user: nuevo, sesionCerrada: nuevo.email !== user.email };
-  } catch (err) {
-    throw new Error(mensajeError(err, "registro"));
-  }
+  if (fotoNueva) await subirFotoUsuarioApi(user.id, await dataUrlAFile(nuevoPerfil.foto, "perfil"));
+  else if (!nuevoPerfil.foto && user.tieneFoto) await quitarFotoUsuarioApi(user.id);
+  const nuevo = await actualizarUsuarioApi(user.id, cambios);
+  if (nuevo.email !== user.email) cerrarSesionApi(); // cambió el e-mail: tiene que volver a ingresar
+  return { user: nuevo, sesionCerrada: nuevo.email !== user.email };
 });
 
-// --- Direcciones: el servicio devuelve la lista que queda ---
-export const crearDireccion = createAsyncThunk("auth/creardireccion", async ({ user, direccion }) => {
-  try {
-    return await servicioDirecciones.crear(user, direccion);
-  } catch (err) {
-    throw new Error(mensajeError(err));
-  }
+// --- Direcciones: el estado se actualiza con lo que responde el back, sin volver a pedir la lista ---
+export const crearDireccion = createAsyncThunk("auth/creardireccion", async (direccion) => crearDireccionApi(direccion));
+
+export const eliminarDireccion = createAsyncThunk("auth/eliminardireccion", async (id) => {
+  await eliminarDireccionApi(id);
+  return id;
 });
 
-export const eliminarDireccion = createAsyncThunk("auth/eliminardireccion", async ({ user, id }) => {
-  try {
-    return await servicioDirecciones.eliminar(user, id);
-  } catch (err) {
-    throw new Error(mensajeError(err));
-  }
-});
-
-export const marcarPrincipal = createAsyncThunk("auth/marcarprincipal", async ({ user, id }) => {
-  try {
-    return await servicioDirecciones.marcarPrincipal(user, id);
-  } catch (err) {
-    throw new Error(mensajeError(err));
-  }
-});
+// El back devuelve la lista entera: cambia la nueva principal y también la que lo era antes
+export const marcarPrincipal = createAsyncThunk("auth/marcarprincipal", async (id) => marcarPrincipalApi(id));
 
 // --- Marcapáginas: el slice actualiza la lista al instante (pending) y la revierte si el back falla (rejected) ---
-export const toggleMark = createAsyncThunk("auth/togglemark", async ({ id, estaba }) => {
-  try {
-    await (estaba ? quitarMarcapaginaApi(id) : agregarMarcapaginaApi(id));
-  } catch (err) {
-    throw new Error(mensajeError(err));
-  }
-});
+export const toggleMark = createAsyncThunk("auth/togglemark", async ({ id, estaba }) =>
+  (estaba ? quitarMarcapaginaApi(id) : agregarMarcapaginaApi(id)));
 
 export const quitarMarks = createAsyncThunk("auth/quitarmarks", async (ids) => {
   await Promise.allSettled(ids.map((id) => quitarMarcapaginaApi(id)));
@@ -154,8 +119,8 @@ const authSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
-    const abrirVerificacion = (state, verif) => {
-      state.verif = { id: verif.email, nota: verif.nota, cuenta: { email: verif.email, nombre: verif.nombre } };
+    const abrirVerificacion = (state, email, nombre, nota) => {
+      state.verif = { id: email, nota, cuenta: { email, nombre } };
     };
     const entrar = (state, user) => {
       state.user = user;
@@ -178,45 +143,43 @@ const authSlice = createSlice({
         if (state.user && state.user.id === action.payload.idUsuario) state.direcciones = action.payload.lista;
       })
       .addCase(login.fulfilled, (state, action) => {
-        if (action.payload.user) entrar(state, action.payload.user);
-        if (action.payload.verif) abrirVerificacion(state, action.payload.verif);
+        entrar(state, action.payload);
+      })
+      // Cuenta sin confirmar: en lugar de un error se abre la confirmación del e-mail (useAuth pide el código nuevo)
+      .addCase(login.rejected, (state, action) => {
+        if (action.error.tipo === "CUENTA_NO_CONFIRMADA") abrirVerificacion(state, action.meta.arg.ident.trim(), "", NOTA_SIN_CONFIRMAR);
       })
       .addCase(registrar.fulfilled, (state, action) => {
-        if (action.payload.verif) abrirVerificacion(state, action.payload.verif);
+        const { email, nombre } = action.payload;
+        abrirVerificacion(state, email, nombre || "", "Te creamos la cuenta. Falta un paso: confirmá tu e-mail.");
       })
       .addCase(logout.fulfilled, (state) => {
         salir(state);
       })
       .addCase(confirmarEmail.fulfilled, (state, action) => {
-        if (action.payload.user) {
-          state.verif = null;
-          entrar(state, action.payload.user);
-        }
+        state.verif = null;
+        entrar(state, action.payload);
       })
       .addCase(reenviarCodigo.fulfilled, (state, action) => {
-        if (!action.payload.error && state.verif) state.verif.nota = "Te enviamos un código nuevo.";
+        if (state.verif) state.verif.nota = action.meta.arg.nota || "Te enviamos un código nuevo.";
       })
       .addCase(guardarPerfil.fulfilled, (state, action) => {
         if (action.payload.sesionCerrada) salir(state);
         else state.user = action.payload.user;
       })
+      // La solicitud para vender cambia el estado de la cuenta (queda PENDIENTE hasta que el admin la resuelva)
+      .addCase(solicitarVendedor.fulfilled, (state, action) => {
+        if (state.user && state.user.id === action.payload.id) state.user = { ...state.user, ...action.payload };
+      })
       .addCase(crearDireccion.fulfilled, (state, action) => {
-        state.direcciones = action.payload;
+        state.direcciones.push(action.payload);
       })
-      .addCase(crearDireccion.rejected, (state, action) => {
-        state.error = action.error.message;
-      })
+      // Si se borra la principal, el back marca otra (la primera): acá se hace lo mismo
       .addCase(eliminarDireccion.fulfilled, (state, action) => {
-        state.direcciones = action.payload;
-      })
-      .addCase(eliminarDireccion.rejected, (state, action) => {
-        state.error = action.error.message;
+        state.direcciones = resolverPrincipal(state.direcciones.filter((d) => d.id !== action.payload));
       })
       .addCase(marcarPrincipal.fulfilled, (state, action) => {
         state.direcciones = action.payload;
-      })
-      .addCase(marcarPrincipal.rejected, (state, action) => {
-        state.error = action.error.message;
       })
       .addCase(toggleMark.pending, (state, action) => {
         const { id, estaba } = action.meta.arg;

@@ -4,7 +4,7 @@ import { escucharSesionVencida } from "./api/axiosConfig"
 import LoginGate from "./componentes/LoginGate"
 import Toast from "./componentes/Toast"
 import { useToast } from "./hooks/useToast"
-import { fetchDirecciones, fetchMarks, fetchUsuario, logout } from "./Redux/authSlice"
+import { fetchDirecciones, fetchMarks, fetchUsuario, logout } from "./redux/authSlice"
 import { fetchCarrito } from "./redux/carritoSlice"
 import { fetchCategorias } from "./redux/categoriasSlice"
 import { fetchLibros } from "./redux/librosSlice"
@@ -41,7 +41,7 @@ const App = () => {
   useEffect(() => {
     if (idCompra !== null) {
       dispatch(fetchMarks(idCompra))
-      dispatch(fetchDirecciones({ id: idCompra }))
+      dispatch(fetchDirecciones(idCompra))
     }
     dispatch(fetchCarrito(idCompra))
     dispatch(fetchPedidos(idCompra))

@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom'
 import EmptyBlock from './EmptyBlock'
 import SellerBookRow from './SellerBookRow'
 
-// estado: 'cargando' | 'ok' | 'error' (ver useMisLibros).
+// estado: 'cargando' | 'ok' | 'error' (lo arma useVendedor con el loading y el error de vendedorSlice).
 // El vacío ("Todavía no publicaste libros") solo se muestra con estado 'ok': el back respondió que no hay libros.
 // Si la carga falló (red, servidor…) se muestra un bloque de error con "Reintentar" y el motivo sale en el toast.
 const SellerBooks = ({ libros, estado = 'ok', onReintentar, onBaja }) => {

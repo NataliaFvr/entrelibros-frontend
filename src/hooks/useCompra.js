@@ -49,7 +49,7 @@ export const useCompra = () => {
   const crear = async (direccion) => {
     const resultado = await dispatch(crearPedido(direccion))
     if (resultado.error) throw new Error(resultado.error.message)
-    dispatch(fetchCarrito(idUsuario)) // el back ya vació el carrito al crear la orden
+    // El back ya vació el carrito al crear la orden: carritoSlice lo vacía con la misma acción, sin volver a pedirlo
     toast('Reservamos tus libros por 1 hora')
     return resultado.payload.n
   }

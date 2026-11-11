@@ -53,3 +53,10 @@ export const sincronizarFotosApi = async (idLibro, fotos = []) => {
 
   return getImagenesApi(idLibro)
 }
+
+// Igual que sincronizarFotosApi, pero si algo falla no corta el guardado del libro: devuelve las fotos que realmente
+// quedaron (`imgs`) y el motivo para avisarle a la persona (`aviso`). `cambiaron` = se subió o se borró alguna.
+export const guardarFotosApi = (idLibro, fotos = [], respaldo = []) =>
+  sincronizarFotosApi(idLibro, fotos)
+    .then((imgs) => ({ imgs, cambiaron: imgs !== fotos, aviso: '' }))
+    .catch(async (err) => ({ imgs: await getImagenesApi(idLibro).catch(() => respaldo), cambiaron: false, aviso: err.message }))

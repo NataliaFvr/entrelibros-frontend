@@ -1,41 +1,24 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { cancelarOrdenApi, checkoutApi, crearPagoApi, listarPedidosApi } from "../api/comprasApi";
-import { mensajeError } from "../utils/errorApi";
 
 // Cada orden ya incluye sus ítems. El número de pedido (`n`) es el id de la orden.
 export const fetchPedidos = createAsyncThunk("pedidos/fetchpedidos", async (idUsuario) => {
   if (idUsuario == null) return []; // sin sesión (o admin): sin pedidos
-  try {
-    return await listarPedidosApi();
-  } catch (err) {
-    throw new Error(mensajeError(err));
-  }
+  return listarPedidosApi();
 });
 
 // POST /carrito/checkout: convierte el carrito en un pedido PENDIENTE (reserva 1 h) y devuelve la orden
 export const crearPedido = createAsyncThunk("pedidos/crearpedido", async (direccion) => {
-  try {
-    return await checkoutApi({ idDireccion: direccion.id, provincia: direccion.prov });
-  } catch (err) {
-    throw new Error(mensajeError(err));
-  }
+  return checkoutApi({ idDireccion: direccion.id, provincia: direccion.prov });
 });
 
 // POST /pagos {idOrden, proveedor}: devuelve { resultado, orden, … } (el back hoy aprueba siempre: SIMULADO_APROBADO)
 export const pagarPedido = createAsyncThunk("pedidos/pagarpedido", async ({ n, proveedor }) => {
-  try {
-    return await crearPagoApi(Number(n), proveedor);
-  } catch (err) {
-    throw new Error(mensajeError(err));
-  }
+  return crearPagoApi(Number(n), proveedor);
 });
 
 export const cancelarPedido = createAsyncThunk("pedidos/cancelarpedido", async (n) => {
-  try {
-    return await cancelarOrdenApi(Number(n));
-  } catch (err) {
-    throw new Error(mensajeError(err));
-  }
+  return cancelarOrdenApi(Number(n));
 });
 
 const pedidosSlice = createSlice({
@@ -49,13 +32,16 @@ const pedidosSlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(fetchPedidos.pending, (state) => {
-        (state.loading = true), (state.error = null);
+        state.loading = true;
+        state.error = null;
       })
       .addCase(fetchPedidos.fulfilled, (state, action) => {
-        (state.loading = false), (state.items = action.payload);
+        state.loading = false;
+        state.items = action.payload;
       })
       .addCase(fetchPedidos.rejected, (state, action) => {
-        (state.loading = false), (state.error = action.error.message);
+        state.loading = false;
+        state.error = action.error.message;
       })
       .addCase(crearPedido.fulfilled, (state, action) => {
         state.items = [action.payload, ...state.items]; // la orden nueva va primero
