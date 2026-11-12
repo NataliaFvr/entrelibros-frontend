@@ -10,7 +10,7 @@ const BuyBox = ({ libro, stock, onComprar, onCarrito, soloLectura = false }) => 
   // Cantidad a comprar: solo para libros nuevos con más de una unidad (un usado es una pieza única)
   const [cantidad, setCantidad] = useState(1)
   const elegible = !esUsado(libro) && stock > 1
-  const envio = useEnvioFicha(libro.id)
+  const envio = useEnvioFicha(libro)
   if (stock <= 0) {
     return (
       <div className="buy">

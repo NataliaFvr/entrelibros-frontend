@@ -1,23 +1,23 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
 import CoverArt from './CoverArt'
 import useCarrusel from '../hooks/useCarrusel'
-import { getImagenesApi } from '../api/librosApi'
+import { fetchFotos } from '../redux/librosSlice'
 import './Gallery.css'
 
 const VISTAS = ['Portada', 'Contraportada', 'Lomo']
 
 // Galería de la ficha como carrusel: con fotos reales muestra las del vendedor; sin fotos, portada / contraportada / lomo.
 const Gallery = ({ libro }) => {
-  const [fotos, setFotos] = useState(libro.imgs || [])
+  const dispatch = useDispatch()
+  const guardadas = useSelector((state) => state.libros.fotos[libro.id])
 
-  // El catálogo solo trae la portada; al abrir la ficha se pide la galería completa.
+  // El catálogo solo trae la portada: la galería completa se pide una vez por libro
   useEffect(() => {
-    let vigente = true
-    getImagenesApi(libro.id).then((imagenes) => {
-      if (vigente && imagenes.length) setFotos(imagenes)
-    }).catch(() => {})
-    return () => { vigente = false }
-  }, [libro.id])
+    if (guardadas === undefined) dispatch(fetchFotos(libro.id))
+  }, [dispatch, libro.id, guardadas])
+
+  const fotos = guardadas && guardadas.length ? guardadas : libro.imgs || []
 
   const libroConFotos = { ...libro, imgs: fotos }
   const reales = Boolean(fotos.length)

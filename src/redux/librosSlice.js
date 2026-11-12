@@ -6,6 +6,7 @@ import { cambiarRol, darDeBajaUsuario } from "./usuariosSlice";
 import { cambiarEstadoLibro, editarLibro } from "./vendedorSlice";
 import { cancelarVenta } from "./ventasSlice";
 import api from "../api/axiosConfig";
+import { getImagenesApi, getLibroApi } from "../api/librosApi";
 
 const URL = "/libros";
 
@@ -14,10 +15,18 @@ export const fetchLibros = createAsyncThunk("libros/fetchlibros", async () => {
   return data.content.map(aLibroFront);
 });
 
+// Un libro que no está en el catálogo (por ejemplo, agotado): null si no existe
+export const fetchLibro = createAsyncThunk("libros/fetchlibro", async (id) => getLibroApi(id));
+
+// Todas las fotos de un libro, para la galería de la ficha (el catálogo solo trae la portada)
+export const fetchFotos = createAsyncThunk("libros/fetchfotos", async (id) => getImagenesApi(id));
+
 const librosSlice = createSlice({
   name: "libros",
   initialState: {
     items: [],
+    sueltos: {},
+    fotos: {},
     loading: true,
     error: null,
   },
@@ -35,6 +44,18 @@ const librosSlice = createSlice({
       .addCase(fetchLibros.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message;
+      })
+      .addCase(fetchLibro.fulfilled, (state, action) => {
+        state.sueltos[action.meta.arg] = action.payload;
+      })
+      .addCase(fetchLibro.rejected, (state, action) => {
+        state.sueltos[action.meta.arg] = null;
+      })
+      .addCase(fetchFotos.fulfilled, (state, action) => {
+        state.fotos[action.meta.arg] = action.payload;
+      })
+      .addCase(fetchFotos.rejected, (state, action) => {
+        state.fotos[action.meta.arg] = [];
       })
       // Lo que hace el vendedor se refleja en el catálogo con la respuesta del back, sin volver a pedir todos los libros
       .addCase(cambiarEstadoLibro.fulfilled, (state, action) => {

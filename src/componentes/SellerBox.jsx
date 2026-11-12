@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
 import { Link, useNavigate } from 'react-router-dom'
 import { initials } from '../utils/colors'
 import { plural } from '../utils/format'
 import { rutaVendedor } from '../utils/vendedor'
-import { getResenasVendedorApi } from '../api/resenasApi'
+import { fetchResenasVendedor } from '../redux/resenasSlice'
 import Stars from './Stars'
 import './SellerPanel.css'
 
@@ -40,23 +41,14 @@ const SellerBox = ({
   propio = false,
 }) => {
   const navigate = useNavigate()
-  const [resenias, setResenias] = useState([])
+  const dispatch = useDispatch()
+  const guardadas = useSelector((state) => (vendedorId == null ? undefined : state.resenas.vendedores[vendedorId]))
 
   useEffect(() => {
-    let vigente = true
+    if (vendedorId != null && guardadas === undefined) dispatch(fetchResenasVendedor(vendedorId))
+  }, [dispatch, vendedorId, guardadas])
 
-    if (vendedorId == null) return undefined
-
-    getResenasVendedorApi(vendedorId)
-      .then((r) => {
-        if (vigente) setResenias(r)
-      })
-      .catch(() => {})
-
-    return () => {
-      vigente = false
-    }
-  }, [vendedorId])
+  const resenias = guardadas || []
 
   const rep = {
     promedio: resenias.length
