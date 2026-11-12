@@ -8,14 +8,14 @@ import NotificationPanel from './NotificationPanel'
 const ID_PANEL = 'panel-notificaciones'
 
 const Campana = ({ user }) => {
-  const { lista, noLeidas, marcarLeida, marcarTodas, descartar, refrescar } = useNotificaciones(user)
+  const { lista, noLeidas, marcarLeida, marcarTodas, descartar } = useNotificaciones(user)
   const popover = usePopover()
   const etiqueta = noLeidas ? `Notificaciones (${noLeidas} sin leer)` : 'Notificaciones'
 
   return (
     <div className="notif" onKeyDown={popover.alTeclear}>
       <button className={`icon-btn notif-btn${popover.abierto ? ' on' : ''}`} type="button" aria-label={etiqueta} title="Notificaciones"
-        aria-haspopup="dialog" aria-expanded={popover.abierto} aria-controls={ID_PANEL} onClick={() => { if (!popover.abierto) refrescar(); popover.alternar() }}>
+        aria-haspopup="dialog" aria-expanded={popover.abierto} aria-controls={ID_PANEL} onClick={popover.alternar}>
         <BellIcon />
         <span className="cart-badge" hidden={noLeidas === 0}>{noLeidas > 99 ? '99+' : noLeidas}</span>
       </button>
@@ -31,7 +31,6 @@ const Campana = ({ user }) => {
 }
 
 // Campanita del header (comprador y vendedor). Sin sesión no se muestra.
-// El `key` recarga las notificaciones cuando cambia la cuenta (entrar, salir, renombrar usuario).
 const NotificationBell = () => {
   const { user } = useAuth()
   if (!user) return null

@@ -1,4 +1,4 @@
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { escucharSesionVencida } from "./api/axiosConfig"
 import LoginGate from "./componentes/LoginGate"
@@ -33,10 +33,11 @@ const App = () => {
     [dispatch, toast],
   )
 
-  // Al entrar o salir de una cuenta se trae lo suyo (sin sesión quedan vacíos)
+  // Solo para una sesión guardada de una visita anterior: el login ya trae los datos de la cuenta
+  const [sesionGuardada] = useState(idUsuario)
   useEffect(() => {
-    if (idUsuario !== null) dispatch(fetchUsuario(idUsuario))
-  }, [dispatch, idUsuario])
+    if (sesionGuardada !== null) dispatch(fetchUsuario(sesionGuardada))
+  }, [dispatch, sesionGuardada])
 
   useEffect(() => {
     if (idCompra !== null) {

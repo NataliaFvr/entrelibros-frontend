@@ -6,6 +6,7 @@ import categoriasReducer from "./categoriasSlice";
 import enviosReducer from "./enviosSlice";
 import librosReducer from "./librosSlice";
 import moderacionReducer from "./moderacionSlice";
+import notificacionesReducer from "./notificacionesSlice";
 import pedidosReducer from "./pedidosSlice";
 import resenasReducer from "./resenasSlice";
 import toastReducer from "./toastSlice";
@@ -28,5 +29,6 @@ export const store = configureStore({
     envios: enviosReducer,
     admin: adminReducer,
     resenas: resenasReducer,
+    notificaciones: notificacionesReducer,
   },
 });
