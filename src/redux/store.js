@@ -13,6 +13,7 @@ import resenasReducer from "./resenasSlice";
 import toastReducer from "./toastSlice";
 import usuariosReducer from "./usuariosSlice";
 import vendedorReducer from "./vendedorSlice";
+import vendedoresReducer from "./vendedoresSlice";
 import ventasReducer from "./ventasSlice";
 
 export const store = configureStore({
@@ -32,5 +33,6 @@ export const store = configureStore({
     resenas: resenasReducer,
     notificaciones: notificacionesReducer,
     catalogo: catalogoReducer,
+    vendedores: vendedoresReducer,
   },
 });
