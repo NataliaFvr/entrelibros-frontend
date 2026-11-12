@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
 import { Link, useLocation } from 'react-router-dom'
-import { getCatalogoApi, getFiltrosDisponiblesApi } from '../api/librosApi'
-import { listarCategoriasApi } from '../api/categoriasApi'
+import { claveBusqueda, fetchFiltrosDisponibles, fetchPagina } from '../redux/catalogoSlice'
 import { useAuth } from '../hooks/useAuth'
 import useFiltros from '../hooks/useFiltros'
 import { filtrosDesdeURL } from '../utils/filtrosURL'
@@ -13,36 +13,32 @@ import ProductGrid from '../componentes/ProductGrid'
 import SearchNoResults from '../componentes/SearchNoResults'
 import Pager from '../componentes/Pager'
 
+const VACIO = { libros: [], total: 0, pages: 0 }
+
 const Catalogo = ({ inicial, categorias, filtros }) => {
+  const dispatch = useDispatch()
   const { user, direcciones } = useAuth()
   const { f, set, setPage, toggle, limpiar } = useFiltros(inicial)
   const [filtrosAbiertos, setFiltrosAbiertos] = useState(false)
-  const [resultado, setResultado] = useState({ libros: [], total: 0, pages: 0 })
-  const [cargando, setCargando] = useState(true)
-  const [error, setError] = useState(false)
-  const solicitudActual = useRef(0)
   const provinciaDireccion = ((direcciones || []).find((d) => d.principal) || (direcciones || [])[0])?.prov || user?.provincia
   // Sin dirección, la provincia la elige la persona en el filtro de envíos (no hace falta cuenta)
   const [provinciaElegida, setProvinciaElegida] = useState('')
   const provinciaComprador = provinciaDireccion || provinciaElegida
 
-  const cargar = () => {
-    const solicitud = ++solicitudActual.current
-    setCargando(true)
-    setError(false)
-    return getCatalogoApi(f, { categorias, filtros, provinciaComprador })
-      // Al cambiar varios filtros, la petición anterior puede terminar después.
-      // Solo la última puede actualizar la grilla.
-      .then((data) => { if (solicitud === solicitudActual.current) setResultado(data) })
-      .catch(() => {
-        if (solicitud === solicitudActual.current) {
-          setResultado({ libros: [], total: 0, pages: 0 })
-          setError(true)
-        }
-      })
-      .finally(() => { if (solicitud === solicitudActual.current) setCargando(false) })
-  }
-  useEffect(() => { cargar() }, [f, categorias, filtros, provinciaComprador]) // eslint-disable-line react-hooks/exhaustive-deps
+  const clave = claveBusqueda(f, provinciaComprador)
+  const guardada = useSelector((state) => state.catalogo.paginas[clave])
+  const error = useSelector((state) => Boolean(state.catalogo.errores[clave]))
+  const cargar = () => dispatch(fetchPagina({ clave, f, provinciaComprador }))
+
+  useEffect(() => {
+    if (!guardada && !error) dispatch(fetchPagina({ clave, f, provinciaComprador }))
+  }, [dispatch, clave, guardada, error, f, provinciaComprador])
+
+  // Mientras llega una búsqueda nueva se sigue viendo la anterior
+  const [mostrada, setMostrada] = useState(VACIO)
+  if (guardada && guardada !== mostrada) setMostrada(guardada)
+  const resultado = error ? VACIO : guardada || mostrada
+  const cargando = !guardada && !error
 
   const topIds = useMemo(() => new Set(
     f.sort === 'best' && f.page === 1 ? resultado.libros.filter((l) => !l.usado).slice(0, 6).map((l) => l.id) : [],
@@ -89,13 +85,17 @@ const Catalogo = ({ inicial, categorias, filtros }) => {
 // Al cambiar la URL (menú, buscador, "Ver todo") se reinician los filtros desde la nueva búsqueda
 const CatalogPage = () => {
   const { search, key } = useLocation()
-  const [datos, setDatos] = useState({ categorias: [], filtros: null })
+  const dispatch = useDispatch()
+  const categorias = useSelector((state) => state.categorias.items)
+  const cargandoCategorias = useSelector((state) => state.categorias.loading)
+  const filtros = useSelector((state) => state.catalogo.filtros)
+
   useEffect(() => {
-    Promise.all([listarCategoriasApi(), getFiltrosDisponiblesApi()])
-      .then(([categorias, filtros]) => setDatos({ categorias, filtros }))
-      .catch(() => setDatos({ categorias: [], filtros: {} }))
-  }, [])
-  if (!datos.filtros) return <main className="cat" />
+    if (!filtros) dispatch(fetchFiltrosDisponibles())
+  }, [dispatch, filtros])
+
+  if (!filtros || cargandoCategorias) return <main className="cat" />
+  const datos = { categorias, filtros }
   const base = filtrosDesdeURL(search, datos.categorias.map((c) => c.nombre))
   // La URL trae el NOMBRE del vendedor; el selector trabaja con su ID. Se resuelve acá para que ambos queden sincronizados.
   const vendedor = (datos.filtros.vendedores || []).find((v) => v.nombre === base.vendedor)
