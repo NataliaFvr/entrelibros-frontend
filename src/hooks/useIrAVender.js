@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom'
+import { abrirGate } from '../redux/userSlice'
 
 const RUTA_VENDER = '/vender'
 
@@ -7,9 +8,12 @@ const RUTA_VENDER = '/vender'
 const useIrAVender = ({ dispatch, user }) => {
   const navigate = useNavigate()
 
-  const requiereLogin=(t,d=null,a=null)=>{if(user)return false;dispatch(abrirGate({tipo:t,destino:d,accion:a}));return true}
   return () => {
-    if (!requiereLogin('sell', RUTA_VENDER)) navigate(RUTA_VENDER)
+    if (!user) {
+      dispatch(abrirGate({ tipo: 'sell', destino: RUTA_VENDER, accion: null }))
+      return
+    }
+    navigate(RUTA_VENDER)
   }
 }
 
