@@ -20,18 +20,34 @@ const limpiar = (nombre) => nombre.trim().replace(/\s+/g, " ");
 const esFotoNueva = (imagen) => typeof imagen === "string" && imagen.startsWith("data:");
 const existe = (todas, nombre, excepto = "") => todas.some((c) => c.nombre !== excepto && norm(c.nombre) === norm(nombre));
 
-export const fetchLibros = createAsyncThunk("libros/fetchLibros", async () => {
-  const { data } = await api.get(URL, { params: { sort: "bestsellers", page: 0, size: 100 } });
-  return data.content.map(aLibroFront);
-});
+export const fetchLibros = createAsyncThunk(
+  "libros/fetchLibros",
+  async () => {
+    const { data } = await api.get(URL, { params: { sort: "bestsellers", page: 0, size: 100 } });
+    return data.content.map(aLibroFront);
+  },
+  { condition: (_, { getState }) => !getState().libros.solicitudes.libros },
+);
 
 // Un libro que no está en el catálogo (por ejemplo, agotado): null si no existe
-export const fetchLibro = createAsyncThunk("libros/fetchLibro", async (id) => getLibroApi(id));
+export const fetchLibro = createAsyncThunk("libros/fetchLibro", async (id) => getLibroApi(id), {
+  condition: (id, { getState }) => {
+    const { libros } = getState().libros;
+    return libros.sueltos[id] === undefined && !libros.solicitudes.librosPorId[id];
+  },
+});
 
 // Todas las fotos de un libro, para la galería de la ficha (el catálogo solo trae la portada)
-export const fetchFotos = createAsyncThunk("libros/fetchFotos", async (id) => getImagenesApi(id));
+export const fetchFotos = createAsyncThunk("libros/fetchFotos", async (id) => getImagenesApi(id), {
+  condition: (id, { getState }) => {
+    const { libros } = getState().libros;
+    return libros.fotos[id] === undefined && !libros.solicitudes.fotosPorId[id];
+  },
+});
 
-export const fetchCategorias = createAsyncThunk("libros/fetchCategorias", async () => listarCategoriasApi());
+export const fetchCategorias = createAsyncThunk("libros/fetchCategorias", async () => listarCategoriasApi(), {
+  condition: (_, { getState }) => !getState().libros.solicitudes.categorias,
+});
 
 export const fetchCategoriasAdmin = createAsyncThunk("libros/fetchCategoriasAdmin", async () => listarCategoriasTodasApi(), {
   condition: (_, { getState }) => !getState().libros.categorias.cargandoTodas,
@@ -118,6 +134,12 @@ const librosSlice = createSlice({
     },
     sueltos: {},
     fotos: {},
+    solicitudes: {
+      libros: false,
+      categorias: false,
+      librosPorId: {},
+      fotosPorId: {},
+    },
     loading: true,
     error: null,
     filtrosElegidos: { ...FILTROS_INICIALES },
@@ -162,38 +184,54 @@ const librosSlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(fetchLibros.pending, (state) => {
+        state.solicitudes.libros = true;
         state.loading = true;
         state.error = null;
       })
       .addCase(fetchLibros.fulfilled, (state, action) => {
+        state.solicitudes.libros = false;
         state.loading = false;
         state.items = action.payload;
       })
       .addCase(fetchLibros.rejected, (state, action) => {
+        state.solicitudes.libros = false;
         state.loading = false;
         state.error = action.error.message;
       })
+      .addCase(fetchLibro.pending, (state, action) => {
+        state.solicitudes.librosPorId[action.meta.arg] = true;
+      })
       .addCase(fetchLibro.fulfilled, (state, action) => {
+        delete state.solicitudes.librosPorId[action.meta.arg];
         state.sueltos[action.meta.arg] = action.payload;
       })
       .addCase(fetchLibro.rejected, (state, action) => {
+        delete state.solicitudes.librosPorId[action.meta.arg];
         state.sueltos[action.meta.arg] = null;
       })
+      .addCase(fetchFotos.pending, (state, action) => {
+        state.solicitudes.fotosPorId[action.meta.arg] = true;
+      })
       .addCase(fetchFotos.fulfilled, (state, action) => {
+        delete state.solicitudes.fotosPorId[action.meta.arg];
         state.fotos[action.meta.arg] = action.payload;
       })
       .addCase(fetchFotos.rejected, (state, action) => {
+        delete state.solicitudes.fotosPorId[action.meta.arg];
         state.fotos[action.meta.arg] = [];
       })
       .addCase(fetchCategorias.pending, (state) => {
+        state.solicitudes.categorias = true;
         state.categorias.loading = true;
         state.categorias.error = null;
       })
       .addCase(fetchCategorias.fulfilled, (state, action) => {
+        state.solicitudes.categorias = false;
         state.categorias.loading = false;
         state.categorias.items = action.payload;
       })
       .addCase(fetchCategorias.rejected, (state, action) => {
+        state.solicitudes.categorias = false;
         state.categorias.loading = false;
         state.categorias.error = action.error.message;
       })
