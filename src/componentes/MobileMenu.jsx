@@ -1,5 +1,4 @@
-/* oxlint-disable no-unused-vars */
-import { abrirGate,cerrarGate as cerrarGateAction,cancelarVerificacion,confirmarEmail,crearDireccion,eliminarDireccion as eliminarDireccionThunk,fetchUsuario,guardarPerfil,limpiarPendiente as limpiarPendienteAction,login as loginThunk,logout as logoutThunk,marcarPrincipal as marcarPrincipalThunk,NOTA_SIN_CONFIRMAR,quitarMarks as quitarMarksThunk,reenviarCodigo,registrar as registrarThunk,toggleMark as toggleMarkThunk } from '../redux/userSlice'
+import { logout as logoutThunk } from '../redux/userSlice'
 import {useDispatch,useSelector} from 'react-redux'
 import { Link } from 'react-router-dom'
 import { useLibros } from '../hooks/useLibros'
@@ -12,10 +11,15 @@ const ESTADOS = [['nuevos', 'Nuevos'], ['usados', 'Usados']]
 
 // Panel del menú hamburguesa: mismas opciones que NavMenu, en acordeones
 const MobileMenu = ({ abierto, onCerrar }) => {
-  const { categorias } = useLibros()
-  const irAVender = useIrAVender()
+  const librosRedux = useSelector((state) => state.libros.items)
+  const loadingRedux = useSelector((state) => state.libros.loading)
+  const errorRedux = useSelector((state) => state.libros.error)
+  const categoriasRedux = useSelector((state) => state.libros.categorias.items)
+  const { categorias } = useLibros({ libros: librosRedux, loading: loadingRedux, error: errorRedux, listaCategorias: categoriasRedux })
+  const userRedux = useSelector((state) => state.user.user)
+  const dispatch = useDispatch()
+  const irAVender = useIrAVender({ dispatch, user: userRedux })
   const esAdmin = useEsAdmin()
-  const dispatch=useDispatch()
 
   const logout=()=>dispatch(logoutThunk())
 

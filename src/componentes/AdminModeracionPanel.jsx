@@ -1,3 +1,4 @@
+import { useDispatch, useSelector } from 'react-redux'
 import { useState } from 'react'
 import useModeracionPanel from '../hooks/useModeracionPanel'
 import AccountTabs from './AccountTabs'
@@ -18,7 +19,9 @@ const VACIO = {
 // Panel del administrador: pestañas Nuevas / Modificaciones (misma cola, filtrada por tipo), carrusel de tarjetas
 // de la más antigua a la más reciente, y decisión (aprobar / rechazar con motivo).
 const AdminModeracionPanel = () => {
-  const { visibles, cantidad, cargando, error, tab, setTab, procesando, aprobar, rechazar, recargarCola } = useModeracionPanel()
+  const dispatch = useDispatch()
+  const moderacion = useSelector((state) => state.moderacion)
+  const { visibles, cantidad, cargando, error, tab, setTab, procesando, aprobar, rechazar, recargarCola } = useModeracionPanel({ dispatch, moderacion })
   const [aRechazar, setARechazar] = useState(null) // solicitud cuyo motivo se está pidiendo
   const [libroHistorial, setLibroHistorial] = useState(null) // { id, titulo } del libro filtrado en el historial (null = todos)
 

@@ -1,3 +1,4 @@
+import { useDispatch, useSelector } from 'react-redux'
 import { useState } from 'react'
 import useAdminEnvios from '../hooks/useAdminEnvios'
 import { TIPOS_ENVIO } from '../data/envios'
@@ -12,7 +13,9 @@ const precio = (n, cargada) => (n != null ? fmt(n) : cargada ? 'Sin definir' : '
 // /admin/envios — cuánto cuesta el envío. Si falta alguna tarifa se crea desde acá (POST /envios);
 // si ya existe se cambia el precio (PATCH /envios/{id}). El cambio se ve enseguida en el carrito y en Políticas de envío.
 const AdminEnviosPage = () => {
-  const { tarifas, cargada, cambiar, crear } = useAdminEnvios()
+  const dispatch = useDispatch()
+  const tarifasState = useSelector((state) => state.envios)
+  const { tarifas, cargada, cambiar, crear } = useAdminEnvios({ dispatch, tarifasState })
   const [editando, setEditando] = useState(null) // un elemento de TIPOS_ENVIO
   const faltan = cargada ? TIPOS_ENVIO.filter((t) => tarifas[t.tipo] == null) : []
 

@@ -1,5 +1,4 @@
-/* oxlint-disable no-unused-vars */
-import { abrirGate,cerrarGate as cerrarGateAction,cancelarVerificacion,confirmarEmail,crearDireccion,eliminarDireccion as eliminarDireccionThunk,fetchUsuario,guardarPerfil,limpiarPendiente as limpiarPendienteAction,login as loginThunk,logout as logoutThunk,marcarPrincipal as marcarPrincipalThunk,NOTA_SIN_CONFIRMAR,quitarMarks as quitarMarksThunk,reenviarCodigo,registrar as registrarThunk,toggleMark as toggleMarkThunk } from '../redux/userSlice'
+import { abrirGate } from '../redux/userSlice'
 import {useDispatch,useSelector} from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import { useCompra } from '../hooks/useCompra'
@@ -13,7 +12,11 @@ const SellerCatalog = ({ tienda, libros }) => {
   const { user } = useSelector((state) => state.user)
 
   const requiereLogin=(t,d=null,a=null)=>{if(user)return false;dispatch(abrirGate({tipo:t,destino:d,accion:a}));return true}
-  const { agregar } = useCompra()
+  const compraUser = useSelector((state) => state.user.user)
+  const compraMarks = useSelector((state) => state.user.marks)
+  const compraCarrito = useSelector((state) => state.carrito.items)
+  const compraPedidos = useSelector((state) => state.pedidos.items)
+  const { agregar } = useCompra({ dispatch, user: compraUser, marks: compraMarks, carrito: compraCarrito, pedidos: compraPedidos })
 
   const comprar = async (libro) => {
     if (requiereLogin('cart')) return

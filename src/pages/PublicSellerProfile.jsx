@@ -1,3 +1,4 @@
+import { useDispatch, useSelector } from 'react-redux'
 import { useState } from 'react'
 import { Navigate, useParams, useSearchParams } from 'react-router-dom'
 import useVendedorPublico from '../hooks/useVendedorPublico'
@@ -12,6 +13,10 @@ import SellerCatalog from '../componentes/SellerCatalog'
 import NotFoundPage from './NotFoundPage'
 
 const Perfil = ({ vendedor, libros }) => {
+  const dispatch = useDispatch()
+  const user = useSelector((state) => state.user.user)
+  const guardadas = useSelector((state) => state.resenas.vendedores[vendedor.id])
+  const estadoGuardado = useSelector((state) => state.resenas.estadosVendedor[vendedor.id])
   const {
     resenias,
     promedio,
@@ -22,7 +27,7 @@ const Perfil = ({ vendedor, libros }) => {
     motivo,
     publicar,
     eliminar,
-  } = useResenasVendedor(vendedor.tienda, vendedor.id)
+  } = useResenasVendedor(vendedor.tienda, vendedor.id, { dispatch, user, libros, guardadas, estadoGuardado })
   const [modal, setModal] = useState(false)
   const [params, setParams] = useSearchParams()
   const tab = params.get('tab') === 'resenias' ? 'resenias' : 'libros'
@@ -82,8 +87,13 @@ const Perfil = ({ vendedor, libros }) => {
 
 // /vendedor/:id — si el vendedor no existe, muestra el 404
 const PublicSellerProfile = () => {
+  const dispatch = useDispatch()
+  const librosRedux = useSelector((state) => state.libros.items)
+  const loadingRedux = useSelector((state) => state.libros.loading)
   const { id } = useParams()
-  const { cargando, vendedor, libros, redirigirA } = useVendedorPublico(id)
+  const idVendedor = /^\d+$/.test(id || '') ? Number(id) : null
+  const guardado = useSelector((state) => (idVendedor == null ? undefined : state.vendedores.publicos[idVendedor]))
+  const { cargando, vendedor, libros, redirigirA } = useVendedorPublico(id, { dispatch, libros: librosRedux, cargando: loadingRedux && librosRedux.length === 0, guardado })
 
   if (redirigirA != null) return <Navigate to={`/vendedor/${redirigirA}`} replace />
   if (cargando) return <main className="usr" />

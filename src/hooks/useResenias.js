@@ -1,17 +1,10 @@
-/* oxlint-disable no-unused-vars */
-import { abrirGate,cerrarGate as cerrarGateAction,cancelarVerificacion,confirmarEmail,crearDireccion,eliminarDireccion as eliminarDireccionThunk,fetchUsuario,guardarPerfil,limpiarPendiente as limpiarPendienteAction,login as loginThunk,logout as logoutThunk,marcarPrincipal as marcarPrincipalThunk,NOTA_SIN_CONFIRMAR,quitarMarks as quitarMarksThunk,reenviarCodigo,registrar as registrarThunk,toggleMark as toggleMarkThunk } from '../redux/userSlice'
 import { useEffect, useMemo } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
 import { eliminarResenaLibro, fetchEstadoResenaLibro, fetchResenasLibro, publicarResenaLibro } from '../redux/resenasSlice'
 
 const SIN_PERMISO = { puedeResenar: false, motivo: '', idOrdenItem: null, miResenia: null }
 
 // Reseñas de un libro y si la sesión actual puede opinar (lo decide el back)
-const useResenias = (libroId) => {
-  const dispatch = useDispatch()
-  const {user}=useSelector(s=>s.user)
-  const guardadas = useSelector((state) => state.resenas.libros[libroId])
-  const estadoGuardado = useSelector((state) => state.resenas.estadosLibro[libroId])
+const useResenias = (libroId, { dispatch, user, guardadas, estadoGuardado }) => {
 
   useEffect(() => {
     if (guardadas === undefined) dispatch(fetchResenasLibro(libroId))

@@ -1,14 +1,11 @@
-/* oxlint-disable no-unused-vars */
 import { mostrarToast } from '../redux/toastSlice'
 import { actualizarTarifa, crearTarifa } from '../redux/enviosSlice'
-import { useDispatch } from 'react-redux'
 import useTarifasEnvio from './useTarifasEnvio'
 
 // `cambiar` y `crear` devuelven { ok } o { error }
-const useAdminEnvios = () => {
-  const dispatch = useDispatch()
+const useAdminEnvios = ({ dispatch, tarifasState }) => {
   const toast = (msg, accion) => dispatch(mostrarToast({ msg, accion }))
-  const { cargada, ...tarifas } = useTarifasEnvio()
+  const { cargada, ...tarifas } = useTarifasEnvio({ dispatch, ...tarifasState })
 
   const guardar = async (accion, mensaje) => {
     const resultado = await dispatch(accion)

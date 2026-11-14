@@ -1,5 +1,4 @@
-/* oxlint-disable no-unused-vars */
-import { abrirGate,cerrarGate as cerrarGateAction,cancelarVerificacion,confirmarEmail,crearDireccion,eliminarDireccion as eliminarDireccionThunk,fetchUsuario,guardarPerfil,limpiarPendiente as limpiarPendienteAction,login as loginThunk,logout as logoutThunk,marcarPrincipal as marcarPrincipalThunk,NOTA_SIN_CONFIRMAR,quitarMarks as quitarMarksThunk,reenviarCodigo,registrar as registrarThunk,toggleMark as toggleMarkThunk } from '../redux/userSlice'
+import { abrirGate } from '../redux/userSlice'
 import {useDispatch,useSelector} from 'react-redux'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
@@ -26,7 +25,9 @@ const MiCuenta = () => {
 
 // Con sesión lleva a /vender; sin sesión abre el modal "¿Empezamos un nuevo capítulo?"
 const VenderMisLibros = () => {
-  const irAVender = useIrAVender()
+  const dispatch = useDispatch()
+  const user = useSelector((state) => state.user.user)
+  const irAVender = useIrAVender({ dispatch, user })
   const alClick = (e) => { e.preventDefault(); irAVender() }
   return <Link to="/vender" onClick={alClick}>Vender mis libros</Link>
 }

@@ -1,3 +1,4 @@
+import { useDispatch, useSelector } from 'react-redux'
 import { Link } from 'react-router-dom'
 import { AYUDA, AYUDA_RAIZ } from '../data/ayuda'
 import useTarifasEnvio from '../hooks/useTarifasEnvio'
@@ -10,8 +11,10 @@ import TruckLane from '../componentes/TruckLane'
 const precio = (n) => (n != null ? fmt(n) : '…')
 
 const ShippingPolicyPage = () => {
+  const dispatch = useDispatch()
+  const tarifasState = useSelector((state) => state.envios)
   const { label, sub } = AYUDA.envios
-  const tarifas = useTarifasEnvio()
+  const tarifas = useTarifasEnvio({ dispatch, ...tarifasState })
   return (
     <InfoLayout titulo={label} sub={sub} migas={[{ label: 'Ayuda', to: AYUDA_RAIZ }, { label }]} pie={<TruckLane />}>
       <div className="info-wrap">

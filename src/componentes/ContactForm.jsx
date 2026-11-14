@@ -1,8 +1,7 @@
-/* oxlint-disable no-unused-vars */
-import { mostrarToast } from '../redux/toastSlice'
-import { enviarContacto } from '../redux/contactoSlice'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import useFormulario from '../hooks/useFormulario'
+import { enviarContacto } from '../redux/contactoSlice'
+import { mostrarToast } from '../redux/toastSlice'
 import { mapearCampos } from '../utils/errorApi'
 import Field from './Field'
 import SelectField from './SelectField'
@@ -16,21 +15,21 @@ const Obligatorio = ({ children }) => <>{children} <span className="req">*</span
 // Formulario de contacto. El backend recibe y valida todos los campos del formulario.
 const ContactForm = () => {
   const dispatch = useDispatch()
-  const toast = (msg, accion) => dispatch(mostrarToast({ msg, accion }))
+  const enviando = useSelector((state) => state.contacto.enviando)
   const { valores, cambiar, error, setError, reiniciar, errores, setErroresCampos } = useFormulario(INICIAL)
   const campo = (n) => ({ name: n, value: valores[n], onChange: cambiar, error: errores[n] })
 
   const enviar = async (e) => {
     e.preventDefault()
     const resultado = await dispatch(enviarContacto({
-        nombre: valores.nombre.trim(),
-        apellido: valores.apellido.trim(),
-        email: valores.email.trim(),
-        area: valores.area.trim(),
-        telefono: valores.telefono.trim(),
-        departamento: valores.departamento,
-        mensaje: valores.mensaje.trim(),
-      }))
+      nombre: valores.nombre.trim(),
+      apellido: valores.apellido.trim(),
+      email: valores.email.trim(),
+      area: valores.area.trim(),
+      telefono: valores.telefono.trim(),
+      departamento: valores.departamento,
+      mensaje: valores.mensaje.trim(),
+    }))
     if (resultado.error) {
       const campos = mapearCampos(resultado.error.campos, {
         nombre: 'nombre', apellido: 'apellido', email: 'email', area: 'area', telefono: 'telefono', departamento: 'departamento', mensaje: 'mensaje',
@@ -40,7 +39,7 @@ const ContactForm = () => {
     }
     setError('')
     reiniciar()
-    toast('¡Mensaje enviado! Te respondemos pronto.')
+    dispatch(mostrarToast({ msg: '¡Mensaje enviado! Te respondemos pronto.' }))
   }
 
   return (
@@ -57,7 +56,7 @@ const ContactForm = () => {
       <SelectField label={<Obligatorio>Departamento/Sección</Obligatorio>} name="departamento" value={valores.departamento} onChange={cambiar} opciones={DEPARTAMENTOS} />
       <TextAreaField label={<Obligatorio>Mensaje</Obligatorio>} {...campo('mensaje')} />
       <p className="ferr" role="alert">{error}</p>
-      <button className="btn main" type="submit">Enviar mensaje</button>
+      <button className="btn main" type="submit" disabled={enviando}>{enviando ? 'Enviando…' : 'Enviar mensaje'}</button>
     </form>
   )
 }

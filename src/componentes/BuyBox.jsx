@@ -1,3 +1,4 @@
+import { useSelector } from 'react-redux'
 import { useState } from 'react'
 import { esUsado } from '../utils/libro'
 import { fmt } from '../utils/format'
@@ -5,12 +6,15 @@ import useEnvioFicha from '../hooks/useEnvioFicha'
 
 // `soloLectura`: administrador mirando la ficha -> sin botones de compra
 const BuyBox = ({ libro, stock, onComprar, onCarrito, soloLectura = false }) => {
+  const user = useSelector((state) => state.user.user)
+  const direcciones = useSelector((state) => state.user.direcciones)
+  const tarifas = useSelector((state) => state.envios.tarifas)
+  const envio = useEnvioFicha(libro, { user, direcciones, tarifas })
   // Un usado es una pieza única: ahí no corresponde la alerta de "¡Última unidad!"
   const ultima = stock === 1 && !esUsado(libro)
   // Cantidad a comprar: solo para libros nuevos con más de una unidad (un usado es una pieza única)
   const [cantidad, setCantidad] = useState(1)
   const elegible = !esUsado(libro) && stock > 1
-  const envio = useEnvioFicha(libro)
   if (stock <= 0) {
     return (
       <div className="buy">

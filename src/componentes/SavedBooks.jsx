@@ -1,6 +1,5 @@
-/* oxlint-disable no-unused-vars */
 import {mostrarToast} from '../redux/toastSlice'
-import { abrirGate,cerrarGate as cerrarGateAction,cancelarVerificacion,confirmarEmail,crearDireccion,eliminarDireccion as eliminarDireccionThunk,fetchUsuario,guardarPerfil,limpiarPendiente as limpiarPendienteAction,login as loginThunk,logout as logoutThunk,marcarPrincipal as marcarPrincipalThunk,NOTA_SIN_CONFIRMAR,quitarMarks as quitarMarksThunk,reenviarCodigo,registrar as registrarThunk,toggleMark as toggleMarkThunk } from '../redux/userSlice'
+import { toggleMark as toggleMarkThunk } from '../redux/userSlice'
 import { fetchLibro } from '../redux/librosSlice'
 import {useDispatch,useSelector} from 'react-redux'
 import { useEffect } from 'react'
@@ -15,13 +14,21 @@ import SavedBook from './SavedBook'
 const SavedBooks = () => {
   const navigate = useNavigate()
   const dispatch=useDispatch()
-  const {marks}=useSelector(s=>s.user)
+  const {marks, user}=useSelector(s=>s.user)
   const sueltos = useSelector((state) => state.libros.sueltos)
   const toggleMark=async(i)=>{const estaba=marks.includes(i);const r=await dispatch(toggleMarkThunk({id:i,estaba}));if(r.error)toast(r.error.message)}
   const toast=(msg,accion)=>dispatch(mostrarToast({msg,accion}))
-  const { agregar } = useCompra()
-  const { libros } = useLibros()
-  const { esPropio } = useLibroPropio()
+  const compraUser = useSelector((state) => state.user.user)
+  const compraMarks = useSelector((state) => state.user.marks)
+  const compraCarrito = useSelector((state) => state.carrito.items)
+  const compraPedidos = useSelector((state) => state.pedidos.items)
+  const { agregar } = useCompra({ dispatch, user: compraUser, marks: compraMarks, carrito: compraCarrito, pedidos: compraPedidos })
+  const librosRedux = useSelector((state) => state.libros.items)
+  const loadingRedux = useSelector((state) => state.libros.loading)
+  const errorRedux = useSelector((state) => state.libros.error)
+  const categoriasRedux = useSelector((state) => state.libros.categorias.items)
+  const { libros } = useLibros({ libros: librosRedux, loading: loadingRedux, error: errorRedux, listaCategorias: categoriasRedux })
+  const { esPropio } = useLibroPropio(user)
 
   const faltantesClave = marks
     .filter((id) => !libros.some((libro) => libro.id === id) && sueltos[id] === undefined)

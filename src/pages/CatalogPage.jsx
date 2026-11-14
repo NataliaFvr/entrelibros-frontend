@@ -17,7 +17,8 @@ const VACIO = { libros: [], total: 0, pages: 0 }
 
 const Catalogo = ({ inicial, categorias, filtros }) => {
   const dispatch = useDispatch()
-  const {user, direcciones}=useSelector(s=>s.user)
+  const user = useSelector((state) => state.user.user)
+  const direcciones = useSelector((state) => state.user.direcciones)
   const filtrosElegidos = useSelector((state) => state.libros.filtrosElegidos)
   const [inicializado, setInicializado] = useState(false)
   const f = inicializado ? filtrosElegidos : inicial

@@ -1,3 +1,4 @@
+import { useDispatch, useSelector } from 'react-redux'
 import { useState } from 'react'
 import AdminHead from '../componentes/AdminHead'
 import AdminModal from '../componentes/AdminModal'
@@ -9,7 +10,9 @@ import useAdminCategorias from '../hooks/useAdminCategorias'
 
 // /admin/categorias — las categorías organizan el catálogo: se crean con foto, se editan y se dan de baja (sin borrarlas)
 const AdminCategoriasPage = () => {
-  const { categorias, crear, editar, darDeBaja, reactivar } = useAdminCategorias()
+  const dispatch = useDispatch()
+  const categoriasState = useSelector((state) => state.libros.categorias)
+  const { categorias, crear, editar, darDeBaja, reactivar } = useAdminCategorias({ dispatch, categoriasState })
   const [editando, setEditando] = useState(null)
   const [baja, setBaja] = useState(null)
   const [errorBaja, setErrorBaja] = useState('')

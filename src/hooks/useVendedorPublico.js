@@ -1,17 +1,12 @@
 import { useEffect, useMemo } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
-import { useLibros } from './useLibros'
 import { fetchVendedorPublico } from '../redux/vendedoresSlice'
 import { slugVendedor } from '../utils/vendedor'
 
 // Vendedor de /vendedor/:id + sus libros activos. `vendedor` es null si el id no existe.
 // Devuelve { cargando, vendedor, libros, redirigirA }. `redirigirA` = id numérico al que hay que llevar un enlace viejo con slug.
 
-const useVendedorPublico = (param) => {
-  const dispatch = useDispatch()
-  const { libros, cargando } = useLibros()
+const useVendedorPublico = (param, { dispatch, libros, cargando, guardado }) => {
   const id = /^\d+$/.test(param) ? Number(param) : null
-  const guardado = useSelector((state) => (id == null ? undefined : state.vendedores.publicos[id]))
 
   // Se pide una vez por vendedor: volver a su perfil no lo pide de nuevo
   useEffect(() => {

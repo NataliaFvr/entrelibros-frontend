@@ -1,3 +1,4 @@
+import { useDispatch, useSelector } from 'react-redux'
 import useAdminPagos from '../hooks/useAdminPagos'
 import { fmt } from '../utils/format'
 import AdminHead from '../componentes/AdminHead'
@@ -8,7 +9,9 @@ import PagosTabla from '../componentes/PagosTabla'
 
 // /admin/pagos — pagos registrados (los cobros son simulados)
 const AdminPagosPage = () => {
-  const adm = useAdminPagos()
+  const dispatch = useDispatch()
+  const { pagos, pagosCargados } = useSelector((state) => state.admin)
+  const adm = useAdminPagos({ dispatch, pagos, pagosCargados })
 
   return (
     <main className="usr">

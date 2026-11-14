@@ -1,3 +1,4 @@
+import { useSelector } from 'react-redux'
 import { Link } from 'react-router-dom'
 import { TONES, textOn } from '../utils/colors'
 import { useLibros } from '../hooks/useLibros'
@@ -6,7 +7,11 @@ import CategoriaCirculo from './CategoriaCirculo'
 
 // `categorias`: nombres, ordenadas de más a menos libros
 const CategoryGrid = ({ categorias }) => {
-  const { imagenesCategorias } = useLibros()
+  const librosRedux = useSelector((state) => state.libros.items)
+  const loadingRedux = useSelector((state) => state.libros.loading)
+  const errorRedux = useSelector((state) => state.libros.error)
+  const categoriasRedux = useSelector((state) => state.libros.categorias.items)
+  const { imagenesCategorias } = useLibros({ libros: librosRedux, loading: loadingRedux, error: errorRedux, listaCategorias: categoriasRedux })
   return (
     <div className="cat-wrap">
       <h2>Categorías</h2>

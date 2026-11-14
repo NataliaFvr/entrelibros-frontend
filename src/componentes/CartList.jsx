@@ -1,9 +1,15 @@
+import { useDispatch, useSelector } from 'react-redux'
 import { useCompra } from '../hooks/useCompra'
 import CartRow from './CartRow'
 
 // `items` = [{ libro, q }]. Cada libro "descansa" sobre su propia repisa de madera.
 const CartList = ({ items }) => {
-  const { cambiarCantidad, quitar } = useCompra()
+  const dispatch = useDispatch()
+  const compraUser = useSelector((state) => state.user.user)
+  const compraMarks = useSelector((state) => state.user.marks)
+  const compraCarrito = useSelector((state) => state.carrito.items)
+  const compraPedidos = useSelector((state) => state.pedidos.items)
+  const { cambiarCantidad, quitar } = useCompra({ dispatch, user: compraUser, marks: compraMarks, carrito: compraCarrito, pedidos: compraPedidos })
   return (
     <div className="cart-list">
       <div className="estante">

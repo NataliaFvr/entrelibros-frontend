@@ -1,3 +1,4 @@
+import { useSelector } from 'react-redux'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useLibros } from '../hooks/useLibros'
@@ -8,7 +9,11 @@ import SearchSuggestions from './SearchSuggestions'
 
 const SearchBox = () => {
   const navigate = useNavigate()
-  const { libros } = useLibros()
+  const librosRedux = useSelector((state) => state.libros.items)
+  const loadingRedux = useSelector((state) => state.libros.loading)
+  const errorRedux = useSelector((state) => state.libros.error)
+  const categoriasRedux = useSelector((state) => state.libros.categorias.items)
+  const { libros } = useLibros({ libros: librosRedux, loading: loadingRedux, error: errorRedux, listaCategorias: categoriasRedux })
   const [texto, setTexto] = useState('')
   const [abierto, setAbierto] = useState(false)
   const [activo, setActivo] = useState(-1)

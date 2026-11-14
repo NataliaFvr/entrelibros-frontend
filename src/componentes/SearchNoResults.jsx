@@ -1,10 +1,12 @@
+import { useSelector } from 'react-redux'
 import useLibroPropio from '../hooks/useLibroPropio'
 import ProductCard from './ProductCard'
 import './SearchResults.css'
 
 // Búsqueda sin coincidencias: mensaje + "Quizás te interesen..." con los bestsellers (`destacados`)
 const SearchNoResults = ({ termino, destacados, onLimpiar }) => {
-  const { esPropio } = useLibroPropio()
+  const user = useSelector((state) => state.user.user)
+  const { esPropio } = useLibroPropio(user)
   return (
     <section className="nores">
       <div className="empty" role="status">

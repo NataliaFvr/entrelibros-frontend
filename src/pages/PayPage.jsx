@@ -1,6 +1,4 @@
-/* oxlint-disable no-unused-vars */
 import { mostrarToast } from '../redux/toastSlice'
-import { abrirGate,cerrarGate as cerrarGateAction,cancelarVerificacion,confirmarEmail,crearDireccion,eliminarDireccion as eliminarDireccionThunk,fetchUsuario,guardarPerfil,limpiarPendiente as limpiarPendienteAction,login as loginThunk,logout as logoutThunk,marcarPrincipal as marcarPrincipalThunk,NOTA_SIN_CONFIRMAR,quitarMarks as quitarMarksThunk,reenviarCodigo,registrar as registrarThunk,toggleMark as toggleMarkThunk } from '../redux/userSlice'
 import { useDispatch, useSelector } from 'react-redux'
 import { useState } from 'react'
 import { Link, Navigate, useNavigate, useParams } from 'react-router-dom'
@@ -27,9 +25,16 @@ const PayPage = () => {
   const navigate = useNavigate()
   const toast = (msg, accion) => dispatch(mostrarToast({ msg, accion }))
   const dispatch=useDispatch()
+  const compraMarks = useSelector((state) => state.user.marks)
+  const compraCarrito = useSelector((state) => state.carrito.items)
+  const compraPedidos = useSelector((state) => state.pedidos.items)
   const {user}=useSelector(s=>s.user)
-  const { pedidos, pagarPedido, cancelarPedido } = useCompra()
-  const { libros } = useLibros()
+  const { pedidos, pagarPedido, cancelarPedido } = useCompra({ dispatch, user, marks: compraMarks, carrito: compraCarrito, pedidos: compraPedidos })
+  const librosRedux = useSelector((state) => state.libros.items)
+  const loadingRedux = useSelector((state) => state.libros.loading)
+  const errorRedux = useSelector((state) => state.libros.error)
+  const categoriasRedux = useSelector((state) => state.libros.categorias.items)
+  const { libros } = useLibros({ libros: librosRedux, loading: loadingRedux, error: errorRedux, listaCategorias: categoriasRedux })
   const [error, setError] = useState('')
   const form = useFormulario({ proveedor: 'tarjeta', numeroTarjeta: '', titular: '', vencimiento: '', codigoSeguridad: '' })
   // El pago es simulado: los datos de la tarjeta no se validan ni viajan al back, solo tienen que estar completos

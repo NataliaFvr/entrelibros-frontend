@@ -1,4 +1,3 @@
-/* oxlint-disable no-unused-vars */
 import { mostrarToast } from '../redux/toastSlice'
 import { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'

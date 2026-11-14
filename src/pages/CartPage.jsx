@@ -1,6 +1,4 @@
-/* oxlint-disable no-unused-vars */
 import { mostrarToast } from '../redux/toastSlice'
-import { abrirGate,cerrarGate as cerrarGateAction,cancelarVerificacion,confirmarEmail,crearDireccion,eliminarDireccion as eliminarDireccionThunk,fetchUsuario,guardarPerfil,limpiarPendiente as limpiarPendienteAction,login as loginThunk,logout as logoutThunk,marcarPrincipal as marcarPrincipalThunk,NOTA_SIN_CONFIRMAR,quitarMarks as quitarMarksThunk,reenviarCodigo,registrar as registrarThunk,toggleMark as toggleMarkThunk } from '../redux/userSlice'
 import { useDispatch, useSelector } from 'react-redux'
 import { useEffect, useState } from 'react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
@@ -15,8 +13,11 @@ import AvisoCompraPendiente from '../componentes/AvisoCompraPendiente'
 const CartPage = () => {
   const navigate = useNavigate()
   const dispatch=useDispatch()
+  const compraMarks = useSelector((state) => state.user.marks)
+  const compraCarrito = useSelector((state) => state.carrito.items)
+  const compraPedidos = useSelector((state) => state.pedidos.items)
   const {user, direcciones}=useSelector(s=>s.user)
-  const { carrito, crearPedido, pedidos } = useCompra()
+  const { carrito, crearPedido, pedidos } = useCompra({ dispatch, user, marks: compraMarks, carrito: compraCarrito, pedidos: compraPedidos })
   const toast = (msg, accion) => dispatch(mostrarToast({ msg, accion }))
   const [elegidaPorUsuario, setElegida] = useState(null) // null = todavía no tocó el selector: se usa la principal
   const [enviando, setEnviando] = useState(false)

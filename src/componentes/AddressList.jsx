@@ -1,6 +1,5 @@
-/* oxlint-disable no-unused-vars */
 import {mostrarToast} from '../redux/toastSlice'
-import { abrirGate,cerrarGate as cerrarGateAction,cancelarVerificacion,confirmarEmail,crearDireccion,eliminarDireccion as eliminarDireccionThunk,fetchUsuario,guardarPerfil,limpiarPendiente as limpiarPendienteAction,login as loginThunk,logout as logoutThunk,marcarPrincipal as marcarPrincipalThunk,NOTA_SIN_CONFIRMAR,quitarMarks as quitarMarksThunk,reenviarCodigo,registrar as registrarThunk,toggleMark as toggleMarkThunk } from '../redux/userSlice'
+import { eliminarDireccion as eliminarDireccionThunk,marcarPrincipal as marcarPrincipalThunk } from '../redux/userSlice'
 import {useDispatch,useSelector} from 'react-redux'
 import { useCompra } from '../hooks/useCompra'
 import { direccionTexto } from '../utils/format'
@@ -19,7 +18,11 @@ const AddressList = () => {
   const eliminarDireccion=async(i)=>!((await dispatch(eliminarDireccionThunk(i))).error)
   const marcarPrincipal=async(i)=>{const r=await dispatch(marcarPrincipalThunk(i));if(!r.error)toast('Dirección principal actualizada');return !r.error}
   const toast=(msg,accion)=>dispatch(mostrarToast({msg,accion}))
-  const { pedidos } = useCompra()
+  const compraUser = useSelector((state) => state.user.user)
+  const compraMarks = useSelector((state) => state.user.marks)
+  const compraCarrito = useSelector((state) => state.carrito.items)
+  const compraPedidos = useSelector((state) => state.pedidos.items)
+  const { pedidos } = useCompra({ dispatch, user: compraUser, marks: compraMarks, carrito: compraCarrito, pedidos: compraPedidos })
 
   if (!direcciones.length) return <EmptyBlock titulo="No tenés direcciones" texto="Agregá una para poder comprar." />
 

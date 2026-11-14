@@ -1,16 +1,14 @@
-/* oxlint-disable no-unused-vars */
-import { abrirGate,cerrarGate as cerrarGateAction,cancelarVerificacion,confirmarEmail,crearDireccion,eliminarDireccion as eliminarDireccionThunk,fetchUsuario,guardarPerfil,limpiarPendiente as limpiarPendienteAction,login as loginThunk,logout as logoutThunk,marcarPrincipal as marcarPrincipalThunk,NOTA_SIN_CONFIRMAR,quitarMarks as quitarMarksThunk,reenviarCodigo,registrar as registrarThunk,toggleMark as toggleMarkThunk } from '../redux/userSlice'
-import {useDispatch,useSelector} from 'react-redux'
-import './NotificationBell.css'
+import { useDispatch, useSelector } from 'react-redux'
 import useNotificaciones from '../hooks/useNotificaciones'
 import usePopover from '../hooks/usePopover'
 import { BellIcon } from './Icons'
+import './NotificationBell.css'
 import NotificationPanel from './NotificationPanel'
 
 const ID_PANEL = 'panel-notificaciones'
 
-const Campana = ({ user }) => {
-  const { lista, noLeidas, marcarLeida, marcarTodas, descartar } = useNotificaciones(user)
+const Campana = ({ user, dispatch, notificaciones }) => {
+  const { lista, noLeidas, marcarLeida, marcarTodas, descartar } = useNotificaciones(user, { dispatch, ...notificaciones })
   const popover = usePopover()
   const etiqueta = noLeidas ? `Notificaciones (${noLeidas} sin leer)` : 'Notificaciones'
 
@@ -34,10 +32,11 @@ const Campana = ({ user }) => {
 
 // Campanita del header (comprador y vendedor). Sin sesión no se muestra.
 const NotificationBell = () => {
-  const dispatch=useDispatch()
+  const dispatch = useDispatch()
   const {user}=useSelector(s=>s.user)
+  const notificaciones = useSelector((state) => state.notificaciones)
   if (!user) return null
-  return <Campana key={user.nombreUsuario} user={user} />
+  return <Campana key={user.nombreUsuario} user={user} dispatch={dispatch} notificaciones={notificaciones} />
 }
 
 export default NotificationBell

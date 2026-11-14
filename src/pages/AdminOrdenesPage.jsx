@@ -1,3 +1,4 @@
+import { useDispatch, useSelector } from 'react-redux'
 import { useState } from 'react'
 import useAdminOrdenes from '../hooks/useAdminOrdenes'
 import { ETIQUETAS_PAGO } from '../utils/pedidos'
@@ -9,7 +10,9 @@ import Pager from '../componentes/Pager'
 
 // /admin/ordenes — todas las compras de la plataforma, solo lectura
 const AdminOrdenesPage = () => {
-  const adm = useAdminOrdenes()
+  const dispatch = useDispatch()
+  const { ordenes, ordenesCargadas } = useSelector((state) => state.admin)
+  const adm = useAdminOrdenes({ dispatch, ordenes, ordenesCargadas })
   const [detalle, setDetalle] = useState(null)
 
   return (

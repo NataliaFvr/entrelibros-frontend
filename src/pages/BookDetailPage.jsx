@@ -1,6 +1,5 @@
-/* oxlint-disable no-unused-vars */
 import { mostrarToast } from '../redux/toastSlice'
-import { abrirGate,cerrarGate as cerrarGateAction,cancelarVerificacion,confirmarEmail,crearDireccion,eliminarDireccion as eliminarDireccionThunk,fetchUsuario,guardarPerfil,limpiarPendiente as limpiarPendienteAction,login as loginThunk,logout as logoutThunk,marcarPrincipal as marcarPrincipalThunk,NOTA_SIN_CONFIRMAR,quitarMarks as quitarMarksThunk,reenviarCodigo,registrar as registrarThunk,toggleMark as toggleMarkThunk } from '../redux/userSlice'
+import { abrirGate,limpiarPendiente as limpiarPendienteAction,toggleMark as toggleMarkThunk } from '../redux/userSlice'
 import { useEffect, useMemo } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
@@ -28,14 +27,19 @@ const Detalle = ({ libro, libros }) => {
   const [params] = useSearchParams()
   const toast = (msg, accion) => dispatch(mostrarToast({ msg, accion }))
   const dispatch=useDispatch()
+  const compraMarks = useSelector((state) => state.user.marks)
+  const compraCarrito = useSelector((state) => state.carrito.items)
+  const compraPedidos = useSelector((state) => state.pedidos.items)
   const {user, marks, pendiente}=useSelector(s=>s.user)
   const requiereLogin=(t,d=null,a=null)=>{if(user)return false;dispatch(abrirGate({tipo:t,destino:d,accion:a}));return true}
   const limpiarPendiente=()=>dispatch(limpiarPendienteAction())
   const toggleMark=async(i)=>{const estaba=marks.includes(i);const r=await dispatch(toggleMarkThunk({id:i,estaba}));if(r.error)toast(r.error.message)}
-  const { agregar } = useCompra()
-  const { resenias, promedio, miResenia, puedeResenar, motivo, publicar, eliminar } = useResenias(libro.id)
+  const guardadasResenas = useSelector((state) => state.resenas.libros[libro.id])
+  const estadoResena = useSelector((state) => state.resenas.estadosLibro[libro.id])
+  const { agregar } = useCompra({ dispatch, user, marks: compraMarks, carrito: compraCarrito, pedidos: compraPedidos })
+  const { resenias, promedio, miResenia, puedeResenar, motivo, publicar, eliminar } = useResenias(libro.id, { dispatch, user, guardadas: guardadasResenas, estadoGuardado: estadoResena })
 
-  const { esPropio } = useLibroPropio()
+  const { esPropio } = useLibroPropio(user)
   const esAdmin = useEsAdmin() // El administrador ve la ficha en modo lectura: sin comprar, guardar ni opinar, pero puede eliminar opiniones.
 
   const usado = esUsado(libro)
@@ -172,7 +176,11 @@ const Detalle = ({ libro, libros }) => {
 
 const BookDetailPage = () => {
   const { id } = useParams()
-  const { libros, cargando } = useLibros()
+  const librosRedux = useSelector((state) => state.libros.items)
+  const loadingRedux = useSelector((state) => state.libros.loading)
+  const errorRedux = useSelector((state) => state.libros.error)
+  const categoriasRedux = useSelector((state) => state.libros.categorias.items)
+  const { libros, cargando } = useLibros({ libros: librosRedux, loading: loadingRedux, error: errorRedux, listaCategorias: categoriasRedux })
   const dispatch = useDispatch()
   const delCatalogo = libros.find((l) => l.id === +id)
   // El catálogo no lista los agotados: si no está, se pide ese libro (undefined = todavía no se pidió)

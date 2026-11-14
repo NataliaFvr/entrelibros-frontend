@@ -1,3 +1,4 @@
+import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import useAdminResumen from '../hooks/useAdminResumen'
 import { fmt } from '../utils/format'
@@ -8,8 +9,12 @@ import PendientesModeracion from '../componentes/PendientesModeracion'
 
 // /admin — lo que necesita atención hoy
 const AdminResumenPage = () => {
+  const dispatch = useDispatch()
+  const moderacion = useSelector((state) => state.moderacion)
+  const { items: usuarios, cargados: usuariosCargados } = useSelector((state) => state.user.todos)
+  const { ordenes, ordenesCargadas } = useSelector((state) => state.admin)
   const navigate = useNavigate()
-  const r = useAdminResumen()
+  const r = useAdminResumen({ dispatch, moderacion, usuarios, usuariosCargados, ordenes, ordenesCargadas })
 
   return (
     <main className="usr">

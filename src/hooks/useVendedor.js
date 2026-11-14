@@ -1,8 +1,6 @@
-/* oxlint-disable no-unused-vars */
-import { mostrarToast } from '../redux/toastSlice'
 import { useEffect, useMemo } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
 import { enRevision, getVendedor } from '../api/vendedorApi'
+import { mostrarToast } from '../redux/toastSlice'
 import { cambiarEstadoLibro, editarLibro, fetchFotosLibro, fetchMisLibros, publicarLibro, solicitarVendedor } from '../redux/vendedorSlice'
 
 const MENSAJE_REVISION = 'Tus cambios fueron enviados a revisión. El libro no se verá en el catálogo hasta que un administrador lo apruebe.'
@@ -10,10 +8,8 @@ const MENSAJE_REVISION = 'Tus cambios fueron enviados a revisión. El libro no s
 // Panel del vendedor: sus datos salen de la sesión y sus libros de Redux (redux/vendedorSlice.js).
 // Acá solo se despachan las acciones y se arman los avisos.
 // `idEditando` = el libro que está abierto en "Editar": para el formulario hacen falta todas sus fotos.
-const useVendedor = (user, idEditando = null) => {
-  const dispatch = useDispatch()
+const useVendedor = (user, idEditando = null, { dispatch, idUsuario, items, loading, error }) => {
   const toast = (msg, accion) => dispatch(mostrarToast({ msg, accion }))
-  const { idUsuario, items, loading, error } = useSelector((state) => state.vendedor)
   const pub = useMemo(() => (idUsuario === user.id ? items : []), [idUsuario, items, user.id]) // solo los de esta cuenta
   const vendedor = useMemo(() => ({ ...getVendedor(user), pub }), [user, pub])
   const aprobado = vendedor.estado === 'aprobado'
@@ -32,9 +28,8 @@ const useVendedor = (user, idEditando = null) => {
 
   // Si la carga falla se avisa una vez; en el panel queda "Reintentar"
   useEffect(() => {
-    if (error) toast(error)
-  }, [error, toast])
-
+  if (error) dispatch(mostrarToast({ msg: error }))
+}, [dispatch, error])
   // 'cargando' | 'ok' (si no hay libros, estado vacío) | 'error'
   const estadoLibros = !aprobado ? 'ok' : loading || (!cargados && !error) ? 'cargando' : error ? 'error' : 'ok'
 

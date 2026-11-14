@@ -1,3 +1,4 @@
+import { useSelector } from 'react-redux'
 import { useMemo, useState } from 'react'
 import { useLibros } from '../hooks/useLibros'
 import useFormulario from '../hooks/useFormulario'
@@ -23,7 +24,11 @@ const desdeLibro = (p) => ({
 // Publicar o editar (`libro`). El backend también valida los datos, pero un usado
 // representa una sola pieza, así que el formulario no permite publicarlo con otro stock.
 const BookForm = ({ libro = {}, onGuardar, onCancelar }) => {
-  const { categorias, libros } = useLibros()
+  const librosRedux = useSelector((state) => state.libros.items)
+  const loadingRedux = useSelector((state) => state.libros.loading)
+  const errorRedux = useSelector((state) => state.libros.error)
+  const categoriasRedux = useSelector((state) => state.libros.categorias.items)
+  const { categorias, libros } = useLibros({ libros: librosRedux, loading: loadingRedux, error: errorRedux, listaCategorias: categoriasRedux })
   // Editoriales y autores que ya hay en el catálogo: se ofrecen como sugerencias para que todos escriban el mismo nombre
   const editoriales = useMemo(() => valoresFrecuentes(libros, 'ed'), [libros])
   const autores = useMemo(() => valoresFrecuentes(libros, 'a'), [libros])

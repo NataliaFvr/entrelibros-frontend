@@ -1,14 +1,11 @@
-/* oxlint-disable no-unused-vars */
 import { mostrarToast } from '../redux/toastSlice'
 import { useEffect, useState } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
 import { fetchSolicitudes, moderar } from '../redux/moderacionSlice'
 
 // Cola de moderación (redux/moderacionSlice.js), pestaña activa y decisiones del admin
-const useModeracionPanel = () => {
-  const dispatch = useDispatch()
+const useModeracionPanel = ({ dispatch, moderacion }) => {
   const toast = (msg, accion) => dispatch(mostrarToast({ msg, accion }))
-  const { items: solicitudes, cargadas, loading, error } = useSelector((state) => state.moderacion)
+  const { items: solicitudes, cargadas, loading, error } = moderacion
   const [tab, setTab] = useState('NUEVO')
   const [procesando, setProcesando] = useState(null)
   const [errorAccion, setErrorAccion] = useState('')

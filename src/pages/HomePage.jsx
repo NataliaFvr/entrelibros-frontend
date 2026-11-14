@@ -1,3 +1,4 @@
+import { useSelector } from 'react-redux'
 import { useMemo } from 'react'
 import { useLibros } from '../hooks/useLibros'
 import { masVendidos, ordenarPorVentas } from '../utils/filtrarLibros'
@@ -11,7 +12,11 @@ import MiniDeco from '../componentes/MiniDeco'
 import AuthorGrid from '../componentes/AuthorGrid'
 
 const HomePage = () => {
-  const { libros, categorias } = useLibros()
+  const librosRedux = useSelector((state) => state.libros.items)
+  const loadingRedux = useSelector((state) => state.libros.loading)
+  const errorRedux = useSelector((state) => state.libros.error)
+  const categoriasRedux = useSelector((state) => state.libros.categorias.items)
+  const { libros, categorias } = useLibros({ libros: librosRedux, loading: loadingRedux, error: errorRedux, listaCategorias: categoriasRedux })
 
   const { best, nuevos, usados, conDesc, topDesc, autores, topCategorias } = useMemo(() => {
     const best = masVendidos(libros) // solo nuevos: los usados no son bestsellers

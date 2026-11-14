@@ -1,9 +1,7 @@
-/* oxlint-disable no-unused-vars */
 import { mostrarToast } from '../redux/toastSlice'
 import {urlFotoUsuario} from '../api/usuariosApi'
-import { abrirGate,cerrarGate as cerrarGateAction,cancelarVerificacion,confirmarEmail,crearDireccion,eliminarDireccion as eliminarDireccionThunk,fetchUsuario,guardarPerfil,limpiarPendiente as limpiarPendienteAction,login as loginThunk,logout as logoutThunk,marcarPrincipal as marcarPrincipalThunk,NOTA_SIN_CONFIRMAR,quitarMarks as quitarMarksThunk,reenviarCodigo,registrar as registrarThunk,toggleMark as toggleMarkThunk } from '../redux/userSlice'
+import { fetchUsuario,guardarPerfil } from '../redux/userSlice'
 import { useEffect, useMemo, useState } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
 import { ETIQUETA_ROL, POR_PAGINA } from '../data/admin'
 import { fetchLibros } from '../redux/librosSlice'
 import {
@@ -12,14 +10,11 @@ import {
 import { norm } from '../utils/format'
 
 // Cada acción devuelve { ok } o { error }: los pop-ups muestran el error sin cerrarse
-const useAdminUsuarios = () => {
-  const dispatch = useDispatch()
-  const {user}=useSelector(s=>s.user)
+const useAdminUsuarios = ({ dispatch, user, usuarios, cargados }) => {
 
   const perfil=user?{avatar:user.avatar||'',foto:user.tieneFoto?urlFotoUsuario(user.id):''}:{}
   const actualizarPerfil=async(v,n)=>{const r=await dispatch(guardarPerfil({valores:v,nuevoPerfil:n,user}));if(r.error){dispatch(fetchUsuario(user.id));throw Error(r.error.message)}return r.payload.sesionCerrada?{sesionCerrada:true}:{}}
   const toast = (msg, accion) => dispatch(mostrarToast({ msg, accion }))
-  const { items: usuarios, cargados } = useSelector((state) => state.user.todos)
   const [filtros, setFiltros] = useState({ q: '', rol: '', est: '', solicitud: '' })
   const [pagina, setPagina] = useState(1)
 

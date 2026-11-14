@@ -1,30 +1,30 @@
-/* oxlint-disable no-unused-vars */
-import {urlFotoUsuario} from '../api/usuariosApi'
-import { abrirGate,cerrarGate as cerrarGateAction,cancelarVerificacion,confirmarEmail,crearDireccion,eliminarDireccion as eliminarDireccionThunk,fetchUsuario,guardarPerfil,limpiarPendiente as limpiarPendienteAction,login as loginThunk,logout as logoutThunk,marcarPrincipal as marcarPrincipalThunk,NOTA_SIN_CONFIRMAR,quitarMarks as quitarMarksThunk,reenviarCodigo,registrar as registrarThunk,toggleMark as toggleMarkThunk } from '../redux/userSlice'
-import {useDispatch,useSelector} from 'react-redux'
 import { useMemo } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
 import { Link, Navigate, useNavigate, useParams } from 'react-router-dom'
-import useVendedor from '../hooks/useVendedor'
-import useCalificacionesRecibidas from '../hooks/useCalificacionesRecibidas'
-import useVentas from '../hooks/useVentas'
+import { urlFotoUsuario } from '../api/usuariosApi'
 import { enRevision } from '../api/vendedorApi'
-import AuthHero from '../componentes/AuthHero'
 import AccountTabs from '../componentes/AccountTabs'
-import MiniDeco from '../componentes/MiniDeco'
-import SellerRequestForm from '../componentes/SellerRequestForm'
-import SellerPending from '../componentes/SellerPending'
-import SellerHead from '../componentes/SellerHead'
-import SellerBooks from '../componentes/SellerBooks'
+import AuthHero from '../componentes/AuthHero'
 import BookForm from '../componentes/BookForm'
+import MiniDeco from '../componentes/MiniDeco'
+import SellerBooks from '../componentes/SellerBooks'
+import SellerHead from '../componentes/SellerHead'
+import SellerPending from '../componentes/SellerPending'
+import SellerReputation from '../componentes/SellerReputation'
+import SellerRequestForm from '../componentes/SellerRequestForm'
 import SellerSales from '../componentes/SellerSales'
 import SellerStats from '../componentes/SellerStats'
+import useCalificacionesRecibidas from '../hooks/useCalificacionesRecibidas'
 import useEstadisticasVendedor from '../hooks/useEstadisticasVendedor'
-import SellerReputation from '../componentes/SellerReputation'
+import useVendedor from '../hooks/useVendedor'
+import useVentas from '../hooks/useVentas'
 
 const TABS = ['libros', 'nuevo', 'editar', 'ventas', 'estadisticas', 'reputacion']
 // Pestaña Estadísticas: datos del back (GET /vendedores/estadisticas).
 const Estadisticas = () => {
-  const { datos, error } = useEstadisticasVendedor()
+  const dispatch = useDispatch()
+  const { estadisticas, errorEstadisticas } = useSelector((state) => state.ventas)
+  const { datos, error } = useEstadisticasVendedor({ dispatch, estadisticas, errorEstadisticas })
   return <SellerStats estadisticas={datos} error={error} />
 }
 
@@ -34,9 +34,13 @@ const Migas = () => <div className="crumbs"><Link to="/">Inicio</Link> › <span
 const Vendedor = ({ user, perfil }) => {
   const navigate = useNavigate()
   const { tab = 'libros', id } = useParams()
-  const { vendedor, estadoLibros, faltanFotos, reintentar, solicitar, guardarLibro, alternarBaja } = useVendedor(user, tab === 'editar' ? id : null)
-  const calificaciones = useCalificacionesRecibidas(vendedor.tienda, vendedor.pub, user.id)
-  const { ventas, cargando, cancelar } = useVentas(user)
+  const dispatch = useDispatch()
+  const estadoVendedor = useSelector((state) => state.vendedor)
+  const estadoVentas = useSelector((state) => state.ventas)
+  const estadoResenas = useSelector((state) => state.resenas)
+  const { vendedor, estadoLibros, faltanFotos, reintentar, solicitar, guardarLibro, alternarBaja } = useVendedor(user, tab === 'editar' ? id : null, { dispatch, ...estadoVendedor })
+  const calificaciones = useCalificacionesRecibidas(vendedor.tienda, vendedor.pub, user.id, { dispatch, ...estadoResenas })
+  const { ventas, cargando, cancelar } = useVentas(user, { dispatch, ...estadoVentas })
   const activas = useMemo(() => ventas.filter((v) => v.estado === 'pagada'), [ventas]) // solo las pagadas suman a totales y estadísticas
 
   if (vendedor.estado !== 'aprobado') {
@@ -87,7 +91,6 @@ const Vendedor = ({ user, perfil }) => {
 }
 
 const SellerPage = () => {
-  const dispatch=useDispatch()
   const {user}=useSelector(s=>s.user)
 
   const perfil=user?{avatar:user.avatar||'',foto:user.tieneFoto?urlFotoUsuario(user.id):''}:{}
