@@ -1,9 +1,10 @@
+/* oxlint-disable no-unused-vars */
+import { mostrarToast } from './redux/toastSlice'
 import { useEffect, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { escucharSesionVencida } from "./api/axiosConfig"
 import LoginGate from "./componentes/LoginGate"
 import Toast from "./componentes/Toast"
-import { useToast } from "./hooks/useToast"
 import { fetchDirecciones, fetchMarks, fetchUsuario, logout } from "./redux/authSlice"
 import { fetchCarrito } from "./redux/carritoSlice"
 import { fetchCategorias } from "./redux/categoriasSlice"
@@ -13,7 +14,7 @@ import AppRoutes from "./routes/AppRoutes"
 
 const App = () => {
   const dispatch = useDispatch()
-  const toast = useToast()
+  const toast = (msg, accion) => dispatch(mostrarToast({ msg, accion }))
   const user = useSelector((state) => state.auth.user)
   const idUsuario = user ? user.id : null
   const esAdmin = Boolean(user) && user.rol === "ADMIN"

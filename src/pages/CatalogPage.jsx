@@ -1,9 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
+import {useDispatch, useSelector} from 'react-redux'
 import { Link, useLocation } from 'react-router-dom'
 import { claveBusqueda, fetchFiltrosDisponibles, fetchPagina } from '../redux/catalogoSlice'
-import { useAuth } from '../hooks/useAuth'
-import useFiltros from '../hooks/useFiltros'
+import { limpiarFiltros, reiniciarFiltros, setFiltros, setPagina, toggleFiltro } from '../redux/librosSlice'
 import { filtrosDesdeURL } from '../utils/filtrosURL'
 import { plural } from '../utils/format'
 import SortSelect from '../componentes/SortSelect'
@@ -17,13 +16,24 @@ const VACIO = { libros: [], total: 0, pages: 0 }
 
 const Catalogo = ({ inicial, categorias, filtros }) => {
   const dispatch = useDispatch()
-  const { user, direcciones } = useAuth()
-  const { f, set, setPage, toggle, limpiar } = useFiltros(inicial)
+  const {user, direcciones}=useSelector(s=>s.auth)
+  const filtrosElegidos = useSelector((state) => state.libros.filtrosElegidos)
+  const [inicializado, setInicializado] = useState(false)
+  const f = inicializado ? filtrosElegidos : inicial
+  const set = (cambios) => dispatch(setFiltros(cambios))
+  const setPage = (page) => dispatch(setPagina(page))
+  const toggle = (clave, valor) => dispatch(toggleFiltro({ clave, valor }))
+  const limpiar = () => dispatch(limpiarFiltros({ min: inicial.min, max: inicial.max }))
   const [filtrosAbiertos, setFiltrosAbiertos] = useState(false)
   const provinciaDireccion = ((direcciones || []).find((d) => d.principal) || (direcciones || [])[0])?.prov || user?.provincia
   // Sin dirección, la provincia la elige la persona en el filtro de envíos (no hace falta cuenta)
   const [provinciaElegida, setProvinciaElegida] = useState('')
   const provinciaComprador = provinciaDireccion || provinciaElegida
+
+  useEffect(() => {
+    dispatch(reiniciarFiltros(inicial))
+    setInicializado(true)
+  }, [dispatch])
 
   const clave = claveBusqueda(f, provinciaComprador)
   const guardada = useSelector((state) => state.catalogo.paginas[clave])

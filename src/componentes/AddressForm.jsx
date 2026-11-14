@@ -1,5 +1,8 @@
+/* oxlint-disable no-unused-vars */
+import {mostrarToast} from '../redux/toastSlice'
+import { abrirGate,cerrarGate as cerrarGateAction,cancelarVerificacion,confirmarEmail,crearDireccion,eliminarDireccion as eliminarDireccionThunk,fetchUsuario,guardarPerfil,limpiarPendiente as limpiarPendienteAction,login as loginThunk,logout as logoutThunk,marcarPrincipal as marcarPrincipalThunk,NOTA_SIN_CONFIRMAR,quitarMarks as quitarMarksThunk,reenviarCodigo,registrar as registrarThunk,toggleMark as toggleMarkThunk } from '../redux/authSlice'
+import {useDispatch,useSelector} from 'react-redux'
 import { PROVINCIAS } from '../data/provincias'
-import { useAuth } from '../hooks/useAuth'
 import useFormulario from '../hooks/useFormulario'
 import Field from './Field'
 import SelectField from './SelectField'
@@ -10,7 +13,10 @@ const INICIAL = { alias: '', calle: '', ciudad: '', cp: '', provincia: PROVINCIA
 // `embebido`: dentro de otra tarjeta (el resumen del carrito): sin tarjeta propia y en una sola columna.
 // `onGuardada`: se llama cuando la dirección se guardó (con el back, cuando ya la aceptó).
 const AddressForm = ({ embebido = false, onGuardada }) => {
-  const { agregarDireccion } = useAuth()
+  const dispatch=useDispatch()
+
+  const agregarDireccion=async(d)=>{const r=await dispatch(crearDireccion(d));if(r.error){toast(r.error.message);return false}toast('Dirección guardada');return true}
+  const toast=(msg,accion)=>dispatch(mostrarToast({msg,accion}))
   const f = useFormulario(INICIAL)
   const campo = (n) => ({ name: n, value: f.valores[n], onChange: f.cambiar, error: f.errores[n] })
 

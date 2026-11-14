@@ -1,6 +1,9 @@
+/* oxlint-disable no-unused-vars */
+import {urlFotoUsuario} from '../api/usuariosApi'
+import { abrirGate,cerrarGate as cerrarGateAction,cancelarVerificacion,confirmarEmail,crearDireccion,eliminarDireccion as eliminarDireccionThunk,fetchUsuario,guardarPerfil,limpiarPendiente as limpiarPendienteAction,login as loginThunk,logout as logoutThunk,marcarPrincipal as marcarPrincipalThunk,NOTA_SIN_CONFIRMAR,quitarMarks as quitarMarksThunk,reenviarCodigo,registrar as registrarThunk,toggleMark as toggleMarkThunk } from '../redux/authSlice'
+import {useDispatch,useSelector} from 'react-redux'
 import { useMemo } from 'react'
 import { Link, Navigate, useNavigate, useParams } from 'react-router-dom'
-import { useAuth } from '../hooks/useAuth'
 import useVendedor from '../hooks/useVendedor'
 import useCalificacionesRecibidas from '../hooks/useCalificacionesRecibidas'
 import useVentas from '../hooks/useVentas'
@@ -84,7 +87,10 @@ const Vendedor = ({ user, perfil }) => {
 }
 
 const SellerPage = () => {
-  const { user, perfil } = useAuth()
+  const dispatch=useDispatch()
+  const {user}=useSelector(s=>s.auth)
+
+  const perfil=user?{avatar:user.avatar||'',foto:user.tieneFoto?urlFotoUsuario(user.id):''}:{}
   if (!user) return <Navigate to="/ingresar" replace state={{ from: '/vender' }} />
   return <Vendedor key={user.nombreUsuario} user={user} perfil={perfil} />
 }

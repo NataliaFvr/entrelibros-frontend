@@ -1,5 +1,7 @@
+/* oxlint-disable no-unused-vars */
+import { abrirGate,cerrarGate as cerrarGateAction,cancelarVerificacion,confirmarEmail,crearDireccion,eliminarDireccion as eliminarDireccionThunk,fetchUsuario,guardarPerfil,limpiarPendiente as limpiarPendienteAction,login as loginThunk,logout as logoutThunk,marcarPrincipal as marcarPrincipalThunk,NOTA_SIN_CONFIRMAR,quitarMarks as quitarMarksThunk,reenviarCodigo,registrar as registrarThunk,toggleMark as toggleMarkThunk } from '../redux/authSlice'
+import {useDispatch,useSelector} from 'react-redux'
 import { useNavigate } from 'react-router-dom'
-import { useAuth } from '../hooks/useAuth'
 import { useCompra } from '../hooks/useCompra'
 import ProductCard from './ProductCard'
 import EmptyBlock from './EmptyBlock'
@@ -7,7 +9,9 @@ import EmptyBlock from './EmptyBlock'
 // Catálogo público: libros activos del vendedor (nuevos y usados), cada uno con botón de compra
 const SellerCatalog = ({ tienda, libros }) => {
   const navigate = useNavigate()
-  const { requiereLogin } = useAuth()
+  const dispatch=useDispatch()
+
+  const requiereLogin=(t,d=null,a=null)=>{if(user)return false;dispatch(abrirGate({tipo:t,destino:d,accion:a}));return true}
   const { agregar } = useCompra()
 
   const comprar = async (libro) => {

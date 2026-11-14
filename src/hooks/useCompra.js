@@ -1,8 +1,9 @@
-import { useDispatch, useSelector } from 'react-redux'
+/* oxlint-disable no-unused-vars */
+import { mostrarToast } from '../redux/toastSlice'
+import { abrirGate,cerrarGate as cerrarGateAction,cancelarVerificacion,confirmarEmail,crearDireccion,eliminarDireccion as eliminarDireccionThunk,fetchUsuario,guardarPerfil,limpiarPendiente as limpiarPendienteAction,login as loginThunk,logout as logoutThunk,marcarPrincipal as marcarPrincipalThunk,NOTA_SIN_CONFIRMAR,quitarMarks as quitarMarksThunk,reenviarCodigo,registrar as registrarThunk,toggleMark as toggleMarkThunk } from '../redux/authSlice'
+import { useReduxDispatch, useReduxSelector } from '../redux/hooks'
 import { agregarAlCarrito, cambiarCantidad, fetchCarrito, quitarDelCarrito } from '../redux/carritoSlice'
 import { cancelarPedido, crearPedido, fetchPedidos, pagarPedido } from '../redux/pedidosSlice'
-import { useAuth } from './useAuth'
-import { useToast } from './useToast'
 
 // Las acciones del carrito se hacen de a una, en orden: si alguien toca "Añadir" dos veces seguidas, la segunda ya ve el ítem
 // creado por la primera y lo modifica (POST /carrito/items crearía una fila repetida).
@@ -11,11 +12,15 @@ let cola = Promise.resolve()
 // Carrito y pedidos de la cuenta con sesión (Redux/carritoSlice.js y Redux/pedidosSlice.js).
 // `agregar`, `cambiarCantidad` y `quitar` devuelven una promesa con true si se aplicó.
 export const useCompra = () => {
-  const dispatch = useDispatch()
-  const toast = useToast()
-  const { user, quitarMarks } = useAuth()
-  const carrito = useSelector((state) => state.carrito.items)
-  const pedidos = useSelector((state) => state.pedidos.items)
+  const dispatch = useReduxDispatch()
+  const toast = (msg, accion) => dispatch(mostrarToast({ msg, accion }))
+  const { user, marks } = useReduxSelector((s) => s.auth)
+  const quitarMarks = (ids) => {
+    const q = ids.filter((i) => marks.includes(i))
+    if (q.length) dispatch(quitarMarksThunk(q))
+  }
+  const carrito = useReduxSelector((state) => state.carrito.items)
+  const pedidos = useReduxSelector((state) => state.pedidos.items)
   const idUsuario = user && user.rol !== 'ADMIN' ? user.id : null // el admin no compra
 
   const ejecutar = (accion, alTerminar) => {

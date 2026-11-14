@@ -1,9 +1,11 @@
+/* oxlint-disable no-unused-vars */
+import { mostrarToast } from '../redux/toastSlice'
+import { abrirGate,cerrarGate as cerrarGateAction,cancelarVerificacion,confirmarEmail,crearDireccion,eliminarDireccion as eliminarDireccionThunk,fetchUsuario,guardarPerfil,limpiarPendiente as limpiarPendienteAction,login as loginThunk,logout as logoutThunk,marcarPrincipal as marcarPrincipalThunk,NOTA_SIN_CONFIRMAR,quitarMarks as quitarMarksThunk,reenviarCodigo,registrar as registrarThunk,toggleMark as toggleMarkThunk } from '../redux/authSlice'
+import { useDispatch, useSelector } from 'react-redux'
 import { useState } from 'react'
 import { Link, Navigate, useNavigate, useParams } from 'react-router-dom'
-import { useAuth } from '../hooks/useAuth'
 import { useCompra } from '../hooks/useCompra'
 import { useLibros } from '../hooks/useLibros'
-import { useToast } from '../hooks/useToast'
 import useFormulario from '../hooks/useFormulario'
 import useProcesoPago from '../hooks/useProcesoPago'
 import { estadoPago } from '../utils/pedidos'
@@ -23,8 +25,9 @@ const Migas = () => (
 const PayPage = () => {
   const { n } = useParams()
   const navigate = useNavigate()
-  const toast = useToast()
-  const { user } = useAuth()
+  const toast = (msg, accion) => dispatch(mostrarToast({ msg, accion }))
+  const dispatch=useDispatch()
+  const {user}=useSelector(s=>s.auth)
   const { pedidos, pagarPedido, cancelarPedido } = useCompra()
   const { libros } = useLibros()
   const [error, setError] = useState('')

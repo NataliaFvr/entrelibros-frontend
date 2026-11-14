@@ -1,15 +1,16 @@
+/* oxlint-disable no-unused-vars */
+import { mostrarToast } from '../redux/toastSlice'
 import { useCallback, useEffect, useMemo } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
+import { useReduxDispatch, useReduxSelector } from '../redux/hooks'
 import { aVentaFront } from '../api/adaptadores'
 import { cancelarVenta, fetchVentas } from '../redux/ventasSlice'
-import { useToast } from './useToast'
 
 // Ventas del vendedor en el formato { id, n, date, estado, est, cancelada, venceEn, its, comprador }.
 // Se piden una vez al entrar al panel (la cabecera muestra cuántas ventas hay) y después viven en Redux (redux/ventasSlice.js).
 const useVentas = (user) => {
-  const dispatch = useDispatch()
-  const toast = useToast()
-  const { idUsuario, items, loading, error } = useSelector((state) => state.ventas)
+  const dispatch = useReduxDispatch()
+  const toast = (msg, accion) => dispatch(mostrarToast({ msg, accion }))
+  const { idUsuario, items, loading, error } = useReduxSelector((state) => state.ventas)
   const cargadas = idUsuario === user.id
 
   useEffect(() => {

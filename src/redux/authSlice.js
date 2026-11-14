@@ -145,7 +145,7 @@ const authSlice = createSlice({
       .addCase(login.fulfilled, (state, action) => {
         entrar(state, action.payload);
       })
-      // Cuenta sin confirmar: en lugar de un error se abre la confirmación del e-mail (useAuth pide el código nuevo)
+      // Cuenta sin confirmar: en lugar de un error se abre la confirmación del e-mail (se pide un código nuevo)
       .addCase(login.rejected, (state, action) => {
         if (action.error.tipo === "CUENTA_NO_CONFIRMADA") abrirVerificacion(state, action.meta.arg.ident.trim(), "", NOTA_SIN_CONFIRMAR);
       })

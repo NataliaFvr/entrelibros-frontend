@@ -1,6 +1,8 @@
+/* oxlint-disable no-unused-vars */
+import { abrirGate,cerrarGate as cerrarGateAction,cancelarVerificacion,confirmarEmail,crearDireccion,eliminarDireccion as eliminarDireccionThunk,fetchUsuario,guardarPerfil,limpiarPendiente as limpiarPendienteAction,login as loginThunk,logout as logoutThunk,marcarPrincipal as marcarPrincipalThunk,NOTA_SIN_CONFIRMAR,quitarMarks as quitarMarksThunk,reenviarCodigo,registrar as registrarThunk,toggleMark as toggleMarkThunk } from '../redux/authSlice'
+import {useDispatch,useSelector} from 'react-redux'
 import { Link } from 'react-router-dom'
 import { useLibros } from '../hooks/useLibros'
-import { useAuth } from '../hooks/useAuth'
 import useEsAdmin from '../hooks/useEsAdmin'
 import useIrAVender from '../hooks/useIrAVender'
 import { AYUDA_LINKS, AYUDA_RAIZ } from '../data/ayuda'
@@ -13,7 +15,9 @@ const MobileMenu = ({ abierto, onCerrar }) => {
   const { categorias } = useLibros()
   const irAVender = useIrAVender()
   const esAdmin = useEsAdmin()
-  const { logout } = useAuth()
+  const dispatch=useDispatch()
+
+  const logout=()=>dispatch(logoutThunk())
 
   if (!abierto) return null
 

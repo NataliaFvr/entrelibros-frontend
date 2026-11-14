@@ -1,14 +1,15 @@
+/* oxlint-disable no-unused-vars */
+import { mostrarToast } from '../redux/toastSlice'
 import { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { eliminarResenaLibro, eliminarResenaVendedor, fetchTodasResenas } from '../redux/resenasSlice'
-import { useToast } from '../hooks/useToast'
 import Aviso from './Aviso'
 import EmptyBlock from './EmptyBlock'
 import ReviewItem from './ReviewItem'
 
 const AdminResenas = () => {
   const dispatch = useDispatch()
-  const toast = useToast()
+  const toast = (msg, accion) => dispatch(mostrarToast({ msg, accion }))
   const { todasLibro: libros, todasVendedor: vendedores, todasCargadas, errorTodas } = useSelector((state) => state.resenas)
   const [errorAccion, setErrorAccion] = useState('')
   const [eliminando, setEliminando] = useState(null)

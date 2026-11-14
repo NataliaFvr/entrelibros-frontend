@@ -7,7 +7,6 @@ import { cambiarRol, darDeBajaUsuario, reactivarUsuario } from "./usuariosSlice"
 import { cambiarEstadoLibro, editarLibro } from "./vendedorSlice";
 import { cancelarVenta } from "./ventasSlice";
 
-// Cada búsqueda (filtros + página + provincia) se guarda con su clave: volver a una ya vista no la pide de nuevo
 export const claveBusqueda = (f, provinciaComprador) => JSON.stringify({ f, provinciaComprador });
 
 export const fetchFiltrosDisponibles = createAsyncThunk("catalogo/fetchfiltrosdisponibles", async () => getFiltrosDisponiblesApi(), {
@@ -28,7 +27,6 @@ export const fetchPagina = createAsyncThunk(
   },
 );
 
-// Si cambia un libro (stock, baja, aprobación…), las búsquedas guardadas pueden haber quedado viejas
 const olvidarBusquedas = (state) => {
   state.paginas = {};
 };
@@ -38,9 +36,9 @@ const catalogoSlice = createSlice({
   initialState: {
     filtros: null,
     cargandoFiltros: false,
-    paginas: {}, // clave -> { libros, total, pages }
-    pendientes: {}, // clave -> true mientras se pide
-    errores: {}, // clave -> mensaje
+    paginas: {},
+    pendientes: {},
+    errores: {},
   },
   reducers: {},
   extraReducers: (builder) => {
@@ -67,9 +65,9 @@ const catalogoSlice = createSlice({
         state.paginas[clave] = action.payload;
       })
       .addCase(fetchPagina.rejected, (state, action) => {
-        const { clave } = action.meta.arg;
-        delete state.pendientes[clave];
-        state.errores[clave] = action.error.message;
+        const { clave: key } = action.meta.arg;
+        delete state.pendientes[key];
+        state.errores[key] = action.error.message;
       })
       .addCase(cambiarEstadoLibro.fulfilled, olvidarBusquedas)
       .addCase(editarLibro.fulfilled, olvidarBusquedas)

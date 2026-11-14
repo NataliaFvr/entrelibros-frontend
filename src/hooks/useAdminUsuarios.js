@@ -1,20 +1,25 @@
+/* oxlint-disable no-unused-vars */
+import { mostrarToast } from '../redux/toastSlice'
+import {urlFotoUsuario} from '../api/usuariosApi'
+import { abrirGate,cerrarGate as cerrarGateAction,cancelarVerificacion,confirmarEmail,crearDireccion,eliminarDireccion as eliminarDireccionThunk,fetchUsuario,guardarPerfil,limpiarPendiente as limpiarPendienteAction,login as loginThunk,logout as logoutThunk,marcarPrincipal as marcarPrincipalThunk,NOTA_SIN_CONFIRMAR,quitarMarks as quitarMarksThunk,reenviarCodigo,registrar as registrarThunk,toggleMark as toggleMarkThunk } from '../redux/authSlice'
 import { useEffect, useMemo, useState } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
+import { useReduxDispatch, useReduxSelector } from '../redux/hooks'
 import { ETIQUETA_ROL, POR_PAGINA } from '../data/admin'
 import { fetchLibros } from '../redux/librosSlice'
 import {
   cambiarRol as cambiarRolAccion, crearUsuario, darDeBajaUsuario, editarUsuario, fetchUsuarios, reactivarUsuario, resolverSolicitud,
 } from '../redux/usuariosSlice'
 import { norm } from '../utils/format'
-import { useAuth } from './useAuth'
-import { useToast } from './useToast'
 
 // Cada acción devuelve { ok } o { error }: los pop-ups muestran el error sin cerrarse
 const useAdminUsuarios = () => {
-  const dispatch = useDispatch()
-  const { user, perfil, actualizarPerfil } = useAuth()
-  const toast = useToast()
-  const { items: usuarios, cargados } = useSelector((state) => state.usuarios)
+  const dispatch = useReduxDispatch()
+  const {user}=useReduxSelector(s=>s.auth)
+
+  const perfil=user?{avatar:user.avatar||'',foto:user.tieneFoto?urlFotoUsuario(user.id):''}:{}
+  const actualizarPerfil=async(v,n)=>{const r=await dispatch(guardarPerfil({valores:v,nuevoPerfil:n,user}));if(r.error){dispatch(fetchUsuario(user.id));throw Error(r.error.message)}return r.payload.sesionCerrada?{sesionCerrada:true}:{}}
+  const toast = (msg, accion) => dispatch(mostrarToast({ msg, accion }))
+  const { items: usuarios, cargados } = useReduxSelector((state) => state.usuarios)
   const [filtros, setFiltros] = useState({ q: '', rol: '', est: '', solicitud: '' })
   const [pagina, setPagina] = useState(1)
 

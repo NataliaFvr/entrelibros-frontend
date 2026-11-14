@@ -1,3 +1,4 @@
+/* oxlint-disable no-unused-vars */
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 
 // Aviso breve: { id, msg, accion?: { texto, a } }. `accion` es un link opcional dentro del aviso (ej. "Ir a mi estantería").

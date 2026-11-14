@@ -1,6 +1,8 @@
+/* oxlint-disable no-unused-vars */
+import { abrirGate,cerrarGate as cerrarGateAction,cancelarVerificacion,confirmarEmail,crearDireccion,eliminarDireccion as eliminarDireccionThunk,fetchUsuario,guardarPerfil,limpiarPendiente as limpiarPendienteAction,login as loginThunk,logout as logoutThunk,marcarPrincipal as marcarPrincipalThunk,NOTA_SIN_CONFIRMAR,quitarMarks as quitarMarksThunk,reenviarCodigo,registrar as registrarThunk,toggleMark as toggleMarkThunk } from '../redux/authSlice'
+import {useDispatch,useSelector} from 'react-redux'
 import { useEffect, useRef } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { useAuth } from '../hooks/useAuth'
 import GateColumn from './GateColumn'
 import { SHELF_PATH } from './Icons'
 
@@ -14,7 +16,9 @@ const MENSAJES = {
 
 // Modal "¿Empezamos un nuevo capítulo?": aparece al intentar una acción que pide sesión
 const LoginGate = () => {
-  const { gate, gateDestino, cerrarGate } = useAuth()
+  const dispatch=useDispatch()
+  const {gateDestino, gate}=useSelector(s=>s.auth)
+  const cerrarGate=({conservarAccion=false}={})=>dispatch(cerrarGateAction({conservarAccion}))
   const navigate = useNavigate()
   const { pathname, search } = useLocation()
 

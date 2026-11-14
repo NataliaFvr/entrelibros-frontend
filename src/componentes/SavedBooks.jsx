@@ -1,5 +1,8 @@
+/* oxlint-disable no-unused-vars */
+import {mostrarToast} from '../redux/toastSlice'
+import { abrirGate,cerrarGate as cerrarGateAction,cancelarVerificacion,confirmarEmail,crearDireccion,eliminarDireccion as eliminarDireccionThunk,fetchUsuario,guardarPerfil,limpiarPendiente as limpiarPendienteAction,login as loginThunk,logout as logoutThunk,marcarPrincipal as marcarPrincipalThunk,NOTA_SIN_CONFIRMAR,quitarMarks as quitarMarksThunk,reenviarCodigo,registrar as registrarThunk,toggleMark as toggleMarkThunk } from '../redux/authSlice'
+import {useDispatch,useSelector} from 'react-redux'
 import { useNavigate } from 'react-router-dom'
-import { useAuth } from '../hooks/useAuth'
 import { useCompra } from '../hooks/useCompra'
 import { useLibros } from '../hooks/useLibros'
 import useLibroPropio from '../hooks/useLibroPropio'
@@ -9,7 +12,10 @@ import SavedBook from './SavedBook'
 // Pestaña Marcapáginas: los libros guardados, en el orden en que se guardaron
 const SavedBooks = () => {
   const navigate = useNavigate()
-  const { marks, toggleMark } = useAuth()
+  const dispatch=useDispatch()
+  const {marks}=useSelector(s=>s.auth)
+  const toggleMark=async(i)=>{const estaba=marks.includes(i);const r=await dispatch(toggleMarkThunk({id:i,estaba}));if(r.error)toast(r.error.message)}
+  const toast=(msg,accion)=>dispatch(mostrarToast({msg,accion}))
   const { agregar } = useCompra()
   const { libros } = useLibros()
   const { esPropio } = useLibroPropio()

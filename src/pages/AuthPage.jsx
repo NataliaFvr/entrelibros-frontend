@@ -1,5 +1,7 @@
+/* oxlint-disable no-unused-vars */
+import { abrirGate,cerrarGate as cerrarGateAction,cancelarVerificacion,confirmarEmail,crearDireccion,eliminarDireccion as eliminarDireccionThunk,fetchUsuario,guardarPerfil,limpiarPendiente as limpiarPendienteAction,login as loginThunk,logout as logoutThunk,marcarPrincipal as marcarPrincipalThunk,NOTA_SIN_CONFIRMAR,quitarMarks as quitarMarksThunk,reenviarCodigo,registrar as registrarThunk,toggleMark as toggleMarkThunk } from '../redux/authSlice'
+import {useDispatch,useSelector} from 'react-redux'
 import { Navigate, useLocation, useNavigate } from 'react-router-dom'
-import { useAuth } from '../hooks/useAuth'
 import AuthHero from '../componentes/AuthHero'
 import AuthTabs from '../componentes/AuthTabs'
 import LoginForm from '../componentes/LoginForm'
@@ -8,7 +10,8 @@ import MiniDeco from '../componentes/MiniDeco'
 
 // tab: 'login' | 'register'. Al entrar vuelve a la página desde la que se pidió la sesión.
 const AuthPage = ({ tab }) => {
-  const { user } = useAuth()
+  const dispatch=useDispatch()
+  const {user}=useSelector(s=>s.auth)
   const navigate = useNavigate()
   const { state } = useLocation()
   const destino = state?.from || '/cuenta'

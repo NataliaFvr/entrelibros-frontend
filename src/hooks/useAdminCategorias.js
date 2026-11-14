@@ -1,15 +1,16 @@
+/* oxlint-disable no-unused-vars */
+import { mostrarToast } from '../redux/toastSlice'
 import { useEffect, useMemo } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
+import { useReduxDispatch, useReduxSelector } from '../redux/hooks'
 import { urlImagenCategoria } from '../api/categoriasApi'
 import { cambiarEstadoCategoria, crearCategoria, editarCategoria, fetchCategoriasAdmin } from '../redux/categoriasSlice'
 import { fetchLibros } from '../redux/librosSlice'
-import { useToast } from './useToast'
 
 // Categorías del panel (activas y de baja). Cada acción devuelve { ok } o { error }.
 const useAdminCategorias = () => {
-  const dispatch = useDispatch()
-  const toast = useToast()
-  const { todas, todasCargadas } = useSelector((state) => state.categorias)
+  const dispatch = useReduxDispatch()
+  const toast = (msg, accion) => dispatch(mostrarToast({ msg, accion }))
+  const { todas, todasCargadas } = useReduxSelector((state) => state.categorias)
 
   useEffect(() => {
     if (!todasCargadas) dispatch(fetchCategoriasAdmin())

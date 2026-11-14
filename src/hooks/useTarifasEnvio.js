@@ -1,10 +1,10 @@
 import { useEffect } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
+import { useReduxDispatch, useReduxSelector } from '../redux/hooks'
 import { fetchTarifas } from '../redux/enviosSlice'
 
 const useTarifasEnvio = () => {
-  const dispatch = useDispatch()
-  const { tarifas, cargada, error } = useSelector((state) => state.envios)
+  const dispatch = useReduxDispatch()
+  const { tarifas, cargada, error } = useReduxSelector((state) => state.envios)
 
   useEffect(() => {
     if (!cargada && !error) dispatch(fetchTarifas())

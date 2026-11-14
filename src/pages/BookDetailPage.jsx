@@ -1,11 +1,12 @@
+/* oxlint-disable no-unused-vars */
+import { mostrarToast } from '../redux/toastSlice'
+import { abrirGate,cerrarGate as cerrarGateAction,cancelarVerificacion,confirmarEmail,crearDireccion,eliminarDireccion as eliminarDireccionThunk,fetchUsuario,guardarPerfil,limpiarPendiente as limpiarPendienteAction,login as loginThunk,logout as logoutThunk,marcarPrincipal as marcarPrincipalThunk,NOTA_SIN_CONFIRMAR,quitarMarks as quitarMarksThunk,reenviarCodigo,registrar as registrarThunk,toggleMark as toggleMarkThunk } from '../redux/authSlice'
 import { useEffect, useMemo } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { useLibros } from '../hooks/useLibros'
 import { fetchLibro } from '../redux/librosSlice'
 import useResenias from '../hooks/useResenias'
-import { useAuth } from '../hooks/useAuth'
-import { useToast } from '../hooks/useToast'
 import { useCompra } from '../hooks/useCompra'
 import useLibroPropio from '../hooks/useLibroPropio'
 import useEsAdmin from '../hooks/useEsAdmin'
@@ -25,8 +26,12 @@ import NotFoundPage from './NotFoundPage'
 const Detalle = ({ libro, libros }) => {
   const navigate = useNavigate()
   const [params] = useSearchParams()
-  const toast = useToast()
-  const { user, requiereLogin, marks, toggleMark, pendiente, limpiarPendiente } = useAuth()
+  const toast = (msg, accion) => dispatch(mostrarToast({ msg, accion }))
+  const dispatch=useDispatch()
+  const {user, marks, pendiente}=useSelector(s=>s.auth)
+  const requiereLogin=(t,d=null,a=null)=>{if(user)return false;dispatch(abrirGate({tipo:t,destino:d,accion:a}));return true}
+  const limpiarPendiente=()=>dispatch(limpiarPendienteAction())
+  const toggleMark=async(i)=>{const estaba=marks.includes(i);const r=await dispatch(toggleMarkThunk({id:i,estaba}));if(r.error)toast(r.error.message)}
   const { agregar } = useCompra()
   const { resenias, promedio, miResenia, puedeResenar, motivo, publicar, eliminar } = useResenias(libro.id)
 

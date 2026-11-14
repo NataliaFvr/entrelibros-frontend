@@ -1,5 +1,6 @@
+/* oxlint-disable no-unused-vars */
+import { mostrarToast } from '../redux/toastSlice'
 import useFormulario from '../hooks/useFormulario'
-import { useToast } from '../hooks/useToast'
 import { enviarContactoApi } from '../api/cuentaApi'
 import { mapearCampos, mensajeError, normalizarError } from '../utils/errorApi'
 import Field from './Field'
@@ -13,7 +14,7 @@ const Obligatorio = ({ children }) => <>{children} <span className="req">*</span
 
 // Formulario de contacto. El backend recibe y valida todos los campos del formulario.
 const ContactForm = () => {
-  const toast = useToast()
+  const toast = (msg, accion) => dispatch(mostrarToast({ msg, accion }))
   const { valores, cambiar, error, setError, reiniciar, errores, setErroresCampos } = useFormulario(INICIAL)
   const campo = (n) => ({ name: n, value: valores[n], onChange: cambiar, error: errores[n] })
 

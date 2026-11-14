@@ -1,13 +1,14 @@
+/* oxlint-disable no-unused-vars */
+import { mostrarToast } from '../redux/toastSlice'
 import { useEffect, useMemo } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
+import { useReduxDispatch, useReduxSelector } from '../redux/hooks'
 import { descartarNotificacion, fetchNotificaciones, marcarLeida, marcarTodasLeidas } from '../redux/notificacionesSlice'
-import { useToast } from './useToast'
 
 // Se piden una vez por cuenta; después cada acción actualiza el estado con la respuesta del back
 const useNotificaciones = (user) => {
-  const dispatch = useDispatch()
-  const toast = useToast()
-  const { idUsuario, items, noLeidas, error } = useSelector((state) => state.notificaciones)
+  const dispatch = useReduxDispatch()
+  const toast = (msg, accion) => dispatch(mostrarToast({ msg, accion }))
+  const { idUsuario, items, noLeidas, error } = useReduxSelector((state) => state.notificaciones)
   const cargadas = idUsuario === user.id
 
   useEffect(() => {

@@ -1,5 +1,7 @@
+/* oxlint-disable no-unused-vars */
+import { abrirGate,cerrarGate as cerrarGateAction,cancelarVerificacion,confirmarEmail,crearDireccion,eliminarDireccion as eliminarDireccionThunk,fetchUsuario,guardarPerfil,limpiarPendiente as limpiarPendienteAction,login as loginThunk,logout as logoutThunk,marcarPrincipal as marcarPrincipalThunk,NOTA_SIN_CONFIRMAR,quitarMarks as quitarMarksThunk,reenviarCodigo,registrar as registrarThunk,toggleMark as toggleMarkThunk } from '../redux/authSlice'
+import {useDispatch,useSelector} from 'react-redux'
 import { useState } from 'react'
-import { useAuth } from '../hooks/useAuth'
 import useFormulario from '../hooks/useFormulario'
 import { CAMPOS_CUENTA } from '../utils/camposApi'
 import { mapearCampos } from '../utils/errorApi'
@@ -10,7 +12,10 @@ import PasswordField from './PasswordField'
 const INICIAL = { nombre: '', apellido: '', nombreUsuario: '', email: '', contrasena: '', repetirContrasena: '' }
 
 const RegisterForm = ({ onPendiente, onIrALogin }) => {
-  const { registrar } = useAuth()
+  const dispatch=useDispatch()
+
+  const errorDe=r=>({error:r.error.message,tipo:r.error.tipo,campos:r.error.campos||{}})
+  const registrar=async(v)=>{const r=await dispatch(registrarThunk(v));return r.error?errorDe(r):{}}
   const { valores, cambiar, errores, setErroresCampos, error, tipoError, setError } = useFormulario(INICIAL)
   const [enviando, setEnviando] = useState(false)
 

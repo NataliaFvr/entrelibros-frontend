@@ -1,12 +1,17 @@
+/* oxlint-disable no-unused-vars */
+import { abrirGate,cerrarGate as cerrarGateAction,cancelarVerificacion,confirmarEmail,crearDireccion,eliminarDireccion as eliminarDireccionThunk,fetchUsuario,guardarPerfil,limpiarPendiente as limpiarPendienteAction,login as loginThunk,logout as logoutThunk,marcarPrincipal as marcarPrincipalThunk,NOTA_SIN_CONFIRMAR,quitarMarks as quitarMarksThunk,reenviarCodigo,registrar as registrarThunk,toggleMark as toggleMarkThunk } from '../redux/authSlice'
+import {useDispatch,useSelector} from 'react-redux'
 import { useState } from 'react'
-import { useAuth } from '../hooks/useAuth'
 import useFormulario from '../hooks/useFormulario'
 import Aviso from './Aviso'
 import Field from './Field'
 import PasswordField from './PasswordField'
 
 const LoginForm = ({ onListo, onPendiente, onIrARegistro, onOlvide }) => {
-  const { login } = useAuth()
+  const dispatch=useDispatch()
+
+  const errorDe=r=>({error:r.error.message,tipo:r.error.tipo,campos:r.error.campos||{}})
+  const login=async(i,c)=>{const r=await dispatch(loginThunk({ident:i,contrasena:c}));if(!r.error)return{};if(r.error.tipo==='CUENTA_NO_CONFIRMADA'){dispatch(reenviarCodigo({email:i.trim(),nota:NOTA_SIN_CONFIRMAR}));return{pendiente:true}}return errorDe(r)}
   const { valores, cambiar, errores, error, tipoError, setError } = useFormulario({ email: '', contrasena: '' })
   const [enviando, setEnviando] = useState(false)
 

@@ -1,8 +1,9 @@
+/* oxlint-disable no-unused-vars */
+import { mostrarToast } from '../redux/toastSlice'
 import { useEffect, useMemo } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
+import { useReduxDispatch, useReduxSelector } from '../redux/hooks'
 import { enRevision, getVendedor } from '../api/vendedorApi'
 import { cambiarEstadoLibro, editarLibro, fetchFotosLibro, fetchMisLibros, publicarLibro, solicitarVendedor } from '../redux/vendedorSlice'
-import { useToast } from './useToast'
 
 const MENSAJE_REVISION = 'Tus cambios fueron enviados a revisión. El libro no se verá en el catálogo hasta que un administrador lo apruebe.'
 
@@ -10,9 +11,9 @@ const MENSAJE_REVISION = 'Tus cambios fueron enviados a revisión. El libro no s
 // Acá solo se despachan las acciones y se arman los avisos.
 // `idEditando` = el libro que está abierto en "Editar": para el formulario hacen falta todas sus fotos.
 const useVendedor = (user, idEditando = null) => {
-  const dispatch = useDispatch()
-  const toast = useToast()
-  const { idUsuario, items, loading, error } = useSelector((state) => state.vendedor)
+  const dispatch = useReduxDispatch()
+  const toast = (msg, accion) => dispatch(mostrarToast({ msg, accion }))
+  const { idUsuario, items, loading, error } = useReduxSelector((state) => state.vendedor)
   const pub = useMemo(() => (idUsuario === user.id ? items : []), [idUsuario, items, user.id]) // solo los de esta cuenta
   const vendedor = useMemo(() => ({ ...getVendedor(user), pub }), [user, pub])
   const aprobado = vendedor.estado === 'aprobado'

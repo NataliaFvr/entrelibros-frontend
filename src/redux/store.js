@@ -2,8 +2,8 @@ import { configureStore } from "@reduxjs/toolkit";
 import adminReducer from "./adminSlice";
 import authReducer from "./authSlice";
 import carritoReducer from "./carritoSlice";
-import catalogoReducer from "./catalogoSlice";
 import categoriasReducer from "./categoriasSlice";
+import catalogoReducer from "./catalogoSlice";
 import enviosReducer from "./enviosSlice";
 import librosReducer from "./librosSlice";
 import moderacionReducer from "./moderacionSlice";
@@ -22,6 +22,7 @@ export const store = configureStore({
     auth: authReducer,
     libros: librosReducer,
     categorias: categoriasReducer,
+    catalogo: catalogoReducer,
     carrito: carritoReducer,
     pedidos: pedidosReducer,
     vendedor: vendedorReducer,
@@ -32,7 +33,6 @@ export const store = configureStore({
     admin: adminReducer,
     resenas: resenasReducer,
     notificaciones: notificacionesReducer,
-    catalogo: catalogoReducer,
     vendedores: vendedoresReducer,
   },
 });

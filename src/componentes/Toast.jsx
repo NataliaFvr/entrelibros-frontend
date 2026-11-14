@@ -1,3 +1,4 @@
+/* oxlint-disable no-unused-vars */
 import { useDispatch, useSelector } from 'react-redux'
 import { Link } from 'react-router-dom'
 import { cerrarToast } from '../redux/toastSlice'
