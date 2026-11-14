@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
-import { useReduxDispatch, useReduxSelector } from '../redux/hooks'
+import { useDispatch, useSelector } from 'react-redux'
 import { POR_PAGINA } from '../data/admin'
 import { fetchOrdenesAdmin } from '../redux/adminSlice'
 
 // Órdenes de la plataforma (las más nuevas primero) con filtro por estado de pago y paginación
 const useAdminOrdenes = () => {
-  const dispatch = useReduxDispatch()
-  const { ordenes, ordenesCargadas } = useReduxSelector((state) => state.admin)
+  const dispatch = useDispatch()
+  const { ordenes, ordenesCargadas } = useSelector((state) => state.admin)
   const [estado, setEstado] = useState('')
   const [pagina, setPagina] = useState(1)
 

@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
-import { useReduxDispatch, useReduxSelector } from '../redux/hooks'
+import { useDispatch, useSelector } from 'react-redux'
 import { POR_PAGINA } from '../data/admin'
 import { fetchPagosAdmin } from '../redux/adminSlice'
 
 // Pagos registrados con sus totales (aprobados, rechazados y monto cobrado) y paginación
 const useAdminPagos = () => {
-  const dispatch = useReduxDispatch()
-  const { pagos, pagosCargados } = useReduxSelector((state) => state.admin)
+  const dispatch = useDispatch()
+  const { pagos, pagosCargados } = useSelector((state) => state.admin)
   useEffect(() => {
     if (!pagosCargados) dispatch(fetchPagosAdmin())
   }, [dispatch, pagosCargados])

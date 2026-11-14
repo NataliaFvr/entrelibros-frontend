@@ -2,20 +2,20 @@
 import { mostrarToast } from '../redux/toastSlice'
 import { abrirGate,cerrarGate as cerrarGateAction,cancelarVerificacion,confirmarEmail,crearDireccion,eliminarDireccion as eliminarDireccionThunk,fetchUsuario,guardarPerfil,limpiarPendiente as limpiarPendienteAction,login as loginThunk,logout as logoutThunk,marcarPrincipal as marcarPrincipalThunk,NOTA_SIN_CONFIRMAR,quitarMarks as quitarMarksThunk,reenviarCodigo,registrar as registrarThunk,toggleMark as toggleMarkThunk } from '../redux/userSlice'
 import { useEffect, useMemo } from 'react'
-import { useReduxDispatch, useReduxSelector } from '../redux/hooks'
+import { useDispatch, useSelector } from 'react-redux'
 import { eliminarResenaVendedor, fetchEstadoResenaVendedor, fetchResenasVendedor, publicarResenaVendedor } from '../redux/resenasSlice'
 import { useLibros } from './useLibros'
 
 const SIN_PERMISO = { puedeResenar: false, motivo: '', idPago: null, miResena: null }
 
 const useResenasVendedor = (tienda, idConocido = null) => {
-  const dispatch = useReduxDispatch()
-  const {user}=useReduxSelector(s=>s.user)
+  const dispatch = useDispatch()
+  const {user}=useSelector(s=>s.user)
   const { libros } = useLibros()
   const toast = (msg, accion) => dispatch(mostrarToast({ msg, accion }))
   const idVendedor = idConocido ?? libros.find((libro) => libro.v === tienda)?.vId ?? null
-  const guardadas = useReduxSelector((state) => (idVendedor == null ? undefined : state.resenas.vendedores[idVendedor]))
-  const estadoGuardado = useReduxSelector((state) => (idVendedor == null ? undefined : state.resenas.estadosVendedor[idVendedor]))
+  const guardadas = useSelector((state) => (idVendedor == null ? undefined : state.resenas.vendedores[idVendedor]))
+  const estadoGuardado = useSelector((state) => (idVendedor == null ? undefined : state.resenas.estadosVendedor[idVendedor]))
 
   useEffect(() => {
     if (idVendedor != null && guardadas === undefined) dispatch(fetchResenasVendedor(idVendedor))

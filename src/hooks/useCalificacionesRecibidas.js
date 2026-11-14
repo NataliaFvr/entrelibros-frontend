@@ -1,14 +1,14 @@
 import { useEffect } from 'react'
-import { useReduxDispatch, useReduxSelector } from '../redux/hooks'
+import { useDispatch, useSelector } from 'react-redux'
 import { fetchOpinionesVendedor, fetchResenasVendedor } from '../redux/resenasSlice'
 
 const promedio = (lista) => (lista.length ? lista.reduce((a, r) => a + r.st, 0) / lista.length : 0)
 
 // Lo que le calificaron a un vendedor: su atención (reseñas al vendedor) y sus libros (opiniones de lo que vendió)
 const useCalificacionesRecibidas = (_tienda, _publicaciones, idVendedor = null) => {
-  const dispatch = useReduxDispatch()
-  const atencion = useReduxSelector((state) => (idVendedor == null ? undefined : state.resenas.vendedores[idVendedor]))
-  const delLibro = useReduxSelector((state) => (idVendedor == null ? undefined : state.resenas.opinionesVendedor[idVendedor]))
+  const dispatch = useDispatch()
+  const atencion = useSelector((state) => (idVendedor == null ? undefined : state.resenas.vendedores[idVendedor]))
+  const delLibro = useSelector((state) => (idVendedor == null ? undefined : state.resenas.opinionesVendedor[idVendedor]))
 
   useEffect(() => {
     if (idVendedor != null && atencion === undefined) dispatch(fetchResenasVendedor(idVendedor))

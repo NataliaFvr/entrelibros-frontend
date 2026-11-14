@@ -1,5 +1,5 @@
 import { useEffect, useMemo } from 'react'
-import { useReduxDispatch, useReduxSelector } from '../redux/hooks'
+import { useDispatch, useSelector } from 'react-redux'
 import { fetchOrdenesAdmin } from '../redux/adminSlice'
 import { fetchSolicitudes } from '../redux/moderacionSlice'
 import { fetchUsuarios } from '../redux/userSlice'
@@ -7,10 +7,10 @@ import { ETIQUETAS_PAGO } from '../utils/pedidos'
 
 // Usa las mismas listas que las otras pantallas del admin: si ya estaban, no se piden de nuevo
 const useAdminResumen = () => {
-  const dispatch = useReduxDispatch()
-  const moderacion = useReduxSelector((state) => state.moderacion)
-  const { items: usuarios, cargados: usuariosCargados } = useReduxSelector((state) => state.user.todos)
-  const { ordenes, ordenesCargadas } = useReduxSelector((state) => state.admin)
+  const dispatch = useDispatch()
+  const moderacion = useSelector((state) => state.moderacion)
+  const { items: usuarios, cargados: usuariosCargados } = useSelector((state) => state.user.todos)
+  const { ordenes, ordenesCargadas } = useSelector((state) => state.admin)
 
   useEffect(() => {
     if (!moderacion.cargadas) dispatch(fetchSolicitudes())
