@@ -2,7 +2,7 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { getVendedorPublicoApi } from "../api/vendedoresApi";
 
 // Perfil público de un vendedor (GET /vendedores/{id}): null si no existe
-export const fetchVendedorPublico = createAsyncThunk("vendedores/fetchvendedorpublico", async (id) => getVendedorPublicoApi(id));
+export const fetchVendedorPublico = createAsyncThunk("vendedores/fetchVendedorPublico", async (id) => getVendedorPublicoApi(id));
 
 const vendedoresSlice = createSlice({
   name: "vendedores",

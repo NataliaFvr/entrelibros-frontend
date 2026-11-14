@@ -1,25 +1,25 @@
 /* oxlint-disable no-unused-vars */
 import { mostrarToast } from '../redux/toastSlice'
 import {urlFotoUsuario} from '../api/usuariosApi'
-import { abrirGate,cerrarGate as cerrarGateAction,cancelarVerificacion,confirmarEmail,crearDireccion,eliminarDireccion as eliminarDireccionThunk,fetchUsuario,guardarPerfil,limpiarPendiente as limpiarPendienteAction,login as loginThunk,logout as logoutThunk,marcarPrincipal as marcarPrincipalThunk,NOTA_SIN_CONFIRMAR,quitarMarks as quitarMarksThunk,reenviarCodigo,registrar as registrarThunk,toggleMark as toggleMarkThunk } from '../redux/authSlice'
+import { abrirGate,cerrarGate as cerrarGateAction,cancelarVerificacion,confirmarEmail,crearDireccion,eliminarDireccion as eliminarDireccionThunk,fetchUsuario,guardarPerfil,limpiarPendiente as limpiarPendienteAction,login as loginThunk,logout as logoutThunk,marcarPrincipal as marcarPrincipalThunk,NOTA_SIN_CONFIRMAR,quitarMarks as quitarMarksThunk,reenviarCodigo,registrar as registrarThunk,toggleMark as toggleMarkThunk } from '../redux/userSlice'
 import { useEffect, useMemo, useState } from 'react'
 import { useReduxDispatch, useReduxSelector } from '../redux/hooks'
 import { ETIQUETA_ROL, POR_PAGINA } from '../data/admin'
 import { fetchLibros } from '../redux/librosSlice'
 import {
   cambiarRol as cambiarRolAccion, crearUsuario, darDeBajaUsuario, editarUsuario, fetchUsuarios, reactivarUsuario, resolverSolicitud,
-} from '../redux/usuariosSlice'
+} from '../redux/userSlice'
 import { norm } from '../utils/format'
 
 // Cada acción devuelve { ok } o { error }: los pop-ups muestran el error sin cerrarse
 const useAdminUsuarios = () => {
   const dispatch = useReduxDispatch()
-  const {user}=useReduxSelector(s=>s.auth)
+  const {user}=useReduxSelector(s=>s.user)
 
   const perfil=user?{avatar:user.avatar||'',foto:user.tieneFoto?urlFotoUsuario(user.id):''}:{}
   const actualizarPerfil=async(v,n)=>{const r=await dispatch(guardarPerfil({valores:v,nuevoPerfil:n,user}));if(r.error){dispatch(fetchUsuario(user.id));throw Error(r.error.message)}return r.payload.sesionCerrada?{sesionCerrada:true}:{}}
   const toast = (msg, accion) => dispatch(mostrarToast({ msg, accion }))
-  const { items: usuarios, cargados } = useReduxSelector((state) => state.usuarios)
+  const { items: usuarios, cargados } = useReduxSelector((state) => state.user.todos)
   const [filtros, setFiltros] = useState({ q: '', rol: '', est: '', solicitud: '' })
   const [pagina, setPagina] = useState(1)
 
@@ -57,7 +57,7 @@ const useAdminUsuarios = () => {
   const crear = (v) => ejecutar(crearUsuario(v), 'Usuario creado')
 
   const editar = async (u, v) => {
-    // La propia cuenta pasa por authSlice: así la sesión sigue al día
+    // La propia cuenta pasa por userSlice: así la sesión sigue al día
     if (u.propio) {
       try {
         await actualizarPerfil(v, perfil)

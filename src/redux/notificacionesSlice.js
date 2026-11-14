@@ -5,7 +5,7 @@ import {
 
 // Las 20 más nuevas y la cantidad de no leídas. `idUsuario` = de qué cuenta son.
 export const fetchNotificaciones = createAsyncThunk(
-  "notificaciones/fetchnotificaciones",
+  "notificaciones/fetchNotificaciones",
   async () => {
     const [items, noLeidas] = await Promise.all([listarPrimeraPaginaNotificacionesApi(), cantidadNoLeidasApi()]);
     return { items, noLeidas };
@@ -13,14 +13,14 @@ export const fetchNotificaciones = createAsyncThunk(
   { condition: (_, { getState }) => !getState().notificaciones.loading },
 );
 
-export const marcarLeida = createAsyncThunk("notificaciones/marcarleida", async (id) => marcarLeidaApi(id));
+export const marcarLeida = createAsyncThunk("notificaciones/marcarLeida", async (id) => marcarLeidaApi(id));
 
-export const descartarNotificacion = createAsyncThunk("notificaciones/descartarnotificacion", async (id) => {
+export const descartarNotificacion = createAsyncThunk("notificaciones/descartarNotificacion", async (id) => {
   await eliminarNotificacionApi(id);
   return id;
 });
 
-export const marcarTodasLeidas = createAsyncThunk("notificaciones/marcartodasleidas", async () => marcarTodasLeidasApi());
+export const marcarTodasLeidas = createAsyncThunk("notificaciones/marcarTodasLeidas", async () => marcarTodasLeidasApi());
 
 const notificacionesSlice = createSlice({
   name: "notificaciones",

@@ -1,5 +1,5 @@
 /* oxlint-disable no-unused-vars */
-import { abrirGate,cerrarGate as cerrarGateAction,cancelarVerificacion,confirmarEmail,crearDireccion,eliminarDireccion as eliminarDireccionThunk,fetchUsuario,guardarPerfil,limpiarPendiente as limpiarPendienteAction,login as loginThunk,logout as logoutThunk,marcarPrincipal as marcarPrincipalThunk,NOTA_SIN_CONFIRMAR,quitarMarks as quitarMarksThunk,reenviarCodigo,registrar as registrarThunk,toggleMark as toggleMarkThunk } from '../redux/authSlice'
+import { abrirGate,cerrarGate as cerrarGateAction,cancelarVerificacion,confirmarEmail,crearDireccion,eliminarDireccion as eliminarDireccionThunk,fetchUsuario,guardarPerfil,limpiarPendiente as limpiarPendienteAction,login as loginThunk,logout as logoutThunk,marcarPrincipal as marcarPrincipalThunk,NOTA_SIN_CONFIRMAR,quitarMarks as quitarMarksThunk,reenviarCodigo,registrar as registrarThunk,toggleMark as toggleMarkThunk } from '../redux/userSlice'
 import {useDispatch,useSelector} from 'react-redux'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
@@ -17,6 +17,7 @@ const Col = ({ titulo, children }) => {
 // Con sesión lleva al perfil; sin sesión abre el modal de login y, al entrar, vuelve a /cuenta
 const MiCuenta = () => {
   const dispatch=useDispatch()
+  const { user } = useSelector((state) => state.user)
 
   const requiereLogin=(t,d=null,a=null)=>{if(user)return false;dispatch(abrirGate({tipo:t,destino:d,accion:a}));return true}
   const alClick = (e) => { if (requiereLogin('account', '/cuenta')) e.preventDefault() }

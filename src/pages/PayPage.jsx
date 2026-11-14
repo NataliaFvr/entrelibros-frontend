@@ -1,6 +1,6 @@
 /* oxlint-disable no-unused-vars */
 import { mostrarToast } from '../redux/toastSlice'
-import { abrirGate,cerrarGate as cerrarGateAction,cancelarVerificacion,confirmarEmail,crearDireccion,eliminarDireccion as eliminarDireccionThunk,fetchUsuario,guardarPerfil,limpiarPendiente as limpiarPendienteAction,login as loginThunk,logout as logoutThunk,marcarPrincipal as marcarPrincipalThunk,NOTA_SIN_CONFIRMAR,quitarMarks as quitarMarksThunk,reenviarCodigo,registrar as registrarThunk,toggleMark as toggleMarkThunk } from '../redux/authSlice'
+import { abrirGate,cerrarGate as cerrarGateAction,cancelarVerificacion,confirmarEmail,crearDireccion,eliminarDireccion as eliminarDireccionThunk,fetchUsuario,guardarPerfil,limpiarPendiente as limpiarPendienteAction,login as loginThunk,logout as logoutThunk,marcarPrincipal as marcarPrincipalThunk,NOTA_SIN_CONFIRMAR,quitarMarks as quitarMarksThunk,reenviarCodigo,registrar as registrarThunk,toggleMark as toggleMarkThunk } from '../redux/userSlice'
 import { useDispatch, useSelector } from 'react-redux'
 import { useState } from 'react'
 import { Link, Navigate, useNavigate, useParams } from 'react-router-dom'
@@ -27,7 +27,7 @@ const PayPage = () => {
   const navigate = useNavigate()
   const toast = (msg, accion) => dispatch(mostrarToast({ msg, accion }))
   const dispatch=useDispatch()
-  const {user}=useSelector(s=>s.auth)
+  const {user}=useSelector(s=>s.user)
   const { pedidos, pagarPedido, cancelarPedido } = useCompra()
   const { libros } = useLibros()
   const [error, setError] = useState('')

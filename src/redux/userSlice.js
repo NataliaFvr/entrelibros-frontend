@@ -1,60 +1,69 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { dataUrlAFile } from "../api/adaptadores";
-import { cerrarSesionApi, getSesionApi, loginApi, reenviarCodigoApi, registrarApi, traerUsuarioApi, verificarEmailApi } from "../api/authApi";
+import { aUsuarioFront, dataUrlAFile } from "../api/adaptadores";
+import {
+  cambiarContraseniaApi, cerrarSesionApi, getSesionApi, loginApi, recuperarContraseniaApi,
+  reenviarCodigoApi, registrarApi, traerUsuarioApi, verificarEmailApi,
+} from "../api/authApi";
 import { agregarMarcapaginaApi, listarMarcapaginasApi, quitarMarcapaginaApi } from "../api/cuentaApi";
 import {
   crearDireccionApi, eliminarDireccionApi, listarDireccionesApi, marcarPrincipalApi, resolverPrincipal,
 } from "../api/direccionesApi";
 import { actualizarUsuarioApi, quitarFotoUsuarioApi, subirFotoUsuarioApi } from "../api/usuariosApi";
+import {
+  cambiarRolApi, crearUsuarioApi, darDeBajaUsuarioApi, listarUsuariosApi, reactivarUsuarioApi, resolverSolicitudApi,
+} from "../api/usuariosApi";
 import { solicitarVendedor } from "./vendedorSlice";
-
-// Los errores ya llegan con el mensaje claro (lo arma el interceptor de api/axiosConfig.js), así que las acciones no
-// necesitan try/catch: si la llamada falla, createAsyncThunk despacha el `rejected` solo.
-// En los formularios de sesión además hace falta saber qué pasó (tipo) y qué campo está mal (campos): se agregan al error.
-const conDetalle = {
-  serializeError: (err) => ({
-    message: err.message,
-    tipo: err.info ? err.info.tipo : undefined,
-    campos: err.info ? err.info.campos : {},
-  }),
-};
+import { conDetalle } from "./conDetalle";
 
 export const NOTA_SIN_CONFIRMAR = "Tu cuenta todavía no está confirmada. Te mandamos un código nuevo.";
 
 // --- Datos de la cuenta (los pide App.jsx al tener sesión) ---
-export const fetchUsuario = createAsyncThunk("auth/fetchusuario", async (id) => traerUsuarioApi(id));
+export const fetchUsuario = createAsyncThunk("user/fetchUsuario", async (id) => traerUsuarioApi(id));
 
-export const fetchMarks = createAsyncThunk("auth/fetchmarks", async (idUsuario) => ({
+export const fetchMarks = createAsyncThunk("user/fetchMarks", async (idUsuario) => ({
   idUsuario,
   ids: await listarMarcapaginasApi(),
 }));
 
-export const fetchDirecciones = createAsyncThunk("auth/fetchdirecciones", async (idUsuario) => ({
+export const fetchDirecciones = createAsyncThunk("user/fetchDirecciones", async (idUsuario) => ({
   idUsuario,
   lista: await listarDireccionesApi(),
 }));
 
 // --- Sesión ---
-export const login = createAsyncThunk("auth/login", async ({ ident, contrasena }) => loginApi(ident, contrasena), conDetalle);
+export const login = createAsyncThunk("user/login", async ({ ident, contrasena }) => loginApi(ident, contrasena), conDetalle);
 
-export const registrar = createAsyncThunk("auth/registrar", async (valores) => registrarApi(valores), conDetalle);
+export const registrar = createAsyncThunk("user/registrar", async (valores) => registrarApi(valores), conDetalle);
 
-export const logout = createAsyncThunk("auth/logout", async () => {
+export const logout = createAsyncThunk("user/logout", async () => {
   cerrarSesionApi();
 });
 
 // --- Confirmación del e-mail ---
 export const confirmarEmail = createAsyncThunk(
-  "auth/confirmaremail",
+  "user/confirmarEmail",
   async ({ email, codigo }) => verificarEmailApi(email, codigo),
   conDetalle,
 );
 
 // `nota` (opcional) = el texto que queda arriba del formulario una vez enviado el código
-export const reenviarCodigo = createAsyncThunk("auth/reenviarcodigo", async ({ email }) => reenviarCodigoApi(email), conDetalle);
+export const reenviarCodigo = createAsyncThunk("user/reenviarCodigo", async ({ email }) => reenviarCodigoApi(email), conDetalle);
+
+export const recuperarContrasenia = createAsyncThunk(
+  "user/recuperarContrasenia",
+  async (email) => recuperarContraseniaApi(email),
+  conDetalle,
+);
+
+export const cambiarContrasenia = createAsyncThunk(
+  "user/cambiarContrasenia",
+  async ({ email, codigo, nuevaContrasenia, repetirNuevaContrasenia }) =>
+    cambiarContraseniaApi({ email, codigo, nuevaContrasenia, repetirNuevaContrasenia }),
+  conDetalle,
+);
 
 // --- Perfil ---
-export const guardarPerfil = createAsyncThunk("auth/guardarperfil", async ({ valores: v, nuevoPerfil, user }) => {
+export const guardarPerfil = createAsyncThunk("user/guardarPerfil", async ({ valores: v, nuevoPerfil, user }) => {
   const cambios = { nombre: v.nombre.trim(), apellido: v.apellido.trim(), nombreUsuario: v.nombreUsuario, email: v.email.trim() };
   if (v.contrasena) { cambios.contrasena = v.contrasena; cambios.contrasenaActual = v.contrasenaActual; }
   const fotoNueva = typeof nuevoPerfil.foto === "string" && nuevoPerfil.foto.startsWith("data:");
@@ -68,26 +77,56 @@ export const guardarPerfil = createAsyncThunk("auth/guardarperfil", async ({ val
 });
 
 // --- Direcciones: el estado se actualiza con lo que responde el back, sin volver a pedir la lista ---
-export const crearDireccion = createAsyncThunk("auth/creardireccion", async (direccion) => crearDireccionApi(direccion));
+export const crearDireccion = createAsyncThunk("user/crearDireccion", async (direccion) => crearDireccionApi(direccion));
 
-export const eliminarDireccion = createAsyncThunk("auth/eliminardireccion", async (id) => {
+export const eliminarDireccion = createAsyncThunk("user/eliminarDireccion", async (id) => {
   await eliminarDireccionApi(id);
   return id;
 });
 
 // El back devuelve la lista entera: cambia la nueva principal y también la que lo era antes
-export const marcarPrincipal = createAsyncThunk("auth/marcarprincipal", async (id) => marcarPrincipalApi(id));
+export const marcarPrincipal = createAsyncThunk("user/marcarPrincipal", async (id) => marcarPrincipalApi(id));
 
 // --- Marcapáginas: el slice actualiza la lista al instante (pending) y la revierte si el back falla (rejected) ---
-export const toggleMark = createAsyncThunk("auth/togglemark", async ({ id, estaba }) =>
+export const toggleMark = createAsyncThunk("user/toggleMark", async ({ id, estaba }) =>
   (estaba ? quitarMarcapaginaApi(id) : agregarMarcapaginaApi(id)));
 
-export const quitarMarks = createAsyncThunk("auth/quitarmarks", async (ids) => {
+export const quitarMarks = createAsyncThunk("user/quitarMarks", async (ids) => {
   await Promise.allSettled(ids.map((id) => quitarMarcapaginaApi(id)));
 });
 
-const authSlice = createSlice({
-  name: "auth",
+const aFila = (u) => ({ ...u, quiereVender: u.estadoSolicitud === "PENDIENTE" });
+
+export const fetchUsuarios = createAsyncThunk("user/fetchUsuarios", async () => listarUsuariosApi(), {
+  condition: (_, { getState }) => !getState().user.todos.loading,
+});
+
+export const crearUsuario = createAsyncThunk("user/crearUsuario", async (v) => {
+  if (!["COMPRADOR", "VENDEDOR"].includes(v.rol)) throw new Error("Desde el panel solo se pueden crear compradores o vendedores.");
+  return crearUsuarioApi(v);
+});
+
+export const editarUsuario = createAsyncThunk("user/editarUsuario", async ({ id, cambios }) => actualizarUsuarioApi(id, cambios));
+
+export const cambiarRol = createAsyncThunk("user/cambiarRol", async ({ id, rol, datosVendedor }) =>
+  aUsuarioFront(await cambiarRolApi(id, rol, datosVendedor)));
+
+export const darDeBajaUsuario = createAsyncThunk("user/darDeBajaUsuario", async (id) =>
+  aUsuarioFront(await darDeBajaUsuarioApi(id)));
+
+export const reactivarUsuario = createAsyncThunk("user/reactivarUsuario", async (id) =>
+  aUsuarioFront(await reactivarUsuarioApi(id)));
+
+export const resolverSolicitud = createAsyncThunk("user/resolverSolicitud", async ({ id, aprobada, comentario }) =>
+  aUsuarioFront(await resolverSolicitudApi(id, aprobada, comentario)));
+
+const reemplazar = (state, action) => {
+  const index = state.todos.items.findIndex((u) => u.id === action.payload.id);
+  if (index !== -1) state.todos.items[index] = aFila(action.payload);
+};
+
+const userSlice = createSlice({
+  name: "user",
   initialState: {
     user: getSesionApi(),
     marks: [],
@@ -97,6 +136,12 @@ const authSlice = createSlice({
     pendiente: null, // acción que quedó esperando el login: { tipo: 'cart' | 'buy' | 'fav', idLibro }
     verif: null, // { id, nota, cuenta: { email, nombre } } mientras se confirma el e-mail
     error: null,
+    todos: {
+      items: [],
+      cargados: false,
+      loading: false,
+      error: null,
+    },
   },
   reducers: {
     abrirGate: (state, action) => {
@@ -136,11 +181,20 @@ const authSlice = createSlice({
       .addCase(fetchUsuario.fulfilled, (state, action) => {
         if (state.user && state.user.id === action.payload.id) state.user = action.payload; // si ya cambió de cuenta, se descarta
       })
+      .addCase(fetchUsuario.rejected, (state, action) => {
+        state.error = action.error.message;
+      })
       .addCase(fetchMarks.fulfilled, (state, action) => {
         if (state.user && state.user.id === action.payload.idUsuario) state.marks = action.payload.ids;
       })
+      .addCase(fetchMarks.rejected, (state, action) => {
+        state.error = action.error.message;
+      })
       .addCase(fetchDirecciones.fulfilled, (state, action) => {
         if (state.user && state.user.id === action.payload.idUsuario) state.direcciones = action.payload.lista;
+      })
+      .addCase(fetchDirecciones.rejected, (state, action) => {
+        state.error = action.error.message;
       })
       .addCase(login.fulfilled, (state, action) => {
         entrar(state, action.payload);
@@ -164,6 +218,7 @@ const authSlice = createSlice({
         if (state.verif) state.verif.nota = action.meta.arg.nota || "Te enviamos un código nuevo.";
       })
       .addCase(guardarPerfil.fulfilled, (state, action) => {
+        reemplazar(state, { payload: action.payload.user });
         if (action.payload.sesionCerrada) salir(state);
         else state.user = action.payload.user;
       })
@@ -171,6 +226,27 @@ const authSlice = createSlice({
       .addCase(solicitarVendedor.fulfilled, (state, action) => {
         if (state.user && state.user.id === action.payload.id) state.user = { ...state.user, ...action.payload };
       })
+      .addCase(fetchUsuarios.pending, (state) => {
+        state.todos.loading = true;
+        state.todos.error = null;
+      })
+      .addCase(fetchUsuarios.fulfilled, (state, action) => {
+        state.todos.loading = false;
+        state.todos.cargados = true;
+        state.todos.items = action.payload.map(aFila);
+      })
+      .addCase(fetchUsuarios.rejected, (state, action) => {
+        state.todos.loading = false;
+        state.todos.error = action.error.message;
+      })
+      .addCase(crearUsuario.fulfilled, (state, action) => {
+        state.todos.items.push(aFila(action.payload));
+      })
+      .addCase(editarUsuario.fulfilled, reemplazar)
+      .addCase(cambiarRol.fulfilled, reemplazar)
+      .addCase(darDeBajaUsuario.fulfilled, reemplazar)
+      .addCase(reactivarUsuario.fulfilled, reemplazar)
+      .addCase(resolverSolicitud.fulfilled, reemplazar)
       .addCase(crearDireccion.fulfilled, (state, action) => {
         state.direcciones.push(action.payload);
       })
@@ -196,6 +272,6 @@ const authSlice = createSlice({
   },
 });
 
-export const { abrirGate, cerrarGate, limpiarPendiente, cancelarVerificacion } = authSlice.actions;
+export const { abrirGate, cerrarGate, limpiarPendiente, cancelarVerificacion } = userSlice.actions;
 
-export default authSlice.reducer;
+export default userSlice.reducer;

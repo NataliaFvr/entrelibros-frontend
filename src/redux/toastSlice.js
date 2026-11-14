@@ -3,7 +3,7 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 
 // Aviso breve: { id, msg, accion?: { texto, a } }. `accion` es un link opcional dentro del aviso (ej. "Ir a mi estantería").
 // El thunk espera el tiempo que dura el aviso y, al terminar, el slice lo cierra (solo si sigue siendo el mismo aviso).
-export const mostrarToast = createAsyncThunk("toast/mostrartoast", async ({ accion }) => {
+export const mostrarToast = createAsyncThunk("toast/mostrarToast", async ({ accion }) => {
   await new Promise((resolver) => setTimeout(resolver, accion ? 4000 : 2400));
 });
 

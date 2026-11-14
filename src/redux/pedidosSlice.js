@@ -2,22 +2,22 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { cancelarOrdenApi, checkoutApi, crearPagoApi, listarPedidosApi } from "../api/comprasApi";
 
 // Cada orden ya incluye sus ítems. El número de pedido (`n`) es el id de la orden.
-export const fetchPedidos = createAsyncThunk("pedidos/fetchpedidos", async (idUsuario) => {
+export const fetchPedidos = createAsyncThunk("pedidos/fetchPedidos", async (idUsuario) => {
   if (idUsuario == null) return []; // sin sesión (o admin): sin pedidos
   return listarPedidosApi();
 });
 
 // POST /carrito/checkout: convierte el carrito en un pedido PENDIENTE (reserva 1 h) y devuelve la orden
-export const crearPedido = createAsyncThunk("pedidos/crearpedido", async (direccion) => {
+export const crearPedido = createAsyncThunk("pedidos/crearPedido", async (direccion) => {
   return checkoutApi({ idDireccion: direccion.id, provincia: direccion.prov });
 });
 
 // POST /pagos {idOrden, proveedor}: devuelve { resultado, orden, … } (el back hoy aprueba siempre: SIMULADO_APROBADO)
-export const pagarPedido = createAsyncThunk("pedidos/pagarpedido", async ({ n, proveedor }) => {
+export const pagarPedido = createAsyncThunk("pedidos/pagarPedido", async ({ n, proveedor }) => {
   return crearPagoApi(Number(n), proveedor);
 });
 
-export const cancelarPedido = createAsyncThunk("pedidos/cancelarpedido", async (n) => {
+export const cancelarPedido = createAsyncThunk("pedidos/cancelarPedido", async (n) => {
   return cancelarOrdenApi(Number(n));
 });
 

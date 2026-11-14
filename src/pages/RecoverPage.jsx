@@ -1,6 +1,6 @@
 /* oxlint-disable no-unused-vars */
 import { mostrarToast } from '../redux/toastSlice'
-import { abrirGate,cerrarGate as cerrarGateAction,cancelarVerificacion,confirmarEmail,crearDireccion,eliminarDireccion as eliminarDireccionThunk,fetchUsuario,guardarPerfil,limpiarPendiente as limpiarPendienteAction,login as loginThunk,logout as logoutThunk,marcarPrincipal as marcarPrincipalThunk,NOTA_SIN_CONFIRMAR,quitarMarks as quitarMarksThunk,reenviarCodigo,registrar as registrarThunk,toggleMark as toggleMarkThunk } from '../redux/authSlice'
+import { abrirGate,cerrarGate as cerrarGateAction,cancelarVerificacion,confirmarEmail,crearDireccion,eliminarDireccion as eliminarDireccionThunk,fetchUsuario,guardarPerfil,limpiarPendiente as limpiarPendienteAction,login as loginThunk,logout as logoutThunk,marcarPrincipal as marcarPrincipalThunk,NOTA_SIN_CONFIRMAR,quitarMarks as quitarMarksThunk,reenviarCodigo,registrar as registrarThunk,toggleMark as toggleMarkThunk } from '../redux/userSlice'
 import { useDispatch, useSelector } from 'react-redux'
 import { Navigate, useLocation, useNavigate } from 'react-router-dom'
 import AuthHero from '../componentes/AuthHero'
@@ -10,7 +10,7 @@ import RecoverForm from '../componentes/RecoverForm'
 // /recuperar — "Olvidé mi contraseña": código por e-mail y contraseña nueva. Al terminar vuelve a /ingresar.
 const RecoverPage = () => {
   const dispatch=useDispatch()
-  const {user}=useSelector(s=>s.auth)
+  const {user}=useSelector(s=>s.user)
   const toast = (msg, accion) => dispatch(mostrarToast({ msg, accion }))
   const navigate = useNavigate()
   const { state } = useLocation()

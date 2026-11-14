@@ -15,15 +15,15 @@ import { cancelarVenta } from "./ventasSlice";
 // y el slice lo reemplaza en la lista: después de guardar no se vuelve a pedir nada.
 
 // `idUsuario` queda guardado para saber de qué cuenta son los libros (si se cambia de cuenta, se vuelven a pedir)
-export const fetchMisLibros = createAsyncThunk("vendedor/fetchmislibros", async () => traerPublicaciones(), {
+export const fetchMisLibros = createAsyncThunk("vendedor/fetchMisLibros", async () => traerPublicaciones(), {
   condition: (_, { getState }) => !getState().vendedor.loading,
 });
 
 // GET /imagenes-libro/libro/{id}: todas las fotos de un libro, en orden (solo hacen falta para editarlo)
-export const fetchFotosLibro = createAsyncThunk("vendedor/fetchfotoslibro", async (id) => getImagenesApi(id));
+export const fetchFotosLibro = createAsyncThunk("vendedor/fetchFotosLibro", async (id) => getImagenesApi(id));
 
 // POST /libros (queda EN_REVISION) y después las fotos. Si las fotos fallan, el libro igual quedó creado: se avisa aparte.
-export const publicarLibro = createAsyncThunk("vendedor/publicarlibro", async (datos) => {
+export const publicarLibro = createAsyncThunk("vendedor/publicarLibro", async (datos) => {
   const creado = await crearLibroApi(aLibroRequest(datos, await idsDeCategorias(categoriasDe(datos))));
   const { imgs, aviso } = await guardarFotosApi(creado.id, datos.imgs);
   // La fila nueva sale de lo que devolvió el back (precio final incluido), no del formulario
@@ -37,7 +37,7 @@ const soloCambios = (datos, actual) => {
   return Object.fromEntries(Object.entries(nuevo).filter(([campo, valor]) => String(valor ?? "") !== String(antes[campo] ?? "")));
 };
 
-export const editarLibro = createAsyncThunk("vendedor/editarlibro", async ({ datos, actual }) => {
+export const editarLibro = createAsyncThunk("vendedor/editarLibro", async ({ datos, actual }) => {
   const pedido = soloCambios(datos, actual);
   // Las categorías viajan si cambiaron, o si el libro quedó de baja (por ejemplo, su categoría se dio de baja y elige otra)
   const nombres = categoriasDe(datos);
@@ -64,11 +64,11 @@ export const editarLibro = createAsyncThunk("vendedor/editarlibro", async ({ dat
 });
 
 // PATCH /libros/{id}/baja o /reactivar: devuelve el libro como quedó
-export const cambiarEstadoLibro = createAsyncThunk("vendedor/cambiarestadolibro", async ({ id, activo }) =>
+export const cambiarEstadoLibro = createAsyncThunk("vendedor/cambiarEstadoLibro", async ({ id, activo }) =>
   aLibroFront(await (activo ? reactivarApi(id) : darDeBajaApi(id))));
 
-// POST /usuarios/solicitud-vendedor: devuelve el usuario con la solicitud PENDIENTE (authSlice lo guarda en la sesión)
-export const solicitarVendedor = createAsyncThunk("vendedor/solicitarvendedor", async (datos) => solicitarVendedorApi(datos));
+// POST /usuarios/solicitud-vendedor: devuelve el usuario con la solicitud PENDIENTE (userSlice lo guarda en la sesión)
+export const solicitarVendedor = createAsyncThunk("vendedor/solicitarVendedor", async (datos) => solicitarVendedorApi(datos));
 
 const vendedorSlice = createSlice({
   name: "vendedor",

@@ -1,5 +1,5 @@
 /* oxlint-disable no-unused-vars */
-import { abrirGate,cerrarGate as cerrarGateAction,cancelarVerificacion,confirmarEmail,crearDireccion,eliminarDireccion as eliminarDireccionThunk,fetchUsuario,guardarPerfil,limpiarPendiente as limpiarPendienteAction,login as loginThunk,logout as logoutThunk,marcarPrincipal as marcarPrincipalThunk,NOTA_SIN_CONFIRMAR,quitarMarks as quitarMarksThunk,reenviarCodigo,registrar as registrarThunk,toggleMark as toggleMarkThunk } from '../redux/authSlice'
+import { abrirGate,cerrarGate as cerrarGateAction,cancelarVerificacion,confirmarEmail,crearDireccion,eliminarDireccion as eliminarDireccionThunk,fetchUsuario,guardarPerfil,limpiarPendiente as limpiarPendienteAction,login as loginThunk,logout as logoutThunk,marcarPrincipal as marcarPrincipalThunk,NOTA_SIN_CONFIRMAR,quitarMarks as quitarMarksThunk,reenviarCodigo,registrar as registrarThunk,toggleMark as toggleMarkThunk } from '../redux/userSlice'
 import { useEffect, useMemo } from 'react'
 import { useReduxDispatch, useReduxSelector } from '../redux/hooks'
 import { eliminarResenaLibro, fetchEstadoResenaLibro, fetchResenasLibro, publicarResenaLibro } from '../redux/resenasSlice'
@@ -9,7 +9,7 @@ const SIN_PERMISO = { puedeResenar: false, motivo: '', idOrdenItem: null, miRese
 // Reseñas de un libro y si la sesión actual puede opinar (lo decide el back)
 const useResenias = (libroId) => {
   const dispatch = useReduxDispatch()
-  const {user}=useReduxSelector(s=>s.auth)
+  const {user}=useReduxSelector(s=>s.user)
   const guardadas = useReduxSelector((state) => state.resenas.libros[libroId])
   const estadoGuardado = useReduxSelector((state) => state.resenas.estadosLibro[libroId])
 

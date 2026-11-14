@@ -1,11 +1,11 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { cargarOrdenes, cargarPagos } from "../api/adminApi";
 
-export const fetchOrdenesAdmin = createAsyncThunk("admin/fetchordenesadmin", async () => cargarOrdenes(), {
+export const fetchOrdenesAdmin = createAsyncThunk("admin/fetchOrdenesAdmin", async () => cargarOrdenes(), {
   condition: (_, { getState }) => !getState().admin.cargandoOrdenes,
 });
 
-export const fetchPagosAdmin = createAsyncThunk("admin/fetchpagosadmin", async () => cargarPagos(), {
+export const fetchPagosAdmin = createAsyncThunk("admin/fetchPagosAdmin", async () => cargarPagos(), {
   condition: (_, { getState }) => !getState().admin.cargandoPagos,
 });
 
@@ -25,6 +25,7 @@ const adminSlice = createSlice({
     builder
       .addCase(fetchOrdenesAdmin.pending, (state) => {
         state.cargandoOrdenes = true;
+        state.error = null;
       })
       .addCase(fetchOrdenesAdmin.fulfilled, (state, action) => {
         state.cargandoOrdenes = false;
@@ -37,6 +38,7 @@ const adminSlice = createSlice({
       })
       .addCase(fetchPagosAdmin.pending, (state) => {
         state.cargandoPagos = true;
+        state.error = null;
       })
       .addCase(fetchPagosAdmin.fulfilled, (state, action) => {
         state.cargandoPagos = false;

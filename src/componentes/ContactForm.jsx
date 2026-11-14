@@ -1,8 +1,9 @@
 /* oxlint-disable no-unused-vars */
 import { mostrarToast } from '../redux/toastSlice'
+import { enviarContacto } from '../redux/contactoSlice'
+import { useDispatch } from 'react-redux'
 import useFormulario from '../hooks/useFormulario'
-import { enviarContactoApi } from '../api/cuentaApi'
-import { mapearCampos, mensajeError, normalizarError } from '../utils/errorApi'
+import { mapearCampos } from '../utils/errorApi'
 import Field from './Field'
 import SelectField from './SelectField'
 import TextAreaField from './TextAreaField'
@@ -14,14 +15,14 @@ const Obligatorio = ({ children }) => <>{children} <span className="req">*</span
 
 // Formulario de contacto. El backend recibe y valida todos los campos del formulario.
 const ContactForm = () => {
+  const dispatch = useDispatch()
   const toast = (msg, accion) => dispatch(mostrarToast({ msg, accion }))
   const { valores, cambiar, error, setError, reiniciar, errores, setErroresCampos } = useFormulario(INICIAL)
   const campo = (n) => ({ name: n, value: valores[n], onChange: cambiar, error: errores[n] })
 
   const enviar = async (e) => {
     e.preventDefault()
-    try {
-      await enviarContactoApi({
+    const resultado = await dispatch(enviarContacto({
         nombre: valores.nombre.trim(),
         apellido: valores.apellido.trim(),
         email: valores.email.trim(),
@@ -29,13 +30,13 @@ const ContactForm = () => {
         telefono: valores.telefono.trim(),
         departamento: valores.departamento,
         mensaje: valores.mensaje.trim(),
-      })
-    } catch (err) {
-      const campos = mapearCampos(normalizarError(err).campos, {
+      }))
+    if (resultado.error) {
+      const campos = mapearCampos(resultado.error.campos, {
         nombre: 'nombre', apellido: 'apellido', email: 'email', area: 'area', telefono: 'telefono', departamento: 'departamento', mensaje: 'mensaje',
       })
       if (Object.keys(campos).length) return setErroresCampos(campos)
-      return setError(mensajeError(err))
+      return setError(resultado.error.message)
     }
     setError('')
     reiniciar()

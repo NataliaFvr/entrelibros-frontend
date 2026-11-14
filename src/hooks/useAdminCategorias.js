@@ -3,14 +3,13 @@ import { mostrarToast } from '../redux/toastSlice'
 import { useEffect, useMemo } from 'react'
 import { useReduxDispatch, useReduxSelector } from '../redux/hooks'
 import { urlImagenCategoria } from '../api/categoriasApi'
-import { cambiarEstadoCategoria, crearCategoria, editarCategoria, fetchCategoriasAdmin } from '../redux/categoriasSlice'
-import { fetchLibros } from '../redux/librosSlice'
+import { cambiarEstadoCategoria, crearCategoria, editarCategoria, fetchCategoriasAdmin, fetchLibros } from '../redux/librosSlice'
 
 // Categorías del panel (activas y de baja). Cada acción devuelve { ok } o { error }.
 const useAdminCategorias = () => {
   const dispatch = useReduxDispatch()
   const toast = (msg, accion) => dispatch(mostrarToast({ msg, accion }))
-  const { todas, todasCargadas } = useReduxSelector((state) => state.categorias)
+  const { todas, todasCargadas } = useReduxSelector((state) => state.libros.categorias)
 
   useEffect(() => {
     if (!todasCargadas) dispatch(fetchCategoriasAdmin())

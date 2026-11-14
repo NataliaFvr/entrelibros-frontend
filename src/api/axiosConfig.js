@@ -62,7 +62,7 @@ const contextoDe = (config) => {
   const url = config.url || ''
   if (url.endsWith('/auth/login')) return 'login'
   if (url.endsWith('/auth/register')) return 'registro'
-  if (/\/auth\/(verificar-email|reenviar-codigo)/.test(url)) return 'verificacion'
+  if (/\/auth\/(verificar-email|reenviar-codigo|recuperar-contrasenia|cambiar-contrasenia)/.test(url)) return 'verificacion'
   if (url.startsWith('/usuarios') && config.method !== 'get') return 'registro' // 409 = usuario o e-mail repetido
   return ''
 }

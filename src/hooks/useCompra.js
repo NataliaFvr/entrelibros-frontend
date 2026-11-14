@@ -1,6 +1,6 @@
 /* oxlint-disable no-unused-vars */
 import { mostrarToast } from '../redux/toastSlice'
-import { abrirGate,cerrarGate as cerrarGateAction,cancelarVerificacion,confirmarEmail,crearDireccion,eliminarDireccion as eliminarDireccionThunk,fetchUsuario,guardarPerfil,limpiarPendiente as limpiarPendienteAction,login as loginThunk,logout as logoutThunk,marcarPrincipal as marcarPrincipalThunk,NOTA_SIN_CONFIRMAR,quitarMarks as quitarMarksThunk,reenviarCodigo,registrar as registrarThunk,toggleMark as toggleMarkThunk } from '../redux/authSlice'
+import { abrirGate,cerrarGate as cerrarGateAction,cancelarVerificacion,confirmarEmail,crearDireccion,eliminarDireccion as eliminarDireccionThunk,fetchUsuario,guardarPerfil,limpiarPendiente as limpiarPendienteAction,login as loginThunk,logout as logoutThunk,marcarPrincipal as marcarPrincipalThunk,NOTA_SIN_CONFIRMAR,quitarMarks as quitarMarksThunk,reenviarCodigo,registrar as registrarThunk,toggleMark as toggleMarkThunk } from '../redux/userSlice'
 import { useReduxDispatch, useReduxSelector } from '../redux/hooks'
 import { agregarAlCarrito, cambiarCantidad, fetchCarrito, quitarDelCarrito } from '../redux/carritoSlice'
 import { cancelarPedido, crearPedido, fetchPedidos, pagarPedido } from '../redux/pedidosSlice'
@@ -14,7 +14,7 @@ let cola = Promise.resolve()
 export const useCompra = () => {
   const dispatch = useReduxDispatch()
   const toast = (msg, accion) => dispatch(mostrarToast({ msg, accion }))
-  const { user, marks } = useReduxSelector((s) => s.auth)
+  const { user, marks } = useReduxSelector((s) => s.user)
   const quitarMarks = (ids) => {
     const q = ids.filter((i) => marks.includes(i))
     if (q.length) dispatch(quitarMarksThunk(q))

@@ -1,5 +1,5 @@
 /* oxlint-disable no-unused-vars */
-import { abrirGate,cerrarGate as cerrarGateAction,cancelarVerificacion,confirmarEmail,crearDireccion,eliminarDireccion as eliminarDireccionThunk,fetchUsuario,guardarPerfil,limpiarPendiente as limpiarPendienteAction,login as loginThunk,logout as logoutThunk,marcarPrincipal as marcarPrincipalThunk,NOTA_SIN_CONFIRMAR,quitarMarks as quitarMarksThunk,reenviarCodigo,registrar as registrarThunk,toggleMark as toggleMarkThunk } from '../redux/authSlice'
+import { abrirGate,cerrarGate as cerrarGateAction,cancelarVerificacion,confirmarEmail,crearDireccion,eliminarDireccion as eliminarDireccionThunk,fetchUsuario,guardarPerfil,limpiarPendiente as limpiarPendienteAction,login as loginThunk,logout as logoutThunk,marcarPrincipal as marcarPrincipalThunk,NOTA_SIN_CONFIRMAR,quitarMarks as quitarMarksThunk,reenviarCodigo,registrar as registrarThunk,toggleMark as toggleMarkThunk } from '../redux/userSlice'
 import {useDispatch,useSelector} from 'react-redux'
 import VistaSwitch from './VistaSwitch'
 import './VistaAdmin.css'
@@ -8,7 +8,7 @@ import './VistaAdmin.css'
 // sin perfil, estantería ni notificaciones; solo el cambio de vista y la sesión.
 const HeaderAdmin = () => {
   const dispatch=useDispatch()
-  const {user}=useSelector(s=>s.auth)
+  const {user}=useSelector(s=>s.user)
   const logout=()=>dispatch(logoutThunk())
   return (
     <div className="header-icons header-admin">

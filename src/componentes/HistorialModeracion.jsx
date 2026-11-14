@@ -1,4 +1,6 @@
-import useHistorialModeracion from '../hooks/useHistorialModeracion'
+import { useEffect, useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import { fetchHistorial, limpiarErrorHistorial } from '../redux/moderacionSlice'
 import Aviso from './Aviso'
 import EmptyBlock from './EmptyBlock'
 import Pager from './Pager'
@@ -20,7 +22,34 @@ const fechaHora = (iso) => (iso ? new Date(iso).toLocaleString('es-AR', { dateSt
 // Historial de decisiones de moderación: todas, o las de un libro. `libro` { id, titulo } filtra; `onLibro(libro)` lo elige
 // desde una fila y `onTodos()` quita el filtro. En celular y tablet cada fila es una tarjeta (mismas reglas que .adm-table).
 const HistorialModeracion = ({ libro, onLibro, onTodos }) => {
-  const h = useHistorialModeracion(libro)
+  const dispatch = useDispatch()
+  const idLibro = libro ? libro.id : null
+  const [pagina, setPagina] = useState(1)
+  const [libroPrevio, setLibroPrevio] = useState(idLibro)
+  if (libroPrevio !== idLibro) {
+    setLibroPrevio(idLibro)
+    setPagina(1)
+  }
+  const clave = `${idLibro ?? 'todo'}:${pagina}`
+  const datos = useSelector((state) => state.moderacion.historial[clave])
+  const error = useSelector((state) => state.moderacion.erroresHistorial[clave])
+  const cargando = useSelector((state) => Boolean(state.moderacion.pendientesHistorial[clave]))
+  useEffect(() => {
+    if (!datos && !error && !cargando) dispatch(fetchHistorial({ idLibro, pagina }))
+  }, [dispatch, idLibro, pagina, datos, error, cargando])
+  const h = {
+    registros: datos?.registros || [],
+    total: datos?.total || 0,
+    paginas: datos?.paginas || 1,
+    pagina,
+    setPagina,
+    cargando: cargando || (!datos && !error),
+    error,
+    reintentar: () => {
+      dispatch(limpiarErrorHistorial(clave))
+      dispatch(fetchHistorial({ idLibro, pagina }))
+    },
+  }
 
   return (
     <section aria-label="Historial de moderación">

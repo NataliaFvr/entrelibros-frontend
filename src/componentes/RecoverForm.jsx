@@ -1,8 +1,8 @@
 import { useState } from 'react'
-import { cambiarContraseniaApi, recuperarContraseniaApi } from '../api/authApi'
+import { useDispatch } from 'react-redux'
+import { cambiarContrasenia, recuperarContrasenia } from '../redux/userSlice'
 import useCuentaRegresiva from '../hooks/useCuentaRegresiva'
 import useFormulario from '../hooks/useFormulario'
-import { normalizarError } from '../utils/errorApi'
 import { enmascararMail } from '../utils/format'
 import Aviso from './Aviso'
 import Field from './Field'
@@ -10,6 +10,7 @@ import PasswordField from './PasswordField'
 
 // Paso 1: pedir el código. POST /api/v1/auth/recuperar-contrasenia { email } -> el back lo manda por e-mail (vale 15 min).
 const PedirCodigo = ({ emailInicial, onEnviado, onVolver }) => {
+  const dispatch = useDispatch()
   const { valores, cambiar, errores, error, tipoError, setError } = useFormulario({ email: emailInicial })
   const [enviando, setEnviando] = useState(false)
 
@@ -18,16 +19,14 @@ const PedirCodigo = ({ emailInicial, onEnviado, onVolver }) => {
     if (enviando) return
     setError('')
     setEnviando(true)
-    try {
-      const email = valores.email.trim()
-      await recuperarContraseniaApi(email)
+    const email = valores.email.trim()
+    const resultado = await dispatch(recuperarContrasenia(email))
+    if (!resultado.error) {
       onEnviado(email)
-    } catch (err) {
-      const info = normalizarError(err, 'verificacion') // 404 = "No encontramos una cuenta con ese e-mail"
-      setError(info.mensaje, info.tipo)
-    } finally {
-      setEnviando(false)
+    } else {
+      setError(resultado.error.message, resultado.error.tipo)
     }
+    setEnviando(false)
   }
 
   return (
@@ -44,6 +43,7 @@ const PedirCodigo = ({ emailInicial, onEnviado, onVolver }) => {
 
 // Paso 2: código + contraseña nueva. POST /api/v1/auth/cambiar-contrasenia { email, codigo, nuevaContrasenia }
 const NuevaContrasena = ({ email, onListo, onOtroMail }) => {
+  const dispatch = useDispatch()
   const { valores, cambiar, errores, setErroresCampos, error, tipoError, setError } = useFormulario({ codigo: '', nuevaContrasenia: '', repetirNuevaContrasenia: '' })
   const [restante, reiniciarCuenta] = useCuentaRegresiva(30)
   const [enviando, setEnviando] = useState(false)
@@ -54,34 +54,29 @@ const NuevaContrasena = ({ email, onListo, onOtroMail }) => {
     if (enviando) return
     setError('')
     setEnviando(true)
-    try {
-      await cambiarContraseniaApi({
+    const resultado = await dispatch(cambiarContrasenia({
         email,
         codigo: valores.codigo.trim(),
         nuevaContrasenia: valores.nuevaContrasenia,
         repetirNuevaContrasenia: valores.repetirNuevaContrasenia,
-      })
+      }))
+    if (!resultado.error) {
       onListo()
-    } catch (err) {
-      const info = normalizarError(err, 'verificacion') // código inválido o vencido
-      setErroresCampos(info.campos || {}) // los campos se llaman igual que en el back
-      setError(info.mensaje, info.tipo)
-    } finally {
-      setEnviando(false)
+    } else {
+      setErroresCampos(resultado.error.campos || {})
+      setError(resultado.error.message, resultado.error.tipo)
     }
+    setEnviando(false)
   }
 
   const reenviar = async () => {
-    try {
-      await recuperarContraseniaApi(email)
+    const resultado = await dispatch(recuperarContrasenia(email))
+    if (!resultado.error) {
       reiniciarCuenta()
       cambiar('codigo', '') // el código anterior ya no sirve; la contraseña escrita se conserva
       setError('')
       setAviso('Te enviamos un código nuevo. El anterior ya no sirve.')
-    } catch (err) {
-      const info = normalizarError(err, 'verificacion')
-      setError(info.mensaje, info.tipo)
-    }
+    } else setError(resultado.error.message, resultado.error.tipo)
   }
 
   const props = (nombre) => ({ name: nombre, value: valores[nombre], onChange: cambiar, error: errores[nombre] })

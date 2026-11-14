@@ -1,7 +1,9 @@
 /* oxlint-disable no-unused-vars */
 import {mostrarToast} from '../redux/toastSlice'
-import { abrirGate,cerrarGate as cerrarGateAction,cancelarVerificacion,confirmarEmail,crearDireccion,eliminarDireccion as eliminarDireccionThunk,fetchUsuario,guardarPerfil,limpiarPendiente as limpiarPendienteAction,login as loginThunk,logout as logoutThunk,marcarPrincipal as marcarPrincipalThunk,NOTA_SIN_CONFIRMAR,quitarMarks as quitarMarksThunk,reenviarCodigo,registrar as registrarThunk,toggleMark as toggleMarkThunk } from '../redux/authSlice'
+import { abrirGate,cerrarGate as cerrarGateAction,cancelarVerificacion,confirmarEmail,crearDireccion,eliminarDireccion as eliminarDireccionThunk,fetchUsuario,guardarPerfil,limpiarPendiente as limpiarPendienteAction,login as loginThunk,logout as logoutThunk,marcarPrincipal as marcarPrincipalThunk,NOTA_SIN_CONFIRMAR,quitarMarks as quitarMarksThunk,reenviarCodigo,registrar as registrarThunk,toggleMark as toggleMarkThunk } from '../redux/userSlice'
+import { fetchLibro } from '../redux/librosSlice'
 import {useDispatch,useSelector} from 'react-redux'
+import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useCompra } from '../hooks/useCompra'
 import { useLibros } from '../hooks/useLibros'
@@ -13,14 +15,25 @@ import SavedBook from './SavedBook'
 const SavedBooks = () => {
   const navigate = useNavigate()
   const dispatch=useDispatch()
-  const {marks}=useSelector(s=>s.auth)
+  const {marks}=useSelector(s=>s.user)
+  const sueltos = useSelector((state) => state.libros.sueltos)
   const toggleMark=async(i)=>{const estaba=marks.includes(i);const r=await dispatch(toggleMarkThunk({id:i,estaba}));if(r.error)toast(r.error.message)}
   const toast=(msg,accion)=>dispatch(mostrarToast({msg,accion}))
   const { agregar } = useCompra()
   const { libros } = useLibros()
   const { esPropio } = useLibroPropio()
 
-  const guardados = marks.map((id) => libros.find((l) => l.id === id)).filter(Boolean)
+  const faltantesClave = marks
+    .filter((id) => !libros.some((libro) => libro.id === id) && sueltos[id] === undefined)
+    .join(',')
+  useEffect(() => {
+    if (!faltantesClave) return
+    faltantesClave.split(',').forEach((id) => dispatch(fetchLibro(Number(id))))
+  }, [dispatch, faltantesClave])
+
+  const guardados = marks
+    .map((id) => libros.find((l) => l.id === id) || sueltos[id])
+    .filter(Boolean)
 
   if (!guardados.length) {
     return (

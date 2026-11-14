@@ -5,17 +5,16 @@ import { useDispatch, useSelector } from "react-redux"
 import { escucharSesionVencida } from "./api/axiosConfig"
 import LoginGate from "./componentes/LoginGate"
 import Toast from "./componentes/Toast"
-import { fetchDirecciones, fetchMarks, fetchUsuario, logout } from "./redux/authSlice"
+import { fetchDirecciones, fetchMarks, fetchUsuario, logout } from "./redux/userSlice"
 import { fetchCarrito } from "./redux/carritoSlice"
-import { fetchCategorias } from "./redux/categoriasSlice"
-import { fetchLibros } from "./redux/librosSlice"
+import { fetchCategorias, fetchLibros } from "./redux/librosSlice"
 import { fetchPedidos } from "./redux/pedidosSlice"
 import AppRoutes from "./routes/AppRoutes"
 
 const App = () => {
   const dispatch = useDispatch()
   const toast = (msg, accion) => dispatch(mostrarToast({ msg, accion }))
-  const user = useSelector((state) => state.auth.user)
+  const user = useSelector((state) => state.user.user)
   const idUsuario = user ? user.id : null
   const esAdmin = Boolean(user) && user.rol === "ADMIN"
   const idCompra = idUsuario !== null && !esAdmin ? idUsuario : null // el admin no tiene marcapáginas, direcciones, carrito ni pedidos

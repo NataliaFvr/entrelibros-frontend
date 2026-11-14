@@ -1,5 +1,5 @@
 /* oxlint-disable no-unused-vars */
-import { abrirGate,cerrarGate as cerrarGateAction,cancelarVerificacion,confirmarEmail,crearDireccion,eliminarDireccion as eliminarDireccionThunk,fetchUsuario,guardarPerfil,limpiarPendiente as limpiarPendienteAction,login as loginThunk,logout as logoutThunk,marcarPrincipal as marcarPrincipalThunk,NOTA_SIN_CONFIRMAR,quitarMarks as quitarMarksThunk,reenviarCodigo,registrar as registrarThunk,toggleMark as toggleMarkThunk } from '../redux/authSlice'
+import { abrirGate,cerrarGate as cerrarGateAction,cancelarVerificacion,confirmarEmail,crearDireccion,eliminarDireccion as eliminarDireccionThunk,fetchUsuario,guardarPerfil,limpiarPendiente as limpiarPendienteAction,login as loginThunk,logout as logoutThunk,marcarPrincipal as marcarPrincipalThunk,NOTA_SIN_CONFIRMAR,quitarMarks as quitarMarksThunk,reenviarCodigo,registrar as registrarThunk,toggleMark as toggleMarkThunk } from '../redux/userSlice'
 import { useReduxDispatch, useReduxSelector } from '../redux/hooks'
 import useTarifasEnvio from './useTarifasEnvio'
 import { zonaEnvio } from '../utils/envio'
@@ -8,7 +8,7 @@ import { zonaEnvio } from '../utils/envio'
 // principal del comprador. Sin dirección no se sabe la zona: se muestra la tarifa más barata ("desde").
 const useEnvioFicha = (libro) => {
   const dispatch=useReduxDispatch()
-  const {user, direcciones}=useReduxSelector(s=>s.auth)
+  const {user, direcciones}=useReduxSelector(s=>s.user)
   const tarifas = useTarifasEnvio()
   const provincia = ((direcciones || []).find((d) => d.principal) || (direcciones || [])[0])?.prov || user?.provincia || ''
 

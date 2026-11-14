@@ -5,45 +5,45 @@ import {
   getEstadoResenaVendedorApi, getResenasLibroApi, getResenasVendedorApi, getTodasResenasLibroApi, getTodasResenasVendedorApi,
   modificarResenaLibroApi, modificarResenaVendedorApi,
 } from "../api/resenasApi";
-import { confirmarEmail, login, logout } from "./authSlice";
+import { confirmarEmail, login, logout } from "./userSlice";
 
 // --- Reseñas de libros ---
-export const fetchResenasLibro = createAsyncThunk("resenas/fetchresenaslibro", async (idLibro) => getResenasLibroApi(idLibro));
+export const fetchResenasLibro = createAsyncThunk("resenas/fetchResenasLibro", async (idLibro) => getResenasLibroApi(idLibro));
 
-export const fetchEstadoResenaLibro = createAsyncThunk("resenas/fetchestadoresenalibro", async (idLibro) => getEstadoResenaLibroApi(idLibro));
+export const fetchEstadoResenaLibro = createAsyncThunk("resenas/fetchEstadoResenaLibro", async (idLibro) => getEstadoResenaLibroApi(idLibro));
 
-export const publicarResenaLibro = createAsyncThunk("resenas/publicarresenalibro", async ({ idOrdenItem, miResenia, opinion }) => {
+export const publicarResenaLibro = createAsyncThunk("resenas/publicarResenaLibro", async ({ idOrdenItem, miResenia, opinion }) => {
   const cuerpo = { calificacion: opinion.st, comentario: opinion.t };
   return miResenia ? modificarResenaLibroApi(miResenia.id, cuerpo) : crearResenaLibroApi({ idOrdenItem, ...cuerpo });
 });
 
 // `resena` = la reseña que se borra (trae idLibro e idOrdenItem)
-export const eliminarResenaLibro = createAsyncThunk("resenas/eliminarresenalibro", async (resena) => {
+export const eliminarResenaLibro = createAsyncThunk("resenas/eliminarResenaLibro", async (resena) => {
   await eliminarResenaLibroApi(resena.id);
   return resena;
 });
 
 // --- Reseñas de vendedores ---
-export const fetchResenasVendedor = createAsyncThunk("resenas/fetchresenasvendedor", async (idVendedor) => getResenasVendedorApi(idVendedor));
+export const fetchResenasVendedor = createAsyncThunk("resenas/fetchResenasVendedor", async (idVendedor) => getResenasVendedorApi(idVendedor));
 
-export const fetchEstadoResenaVendedor = createAsyncThunk("resenas/fetchestadoresenavendedor", async (idVendedor) =>
+export const fetchEstadoResenaVendedor = createAsyncThunk("resenas/fetchEstadoResenaVendedor", async (idVendedor) =>
   getEstadoResenaVendedorApi(idVendedor));
 
-export const publicarResenaVendedor = createAsyncThunk("resenas/publicarresenavendedor", async ({ idVendedor, idPago, miResena, clasificacion, comentario }) => {
+export const publicarResenaVendedor = createAsyncThunk("resenas/publicarResenaVendedor", async ({ idVendedor, idPago, miResena, clasificacion, comentario }) => {
   const cuerpo = { idPago, idVendedor, clasificacion, comentario };
   return miResena ? modificarResenaVendedorApi(miResena.id, cuerpo) : crearResenaVendedorApi(cuerpo);
 });
 
-export const eliminarResenaVendedor = createAsyncThunk("resenas/eliminarresenavendedor", async (resena) => {
+export const eliminarResenaVendedor = createAsyncThunk("resenas/eliminarResenaVendedor", async (resena) => {
   await eliminarResenaVendedorApi(resena.id);
   return resena;
 });
 
 // Opiniones de todos los libros que vendió un vendedor (su pestaña "Reputación")
-export const fetchOpinionesVendedor = createAsyncThunk("resenas/fetchopinionesvendedor", async (idVendedor) => getOpinionesVendedor(idVendedor));
+export const fetchOpinionesVendedor = createAsyncThunk("resenas/fetchOpinionesVendedor", async (idVendedor) => getOpinionesVendedor(idVendedor));
 
 // --- Admin: todas las reseñas ---
-export const fetchTodasResenas = createAsyncThunk("resenas/fetchtodasresenas", async () => {
+export const fetchTodasResenas = createAsyncThunk("resenas/fetchTodasResenas", async () => {
   const [libros, vendedores] = await Promise.all([getTodasResenasLibroApi(), getTodasResenasVendedorApi()]);
   return { libros, vendedores };
 });
@@ -90,6 +90,14 @@ const resenasSlice = createSlice({
       .addCase(fetchEstadoResenaLibro.fulfilled, (state, action) => {
         state.estadosLibro[action.meta.arg] = action.payload;
       })
+      .addCase(fetchEstadoResenaLibro.rejected, (state, action) => {
+        state.estadosLibro[action.meta.arg] = {
+          puedeResenar: false,
+          motivo: action.error.message,
+          idOrdenItem: null,
+          miResenia: null,
+        };
+      })
       .addCase(publicarResenaLibro.fulfilled, (state, action) => {
         const resena = action.payload;
         reemplazarOAgregar(state.libros[resena.idLibro], resena);
@@ -117,6 +125,14 @@ const resenasSlice = createSlice({
       })
       .addCase(fetchEstadoResenaVendedor.fulfilled, (state, action) => {
         state.estadosVendedor[action.meta.arg] = action.payload;
+      })
+      .addCase(fetchEstadoResenaVendedor.rejected, (state, action) => {
+        state.estadosVendedor[action.meta.arg] = {
+          puedeResenar: false,
+          motivo: action.error.message,
+          idPago: null,
+          miResena: null,
+        };
       })
       .addCase(publicarResenaVendedor.fulfilled, (state, action) => {
         const resena = action.payload;

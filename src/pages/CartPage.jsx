@@ -1,11 +1,11 @@
 /* oxlint-disable no-unused-vars */
 import { mostrarToast } from '../redux/toastSlice'
-import { abrirGate,cerrarGate as cerrarGateAction,cancelarVerificacion,confirmarEmail,crearDireccion,eliminarDireccion as eliminarDireccionThunk,fetchUsuario,guardarPerfil,limpiarPendiente as limpiarPendienteAction,login as loginThunk,logout as logoutThunk,marcarPrincipal as marcarPrincipalThunk,NOTA_SIN_CONFIRMAR,quitarMarks as quitarMarksThunk,reenviarCodigo,registrar as registrarThunk,toggleMark as toggleMarkThunk } from '../redux/authSlice'
+import { abrirGate,cerrarGate as cerrarGateAction,cancelarVerificacion,confirmarEmail,crearDireccion,eliminarDireccion as eliminarDireccionThunk,fetchUsuario,guardarPerfil,limpiarPendiente as limpiarPendienteAction,login as loginThunk,logout as logoutThunk,marcarPrincipal as marcarPrincipalThunk,NOTA_SIN_CONFIRMAR,quitarMarks as quitarMarksThunk,reenviarCodigo,registrar as registrarThunk,toggleMark as toggleMarkThunk } from '../redux/userSlice'
 import { useDispatch, useSelector } from 'react-redux'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { useCompra } from '../hooks/useCompra'
-import useCotizacionEnvio from '../hooks/useCotizacionEnvio'
+import { fetchCotizacion } from '../redux/carritoSlice'
 import Stepper from '../componentes/Stepper'
 import EmptyBlock from '../componentes/EmptyBlock'
 import CartList from '../componentes/CartList'
@@ -15,7 +15,7 @@ import AvisoCompraPendiente from '../componentes/AvisoCompraPendiente'
 const CartPage = () => {
   const navigate = useNavigate()
   const dispatch=useDispatch()
-  const {user, direcciones}=useSelector(s=>s.auth)
+  const {user, direcciones}=useSelector(s=>s.user)
   const { carrito, crearPedido, pedidos } = useCompra()
   const toast = (msg, accion) => dispatch(mostrarToast({ msg, accion }))
   const [elegidaPorUsuario, setElegida] = useState(null) // null = todavía no tocó el selector: se usa la principal
@@ -29,7 +29,14 @@ const CartPage = () => {
   const items = carrito.map((libro) => ({ libro, q: libro.q }))
   const subtotalCarrito = carrito.reduce((suma, item) => suma + item.subtotal, 0)
   // El back cotiza el envío para la dirección elegida: se ve el total antes de confirmar
-  const cotizacion = useCotizacionEnvio(direccion?.id, carrito.map((c) => `${c.id}:${c.q}`).join(','))
+  const clave = carrito.map((c) => `${c.id}:${c.q}`).join(',')
+  const cotizacion = useSelector((s) => s.carrito.cotizaciones[`${direccion?.id}:${clave}`]) || null
+  const errorCotizacion = useSelector((s) => s.carrito.errores[`${direccion?.id}:${clave}`])
+  useEffect(() => {
+    if (direccion?.id != null && clave && cotizacion == null && !errorCotizacion) {
+      dispatch(fetchCotizacion({ idDireccion: direccion.id, clave }))
+    }
+  }, [dispatch, direccion?.id, clave, cotizacion, errorCotizacion])
   if (!user) return <Navigate to="/ingresar" replace state={{ from: '/carrito' }} />
 
   const finalizar = async () => {

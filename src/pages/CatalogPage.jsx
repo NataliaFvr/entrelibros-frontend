@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import {useDispatch, useSelector} from 'react-redux'
 import { Link, useLocation } from 'react-router-dom'
-import { claveBusqueda, fetchFiltrosDisponibles, fetchPagina } from '../redux/catalogoSlice'
-import { limpiarFiltros, reiniciarFiltros, setFiltros, setPagina, toggleFiltro } from '../redux/librosSlice'
+import {
+  claveBusqueda, fetchFiltrosDisponibles, fetchPagina, limpiarFiltros, reiniciarFiltros, setFiltros, setPagina, toggleFiltro,
+} from '../redux/librosSlice'
 import { filtrosDesdeURL } from '../utils/filtrosURL'
 import { plural } from '../utils/format'
 import SortSelect from '../componentes/SortSelect'
@@ -16,7 +17,7 @@ const VACIO = { libros: [], total: 0, pages: 0 }
 
 const Catalogo = ({ inicial, categorias, filtros }) => {
   const dispatch = useDispatch()
-  const {user, direcciones}=useSelector(s=>s.auth)
+  const {user, direcciones}=useSelector(s=>s.user)
   const filtrosElegidos = useSelector((state) => state.libros.filtrosElegidos)
   const [inicializado, setInicializado] = useState(false)
   const f = inicializado ? filtrosElegidos : inicial
@@ -36,8 +37,8 @@ const Catalogo = ({ inicial, categorias, filtros }) => {
   }, [dispatch])
 
   const clave = claveBusqueda(f, provinciaComprador)
-  const guardada = useSelector((state) => state.catalogo.paginas[clave])
-  const error = useSelector((state) => Boolean(state.catalogo.errores[clave]))
+  const guardada = useSelector((state) => state.libros.catalogo.paginas[clave])
+  const error = useSelector((state) => Boolean(state.libros.catalogo.errores[clave]))
   const cargar = () => dispatch(fetchPagina({ clave, f, provinciaComprador }))
 
   useEffect(() => {
@@ -96,9 +97,9 @@ const Catalogo = ({ inicial, categorias, filtros }) => {
 const CatalogPage = () => {
   const { search, key } = useLocation()
   const dispatch = useDispatch()
-  const categorias = useSelector((state) => state.categorias.items)
-  const cargandoCategorias = useSelector((state) => state.categorias.loading)
-  const filtros = useSelector((state) => state.catalogo.filtros)
+  const categorias = useSelector((state) => state.libros.categorias.items)
+  const cargandoCategorias = useSelector((state) => state.libros.categorias.loading)
+  const filtros = useSelector((state) => state.libros.catalogo.filtros)
 
   useEffect(() => {
     if (!filtros) dispatch(fetchFiltrosDisponibles())
