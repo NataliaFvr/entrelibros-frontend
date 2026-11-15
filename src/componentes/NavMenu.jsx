@@ -2,7 +2,6 @@ import { useDispatch, useSelector } from 'react-redux'
 import { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { useLibros } from '../hooks/useLibros'
-import useEsAdmin from '../hooks/useEsAdmin'
 import useMenuDesplegable from '../hooks/useMenuDesplegable'
 import useIrAVender from '../hooks/useIrAVender'
 import { AYUDA_LINKS, AYUDA_RAIZ } from '../data/ayuda'
@@ -75,7 +74,7 @@ const NavMenu = () => {
   const enNosotros = pathname === NOSOTROS.to
   const userRedux = useSelector((state) => state.user.user)
   const vender = useIrAVender({ dispatch, user: userRedux })
-  const esAdmin = useEsAdmin()
+  const esAdmin = useSelector((state) => state.user.user?.rol === 'ADMIN')
 
   // El administrador solo ve inicio y catálogo
   if (esAdmin) {
