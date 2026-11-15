@@ -1,13 +1,13 @@
+import { useSelector } from 'react-redux'
 import { Link } from 'react-router-dom'
 import { initials } from '../utils/colors'
 import { plural } from '../utils/format'
 import { rutaVendedor } from '../utils/vendedor'
-import useEsAdmin from '../hooks/useEsAdmin'
 import './SearchResults.css'
 
 // Vendedores que coinciden con la búsqueda: tarjetas con enlace directo a su perfil público (/vendedor/:id)
 const SellerMatches = ({ tiendas }) => {
-  const esAdmin = useEsAdmin()
+  const esAdmin = useSelector((state) => state.user.user?.rol === 'ADMIN')
   if (!tiendas.length || esAdmin) return null // el admin no tiene perfiles públicos de tienda a los que ir
   return (
     <section className="sm" aria-label="Vendedores que coinciden con tu búsqueda">

@@ -3,7 +3,6 @@ import {useDispatch,useSelector} from 'react-redux'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import useIrAVender from '../hooks/useIrAVender'
-import useEsAdmin from '../hooks/useEsAdmin'
 import { AYUDA_LINKS } from '../data/ayuda'
 import { NOSOTROS } from '../data/nosotros'
 import { LEGALES_LINKS } from '../data/legales'
@@ -35,7 +34,7 @@ const VenderMisLibros = () => {
 // Términos y Privacidad se leen en un pop-up, sin salir de la página en la que estás
 const Footer = () => {
   const [legal, setLegal] = useState(null)
-  const esAdmin = useEsAdmin()
+  const esAdmin = useSelector((state) => state.user.user?.rol === 'ADMIN')
 
   return (
     <>

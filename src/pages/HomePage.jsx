@@ -8,8 +8,8 @@ import SeccionLibros from '../componentes/SeccionLibros'
 import FlashSale from '../componentes/FlashSale'
 import Tagline from '../componentes/Tagline'
 import CategoryGrid from '../componentes/CategoryGrid'
-import MiniDeco from '../componentes/MiniDeco'
 import AuthorGrid from '../componentes/AuthorGrid'
+import ProximaAventura from '../componentes/ProximaAventura'
 
 const HomePage = () => {
   const librosRedux = useSelector((state) => state.libros.items)
@@ -38,18 +38,18 @@ const HomePage = () => {
   }, [libros, categorias])
 
   return (
-    <>
+    <div className="home-page">
       <Hero libros={best} />
+      <SeccionLibros titulo="Libros Nuevos" to="/libros?estado=nuevos&sort=new" libros={nuevos} />
+      <SeccionLibros titulo="Libros que buscan una nueva estantería" to="/libros?estado=usados" libros={usados} />
+      <ProximaAventura libros={libros} categorias={categorias} />
       <SeccionLibros titulo="Bestsellers" to="/libros?sort=best" libros={best} />
       <SeccionLibros titulo="En Oferta" to="/libros?desc=1" libros={conDesc} />
       <FlashSale libros={topDesc} />
-      <SeccionLibros titulo="Libros Nuevos" to="/libros?estado=nuevos&sort=new" libros={nuevos} />
-      <SeccionLibros titulo="Libros Usados" to="/libros?estado=usados" libros={usados} />
-      <Tagline />
       <CategoryGrid categorias={topCategorias} />
-      <MiniDeco />
+      <Tagline />
       <AuthorGrid autores={autores} />
-    </>
+    </div>
   )
 }
 

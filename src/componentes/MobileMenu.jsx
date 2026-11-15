@@ -2,7 +2,6 @@ import { logout as logoutThunk } from '../redux/userSlice'
 import {useDispatch,useSelector} from 'react-redux'
 import { Link } from 'react-router-dom'
 import { useLibros } from '../hooks/useLibros'
-import useEsAdmin from '../hooks/useEsAdmin'
 import useIrAVender from '../hooks/useIrAVender'
 import { AYUDA_LINKS, AYUDA_RAIZ } from '../data/ayuda'
 import { NOSOTROS } from '../data/nosotros'
@@ -19,7 +18,7 @@ const MobileMenu = ({ abierto, onCerrar }) => {
   const userRedux = useSelector((state) => state.user.user)
   const dispatch = useDispatch()
   const irAVender = useIrAVender({ dispatch, user: userRedux })
-  const esAdmin = useEsAdmin()
+  const esAdmin = useSelector((state) => state.user.user?.rol === 'ADMIN')
 
   const logout=()=>dispatch(logoutThunk())
 

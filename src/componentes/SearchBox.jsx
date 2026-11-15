@@ -3,7 +3,6 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useLibros } from '../hooks/useLibros'
 import useSugerencias from '../hooks/useSugerencias'
-import useEsAdmin from '../hooks/useEsAdmin'
 import { rutaVendedor } from '../utils/vendedor'
 import SearchSuggestions from './SearchSuggestions'
 
@@ -17,7 +16,7 @@ const SearchBox = () => {
   const [texto, setTexto] = useState('')
   const [abierto, setAbierto] = useState(false)
   const [activo, setActivo] = useState(-1)
-  const esAdmin = useEsAdmin()
+  const esAdmin = useSelector((state) => state.user.user?.rol === 'ADMIN')
   const sugeridos = useSugerencias(libros, texto)
   const items = esAdmin ? sugeridos.filter((it) => it.tipo !== 'vendedor') : sugeridos // el admin no entra a perfiles de tienda
   const hayTexto = texto.trim() !== ''

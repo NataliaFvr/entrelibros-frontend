@@ -5,6 +5,8 @@ import { cancelarOrdenApi, checkoutApi, crearPagoApi, listarPedidosApi } from ".
 export const fetchPedidos = createAsyncThunk("pedidos/fetchPedidos", async (idUsuario) => {
   if (idUsuario == null) return []; // sin sesión (o admin): sin pedidos
   return listarPedidosApi();
+}, {
+  condition: (idUsuario, { getState }) => !getState().pedidos.solicitudes[idUsuario],
 });
 
 // POST /carrito/checkout: convierte el carrito en un pedido PENDIENTE (reserva 1 h) y devuelve la orden
@@ -25,23 +27,33 @@ const pedidosSlice = createSlice({
   name: "pedidos",
   initialState: {
     items: [],
+    solicitudes: {},
+    usuarioSolicitado: null,
     loading: false,
     error: null,
   },
   reducers: {},
   extraReducers: (builder) => {
     builder
-      .addCase(fetchPedidos.pending, (state) => {
+      .addCase(fetchPedidos.pending, (state, action) => {
+        state.solicitudes[action.meta.arg] = true;
+        state.usuarioSolicitado = action.meta.arg;
         state.loading = true;
         state.error = null;
       })
       .addCase(fetchPedidos.fulfilled, (state, action) => {
-        state.loading = false;
-        state.items = action.payload;
+        delete state.solicitudes[action.meta.arg];
+        if (state.usuarioSolicitado === action.meta.arg) {
+          state.loading = false;
+          state.items = action.payload;
+        }
       })
       .addCase(fetchPedidos.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.error.message;
+        delete state.solicitudes[action.meta.arg];
+        if (state.usuarioSolicitado === action.meta.arg) {
+          state.loading = false;
+          state.error = action.error.message;
+        }
       })
       .addCase(crearPedido.fulfilled, (state, action) => {
         state.items = [action.payload, ...state.items]; // la orden nueva va primero

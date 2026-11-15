@@ -8,7 +8,6 @@ import { fetchLibro } from '../redux/librosSlice'
 import useResenias from '../hooks/useResenias'
 import { useCompra } from '../hooks/useCompra'
 import useLibroPropio from '../hooks/useLibroPropio'
-import useEsAdmin from '../hooks/useEsAdmin'
 import { posicionBestseller } from '../utils/filtrarLibros'
 import { categoriasDe, esUsado } from '../utils/libro'
 import BookBreadcrumb from '../componentes/BookBreadcrumb'
@@ -40,7 +39,7 @@ const Detalle = ({ libro, libros }) => {
   const { resenias, promedio, miResenia, puedeResenar, motivo, publicar, eliminar } = useResenias(libro.id, { dispatch, user, guardadas: guardadasResenas, estadoGuardado: estadoResena })
 
   const { esPropio } = useLibroPropio(user)
-  const esAdmin = useEsAdmin() // El administrador ve la ficha en modo lectura: sin comprar, guardar ni opinar, pero puede eliminar opiniones.
+  const esAdmin = useSelector((state) => state.user.user?.rol === 'ADMIN') // El administrador ve la ficha en modo lectura: sin comprar, guardar ni opinar, pero puede eliminar opiniones.
 
   const usado = esUsado(libro)
   const propio = esPropio(libro)

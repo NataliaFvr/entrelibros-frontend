@@ -7,6 +7,8 @@ import { crearPedido } from "./pedidosSlice";
 export const fetchCarrito = createAsyncThunk("carrito/fetchCarrito", async (idUsuario) => {
   if (idUsuario == null) return []; // sin sesión (o admin): carrito vacío
   return listarCarritoApi();
+}, {
+  condition: (idUsuario, { getState }) => !getState().carrito.solicitudes[idUsuario],
 });
 
 export const agregarAlCarrito = createAsyncThunk("carrito/agregarAlCarrito", async ({ libro, cantidad }, { getState }) => {
@@ -54,26 +56,36 @@ const carritoSlice = createSlice({
     cotizaciones: {},
     pendientes: {},
     errores: {},
+    solicitudes: {},
+    usuarioSolicitado: null,
     loading: false,
     error: null,
   },
   reducers: {},
   extraReducers: (builder) => {
     builder
-      .addCase(fetchCarrito.pending, (state) => {
+      .addCase(fetchCarrito.pending, (state, action) => {
+        state.solicitudes[action.meta.arg] = true;
+        state.usuarioSolicitado = action.meta.arg;
         state.loading = true;
         state.error = null;
       })
       .addCase(fetchCarrito.fulfilled, (state, action) => {
-        state.loading = false;
-        state.items = action.payload;
-        state.cotizaciones = {};
-        state.pendientes = {};
-        state.errores = {};
+        delete state.solicitudes[action.meta.arg];
+        if (state.usuarioSolicitado === action.meta.arg) {
+          state.loading = false;
+          state.items = action.payload;
+          state.cotizaciones = {};
+          state.pendientes = {};
+          state.errores = {};
+        }
       })
       .addCase(fetchCarrito.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.error.message;
+        delete state.solicitudes[action.meta.arg];
+        if (state.usuarioSolicitado === action.meta.arg) {
+          state.loading = false;
+          state.error = action.error.message;
+        }
       })
       .addCase(agregarAlCarrito.fulfilled, (state, action) => {
         guardarItem(state, action.payload);
