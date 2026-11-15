@@ -18,17 +18,23 @@ import { conDetalle } from "./conDetalle";
 export const NOTA_SIN_CONFIRMAR = "Tu cuenta todavía no está confirmada. Te mandamos un código nuevo.";
 
 // --- Datos de la cuenta (los pide App.jsx al tener sesión) ---
-export const fetchUsuario = createAsyncThunk("user/fetchUsuario", async (id) => traerUsuarioApi(id));
+export const fetchUsuario = createAsyncThunk("user/fetchUsuario", async (id) => traerUsuarioApi(id), {
+  condition: (id, { getState }) => !getState().user.solicitudes.usuario[id],
+});
 
 export const fetchMarks = createAsyncThunk("user/fetchMarks", async (idUsuario) => ({
   idUsuario,
   ids: await listarMarcapaginasApi(),
-}));
+}), {
+  condition: (idUsuario, { getState }) => !getState().user.solicitudes.marks[idUsuario],
+});
 
 export const fetchDirecciones = createAsyncThunk("user/fetchDirecciones", async (idUsuario) => ({
   idUsuario,
   lista: await listarDireccionesApi(),
-}));
+}), {
+  condition: (idUsuario, { getState }) => !getState().user.solicitudes.direcciones[idUsuario],
+});
 
 // --- Sesión ---
 export const login = createAsyncThunk("user/login", async ({ ident, contrasena }) => loginApi(ident, contrasena), conDetalle);
@@ -131,6 +137,11 @@ const userSlice = createSlice({
     user: getSesionApi(),
     marks: [],
     direcciones: [],
+    solicitudes: {
+      usuario: {},
+      marks: {},
+      direcciones: {},
+    },
     gate: null,
     gateDestino: null,
     pendiente: null, // acción que quedó esperando el login: { tipo: 'cart' | 'buy' | 'fav', idLibro }
@@ -178,22 +189,37 @@ const userSlice = createSlice({
       state.direcciones = [];
     };
     builder
+      .addCase(fetchUsuario.pending, (state, action) => {
+        state.solicitudes.usuario[action.meta.arg] = true;
+      })
       .addCase(fetchUsuario.fulfilled, (state, action) => {
+        delete state.solicitudes.usuario[action.meta.arg];
         if (state.user && state.user.id === action.payload.id) state.user = action.payload; // si ya cambió de cuenta, se descarta
       })
       .addCase(fetchUsuario.rejected, (state, action) => {
+        delete state.solicitudes.usuario[action.meta.arg];
         state.error = action.error.message;
       })
+      .addCase(fetchMarks.pending, (state, action) => {
+        state.solicitudes.marks[action.meta.arg] = true;
+      })
       .addCase(fetchMarks.fulfilled, (state, action) => {
+        delete state.solicitudes.marks[action.meta.arg];
         if (state.user && state.user.id === action.payload.idUsuario) state.marks = action.payload.ids;
       })
       .addCase(fetchMarks.rejected, (state, action) => {
+        delete state.solicitudes.marks[action.meta.arg];
         state.error = action.error.message;
       })
+      .addCase(fetchDirecciones.pending, (state, action) => {
+        state.solicitudes.direcciones[action.meta.arg] = true;
+      })
       .addCase(fetchDirecciones.fulfilled, (state, action) => {
+        delete state.solicitudes.direcciones[action.meta.arg];
         if (state.user && state.user.id === action.payload.idUsuario) state.direcciones = action.payload.lista;
       })
       .addCase(fetchDirecciones.rejected, (state, action) => {
+        delete state.solicitudes.direcciones[action.meta.arg];
         state.error = action.error.message;
       })
       .addCase(login.fulfilled, (state, action) => {

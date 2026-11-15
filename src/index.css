@@ -156,6 +156,9 @@
   /* AUTORES */
   .mini-deco{max-width:1000px;margin:0 auto;padding:0 20px}
   .mini-deco svg{display:block;width:100%;height:auto;max-height:90px}
+  .tag-wrap .mini-deco{position:absolute;inset:0;max-width:none;margin:0;padding:0;display:flex;align-items:center;pointer-events:none}
+  .tag-wrap .mini-deco svg{width:100%;height:auto;max-height:none}
+  @media (max-width:1400px){.tag-wrap .mini-deco{display:none}}
   .auth-wrap{padding-top:34px}
   .author{cursor:pointer;width:110px;text-align:center}
   .avatar{width:96px;height:96px;border-radius:50%;margin:0 auto 9px;display:flex;align-items:center;justify-content:center;font-family:'Fraunces',serif;font-weight:700;font-size:1.8rem;box-shadow:0 6px 14px rgba(4,42,43,.15);border:3px solid transparent;transition:transform .25s,border-color .25s}
@@ -676,6 +679,112 @@
   .sale-acts .btn:disabled{opacity:.6;cursor:not-allowed}
   .ord-off{opacity:.75}
   @media (max-width:480px){.sale-acts .btn{width:100%}}
+
+  /* ===== Sorpresa "Próxima aventura" del inicio ===== */
+  .proxima-aventura{max-width:1240px;margin:46px auto 0;padding:clamp(22px,4vw,44px);display:grid;grid-template-columns:minmax(0,1.1fr) minmax(270px,.9fr);gap:clamp(24px,5vw,64px);align-items:center;background:linear-gradient(125deg,#e7f6f7 0%,#f8eee5 100%);border-radius:18px}
+  .aventura-eyebrow{display:inline-block;color:var(--burnt);font-size:.72rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;margin-bottom:9px}
+  .aventura-copy h2{font-size:clamp(1.7rem,3.8vw,2.7rem);line-height:1.08;margin-bottom:10px}
+  .aventura-copy>p{max-width:54ch;font-size:.92rem;line-height:1.55;opacity:.78}
+  .aventura-filtros{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:22px 0 10px}
+  .aventura-filtros label{display:flex;flex-direction:column;gap:7px;font-size:.78rem;font-weight:700}
+  .aventura-filtros select{width:100%;min-width:0;padding:10px 12px;border:1px solid rgba(4,42,43,.2);border-radius:8px;background:#fff;color:var(--evergreen);font:inherit;font-weight:500}
+  .aventura-filtros select:focus-visible,.aventura-filtros input:focus-visible,.aventura-boton:focus-visible,.aventura-caja-abrir:focus-visible{outline:2px solid var(--blue);outline-offset:3px}
+  .aventura-precio{grid-column:1/-1}
+  .aventura-precio input{width:100%;accent-color:var(--burnt);cursor:pointer}
+  .aventura-pistas{font-size:.72rem!important;opacity:.68!important;margin:0 0 14px}
+  .aventura-boton{width:auto;padding:12px 22px}
+  .aventura-boton:disabled,.aventura-caja-abrir:disabled{opacity:.55;cursor:not-allowed}
+  .aventura-sin-libros{margin-top:10px;color:var(--burnt);font-size:.82rem!important;font-weight:600;line-height:1.45}
+  .aventura-escena{position:relative;min-height:330px;display:flex;flex-direction:column;align-items:center;justify-content:center;isolation:isolate}
+  .aventura-escena::before{content:'';position:absolute;width:min(78%,300px);aspect-ratio:1;border-radius:50%;background:rgba(205,237,246,.85);z-index:-1}
+  .aventura-caja-inicio{min-width:0}
+  .aventura-caja-abrir{position:relative;width:100%;height:100%;min-height:330px;display:flex;flex-direction:column;align-items:center;justify-content:center;border:0;background:transparent;color:inherit;cursor:pointer}
+  .aventura-caja-abrir::before{content:'';position:absolute;inset:14% 12%;border-radius:50%;background:rgba(239,123,69,.15);filter:blur(20px);opacity:.4;transition:opacity .25s,transform .25s}
+  .aventura-caja-abrir:hover::before{opacity:1;transform:scale(1.08)}
+  .aventura-decoracion{position:absolute;inset:0;pointer-events:none}
+  .aventura-lomo{position:absolute;bottom:40%;width:43px;height:104px;display:grid;place-items:center;border:2px solid rgba(4,42,43,.18);border-radius:5px 8px 4px 4px;box-shadow:0 7px 12px rgba(4,42,43,.16);font-family:'Fraunces',serif;font-size:1.4rem;font-weight:700;color:var(--evergreen);background:var(--blue);transition:color .2s,text-shadow .2s,transform .25s}
+  .aventura-caja-abrir:hover .aventura-lomo{color:var(--burnt);text-shadow:0 0 12px rgba(216,71,39,.45)}
+  .aventura-caja-abrir:hover .lomo-uno{transform:translateY(-7px) rotate(-17deg)}
+  .aventura-caja-abrir:hover .lomo-tres{transform:translateY(-7px) rotate(17deg)}
+  .lomo-uno{left:18%;transform:rotate(-17deg);background:var(--tangerine)}
+  .lomo-dos{left:calc(50% - 21px);height:118px;background:var(--cream)}
+  .lomo-tres{right:18%;transform:rotate(17deg);background:var(--burnt);color:white}
+  .aventura-caja{position:relative;width:min(80%,300px);height:142px;margin-top:100px;perspective:500px;z-index:2;display:block}
+  .caja-frente{position:absolute;inset:24px 0 0;border:4px solid var(--evergreen);border-radius:8px 8px 16px 16px;background:linear-gradient(145deg,#d2a878,#b88a5b);box-shadow:0 14px 20px rgba(4,42,43,.16);display:grid;place-items:center;overflow:hidden}
+  .caja-frente::before,.caja-frente::after{content:'';position:absolute;inset:0 auto 0 28%;width:8px;background:rgba(255,255,255,.25)}
+  .caja-frente::after{left:auto;right:28%}
+  .caja-frente i{position:relative;background:var(--cream);padding:7px 12px;border-radius:4px;font-family:'Fraunces',serif;font-size:.8rem;font-style:normal;font-weight:800;letter-spacing:.12em;transform:rotate(-4deg)}
+  .caja-tapa{position:absolute;top:3px;left:-3%;width:106%;height:43px;border:4px solid var(--evergreen);border-radius:8px;background:var(--madera-clara);transform-origin:5% 90%;z-index:3;box-shadow:0 6px 10px rgba(4,42,43,.12)}
+  .aventura-mensaje{position:absolute;bottom:0;font-size:.85rem;font-weight:700;color:var(--evergreen);opacity:.8}
+  .aventura-libro{display:flex;align-items:center;gap:12px;padding:10px 14px 10px 10px;border-radius:12px;background:#fff;box-shadow:0 10px 25px rgba(4,42,43,.17);max-width:100%;transform:rotate(-2deg)}
+  .aventura-portada{width:86px;height:116px;flex-shrink:0;display:grid;place-items:end center;padding:8px;border-radius:6px;box-shadow:0 5px 12px rgba(4,42,43,.18);overflow:hidden;background-position:center!important;background-size:cover!important}
+  .aventura-portada b{width:100%;padding:5px 4px;border-radius:3px;background:rgba(255,255,255,.8);color:var(--evergreen);font-family:'Fraunces',serif;font-size:.72rem;line-height:1.15;text-align:center}
+  .aventura-info{display:flex;flex-direction:column;gap:5px;max-width:190px}
+  .aventura-info strong{font-family:'Fraunces',serif;font-size:1rem;line-height:1.2}
+  .aventura-info small{font-size:.75rem;opacity:.7}
+  .aventura-info>span{font-size:.82rem;font-weight:700;color:var(--burnt)}
+  .aventura-overlay{position:fixed;inset:0;z-index:100;display:grid;place-items:center;padding:20px;background:rgba(4,42,43,.68);backdrop-filter:blur(5px);animation:aventura-fondo .2s ease-out}
+  .aventura-dialogo{position:relative;width:min(100%,690px);max-height:min(92dvh,850px);overflow-y:auto;padding:30px clamp(18px,4vw,40px);border:1px solid rgba(4,42,43,.12);border-radius:18px;background:linear-gradient(145deg,#fbfaf6,#eaf7f7 60%,#f8eee5);box-shadow:0 24px 70px rgba(0,0,0,.3);text-align:center;outline:none;animation:aventura-dialogo .3s ease-out}
+  .aventura-dialogo h2{font-size:clamp(1.5rem,4vw,2.25rem);line-height:1.1;margin-bottom:4px}
+  .aventura-cerrar{position:absolute;top:12px;right:14px;width:38px;height:38px;border:0;border-radius:50%;background:rgba(4,42,43,.08);color:var(--evergreen);font-size:1.7rem;line-height:1;cursor:pointer}
+  .aventura-cerrar:hover{background:var(--cyan)}
+  .aventura-escena-modal{min-height:278px;margin:0 auto;max-width:520px}
+  .aventura-estanteria{position:absolute;top:4%;left:50%;height:165px;display:flex;align-items:flex-end;gap:9px;transform:translateX(-50%);z-index:2}
+  .aventura-lomo-real{position:relative;width:clamp(38px,9vw,62px);height:clamp(92px,20vw,142px);display:flex;align-items:flex-end;justify-content:center;padding:8px 4px;border:2px solid rgba(4,42,43,.18);border-radius:5px 8px 3px 3px;box-shadow:0 5px 12px rgba(4,42,43,.18);background-position:center!important;background-size:cover!important;font-family:'Fraunces',serif;font-size:.67rem;font-weight:700;line-height:1.1;text-align:center;overflow:hidden}
+  .aventura-lomo-real:not([style*="url("]){overflow-wrap:anywhere}
+  .aventura-estante{position:absolute;left:-12px;right:-12px;bottom:-8px;height:12px;border-radius:8px;background:var(--madera-osc);box-shadow:0 5px 0 rgba(4,42,43,.12)}
+  .aventura-caja-modal{position:absolute;bottom:5%;width:min(68%,300px);height:104px;margin:0}
+  .aventura-caja-modal .caja-frente{inset:18px 0 0}
+  .aventura-caja-modal .caja-tapa{height:32px}
+  .aventura-escena-modal.mezclando .aventura-estanteria{animation:aventura-tiembla .16s linear infinite}
+  .aventura-escena-modal.mezclando .aventura-lomo-real.elegido{z-index:4;animation:aventura-cae 1.25s cubic-bezier(.45,.05,.8,.55) .55s forwards}
+  .aventura-escena-modal.mezclando .caja-tapa{animation:aventura-abre .35s ease-out .65s both}
+  .aventura-escena-modal.revelada .caja-tapa{transform:rotate(-17deg) translateY(-8px)}
+  .aventura-resultado{display:flex;flex-direction:column;align-items:center;gap:14px;animation:aventura-aparece .4s ease-out both}
+  .aventura-resultado .aventura-libro{width:min(100%,440px);text-align:left}
+  .aventura-acciones{display:flex;flex-wrap:wrap;justify-content:center;gap:10px}
+  @keyframes aventura-tiembla{0%,100%{transform:translateX(-50%) rotate(0)}25%{transform:translateX(calc(-50% - 3px)) rotate(-1deg)}75%{transform:translateX(calc(-50% + 3px)) rotate(1deg)}}
+  @keyframes aventura-cae{0%{transform:translateY(0) rotate(0) scale(1);opacity:1}40%{transform:translateY(45px) rotate(12deg) scale(1.05);opacity:1}100%{transform:translateY(175px) rotate(30deg) scale(.55);opacity:0}}
+  @keyframes aventura-abre{from{transform:rotate(0)}to{transform:rotate(-17deg) translateY(-8px)}}
+  @keyframes aventura-aparece{from{opacity:0;transform:translateY(12px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
+  @keyframes aventura-fondo{from{opacity:0}to{opacity:1}}
+  @keyframes aventura-dialogo{from{opacity:0;transform:translateY(12px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+  @media (max-width:900px){.proxima-aventura{margin:34px 20px 0;grid-template-columns:1fr}.aventura-caja-inicio{min-height:290px;grid-row:1}.aventura-caja-abrir{min-height:290px}}
+  @media (max-width:520px){.proxima-aventura{margin:28px 14px 0;padding:22px 18px}.aventura-filtros{grid-template-columns:1fr}.aventura-precio{grid-column:auto}.aventura-caja-inicio{min-height:260px}.aventura-caja-abrir{min-height:260px}.aventura-lomo{height:86px}.lomo-dos{height:98px}.aventura-caja{height:120px;margin-top:80px}.aventura-dialogo{padding:30px 16px 20px}.aventura-escena-modal{min-height:245px}.aventura-acciones{width:100%}.aventura-acciones .btn{width:100%}}
+  @media (prefers-reduced-motion:reduce){.aventura-caja-abrir::before,.aventura-overlay,.aventura-dialogo,.aventura-lomo-real,.aventura-resultado{animation:none!important;transition:none}.aventura-escena-modal.mezclando .aventura-estanteria{animation:none}.aventura-escena-modal.mezclando .aventura-lomo-real.elegido{animation:none;opacity:0}}
+
+  /* ===== Presentación actualizada de la mystery box ===== */
+  .proxima-aventura{display:block;width:100vw;max-width:none;margin:46px 0 0 calc(50% - 50vw);padding:clamp(28px,5vw,58px) clamp(22px,5vw,64px);border-radius:0;background:linear-gradient(115deg,#f9e5d7 0%,#f4c9a9 100%)}
+  .aventura-contenido{max-width:1240px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1.1fr) minmax(270px,.9fr);gap:clamp(24px,5vw,64px);align-items:center}
+  .aventura-escena::before{content:none}
+  .aventura-caja-abrir{height:100%;min-height:330px;flex-direction:row}
+  .aventura-decoracion,.aventura-lomo,.aventura-mensaje{display:none}
+  .aventura-caja{width:min(80%,300px);height:170px;margin:0}
+  .caja-frente{inset:32px 0 0}
+  .caja-frente i{display:grid;place-items:center;width:52px;height:52px;padding:0;border-radius:50%;background:var(--cream);font-size:2rem;line-height:1;letter-spacing:0;transform:none}
+  .aventura-video-wrap{display:flex;flex-direction:column;align-items:center;gap:12px}
+  .aventura-video{display:block;width:min(100%,520px);max-height:52vh;aspect-ratio:16/9;object-fit:contain;border-radius:12px;background:#1a1a1a;box-shadow:0 12px 30px rgba(4,42,43,.2)}
+  .aventura-caja-escena,.aventura-caja-revelada{min-height:220px;display:grid;place-items:center}
+  .aventura-caja-interactiva{min-height:220px}
+  .aventura-caja-interactiva .aventura-caja{width:min(70%,300px);height:160px}
+  .aventura-caja-interactiva.temblando .aventura-caja{animation:aventura-temblor .16s linear infinite}
+  .aventura-caja-interactiva.abriendo .caja-tapa,.aventura-caja-revelada .caja-tapa{animation:aventura-abre .6s ease-out forwards}
+  .aventura-caja-interactiva.abriendo .caja-frente i,.aventura-caja-revelada .caja-frente i{opacity:0;transition:opacity .2s}
+  .aventura-caja-revelada{min-height:105px}
+  .aventura-caja-revelada .aventura-caja{width:180px;height:100px;transform:scale(.62);transform-origin:center top}
+  .aventura-resultado{transform:none}
+  .aventura-resultado .aventura-libro{width:min(100%,440px);transform:none}
+  @keyframes aventura-temblor{0%,100%{transform:rotate(0)}25%{transform:rotate(-2deg) translateX(-3px)}75%{transform:rotate(2deg) translateX(3px)}}
+  @keyframes aventura-abre{from{transform:rotate(0)}to{transform:rotate(-32deg) translateY(-10px)}}
+  @media (max-width:900px){.proxima-aventura{margin-top:34px}.aventura-contenido{grid-template-columns:1fr}.aventura-caja-inicio{min-height:260px;grid-row:1}.aventura-caja-abrir{min-height:260px}}
+  @media (max-width:520px){.proxima-aventura{margin-top:28px;padding:22px 18px}.aventura-filtros{grid-template-columns:1fr}.aventura-precio{grid-column:auto}.aventura-caja-inicio{min-height:230px}.aventura-caja-abrir{min-height:230px}.aventura-caja{width:min(82%,280px);height:145px}.aventura-dialogo{padding:30px 16px 20px}.aventura-video{aspect-ratio:4/3}.aventura-caja-escena{min-height:190px}.aventura-caja-interactiva{min-height:190px}.aventura-acciones{width:100%}.aventura-acciones .btn{width:100%}}
+  @media (prefers-reduced-motion:reduce){.aventura-caja-abrir::before,.aventura-overlay,.aventura-dialogo,.aventura-resultado{animation:none!important;transition:none}.aventura-caja-interactiva.temblando .aventura-caja{animation:none}.aventura-caja-interactiva.abriendo .caja-tapa,.aventura-caja-revelada .caja-tapa{animation:none;transform:rotate(-32deg) translateY(-10px)}}
+  .home-page .proxima-aventura{width:100%;margin:46px 0 0;padding:clamp(28px,5vw,58px) clamp(22px,5vw,64px)}
+  .home-page .aventura-contenido{max-width:1240px}
+  .aventura-video-error{max-width:42ch;color:var(--burnt);font-size:.9rem;line-height:1.5}
+  .aventura-acciones .aventura-boton{min-width:0}
+  @media (max-width:900px){.home-page .proxima-aventura{margin-top:34px}}
+  @media (max-width:520px){.home-page .proxima-aventura{margin-top:28px;padding:22px 18px}}
 
   /* ===== Ingresar / Registrarse / Confirmar: se adaptan al ALTO de la pantalla =====
      Una sola columna centrada (antes quedaba el formulario en media tarjeta y el resto vacÃ­o) y una cabecera que se
