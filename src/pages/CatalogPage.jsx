@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import {useDispatch, useSelector} from 'react-redux'
 import { Link, useLocation } from 'react-router-dom'
+import { nanoid } from '@reduxjs/toolkit'
 import {
   claveBusqueda, fetchFiltrosDisponibles, fetchPagina, limpiarFiltros, reiniciarFiltros, setFiltros, setPagina, toggleFiltro,
 } from '../redux/librosSlice'
@@ -20,8 +21,13 @@ const Catalogo = ({ inicial, categorias, filtros }) => {
   const user = useSelector((state) => state.user.user)
   const direcciones = useSelector((state) => state.user.direcciones)
   const filtrosElegidos = useSelector((state) => state.libros.filtrosElegidos)
-  const [inicializado, setInicializado] = useState(false)
-  const f = inicializado ? filtrosElegidos : inicial
+  const filtrosMontaje = useSelector((state) => state.libros.filtrosMontaje)
+  // Un id por visita al catálogo (el componente se vuelve a montar con cada navegación, por su `key`)
+  const [montaje] = useState(nanoid)
+  // Los filtros de la URL de esta visita, tal como llegaron al montar
+  const filtrosURL = useRef(inicial)
+  // Hasta que Redux tiene los filtros de esta visita, se usan los de la URL
+  const f = filtrosMontaje === montaje ? filtrosElegidos : inicial
   const set = (cambios) => dispatch(setFiltros(cambios))
   const setPage = (page) => dispatch(setPagina(page))
   const toggle = (clave, valor) => dispatch(toggleFiltro({ clave, valor }))
@@ -33,9 +39,8 @@ const Catalogo = ({ inicial, categorias, filtros }) => {
   const provinciaComprador = provinciaDireccion || provinciaElegida
 
   useEffect(() => {
-    dispatch(reiniciarFiltros(inicial))
-    setInicializado(true)
-  }, [dispatch])
+    dispatch(reiniciarFiltros({ filtros: filtrosURL.current, montaje }))
+  }, [dispatch, montaje])
 
   const clave = claveBusqueda(f, provinciaComprador)
   const guardada = useSelector((state) => state.libros.catalogo.paginas[clave])

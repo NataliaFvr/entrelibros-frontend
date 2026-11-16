@@ -1,6 +1,7 @@
 import {urlFotoUsuario} from '../api/usuariosApi'
 import { abrirGate } from '../redux/userSlice'
 import {useDispatch,useSelector} from 'react-redux'
+import { selectUser, selectCompra } from '../redux/selectores'
 import { useNavigate } from 'react-router-dom'
 import { useCompra } from '../hooks/useCompra'
 import { BookmarkIcon, ShelfIcon, UserIcon } from './Icons'
@@ -15,15 +16,12 @@ const alTeclear = (accion) => (e) => {
 const HeaderIcons = () => {
   const navigate = useNavigate()
   const dispatch=useDispatch()
-  const {user}=useSelector(s=>s.user)
+  const user = useSelector(selectUser)
 
   const perfil=user?{avatar:user.avatar||'',foto:user.tieneFoto?urlFotoUsuario(user.id):''}:{}
   const requiereLogin=(t,d=null,a=null)=>{if(user)return false;dispatch(abrirGate({tipo:t,destino:d,accion:a}));return true}
-  const compraUser = useSelector((state) => state.user.user)
-  const compraMarks = useSelector((state) => state.user.marks)
-  const compraCarrito = useSelector((state) => state.carrito.items)
-  const compraPedidos = useSelector((state) => state.pedidos.items)
-  const { cartCount } = useCompra({ dispatch, user: compraUser, marks: compraMarks, carrito: compraCarrito, pedidos: compraPedidos })
+  const compra = useSelector(selectCompra)
+  const { cartCount } = useCompra({ dispatch, ...compra })
 
   const irACuenta = () => navigate(user ? '/cuenta' : '/ingresar')
   const abrirEstanteria = () => {

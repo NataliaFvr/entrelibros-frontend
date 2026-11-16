@@ -9,7 +9,10 @@ import ReviewItem from './ReviewItem'
 const AdminResenas = () => {
   const dispatch = useDispatch()
   const toast = (msg, accion) => dispatch(mostrarToast({ msg, accion }))
-  const { todasLibro: libros, todasVendedor: vendedores, todasCargadas, errorTodas } = useSelector((state) => state.resenas)
+  const libros = useSelector((state) => state.resenas.todasLibro)
+  const vendedores = useSelector((state) => state.resenas.todasVendedor)
+  const todasCargadas = useSelector((state) => state.resenas.todasCargadas)
+  const errorTodas = useSelector((state) => state.resenas.errorTodas)
   const [errorAccion, setErrorAccion] = useState('')
   const [eliminando, setEliminando] = useState(null)
   const cargando = !todasCargadas && !errorTodas

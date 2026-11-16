@@ -1,5 +1,6 @@
 import { abrirGate } from '../redux/userSlice'
 import {useDispatch,useSelector} from 'react-redux'
+import { selectUser } from '../redux/selectores'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import useIrAVender from '../hooks/useIrAVender'
@@ -15,7 +16,7 @@ const Col = ({ titulo, children }) => {
 // Con sesión lleva al perfil; sin sesión abre el modal de login y, al entrar, vuelve a /cuenta
 const MiCuenta = () => {
   const dispatch=useDispatch()
-  const { user } = useSelector((state) => state.user)
+  const user = useSelector(selectUser)
 
   const requiereLogin=(t,d=null,a=null)=>{if(user)return false;dispatch(abrirGate({tipo:t,destino:d,accion:a}));return true}
   const alClick = (e) => { if (requiereLogin('account', '/cuenta')) e.preventDefault() }

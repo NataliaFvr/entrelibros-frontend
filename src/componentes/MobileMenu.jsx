@@ -1,5 +1,6 @@
 import { logout as logoutThunk } from '../redux/userSlice'
 import {useDispatch,useSelector} from 'react-redux'
+import { selectCatalogo } from '../redux/selectores'
 import { Link } from 'react-router-dom'
 import { useLibros } from '../hooks/useLibros'
 import useIrAVender from '../hooks/useIrAVender'
@@ -10,11 +11,8 @@ const ESTADOS = [['nuevos', 'Nuevos'], ['usados', 'Usados']]
 
 // Panel del menú hamburguesa: mismas opciones que NavMenu, en acordeones
 const MobileMenu = ({ abierto, onCerrar }) => {
-  const librosRedux = useSelector((state) => state.libros.items)
-  const loadingRedux = useSelector((state) => state.libros.loading)
-  const errorRedux = useSelector((state) => state.libros.error)
-  const categoriasRedux = useSelector((state) => state.libros.categorias.items)
-  const { categorias } = useLibros({ libros: librosRedux, loading: loadingRedux, error: errorRedux, listaCategorias: categoriasRedux })
+  const catalogo = useSelector(selectCatalogo)
+  const { categorias } = useLibros(catalogo)
   const userRedux = useSelector((state) => state.user.user)
   const dispatch = useDispatch()
   const irAVender = useIrAVender({ dispatch, user: userRedux })

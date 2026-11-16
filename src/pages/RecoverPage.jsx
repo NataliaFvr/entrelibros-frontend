@@ -1,5 +1,6 @@
 import { mostrarToast } from '../redux/toastSlice'
 import { useDispatch, useSelector } from 'react-redux'
+import { selectUser } from '../redux/selectores'
 import { Navigate, useLocation, useNavigate } from 'react-router-dom'
 import AuthHero from '../componentes/AuthHero'
 import MiniDeco from '../componentes/MiniDeco'
@@ -8,7 +9,7 @@ import RecoverForm from '../componentes/RecoverForm'
 // /recuperar — "Olvidé mi contraseña": código por e-mail y contraseña nueva. Al terminar vuelve a /ingresar.
 const RecoverPage = () => {
   const dispatch=useDispatch()
-  const {user}=useSelector(s=>s.user)
+  const user = useSelector(selectUser)
   const toast = (msg, accion) => dispatch(mostrarToast({ msg, accion }))
   const navigate = useNavigate()
   const { state } = useLocation()

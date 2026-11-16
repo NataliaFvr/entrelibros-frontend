@@ -1,33 +1,26 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { aLibroFront, dataUrlAFile } from "../api/adaptadores";
+import { dataUrlAFile } from "../api/adaptadores";
 import { moderar } from "./moderacionSlice";
 import { cambiarRol, darDeBajaUsuario, reactivarUsuario } from "./userSlice";
 import { cambiarEstadoLibro, editarLibro } from "./vendedorSlice";
 import { cancelarVenta } from "./ventasSlice";
 import { crearPedido, cancelarPedido } from "./pedidosSlice";
-import api from "../api/axiosConfig";
 import {
   crearCategoriaApi, darDeBajaCategoriaApi, listarCategoriasApi, listarCategoriasTodasApi, quitarImagenCategoriaApi,
   reactivarCategoriaApi, renombrarCategoriaApi, subirImagenCategoriaApi,
 } from "../api/categoriasApi";
-import { getCatalogoApi, getFiltrosDisponiblesApi, getImagenesApi, getLibroApi } from "../api/librosApi";
+import { getCatalogoApi, getFiltrosDisponiblesApi, getImagenesApi, getLibroApi, getLibrosApi } from "../api/librosApi";
 import { FILTROS_INICIALES } from "../utils/filtrarLibros";
 import { norm } from "../utils/format";
-
-const URL = "/libros";
 
 const limpiar = (nombre) => nombre.trim().replace(/\s+/g, " ");
 const esFotoNueva = (imagen) => typeof imagen === "string" && imagen.startsWith("data:");
 const existe = (todas, nombre, excepto = "") => todas.some((c) => c.nombre !== excepto && norm(c.nombre) === norm(nombre));
 
-export const fetchLibros = createAsyncThunk(
-  "libros/fetchLibros",
-  async () => {
-    const { data } = await api.get(URL, { params: { sort: "bestsellers", page: 0, size: 100 } });
-    return data.content.map(aLibroFront);
-  },
-  { condition: (_, { getState }) => !getState().libros.solicitudes.libros },
-);
+// Muestra del inicio, carruseles y sugerencias (los 100 más vendidos). El GET vive en api/librosApi.js como el resto.
+export const fetchLibros = createAsyncThunk("libros/fetchLibros", async () => getLibrosApi(), {
+  condition: (_, { getState }) => !getState().libros.solicitudes.libros,
+});
 
 // Un libro que no está en el catálogo (por ejemplo, agotado): null si no existe
 export const fetchLibro = createAsyncThunk("libros/fetchLibro", async (id) => getLibroApi(id), {
@@ -143,6 +136,7 @@ const librosSlice = createSlice({
     loading: true,
     error: null,
     filtrosElegidos: { ...FILTROS_INICIALES },
+    filtrosMontaje: null, // qué montaje del catálogo cargó los filtros de su URL (ver reiniciarFiltros)
     catalogo: {
       filtros: null,
       cargandoFiltros: false,
@@ -177,8 +171,11 @@ const librosSlice = createSlice({
         sort: state.filtrosElegidos.sort,
       };
     },
+    // Al entrar al catálogo, los filtros salen de la URL. `montaje` identifica a esa visita: hasta que llega esta acción,
+    // el catálogo usa los filtros de la URL y no los que hayan quedado de la visita anterior.
     reiniciarFiltros: (state, action) => {
-      state.filtrosElegidos = action.payload;
+      state.filtrosElegidos = action.payload.filtros;
+      state.filtrosMontaje = action.payload.montaje;
     },
   },
   extraReducers: (builder) => {

@@ -1,4 +1,5 @@
 import { useSelector } from 'react-redux'
+import { selectCatalogo } from '../redux/selectores'
 import { useLibros } from '../hooks/useLibros'
 import { fechaCorta, fmt } from '../utils/format'
 import AdminModal from './AdminModal'
@@ -10,11 +11,8 @@ const CANCELADAS = ['CANCELADO', 'VENCIDO']
 
 // Detalle de una orden (solo lectura): estado, quién compra, adónde va, qué libros lleva y cuánto cuesta.
 const OrdenDetalleModal = ({ orden: o, onCerrar }) => {
-  const librosRedux = useSelector((state) => state.libros.items)
-  const loadingRedux = useSelector((state) => state.libros.loading)
-  const errorRedux = useSelector((state) => state.libros.error)
-  const categoriasRedux = useSelector((state) => state.libros.categorias.items)
-  const { libros } = useLibros({ libros: librosRedux, loading: loadingRedux, error: errorRedux, listaCategorias: categoriasRedux })
+  const catalogo = useSelector(selectCatalogo)
+  const { libros } = useLibros(catalogo)
   const canceladas = CANCELADAS.includes(o.estadoPago)
 
   return (

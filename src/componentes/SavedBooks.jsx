@@ -2,6 +2,7 @@ import {mostrarToast} from '../redux/toastSlice'
 import { toggleMark as toggleMarkThunk } from '../redux/userSlice'
 import { fetchLibro } from '../redux/librosSlice'
 import {useDispatch,useSelector} from 'react-redux'
+import { selectUser, selectMarks, selectCompra, selectCatalogo } from '../redux/selectores'
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useCompra } from '../hooks/useCompra'
@@ -14,20 +15,15 @@ import SavedBook from './SavedBook'
 const SavedBooks = () => {
   const navigate = useNavigate()
   const dispatch=useDispatch()
-  const {marks, user}=useSelector(s=>s.user)
+  const user = useSelector(selectUser)
+  const marks = useSelector(selectMarks)
   const sueltos = useSelector((state) => state.libros.sueltos)
   const toggleMark=async(i)=>{const estaba=marks.includes(i);const r=await dispatch(toggleMarkThunk({id:i,estaba}));if(r.error)toast(r.error.message)}
   const toast=(msg,accion)=>dispatch(mostrarToast({msg,accion}))
-  const compraUser = useSelector((state) => state.user.user)
-  const compraMarks = useSelector((state) => state.user.marks)
-  const compraCarrito = useSelector((state) => state.carrito.items)
-  const compraPedidos = useSelector((state) => state.pedidos.items)
-  const { agregar } = useCompra({ dispatch, user: compraUser, marks: compraMarks, carrito: compraCarrito, pedidos: compraPedidos })
-  const librosRedux = useSelector((state) => state.libros.items)
-  const loadingRedux = useSelector((state) => state.libros.loading)
-  const errorRedux = useSelector((state) => state.libros.error)
-  const categoriasRedux = useSelector((state) => state.libros.categorias.items)
-  const { libros } = useLibros({ libros: librosRedux, loading: loadingRedux, error: errorRedux, listaCategorias: categoriasRedux })
+  const compra = useSelector(selectCompra)
+  const { agregar } = useCompra({ dispatch, ...compra })
+  const catalogo = useSelector(selectCatalogo)
+  const { libros } = useLibros(catalogo)
   const { esPropio } = useLibroPropio(user)
 
   const faltantesClave = marks

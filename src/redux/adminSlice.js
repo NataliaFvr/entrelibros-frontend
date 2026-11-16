@@ -1,4 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { logout } from "./userSlice";
 import { cargarOrdenes, cargarPagos } from "../api/adminApi";
 
 export const fetchOrdenesAdmin = createAsyncThunk("admin/fetchOrdenesAdmin", async () => cargarOrdenes(), {
@@ -9,20 +10,24 @@ export const fetchPagosAdmin = createAsyncThunk("admin/fetchPagosAdmin", async (
   condition: (_, { getState }) => !getState().admin.cargandoPagos,
 });
 
+const initialState = {
+  ordenes: [],
+  ordenesCargadas: false,
+  cargandoOrdenes: false,
+  pagos: [],
+  pagosCargados: false,
+  cargandoPagos: false,
+  error: null,
+};
+
 const adminSlice = createSlice({
   name: "admin",
-  initialState: {
-    ordenes: [],
-    ordenesCargadas: false,
-    cargandoOrdenes: false,
-    pagos: [],
-    pagosCargados: false,
-    cargandoPagos: false,
-    error: null,
-  },
+  initialState,
   reducers: {},
   extraReducers: (builder) => {
     builder
+      // Datos del panel del admin: al cerrar sesión se vacían para que no queden para la próxima cuenta
+      .addCase(logout.fulfilled, () => initialState)
       .addCase(fetchOrdenesAdmin.pending, (state) => {
         state.cargandoOrdenes = true;
         state.error = null;

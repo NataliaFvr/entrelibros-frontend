@@ -1,6 +1,7 @@
 import {mostrarToast} from '../redux/toastSlice'
 import { eliminarDireccion as eliminarDireccionThunk,marcarPrincipal as marcarPrincipalThunk } from '../redux/userSlice'
 import {useDispatch,useSelector} from 'react-redux'
+import { selectDirecciones, selectCompra } from '../redux/selectores'
 import { useCompra } from '../hooks/useCompra'
 import { direccionTexto } from '../utils/format'
 import AddressCard from './AddressCard'
@@ -14,15 +15,12 @@ const usaDireccion = (pedido, d) => (pedido.dest
 // Grilla fluida: las tarjetas se reparten todo el ancho disponible
 const AddressList = () => {
   const dispatch=useDispatch()
-  const {direcciones}=useSelector(s=>s.user)
+  const direcciones = useSelector(selectDirecciones)
   const eliminarDireccion=async(i)=>!((await dispatch(eliminarDireccionThunk(i))).error)
   const marcarPrincipal=async(i)=>{const r=await dispatch(marcarPrincipalThunk(i));if(!r.error)toast('Dirección principal actualizada');return !r.error}
   const toast=(msg,accion)=>dispatch(mostrarToast({msg,accion}))
-  const compraUser = useSelector((state) => state.user.user)
-  const compraMarks = useSelector((state) => state.user.marks)
-  const compraCarrito = useSelector((state) => state.carrito.items)
-  const compraPedidos = useSelector((state) => state.pedidos.items)
-  const { pedidos } = useCompra({ dispatch, user: compraUser, marks: compraMarks, carrito: compraCarrito, pedidos: compraPedidos })
+  const compra = useSelector(selectCompra)
+  const { pedidos } = useCompra({ dispatch, ...compra })
 
   if (!direcciones.length) return <EmptyBlock titulo="No tenés direcciones" texto="Agregá una para poder comprar." />
 

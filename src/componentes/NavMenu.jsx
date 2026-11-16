@@ -1,4 +1,5 @@
 import { useDispatch, useSelector } from 'react-redux'
+import { selectCatalogo } from '../redux/selectores'
 import { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { useLibros } from '../hooks/useLibros'
@@ -42,11 +43,8 @@ const NavDesplegable = ({ etiqueta, to, activo, children }) => {
 // Contenido del desplegable de Libros. Se vuelve a montar (key) cada vez que el menú se abre o cierra,
 // así nunca queda un submenú abierto de la vez anterior.
 const SubMenusLibros = ({ onElegir }) => {
-  const librosRedux = useSelector((state) => state.libros.items)
-  const loadingRedux = useSelector((state) => state.libros.loading)
-  const errorRedux = useSelector((state) => state.libros.error)
-  const categoriasRedux = useSelector((state) => state.libros.categorias.items)
-  const { categorias } = useLibros({ libros: librosRedux, loading: loadingRedux, error: errorRedux, listaCategorias: categoriasRedux })
+  const catalogo = useSelector(selectCatalogo)
+  const { categorias } = useLibros(catalogo)
   const [sub, setSub] = useState(null)
   return ['nuevos', 'usados'].map((estado) => (
     <SubItem key={estado} estado={estado} etiqueta={estado === 'nuevos' ? 'Nuevos' : 'Usados'} categorias={categorias}

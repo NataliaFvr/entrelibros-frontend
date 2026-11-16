@@ -1,4 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { logout } from "./userSlice";
 import { aLibroFront } from "../api/adaptadores";
 import { fuenteModeracion } from "../api/moderacionApi";
 
@@ -33,17 +34,19 @@ export const fetchHistorial = createAsyncThunk(
   },
 );
 
+const initialState = {
+  items: [],
+  cargadas: false,
+  loading: false,
+  error: null,
+  historial: {},
+  pendientesHistorial: {},
+  erroresHistorial: {},
+};
+
 const moderacionSlice = createSlice({
   name: "moderacion",
-  initialState: {
-    items: [],
-    cargadas: false,
-    loading: false,
-    error: null,
-    historial: {},
-    pendientesHistorial: {},
-    erroresHistorial: {},
-  },
+  initialState,
   reducers: {
     limpiarErrorHistorial: (state, action) => {
       delete state.erroresHistorial[action.payload];
@@ -51,6 +54,8 @@ const moderacionSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
+      // Datos del panel del admin: al cerrar sesión se vacían para que no queden para la próxima cuenta
+      .addCase(logout.fulfilled, () => initialState)
       .addCase(fetchSolicitudes.pending, (state) => {
         state.loading = true;
         state.error = null;

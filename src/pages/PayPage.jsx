@@ -1,5 +1,6 @@
 import { mostrarToast } from '../redux/toastSlice'
 import { useDispatch, useSelector } from 'react-redux'
+import { selectUser, selectCompra, selectCatalogo } from '../redux/selectores'
 import { useState } from 'react'
 import { Link, Navigate, useNavigate, useParams } from 'react-router-dom'
 import { useCompra } from '../hooks/useCompra'
@@ -25,16 +26,11 @@ const PayPage = () => {
   const navigate = useNavigate()
   const toast = (msg, accion) => dispatch(mostrarToast({ msg, accion }))
   const dispatch=useDispatch()
-  const compraMarks = useSelector((state) => state.user.marks)
-  const compraCarrito = useSelector((state) => state.carrito.items)
-  const compraPedidos = useSelector((state) => state.pedidos.items)
-  const {user}=useSelector(s=>s.user)
-  const { pedidos, pagarPedido, cancelarPedido } = useCompra({ dispatch, user, marks: compraMarks, carrito: compraCarrito, pedidos: compraPedidos })
-  const librosRedux = useSelector((state) => state.libros.items)
-  const loadingRedux = useSelector((state) => state.libros.loading)
-  const errorRedux = useSelector((state) => state.libros.error)
-  const categoriasRedux = useSelector((state) => state.libros.categorias.items)
-  const { libros } = useLibros({ libros: librosRedux, loading: loadingRedux, error: errorRedux, listaCategorias: categoriasRedux })
+  const compra = useSelector(selectCompra)
+  const user = useSelector(selectUser)
+  const { pedidos, pagarPedido, cancelarPedido } = useCompra({ dispatch, ...compra })
+  const catalogo = useSelector(selectCatalogo)
+  const { libros } = useLibros(catalogo)
   const [error, setError] = useState('')
   const form = useFormulario({ proveedor: 'tarjeta', numeroTarjeta: '', titular: '', vencimiento: '', codigoSeguridad: '' })
   // El pago es simulado: los datos de la tarjeta no se validan ni viajan al back, solo tienen que estar completos

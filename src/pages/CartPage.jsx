@@ -1,5 +1,6 @@
 import { mostrarToast } from '../redux/toastSlice'
 import { useDispatch, useSelector } from 'react-redux'
+import { selectUser, selectDirecciones, selectCompra } from '../redux/selectores'
 import { useEffect, useState } from 'react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { useCompra } from '../hooks/useCompra'
@@ -13,11 +14,10 @@ import AvisoCompraPendiente from '../componentes/AvisoCompraPendiente'
 const CartPage = () => {
   const navigate = useNavigate()
   const dispatch=useDispatch()
-  const compraMarks = useSelector((state) => state.user.marks)
-  const compraCarrito = useSelector((state) => state.carrito.items)
-  const compraPedidos = useSelector((state) => state.pedidos.items)
-  const {user, direcciones}=useSelector(s=>s.user)
-  const { carrito, crearPedido, pedidos } = useCompra({ dispatch, user, marks: compraMarks, carrito: compraCarrito, pedidos: compraPedidos })
+  const compra = useSelector(selectCompra)
+  const user = useSelector(selectUser)
+  const direcciones = useSelector(selectDirecciones)
+  const { carrito, crearPedido, pedidos } = useCompra({ dispatch, ...compra })
   const toast = (msg, accion) => dispatch(mostrarToast({ msg, accion }))
   const [elegidaPorUsuario, setElegida] = useState(null) // null = todavía no tocó el selector: se usa la principal
   const [enviando, setEnviando] = useState(false)

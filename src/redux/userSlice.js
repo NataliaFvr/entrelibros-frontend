@@ -187,6 +187,8 @@ const userSlice = createSlice({
       state.user = null;
       state.marks = [];
       state.direcciones = [];
+      // La lista de usuarios es del panel del admin: no queda en memoria para la próxima cuenta
+      state.todos = { items: [], cargados: false, loading: false, error: null };
     };
     builder
       .addCase(fetchUsuario.pending, (state, action) => {

@@ -1,4 +1,5 @@
 import { useSelector } from 'react-redux'
+import { selectCatalogo } from '../redux/selectores'
 import { useMemo } from 'react'
 import { useLibros } from '../hooks/useLibros'
 import { masVendidos, ordenarPorVentas } from '../utils/filtrarLibros'
@@ -12,11 +13,8 @@ import AuthorGrid from '../componentes/AuthorGrid'
 import ProximaAventura from '../componentes/ProximaAventura'
 
 const HomePage = () => {
-  const librosRedux = useSelector((state) => state.libros.items)
-  const loadingRedux = useSelector((state) => state.libros.loading)
-  const errorRedux = useSelector((state) => state.libros.error)
-  const categoriasRedux = useSelector((state) => state.libros.categorias.items)
-  const { libros, categorias } = useLibros({ libros: librosRedux, loading: loadingRedux, error: errorRedux, listaCategorias: categoriasRedux })
+  const catalogo = useSelector(selectCatalogo)
+  const { libros, categorias } = useLibros(catalogo)
 
   const { best, nuevos, usados, conDesc, topDesc, autores, topCategorias } = useMemo(() => {
     const best = masVendidos(libros) // solo nuevos: los usados no son bestsellers

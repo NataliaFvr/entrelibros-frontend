@@ -1,5 +1,6 @@
 import { logout as logoutThunk } from '../redux/userSlice'
 import {useDispatch,useSelector} from 'react-redux'
+import { selectUser } from '../redux/selectores'
 import VistaSwitch from './VistaSwitch'
 import './VistaAdmin.css'
 
@@ -7,7 +8,7 @@ import './VistaAdmin.css'
 // sin perfil, estantería ni notificaciones; solo el cambio de vista y la sesión.
 const HeaderAdmin = () => {
   const dispatch=useDispatch()
-  const {user}=useSelector(s=>s.user)
+  const user = useSelector(selectUser)
   const logout=()=>dispatch(logoutThunk())
   return (
     <div className="header-icons header-admin">

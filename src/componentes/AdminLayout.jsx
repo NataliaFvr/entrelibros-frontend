@@ -1,5 +1,6 @@
 import { logout as logoutThunk } from '../redux/userSlice'
 import {useDispatch,useSelector} from 'react-redux'
+import { selectUser } from '../redux/selectores'
 import { Link, Navigate, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import useMenuMovil from '../hooks/useMenuMovil'
 import { SECCIONES_ADMIN } from '../data/admin'
@@ -13,7 +14,7 @@ import './AdminPanel.css'
 // Solo entra el rol ADMIN; sin sesión manda a ingresar y vuelve a la misma pantalla.
 const AdminLayout = () => {
   const dispatch=useDispatch()
-  const {user}=useSelector(s=>s.user)
+  const user = useSelector(selectUser)
   const logout=()=>dispatch(logoutThunk())
   const { pathname } = useLocation()
   const navigate = useNavigate()

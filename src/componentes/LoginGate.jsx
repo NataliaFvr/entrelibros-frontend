@@ -16,7 +16,8 @@ const MENSAJES = {
 // Modal "¿Empezamos un nuevo capítulo?": aparece al intentar una acción que pide sesión
 const LoginGate = () => {
   const dispatch=useDispatch()
-  const {gateDestino, gate}=useSelector(s=>s.user)
+  const gate = useSelector((state) => state.user.gate)
+  const gateDestino = useSelector((state) => state.user.gateDestino)
   const cerrarGate=({conservarAccion=false}={})=>dispatch(cerrarGateAction({conservarAccion}))
   const navigate = useNavigate()
   const { pathname, search } = useLocation()

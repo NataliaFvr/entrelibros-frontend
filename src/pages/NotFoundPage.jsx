@@ -1,4 +1,5 @@
 import { useSelector } from 'react-redux'
+import { selectCatalogo } from '../redux/selectores'
 import { useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useLibros } from '../hooks/useLibros'
@@ -11,11 +12,8 @@ import NotFoundArt from '../componentes/NotFoundArt'
 const NotFoundPage = () => {
   const navigate = useNavigate()
   const { pathname } = useLocation()
-  const librosRedux = useSelector((state) => state.libros.items)
-  const loadingRedux = useSelector((state) => state.libros.loading)
-  const errorRedux = useSelector((state) => state.libros.error)
-  const categoriasRedux = useSelector((state) => state.libros.categorias.items)
-  const { libros } = useLibros({ libros: librosRedux, loading: loadingRedux, error: errorRedux, listaCategorias: categoriasRedux })
+  const catalogo = useSelector(selectCatalogo)
+  const { libros } = useLibros(catalogo)
   const [q, setQ] = useState('')
 
   const buscar = (e) => {

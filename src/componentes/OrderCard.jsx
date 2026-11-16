@@ -1,4 +1,5 @@
 import { useDispatch, useSelector } from 'react-redux'
+import { selectCompra } from '../redux/selectores'
 import { useNavigate } from 'react-router-dom'
 import { useCompra } from '../hooks/useCompra'
 import { fechaCorta, fmt, mmss } from '../utils/format'
@@ -13,11 +14,8 @@ import ConfirmLink from './ConfirmLink'
 const OrderCard = ({ pedido, libros }) => {
   const dispatch = useDispatch()
   const navigate = useNavigate()
-  const compraUser = useSelector((state) => state.user.user)
-  const compraMarks = useSelector((state) => state.user.marks)
-  const compraCarrito = useSelector((state) => state.carrito.items)
-  const compraPedidos = useSelector((state) => state.pedidos.items)
-  const { cancelarPedido } = useCompra({ dispatch, user: compraUser, marks: compraMarks, carrito: compraCarrito, pedidos: compraPedidos })
+  const compra = useSelector(selectCompra)
+  const { cancelarPedido } = useCompra({ dispatch, ...compra })
   const ahora = useAhora()
   const estado = estadoPago(pedido, ahora)
   const [texto, clase] = ETIQUETAS_PAGO[estado]

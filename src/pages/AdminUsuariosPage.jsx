@@ -1,4 +1,5 @@
 import { useDispatch, useSelector } from 'react-redux'
+import { selectUser } from '../redux/selectores'
 import { useState } from 'react'
 import AdminHead from '../componentes/AdminHead'
 import ConfirmarBajaModal from '../componentes/ConfirmarBajaModal'
@@ -14,7 +15,8 @@ import { plural } from '../utils/format'
 // /admin/usuarios — crear, editar, cambiar rol, dar de baja / reactivar y resolver solicitudes para ser vendedor
 const AdminUsuariosPage = () => {
   const dispatch = useDispatch()
-  const { user, todos } = useSelector((state) => state.user)
+  const user = useSelector(selectUser)
+  const todos = useSelector((state) => state.user.todos)
   const adm = useAdminUsuarios({ dispatch, user, usuarios: todos.items, cargados: todos.cargados })
   const [modal, setModal] = useState(null) // { tipo: 'crear' | 'editar' | 'rol' | 'baja', usuario? }
   const cerrar = () => setModal(null)

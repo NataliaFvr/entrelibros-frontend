@@ -2,6 +2,7 @@ import { mostrarToast } from '../redux/toastSlice'
 import {urlFotoUsuario} from '../api/usuariosApi'
 import { fetchUsuario,guardarPerfil,logout as logoutThunk } from '../redux/userSlice'
 import { useDispatch, useSelector } from 'react-redux'
+import { selectUser } from '../redux/selectores'
 import { useState } from 'react'
 import { Link, Navigate, useNavigate, useParams } from 'react-router-dom'
 import UserHead from '../componentes/UserHead'
@@ -17,7 +18,7 @@ const PESTANIAS = ['perfil', 'editar', 'marcapaginas', 'compras', 'direcciones']
 // /cuenta = perfil · /cuenta/editar · /cuenta/marcapaginas · /cuenta/compras · /cuenta/direcciones
 const AccountPage = () => {
   const dispatch=useDispatch()
-  const {user}=useSelector(s=>s.user)
+  const user = useSelector(selectUser)
 
   const perfil=user?{avatar:user.avatar||'',foto:user.tieneFoto?urlFotoUsuario(user.id):''}:{}
   const logout=()=>dispatch(logoutThunk())

@@ -1,4 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { logout } from "./userSlice";
 import { actualizarCargoServicioApi, obtenerCargoServicioApi } from "../api/cargoServicioApi";
 import { conDetalle } from "./conDetalle";
 
@@ -20,18 +21,22 @@ const aplicar = (state, action) => {
   state.fechaActualizacion = action.payload.fechaActualizacion || null;
 };
 
+const initialState = {
+  porcentaje: null,
+  fechaActualizacion: null,
+  cargado: false,
+  cargando: false,
+  error: null,
+};
+
 const cargoServicioSlice = createSlice({
   name: "cargoServicio",
-  initialState: {
-    porcentaje: null,
-    fechaActualizacion: null,
-    cargado: false,
-    cargando: false,
-    error: null,
-  },
+  initialState,
   reducers: {},
   extraReducers: (builder) => {
     builder
+      // Datos del panel del admin: al cerrar sesión se vacían para que no queden para la próxima cuenta
+      .addCase(logout.fulfilled, () => initialState)
       .addCase(fetchCargoServicio.pending, (state) => {
         state.cargando = true;
         state.error = null;

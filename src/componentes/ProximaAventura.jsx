@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
+import { selectCompra } from '../redux/selectores'
 import { Link } from 'react-router-dom'
 import { useCompra } from '../hooks/useCompra'
 import { abrirGate } from '../redux/userSlice'
@@ -12,11 +13,9 @@ const moneda = new Intl.NumberFormat('es-AR', { maximumFractionDigits: 0 })
 
 const ProximaAventura = ({ libros, categorias }) => {
   const dispatch = useDispatch()
-  const user = useSelector((state) => state.user.user)
-  const marks = useSelector((state) => state.user.marks)
-  const carrito = useSelector((state) => state.carrito.items)
-  const pedidos = useSelector((state) => state.pedidos.items)
-  const { agregar } = useCompra({ dispatch, user, marks, carrito, pedidos })
+  const compra = useSelector(selectCompra)
+  const { user } = compra
+  const { agregar } = useCompra({ dispatch, ...compra })
   const [categoria, setCategoria] = useState('')
   const [estado, setEstado] = useState('todos')
   const [precioMaximo, setPrecioMaximo] = useState(0)

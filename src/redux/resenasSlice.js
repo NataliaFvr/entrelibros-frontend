@@ -114,7 +114,14 @@ const resenasSlice = createSlice({
     };
     builder
       .addCase(login.fulfilled, olvidarEstados)
-      .addCase(logout.fulfilled, olvidarEstados)
+      .addCase(logout.fulfilled, (state) => {
+        olvidarEstados(state);
+        // Las listas completas son del panel del admin: no quedan en memoria para la próxima cuenta
+        state.todasLibro = [];
+        state.todasVendedor = [];
+        state.todasCargadas = false;
+        state.errorTodas = null;
+      })
       .addCase(confirmarEmail.fulfilled, olvidarEstados)
       .addCase(fetchResenasLibro.pending, (state, action) => {
         state.solicitudes.libros[action.meta.arg] = true;

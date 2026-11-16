@@ -1,4 +1,5 @@
 import { useSelector } from 'react-redux'
+import { selectUser } from '../redux/selectores'
 import { Navigate, useLocation, useNavigate } from 'react-router-dom'
 import AuthHero from '../componentes/AuthHero'
 import AuthTabs from '../componentes/AuthTabs'
@@ -8,7 +9,7 @@ import RegisterForm from '../componentes/RegisterForm'
 
 // tab: 'login' | 'register'. Al entrar vuelve a la página desde la que se pidió la sesión.
 const AuthPage = ({ tab }) => {
-  const {user}=useSelector(s=>s.user)
+  const user = useSelector(selectUser)
   const navigate = useNavigate()
   const { state } = useLocation()
   const destino = state?.from || '/cuenta'

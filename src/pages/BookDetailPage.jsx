@@ -2,6 +2,7 @@ import { mostrarToast } from '../redux/toastSlice'
 import { abrirGate,limpiarPendiente as limpiarPendienteAction,toggleMark as toggleMarkThunk } from '../redux/userSlice'
 import { useEffect, useMemo } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
+import { selectUser, selectMarks, selectPendiente, selectCompra, selectCatalogo } from '../redux/selectores'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { useLibros } from '../hooks/useLibros'
 import { fetchLibro } from '../redux/librosSlice'
@@ -26,16 +27,16 @@ const Detalle = ({ libro, libros }) => {
   const [params] = useSearchParams()
   const toast = (msg, accion) => dispatch(mostrarToast({ msg, accion }))
   const dispatch=useDispatch()
-  const compraMarks = useSelector((state) => state.user.marks)
-  const compraCarrito = useSelector((state) => state.carrito.items)
-  const compraPedidos = useSelector((state) => state.pedidos.items)
-  const {user, marks, pendiente}=useSelector(s=>s.user)
+  const compra = useSelector(selectCompra)
+  const user = useSelector(selectUser)
+  const marks = useSelector(selectMarks)
+  const pendiente = useSelector(selectPendiente)
   const requiereLogin=(t,d=null,a=null)=>{if(user)return false;dispatch(abrirGate({tipo:t,destino:d,accion:a}));return true}
   const limpiarPendiente=()=>dispatch(limpiarPendienteAction())
   const toggleMark=async(i)=>{const estaba=marks.includes(i);const r=await dispatch(toggleMarkThunk({id:i,estaba}));if(r.error)toast(r.error.message)}
   const guardadasResenas = useSelector((state) => state.resenas.libros[libro.id])
   const estadoResena = useSelector((state) => state.resenas.estadosLibro[libro.id])
-  const { agregar } = useCompra({ dispatch, user, marks: compraMarks, carrito: compraCarrito, pedidos: compraPedidos })
+  const { agregar } = useCompra({ dispatch, ...compra })
   const { resenias, promedio, miResenia, puedeResenar, motivo, publicar, eliminar } = useResenias(libro.id, { dispatch, user, guardadas: guardadasResenas, estadoGuardado: estadoResena })
 
   const { esPropio } = useLibroPropio(user)
@@ -175,11 +176,8 @@ const Detalle = ({ libro, libros }) => {
 
 const BookDetailPage = () => {
   const { id } = useParams()
-  const librosRedux = useSelector((state) => state.libros.items)
-  const loadingRedux = useSelector((state) => state.libros.loading)
-  const errorRedux = useSelector((state) => state.libros.error)
-  const categoriasRedux = useSelector((state) => state.libros.categorias.items)
-  const { libros, cargando } = useLibros({ libros: librosRedux, loading: loadingRedux, error: errorRedux, listaCategorias: categoriasRedux })
+  const catalogo = useSelector(selectCatalogo)
+  const { libros, cargando } = useLibros(catalogo)
   const dispatch = useDispatch()
   const delCatalogo = libros.find((l) => l.id === +id)
   // El catálogo no lista los agotados: si no está, se pide ese libro (undefined = todavía no se pidió)

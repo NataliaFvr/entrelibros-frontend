@@ -1,19 +1,31 @@
 import { mostrarToast } from '../redux/toastSlice'
-import {urlFotoUsuario} from '../api/usuariosApi'
-import { fetchUsuario,guardarPerfil } from '../redux/userSlice'
+import { urlFotoUsuario } from '../api/usuariosApi'
 import { useEffect, useMemo, useState } from 'react'
 import { ETIQUETA_ROL, POR_PAGINA } from '../data/admin'
 import { fetchLibros } from '../redux/librosSlice'
 import {
-  cambiarRol as cambiarRolAccion, crearUsuario, darDeBajaUsuario, editarUsuario, fetchUsuarios, reactivarUsuario, resolverSolicitud,
+  cambiarRol as cambiarRolAccion, crearUsuario, darDeBajaUsuario, editarUsuario, fetchUsuario, fetchUsuarios, guardarPerfil,
+  reactivarUsuario, resolverSolicitud,
 } from '../redux/userSlice'
 import { norm } from '../utils/format'
 
 // Cada acción devuelve { ok } o { error }: los pop-ups muestran el error sin cerrarse
 const useAdminUsuarios = ({ dispatch, user, usuarios, cargados }) => {
+  // Foto y avatar del admin logueado, para el formulario de su propio perfil
+  const perfil = user
+    ? { avatar: user.avatar || '', foto: user.tieneFoto ? urlFotoUsuario(user.id) : '' }
+    : {}
 
-  const perfil=user?{avatar:user.avatar||'',foto:user.tieneFoto?urlFotoUsuario(user.id):''}:{}
-  const actualizarPerfil=async(v,n)=>{const r=await dispatch(guardarPerfil({valores:v,nuevoPerfil:n,user}));if(r.error){dispatch(fetchUsuario(user.id));throw Error(r.error.message)}return r.payload.sesionCerrada?{sesionCerrada:true}:{}}
+  // Guarda el perfil del admin. Si falla, se vuelve a traer el usuario (para descartar lo que quedó a medias) y se
+  // relanza el error para que el formulario lo muestre. Si el cambio cerró la sesión (por ejemplo, cambió el e-mail), lo avisa.
+  const actualizarPerfil = async (valores, nuevoPerfil) => {
+    const resultado = await dispatch(guardarPerfil({ valores, nuevoPerfil, user }))
+    if (resultado.error) {
+      dispatch(fetchUsuario(user.id))
+      throw Error(resultado.error.message)
+    }
+    return resultado.payload.sesionCerrada ? { sesionCerrada: true } : {}
+  }
   const toast = (msg, accion) => dispatch(mostrarToast({ msg, accion }))
   const [filtros, setFiltros] = useState({ q: '', rol: '', est: '', solicitud: '' })
   const [pagina, setPagina] = useState(1)

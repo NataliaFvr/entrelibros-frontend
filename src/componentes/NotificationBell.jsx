@@ -1,4 +1,5 @@
 import { useDispatch, useSelector } from 'react-redux'
+import { selectUser } from '../redux/selectores'
 import useNotificaciones from '../hooks/useNotificaciones'
 import usePopover from '../hooks/usePopover'
 import { BellIcon } from './Icons'
@@ -33,7 +34,7 @@ const Campana = ({ user, dispatch, notificaciones }) => {
 // Campanita del header (comprador y vendedor). Sin sesión no se muestra.
 const NotificationBell = () => {
   const dispatch = useDispatch()
-  const {user}=useSelector(s=>s.user)
+  const user = useSelector(selectUser)
   const notificaciones = useSelector((state) => state.notificaciones)
   if (!user) return null
   return <Campana key={user.nombreUsuario} user={user} dispatch={dispatch} notificaciones={notificaciones} />

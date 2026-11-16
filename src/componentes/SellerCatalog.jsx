@@ -1,5 +1,6 @@
 import { abrirGate } from '../redux/userSlice'
 import {useDispatch,useSelector} from 'react-redux'
+import { selectUser, selectCompra } from '../redux/selectores'
 import { useNavigate } from 'react-router-dom'
 import { useCompra } from '../hooks/useCompra'
 import ProductCard from './ProductCard'
@@ -9,14 +10,11 @@ import EmptyBlock from './EmptyBlock'
 const SellerCatalog = ({ tienda, libros }) => {
   const navigate = useNavigate()
   const dispatch=useDispatch()
-  const { user } = useSelector((state) => state.user)
+  const user = useSelector(selectUser)
 
   const requiereLogin=(t,d=null,a=null)=>{if(user)return false;dispatch(abrirGate({tipo:t,destino:d,accion:a}));return true}
-  const compraUser = useSelector((state) => state.user.user)
-  const compraMarks = useSelector((state) => state.user.marks)
-  const compraCarrito = useSelector((state) => state.carrito.items)
-  const compraPedidos = useSelector((state) => state.pedidos.items)
-  const { agregar } = useCompra({ dispatch, user: compraUser, marks: compraMarks, carrito: compraCarrito, pedidos: compraPedidos })
+  const compra = useSelector(selectCompra)
+  const { agregar } = useCompra({ dispatch, ...compra })
 
   const comprar = async (libro) => {
     if (requiereLogin('cart')) return
