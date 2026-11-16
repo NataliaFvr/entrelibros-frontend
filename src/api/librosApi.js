@@ -53,11 +53,16 @@ export const getCatalogoApi = async (f, { categorias = [], filtros = {}, provinc
     provinciaComprador: filtrarEnvio ? provinciaComprador : undefined,
     envioLocal: filtrarEnvio ? f.envios[0] === 'misma' : undefined,
   }
-  const { data } = await api.get('/libros', { params })
-  return {
-    libros: (data.content || []).map(aLibroFront),
-    total: data.totalElements || 0,
-    pages: data.totalPages || 0,
+  try {
+    const { data } = await api.get('/libros', { params })
+    return {
+      libros: (data.content || []).map(aLibroFront),
+      total: data.totalElements || 0,
+      pages: data.totalPages || 0,
+    }
+  } catch (err) {
+    if (esListaVacia(err)) return { libros: [], total: 0, pages: 0 } // ListaVaciaException: ningún libro con esos filtros
+    throw err
   }
 }
 
@@ -66,8 +71,13 @@ export const getFiltrosDisponiblesApi = async () => (await api.get('/libros/filt
 // Muestra acotada para los componentes fuera del catálogo (inicio, carruseles y sugerencias).
 // El catálogo completo usa `getCatalogoApi`; no hay que recorrer todas las páginas acá.
 export const getLibrosApi = async () => {
-  const { data } = await api.get('/libros', { params: { sort: 'bestsellers', page: 0, size: TAMANIO } })
-  return (data.content || []).map(aLibroFront)
+  try {
+    const { data } = await api.get('/libros', { params: { sort: 'bestsellers', page: 0, size: TAMANIO } })
+    return (data.content || []).map(aLibroFront)
+  } catch (err) {
+    if (esListaVacia(err)) return [] // todavía no hay libros publicados
+    throw err
+  }
 }
 
 export const getMisLibrosApi = async () => {

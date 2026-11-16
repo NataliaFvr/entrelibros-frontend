@@ -78,6 +78,7 @@ export async function obtenerHistorial(page = 0, size = 20) {
     const { data } = await api.get(RUTAS.historial, { baseURL: RAIZ, params: { page, size } })
     return data
   } catch (err) {
+    if (esListaVacia(err)) return paginaVacia(size, page)
     return fallar(err)
   }
 }
@@ -87,6 +88,7 @@ export async function obtenerHistorialDeLibro(id, page = 0, size = 20) {
     const { data } = await api.get(RUTAS.historialLibro(id), { baseURL: RAIZ, params: { page, size } })
     return data
   } catch (err) {
+    if (esListaVacia(err)) return paginaVacia(size, page)
     return fallar(err)
   }
 }
