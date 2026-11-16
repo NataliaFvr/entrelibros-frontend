@@ -35,7 +35,7 @@ const ImageUploader = ({ imagenes }) => {
         <div className="iu-side" style={{ display: 'flex', flexDirection: 'column', gap: 12, minWidth: 0 }}>
           <div className="iu-grid">
             {fotos.map((src, i) => (
-              <button key={src.slice(-24) + i} type="button" className={`iu-th${i === actual ? ' on' : ''}`} aria-label={`Ver foto ${i + 1}`} onClick={() => setActiva(i)}>
+              <button key={src} type="button" className={`iu-th${i === actual ? ' on' : ''}`} aria-label={`Ver foto ${i + 1}`} onClick={() => setActiva(i)}>
                 <img src={src} alt="" />
                 {i === 0 && <span className="iu-cv">Portada</span>}
               </button>

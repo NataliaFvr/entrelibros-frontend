@@ -28,10 +28,10 @@ export const solicitarVendedorApi = async ({ tienda, tel, desc, prov }) =>
     nombreTienda: tienda, telefono: tel, descripcion: desc, provincia: prov,
   })).data)
 
-// ADMIN: solicitudes pendientes y su resolución (aprobar y comentario viajan como query params, no como body)
+// ADMIN: solicitudes pendientes y su resolución (aprobar y comentario viajan en el body)
 export const listarSolicitudesApi = async () => (await traerPaginas('/usuarios/solicitudes-vendedor')).map(aUsuarioFront)
 export const resolverSolicitudApi = async (id, aprobar, comentario) =>
-  (await api.patch(`/usuarios/${id}/solicitud-vendedor`, null, { params: { aprobar, ...(comentario ? { comentario } : {}) } })).data
+  (await api.patch(`/usuarios/${id}/solicitud-vendedor`, { aprobar, comentario: comentario || null })).data
 
 /* ---------- Foto de perfil (ImagenesUsuarioController) ----------
    GET    /usuarios/{id}/foto  -> bytes de la imagen (público, src de un <img>); 404 si no tiene

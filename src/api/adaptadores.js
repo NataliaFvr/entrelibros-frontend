@@ -169,7 +169,7 @@ const estadoVenta = (ov) => {
 }
 export const aVentaFront = (ordenVendedor) => {
   const its = (ordenVendedor.items || []).map((i) => ({
-    t: i.tituloLibro || 'Libro', q: i.cantidad, p: i.precioUnitario,
+    id: i.idOrdenItem, t: i.tituloLibro || 'Libro', q: i.cantidad, p: i.precioUnitario,
     cat: (i.categorias || [])[0] || '', usado: i.estadoLibro === 'USADO',
     img: i.portada ? `${RAIZ}${i.portada}` : null,
   }))
@@ -230,9 +230,13 @@ export const aVendedorPublicoFront = (v) => {
 
 /* ---------------- Imágenes ---------------- */
 
-// dataURL (las fotos del formulario van en base64) -> File para el multipart de POST /imagenes-libro
+// dataURL (las fotos del formulario van en base64) -> File para el multipart de POST /imagenes-libro.
+// Se decodifica el base64 a mano: no es un pedido HTTP, así que no hace falta fetch.
 export const dataUrlAFile = async (dataUrl, nombre = 'foto') => {
-  const blob = await (await fetch(dataUrl)).blob()
-  const ext = blob.type === 'image/png' ? 'png' : 'jpg'
-  return new File([blob], `${nombre}.${ext}`, { type: blob.type || 'image/jpeg' })
+  const [cabecera, base64] = dataUrl.split(',')
+  const tipo = (cabecera.match(/^data:([^;]+)/) || [])[1] || 'image/jpeg'
+  const binario = atob(base64)
+  const bytes = Uint8Array.from(binario, (letra) => letra.charCodeAt(0))
+  const ext = tipo === 'image/png' ? 'png' : 'jpg'
+  return new File([bytes], `${nombre}.${ext}`, { type: tipo })
 }

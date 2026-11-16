@@ -46,20 +46,19 @@ const ProximaAventura = ({ libros, categorias }) => {
     [libros],
   )
 
+  // El foco entra al diálogo al abrirlo, así el onKeyDown del propio modal recibe el Escape
   useEffect(() => {
-    if (!modalAbierto) return undefined
-    dialogoRef.current?.focus()
-    const cerrarConEscape = (event) => {
-      if (event.key === 'Escape') setModalAbierto(false)
-    }
-    window.addEventListener('keydown', cerrarConEscape)
-    return () => window.removeEventListener('keydown', cerrarConEscape)
+    if (modalAbierto) dialogoRef.current?.focus()
   }, [modalAbierto])
+
+  const cerrarConEscape = (event) => {
+    if (event.key === 'Escape') setModalAbierto(false)
+  }
 
   useEffect(() => {
     if (etapa !== 'abriendo') return undefined
-    const timer = window.setTimeout(() => setEtapa('revelada'), 900)
-    return () => window.clearTimeout(timer)
+    const timer = setTimeout(() => setEtapa('revelada'), 900)
+    return () => clearTimeout(timer)
   }, [etapa])
 
   const prepararCaja = () => {
@@ -146,7 +145,7 @@ const ProximaAventura = ({ libros, categorias }) => {
       </div>
 
       {modalAbierto && (
-        <div className="aventura-overlay" onMouseDown={(event) => { if (event.target === event.currentTarget) setModalAbierto(false) }}>
+        <div className="aventura-overlay" onKeyDown={cerrarConEscape} onMouseDown={(event) => { if (event.target === event.currentTarget) setModalAbierto(false) }}>
           <section className="aventura-dialogo" role="dialog" aria-modal="true" aria-labelledby="aventura-dialogo-titulo" tabIndex={-1} ref={dialogoRef}>
             <button className="aventura-cerrar" type="button" onClick={() => setModalAbierto(false)} aria-label="Cerrar">×</button>
             {etapa !== 'video' && <span className="aventura-eyebrow">La caja misteriosa</span>}
