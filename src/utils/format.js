@@ -7,6 +7,9 @@ export const norm = (s) =>
 
 export const plural = (n, uno, varios) => (n === 1 ? uno : varios)
 
+// 5 -> "5%" · 2.5 -> "2,5%" (hasta 2 decimales, sin ceros de más)
+export const pct = (n) => `${Number(n).toLocaleString('es-AR', { maximumFractionDigits: 2 })}%`
+
 // ana_gil@mail.com -> an••••@mail.com
 export const enmascararMail = (email) => {
   const [a, b] = email.split('@')

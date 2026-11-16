@@ -1,5 +1,6 @@
 import { fmt } from '../utils/format'
 import SummaryRow from './SummaryRow'
+import CargoServicioRow from './CargoServicioRow'
 import OrderLines from './OrderLines'
 import { nombreMetodo } from '../data/metodosPago'
 
@@ -15,7 +16,8 @@ const PayApproved = ({ pedido, libros, onVerCompras, onSeguir }) => {
       <div className="sum">
         <OrderLines pedido={pedido} libros={libros} />
         <SummaryRow titulo="Envío" valor={fmt(pedido.env)} />
-        <SummaryRow titulo="Total pagado" valor={fmt(pedido.sub + pedido.env)} total />
+        <CargoServicioRow monto={pedido.cargo} porcentaje={pedido.pctCargo} />
+        <SummaryRow titulo="Total pagado" valor={fmt(pedido.total)} total />
         <small className="ord-a">Envío a: {pedido.addr}</small>
       </div>
       <div className="rvf-b" style={{ justifyContent: 'center', flexWrap: 'wrap' }}>

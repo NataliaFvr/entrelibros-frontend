@@ -2,7 +2,7 @@ import { listarOrdenesAdminApi, listarPagosAdminApi } from './comprasApi'
 
 const aOrdenAdmin = (o) => ({
   n: o.n, fecha: o.date, comprador: o.comprador, provincia: o.dest.prov || o.addr, destino: o.addr,
-  subtotal: o.sub, envio: o.env, total: o.total, estadoPago: o.pago,
+  subtotal: o.sub, envio: o.env, cargo: o.cargo, pctCargo: o.pctCargo, total: o.total, estadoPago: o.pago,
   proveedor: o.proveedor || 'tarjeta', items: o.its,
 })
 

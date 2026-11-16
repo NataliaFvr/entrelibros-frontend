@@ -28,6 +28,7 @@ export const cambiarCantidadItemApi = async (idItem, cantidad) =>
 
 export const quitarItemApi = async (idItem) => (await api.delete(`/carrito/items/${idItem}`)).data
 
-// GET /carrito/envio?idDireccion= -> { subtotal, costoEnvio, total, cantidadEnvios }: el total antes de confirmar
+// GET /carrito/envio?idDireccion= -> { subtotal, costoEnvio, cargoServicio, porcentajeCargo, total, cantidadEnvios, envios }:
+// el total antes de confirmar (total = libros + envíos + cargo de servicio)
 export const cotizarEnvioApi = async (idDireccion) =>
   (await api.get('/carrito/envio', { params: { idDireccion } })).data

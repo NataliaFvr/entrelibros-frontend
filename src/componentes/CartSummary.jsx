@@ -1,11 +1,13 @@
 import { useState } from 'react'
 import { fmt, plural } from '../utils/format'
 import SummaryRow from './SummaryRow'
+import CargoServicioRow from './CargoServicioRow'
 import AddressSelect from './AddressSelect'
 import AddressForm from './AddressForm'
 
 // Resumen de la estantería + dirección de envío + botón para pasar al pago.
-// `cotizacion` = { costoEnvio, total, cantidadEnvios, envios } que calcula el back para la dirección elegida (null si todavía no llegó).
+// `cotizacion` = { costoEnvio, cargoServicio, porcentajeCargo, total, cantidadEnvios, envios } que calcula el back para la
+// dirección elegida (null si todavía no llegó). El cargo de servicio es un porcentaje sobre los libros, sin el envío.
 // `envios` = [{ idVendedor, vendedor, zona: 'misma' | 'distinta', costo }]: un envío por vendedor.
 const CartSummary = ({ sub, cotizacion, direcciones, elegida, onElegir, onFinalizar, enviando = false }) => {
   const [agregando, setAgregando] = useState(false) // formulario de nueva dirección abierto (si ya hay direcciones)
@@ -26,6 +28,7 @@ const CartSummary = ({ sub, cotizacion, direcciones, elegida, onElegir, onFinali
               ))}
             </ul>
           )}
+          <CargoServicioRow monto={cotizacion.cargoServicio} porcentaje={cotizacion.porcentajeCargo} />
           <SummaryRow titulo="Total" valor={fmt(cotizacion.total)} total />
         </>
       ) : (

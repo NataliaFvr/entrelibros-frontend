@@ -4,6 +4,7 @@ import { fechaCorta, fmt } from '../utils/format'
 import AdminModal from './AdminModal'
 import EtiquetaPago from './EtiquetaPago'
 import SummaryRow from './SummaryRow'
+import CargoServicioRow from './CargoServicioRow'
 
 const CANCELADAS = ['CANCELADO', 'VENCIDO']
 
@@ -37,6 +38,7 @@ const OrdenDetalleModal = ({ orden: o, onCerrar }) => {
           )
         })}
         <SummaryRow titulo="Envío" valor={fmt(o.envio)} />
+        <CargoServicioRow monto={o.cargo} porcentaje={o.pctCargo} />
         <SummaryRow titulo="Total" valor={fmt(o.total)} total />
       </div>
       <div className="modal-btns">

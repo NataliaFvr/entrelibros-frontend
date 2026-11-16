@@ -9,6 +9,7 @@ import HistorialModeracion from './HistorialModeracion'
 import ModeracionItem from './ModeracionItem'
 import RechazoModal from './RechazoModal'
 import AdminResenas from './AdminResenas'
+import AdminCargoServicio from './AdminCargoServicio'
 import './AdminModeracion.css'
 
 const VACIO = {
@@ -30,6 +31,7 @@ const AdminModeracionPanel = () => {
     ['MODIFICACION', `Modificaciones (${cantidad('MODIFICACION')})`],
     ['RESEÑAS', 'Reseñas'],
     ['HISTORIAL', 'Historial'],
+    ['CARGO', 'Cargo de servicio'],
   ]
   const enCola = tab === 'NUEVO' || tab === 'MODIFICACION'
   const verHistorialDe = (libro) => { setLibroHistorial(libro); setTab('HISTORIAL') }
@@ -55,11 +57,9 @@ const AdminModeracionPanel = () => {
               onHistorial={() => verHistorialDe({ id: s.libroId, titulo: s.datosPropuestos.titulo })} />
           )} />
       )}
-      {!enCola && (
-        tab === 'HISTORIAL'
-          ? <HistorialModeracion libro={libroHistorial} onLibro={setLibroHistorial} onTodos={() => setLibroHistorial(null)} />
-          : <AdminResenas />
-      )}
+      {tab === 'HISTORIAL' && <HistorialModeracion libro={libroHistorial} onLibro={setLibroHistorial} onTodos={() => setLibroHistorial(null)} />}
+      {tab === 'RESEÑAS' && <AdminResenas />}
+      {tab === 'CARGO' && <AdminCargoServicio />}
       {aRechazar && (
         <RechazoModal titulo={aRechazar.datosPropuestos.titulo} onCerrar={() => setARechazar(null)}
           onConfirmar={(motivo) => rechazar(aRechazar, motivo)} />

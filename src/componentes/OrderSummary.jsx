@@ -1,5 +1,6 @@
 import { fmt } from '../utils/format'
 import SummaryRow from './SummaryRow'
+import CargoServicioRow from './CargoServicioRow'
 import OrderLines from './OrderLines'
 import ReserveTimer from './ReserveTimer'
 import ConfirmLink from './ConfirmLink'
@@ -11,6 +12,7 @@ const OrderSummary = ({ pedido, libros, error, puedePagar, onCancelar }) => {
       <OrderLines pedido={pedido} libros={libros} />
       <SummaryRow titulo="Libros" valor={fmt(pedido.sub)} />
       <SummaryRow titulo="Envío" valor={fmt(pedido.env)} />
+      <CargoServicioRow monto={pedido.cargo} porcentaje={pedido.pctCargo} />
       <SummaryRow titulo="Total" valor={fmt(pedido.total)} total />
       <small className="ord-a">Envío a: {pedido.addr}</small>
       <ReserveTimer venceEn={pedido.venceEn} />

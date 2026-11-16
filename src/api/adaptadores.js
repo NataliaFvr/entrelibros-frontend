@@ -120,7 +120,7 @@ export const aItemCarritoFront = (i) => ({
 // El front normaliza la provincia solo para el request; el backend calcula la zona y el costo real.
 export const provinciaParaBack = (prov = '') => (/^(ciudad aut[oó]noma de buenos aires|caba)$/i.test(prov.trim()) ? 'CABA' : prov.trim())
 
-// OrdenResponse (con items) -> pedido del front { n, date, its, addr, sub, env, total, est, pago, venceEn, proveedor }
+// OrdenResponse (con items) -> pedido del front { n, date, its, addr, sub, env, cargo, pctCargo, total, est, pago, venceEn, proveedor }
 const ESTADO_TEXTO = { PENDIENTE: 'Pendiente', SIMULADO_APROBADO: 'Confirmada', RECHAZADO: 'Rechazada', CANCELADO: 'Cancelada', VENCIDO: 'Vencida' }
 
 // Dirección de entrega de la orden: el back la guarda copiada al hacer el checkout (calleDestino, ciudadDestino, cpDestino
@@ -129,14 +129,19 @@ export const aDestinoFront = (o) => ({
   calle: o.calleDestino || '', ciudad: o.ciudadDestino || '', cp: o.cpDestino || '', prov: o.provinciaDestino || '',
 })
 
+// La orden no guarda el porcentaje del cargo, solo el monto (OrdenResponse.cargoServicio): el porcentaje con el que se
+// cobró sale de cargo / subtotal. Así se muestra el de esa compra aunque el admin lo haya cambiado después.
+const porcentajeCargo = (cargo, subtotal) => (cargo > 0 && subtotal > 0 ? Math.round((cargo / subtotal) * 10000) / 100 : 0)
+
 export const aPedidoFront = (o) => {
   const dest = aDestinoFront(o)
+  const cargo = o.cargoServicio ?? 0
   return {
     n: String(o.id), idOrden: o.id, date: isoADia(o.fecha),
     its: (o.items || []).map((i) => ({ id: i.idLibro, q: i.cantidad, p: i.precioUnitario, t: i.tituloLibro, idItem: i.idOrdenItem, idVendedor: i.idVendedor, cancelado: Boolean(i.cancelado),
       emailV: i.emailVendedor || '', telV: i.telefonoVendedor || '', tiendaV: i.nombreTienda || '', img: i.portada ? `${RAIZ}${i.portada}` : null })),
     dest, addr: destinoTexto(dest), // addr = texto listo para mostrar: "calle, ciudad, Provincia (CP)"
-    sub: o.subtotal ?? 0, env: o.costoEnvio ?? 0, total: o.total ?? 0,
+    sub: o.subtotal ?? 0, env: o.costoEnvio ?? 0, cargo, pctCargo: porcentajeCargo(cargo, o.subtotal ?? 0), total: o.total ?? 0,
     est: ESTADO_TEXTO[o.estadoPago] || o.estadoPago, pago: o.estadoPago,
     venceEn: o.estadoPago === 'PENDIENTE' ? isoAMs(o.venceEn) ?? undefined : undefined,
     comprador: `${o.nombreComprador || ''}`.trim(), proveedor: o.proveedor || '',

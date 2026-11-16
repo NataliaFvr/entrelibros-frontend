@@ -6,6 +6,7 @@ import { nombreMetodo } from '../data/metodosPago'
 import { ETIQUETAS_PAGO, estadoPago } from '../utils/pedidos'
 import useAhora from '../hooks/useAhora'
 import SummaryRow from './SummaryRow'
+import CargoServicioRow from './CargoServicioRow'
 import OrderLines from './OrderLines'
 import ConfirmLink from './ConfirmLink'
 
@@ -40,6 +41,7 @@ const OrderCard = ({ pedido, libros }) => {
       </div>
       <OrderLines pedido={pedido} libros={libros} conOpinion={pagada} />
       <SummaryRow titulo="Envío" valor={fmt(pedido.env)} />
+      <CargoServicioRow monto={pedido.cargo} porcentaje={pedido.pctCargo} />
       <SummaryRow titulo="Total" valor={fmt(pedido.total)} total />
       <small className="ord-a">
         Envío a: {pedido.addr}{pedido.proveedor && ` · Pagado con ${nombreMetodo(pedido.proveedor)}`}

@@ -1,5 +1,6 @@
 import { configureStore } from "@reduxjs/toolkit";
 import adminReducer from "./adminSlice";
+import cargoServicioReducer from "./cargoServicioSlice";
 import carritoReducer from "./carritoSlice";
 import contactoReducer from "./contactoSlice";
 import enviosReducer from "./enviosSlice";
@@ -26,6 +27,7 @@ export const store = configureStore({
     ventas: ventasReducer,
     moderacion: moderacionReducer,
     envios: enviosReducer,
+    cargoServicio: cargoServicioReducer,
     admin: adminReducer,
     resenas: resenasReducer,
     notificaciones: notificacionesReducer,
