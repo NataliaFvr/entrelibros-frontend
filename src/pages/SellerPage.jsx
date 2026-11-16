@@ -39,7 +39,12 @@ const Vendedor = ({ user, perfil }) => {
   const estadoVentas = useSelector((state) => state.ventas)
   const estadoResenas = useSelector((state) => state.resenas)
   const { vendedor, estadoLibros, faltanFotos, reintentar, solicitar, guardarLibro, alternarBaja } = useVendedor(user, tab === 'editar' ? id : null, { dispatch, ...estadoVendedor })
-  const calificaciones = useCalificacionesRecibidas(vendedor.tienda, vendedor.pub, user.id, { dispatch, ...estadoResenas })
+  // En el slice de reseñas cada lista está guardada por id de vendedor
+  const calificaciones = useCalificacionesRecibidas(vendedor.tienda, vendedor.pub, user.id, {
+    dispatch,
+    atencion: estadoResenas.vendedores[user.id],
+    delLibro: estadoResenas.opinionesVendedor[user.id],
+  })
   const { ventas, cargando, cancelar } = useVentas(user, { dispatch, ...estadoVentas })
   const activas = useMemo(() => ventas.filter((v) => v.estado === 'pagada'), [ventas]) // solo las pagadas suman a totales y estadísticas
 
