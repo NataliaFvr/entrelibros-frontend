@@ -61,7 +61,13 @@ const useAdminUsuarios = ({ dispatch, user, usuarios, cargados }) => {
     return { ok: true }
   }
 
-  const crear = (v) => ejecutar(crearUsuario(v), 'Usuario creado')
+  // Devuelve { ok } o { error, campos }: los errores por campo se muestran debajo de cada input del formulario
+  const crear = async (v) => {
+    const resultado = await dispatch(crearUsuario(v))
+    if (resultado.error) return { error: resultado.error.message, campos: resultado.error.campos || {} }
+    toast('Usuario creado')
+    return { ok: true }
+  }
 
   const editar = async (u, v) => {
     // La propia cuenta pasa por userSlice: así la sesión sigue al día

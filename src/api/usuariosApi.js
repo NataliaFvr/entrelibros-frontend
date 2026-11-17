@@ -6,9 +6,13 @@ import { aUsuarioFront } from './adaptadores'
 
 export const listarUsuariosApi = async () => (await traerPaginas('/usuarios')).map(aUsuarioFront)
 
+// POST /usuarios (admin). Para un VENDEDOR el back exige además nombreTienda, provincia y teléfono.
 export const crearUsuarioApi = async (v) =>
   aUsuarioFront((await api.post('/usuarios', {
     nombreUsuario: v.nombreUsuario.trim(), email: v.email.trim(), contrasena: v.contrasena, nombre: v.nombre.trim(), apellido: v.apellido.trim(), rol: v.rol,
+    ...(v.rol === 'VENDEDOR'
+      ? { nombreTienda: v.nombreTienda.trim(), provincia: v.provincia, telefono: v.telefono.trim() }
+      : {}),
   })).data)
 
 // PATCH /usuarios/{id}: solo se aplican los campos que vienen (UsuarioUpdateRequest)

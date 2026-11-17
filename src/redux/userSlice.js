@@ -107,10 +107,11 @@ export const fetchUsuarios = createAsyncThunk("user/fetchUsuarios", async () => 
   condition: (_, { getState }) => !getState().user.todos.loading,
 });
 
+// `conDetalle`: si el back rechaza un campo (ej. el teléfono del vendedor), el error llega con su nombre al formulario
 export const crearUsuario = createAsyncThunk("user/crearUsuario", async (v) => {
   if (!["COMPRADOR", "VENDEDOR"].includes(v.rol)) throw new Error("Desde el panel solo se pueden crear compradores o vendedores.");
   return crearUsuarioApi(v);
-});
+}, conDetalle);
 
 export const editarUsuario = createAsyncThunk("user/editarUsuario", async ({ id, cambios }) => actualizarUsuarioApi(id, cambios));
 
