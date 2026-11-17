@@ -1,9 +1,9 @@
 import { mostrarToast } from '../redux/toastSlice'
 import { useEffect, useMemo } from 'react'
-import { descartarNotificacion, fetchNotificaciones, marcarLeida, marcarTodasLeidas } from '../redux/notificacionesSlice'
+import { cargarMasNotificaciones, descartarNotificacion, fetchNotificaciones, marcarLeida, marcarTodasLeidas } from '../redux/notificacionesSlice'
 
 // Se piden una vez por cuenta; después cada acción actualiza el estado con la respuesta del back
-const useNotificaciones = (user, { dispatch, idUsuario, items, noLeidas, error }) => {
+const useNotificaciones = (user, { dispatch, idUsuario, items, noLeidas, hayMas, cargandoMas, error }) => {
   const toast = (msg, accion) => dispatch(mostrarToast({ msg, accion }))
   const cargadas = idUsuario === user.id
 
@@ -21,6 +21,9 @@ const useNotificaciones = (user, { dispatch, idUsuario, items, noLeidas, error }
   return {
     lista,
     noLeidas: cargadas ? noLeidas : 0,
+    hayMas: cargadas && hayMas,
+    cargandoMas,
+    verMas: () => ejecutar(cargarMasNotificaciones()),
     marcarLeida: (id) => ejecutar(marcarLeida(id)),
     marcarTodas: () => ejecutar(marcarTodasLeidas()),
     descartar: (id) => ejecutar(descartarNotificacion(id)),

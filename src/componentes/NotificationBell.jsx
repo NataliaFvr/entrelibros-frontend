@@ -9,7 +9,7 @@ import NotificationPanel from './NotificationPanel'
 const ID_PANEL = 'panel-notificaciones'
 
 const Campana = ({ user, dispatch, notificaciones }) => {
-  const { lista, noLeidas, marcarLeida, marcarTodas, descartar } = useNotificaciones(user, { dispatch, ...notificaciones })
+  const { lista, noLeidas, hayMas, cargandoMas, verMas, marcarLeida, marcarTodas, descartar } = useNotificaciones(user, { dispatch, ...notificaciones })
   const popover = usePopover()
   const etiqueta = noLeidas ? `Notificaciones (${noLeidas} sin leer)` : 'Notificaciones'
 
@@ -23,7 +23,8 @@ const Campana = ({ user, dispatch, notificaciones }) => {
       {popover.abierto && (
         <>
           <div className="notif-back" onClick={popover.cerrar} />
-          <NotificationPanel id={ID_PANEL} lista={lista} noLeidas={noLeidas} onLeer={marcarLeida} onLeerTodas={marcarTodas}
+          <NotificationPanel id={ID_PANEL} lista={lista} noLeidas={noLeidas} hayMas={hayMas} cargandoMas={cargandoMas} onVerMas={verMas}
+            onLeer={marcarLeida} onLeerTodas={marcarTodas}
             onDescartar={descartar} onCerrar={popover.cerrar} />
         </>
       )}

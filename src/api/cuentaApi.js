@@ -5,13 +5,15 @@ import { esListaVacia } from '../utils/errorApi'
 
 // NotificacionController, MarcapaginaController y ContactoController
 
-// Solo la primera página (las más nuevas primero): alcanza para el desplegable de la campanita. 404 ListaVacia = sin notificaciones.
-export const listarPrimeraPaginaNotificacionesApi = async (size = 20) => {
+// Las `size` más nuevas (siempre desde la primera página) y si quedan más: { items, hayMas }.
+// "Ver más" pide la primera página más grande en vez de la página siguiente: si el usuario borró alguna,
+// pedir la página 2 correría todo un lugar y una notificación quedaría salteada.
+export const listarNotificacionesApi = async (size = 20) => {
   try {
     const { data } = await api.get('/notificaciones', { params: { page: 0, size } })
-    return (data.content || []).map(aNotificacionFront)
+    return { items: (data.content || []).map(aNotificacionFront), hayMas: !data.last }
   } catch (err) {
-    if (esListaVacia(err)) return []
+    if (esListaVacia(err)) return { items: [], hayMas: false }
     throw err
   }
 }
