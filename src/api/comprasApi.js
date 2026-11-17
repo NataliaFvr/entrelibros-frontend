@@ -35,7 +35,6 @@ export const crearPagoApi = async (idOrden, proveedor) => {
   const pago = (await api.post('/pagos', { idOrden, proveedor })).data
   return { ...pago, orden: aPedidoFront(pago.orden) }
 }
-export const pagosDeOrdenApi = async (idOrden) => lista(() => api.get(`/pagos/orden/${idOrden}`))
 
 // ADMIN: GET /ordenes y GET /pagos. Las órdenes ya incluyen sus ítems.
 export const listarOrdenesAdminApi = async () => (await lista(() => api.get('/ordenes'))).map(aPedidoFront)

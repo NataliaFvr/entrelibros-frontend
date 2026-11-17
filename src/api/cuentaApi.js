@@ -5,7 +5,6 @@ import { esListaVacia } from '../utils/errorApi'
 
 // NotificacionController, MarcapaginaController y ContactoController
 
-export const listarNotificacionesApi = async () => (await traerPaginas('/notificaciones')).map(aNotificacionFront)
 // Solo la primera página (las más nuevas primero): alcanza para el desplegable de la campanita. 404 ListaVacia = sin notificaciones.
 export const listarPrimeraPaginaNotificacionesApi = async (size = 20) => {
   try {

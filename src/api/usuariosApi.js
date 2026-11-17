@@ -32,8 +32,7 @@ export const solicitarVendedorApi = async ({ tienda, tel, desc, prov }) =>
     nombreTienda: tienda, telefono: tel, descripcion: desc, provincia: prov,
   })).data)
 
-// ADMIN: solicitudes pendientes y su resolución (aprobar y comentario viajan en el body)
-export const listarSolicitudesApi = async () => (await traerPaginas('/usuarios/solicitudes-vendedor')).map(aUsuarioFront)
+// ADMIN: resolución de una solicitud de vendedor (aprobar y comentario viajan en el body)
 export const resolverSolicitudApi = async (id, aprobar, comentario) =>
   (await api.patch(`/usuarios/${id}/solicitud-vendedor`, { aprobar, comentario: comentario || null })).data
 

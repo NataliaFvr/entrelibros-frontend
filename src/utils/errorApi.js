@@ -31,7 +31,7 @@ export const MENSAJES = {
   USUARIO_NO_ENCONTRADO: 'No encontramos una cuenta con ese usuario o e-mail.',
   CREDENCIALES: 'Usuario o contraseña incorrectos.',
   DUPLICADO: 'Ese usuario o e-mail ya tiene una cuenta.',
-  DEMASIADOS_INTENTOS: 'Demasiados intentos. Esperá un momento o pedí un código nuevo.',
+  DEMASIADOS_INTENTOS: 'Por seguridad bloqueamos este código después de 5 intentos fallidos. Tocá «Reenviar código» y te mandamos uno nuevo por e-mail.',
   SESION_EXPIRADA: 'Tu sesión venció. Volvé a ingresar para continuar.',
   PERMISO: 'No tenés permiso para realizar esta acción.',
   NO_ENCONTRADO: 'No encontramos lo que buscabas. Puede que ya no exista.',
@@ -52,7 +52,7 @@ export const TITULOS = {
   USUARIO_NO_ENCONTRADO: 'Cuenta no encontrada',
   CREDENCIALES: 'No pudimos iniciar sesión',
   DUPLICADO: 'Datos ya registrados',
-  DEMASIADOS_INTENTOS: 'Demasiados intentos',
+  DEMASIADOS_INTENTOS: 'Código bloqueado',
   SESION_EXPIRADA: 'Sesión vencida',
   PERMISO: 'Sin permiso',
   NO_ENCONTRADO: 'No encontrado',
@@ -138,8 +138,8 @@ export const normalizarError = (err, contexto = '') => {
   return { tipo, status: r.status, mensaje, campos }
 }
 
-// ¿Es el 404 de un LISTADO vacío? El back responde 404 { error: "…" } con ListaVaciaException ("No hay libros", "No tenés órdenes"…),
-// y también cuando se pide una página que ya no existe. Solo ese caso se trata como "no hay resultados".
+// ¿Es el 404 de un LISTADO vacío? Hoy el back responde 200 con [] (o una página vacía) cuando no hay resultados;
+// esto queda como resguardo por si algún listado vuelve a responder 404 { error: "…" }. Solo ese caso se trata como "no hay resultados".
 // Cualquier otro error (401, 403, 500, red, timeout) NO es "vacío": tiene que propagarse y mostrarse con mensajeError().
 // Un 404 sin campo `error` (proxy, HTML) o el 404 por defecto de Spring ({ timestamp, status, error: "Not Found", path }, URL inexistente)
 // tampoco es una lista vacía: es un error real.

@@ -1,5 +1,6 @@
 import { cancelarVerificacion,confirmarEmail,reenviarCodigo } from '../redux/userSlice'
 import {useDispatch,useSelector} from 'react-redux'
+import { selectUser } from '../redux/selectores'
 import { Navigate, useLocation } from 'react-router-dom'
 import AuthHero from '../componentes/AuthHero'
 import VerifyForm from '../componentes/VerifyForm'
@@ -8,7 +9,7 @@ import MiniDeco from '../componentes/MiniDeco'
 // Confirmación del e-mail con código de 6 dígitos. Al confirmar, entra y vuelve a donde estaba.
 const VerifyPage = () => {
   const dispatch=useDispatch()
-  const {user}=useSelector(s=>s.user)
+  const user = useSelector(selectUser)
   const errorDe=r=>({error:r.error.message,tipo:r.error.tipo,campos:r.error.campos||{}})
   const verif=useSelector(s=>s.user.verif),verificacion={usuario:verif&&verif.cuenta,nota:verif?verif.nota:'',reenviar:async()=>{const r=await dispatch(reenviarCodigo({email:verif.id}));return r.error?errorDe(r):{}},confirmar:async(c)=>{const r=await dispatch(confirmarEmail({email:verif.id,codigo:c}));return r.error?errorDe(r):{}},cancelar:()=>dispatch(cancelarVerificacion())}
   const { state } = useLocation()

@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
+import { selectUser } from '../redux/selectores'
 import { Link, Navigate, useNavigate, useParams } from 'react-router-dom'
 import { urlFotoUsuario } from '../api/usuariosApi'
 import { enRevision } from '../api/vendedorApi'
@@ -96,7 +97,7 @@ const Vendedor = ({ user, perfil }) => {
 }
 
 const SellerPage = () => {
-  const {user}=useSelector(s=>s.user)
+  const user = useSelector(selectUser)
 
   const perfil=user?{avatar:user.avatar||'',foto:user.tieneFoto?urlFotoUsuario(user.id):''}:{}
   if (!user) return <Navigate to="/ingresar" replace state={{ from: '/vender' }} />
