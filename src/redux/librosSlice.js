@@ -25,7 +25,7 @@ export const fetchLibros = createAsyncThunk("libros/fetchLibros", async () => ge
 // Un libro que no está en el catálogo (por ejemplo, agotado): null si no existe
 export const fetchLibro = createAsyncThunk("libros/fetchLibro", async (id) => getLibroApi(id), {
   condition: (id, { getState }) => {
-    const { libros } = getState().libros;
+    const libros = getState().libros;
     return libros.sueltos[id] === undefined && !libros.solicitudes.librosPorId[id];
   },
 });

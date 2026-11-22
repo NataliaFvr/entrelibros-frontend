@@ -5,6 +5,7 @@ import {
   getEstadoResenaVendedorApi, getResenasLibroApi, getResenasVendedorApi, getTodasResenasLibroApi, getTodasResenasVendedorApi,
   modificarResenaLibroApi, modificarResenaVendedorApi,
 } from "../api/resenasApi";
+import { pagarPedido } from "./pedidosSlice";
 import { confirmarEmail, login, logout } from "./userSlice";
 import { removeById, upsertById } from "./helpers";
 
@@ -122,6 +123,8 @@ const resenasSlice = createSlice({
         state.errorTodas = null;
       })
       .addCase(confirmarEmail.fulfilled, olvidarEstados)
+      // Al pagar cambia qué se puede reseñar
+      .addCase(pagarPedido.fulfilled, olvidarEstados)
       .addCase(fetchResenasLibro.pending, (state, action) => {
         state.solicitudes.libros[action.meta.arg] = true;
       })
