@@ -2,10 +2,10 @@ import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import useAdminResumen from '../hooks/useAdminResumen'
 import { fmt } from '../utils/format'
-import AdminHead from '../componentes/AdminHead'
-import AdminKpi from '../componentes/AdminKpi'
-import OrdenesPorEstado from '../componentes/OrdenesPorEstado'
-import PendientesModeracion from '../componentes/PendientesModeracion'
+import AdminHead from '../componentes/admin/AdminHead'
+import AdminKpi from '../componentes/admin/AdminKpi'
+import OrdenesPorEstado from '../componentes/admin/OrdenesPorEstado'
+import PendientesModeracion from '../componentes/admin/PendientesModeracion'
 
 // /admin — lo que necesita atención hoy
 const AdminResumenPage = () => {

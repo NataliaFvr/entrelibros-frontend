@@ -1,8 +1,8 @@
 import { Link } from 'react-router-dom'
 import { AYUDA, AYUDA_RAIZ } from '../data/ayuda'
 import { PREGUNTAS_FRECUENTES } from '../data/preguntasFrecuentes'
-import InfoLayout from '../componentes/InfoLayout'
-import FaqAccordion from '../componentes/FaqAccordion'
+import InfoLayout from '../componentes/layout/InfoLayout'
+import FaqAccordion from '../componentes/institucional/FaqAccordion'
 
 const FaqPage = () => {
   const { label, sub } = AYUDA.faq

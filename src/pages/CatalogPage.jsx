@@ -7,12 +7,12 @@ import {
 } from '../redux/librosSlice'
 import { filtrosDesdeURL } from '../utils/filtrosURL'
 import { plural } from '../utils/format'
-import SortSelect from '../componentes/SortSelect'
-import ActiveChips from '../componentes/ActiveChips'
-import FilterSidebar from '../componentes/FilterSidebar'
-import ProductGrid from '../componentes/ProductGrid'
-import SearchNoResults from '../componentes/SearchNoResults'
-import Pager from '../componentes/Pager'
+import SortSelect from '../componentes/catalogo/SortSelect'
+import ActiveChips from '../componentes/catalogo/ActiveChips'
+import FilterSidebar from '../componentes/catalogo/FilterSidebar'
+import ProductGrid from '../componentes/catalogo/ProductGrid'
+import SearchNoResults from '../componentes/catalogo/SearchNoResults'
+import Pager from '../componentes/comun/Pager'
 
 const VACIO = { libros: [], total: 0, pages: 0 }
 

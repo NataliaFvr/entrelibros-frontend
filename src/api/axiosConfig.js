@@ -12,17 +12,34 @@ export const RUTA_AUTH = '/api/v1/auth'
 const alVencerSesion = new Set()
 export const escucharSesionVencida = (fn) => { alVencerSesion.add(fn); return () => alVencerSesion.delete(fn) }
 
-const CLAVE_TOKEN = 'token'
-const CLAVE_REFRESH = 'refresh_token'
+// El estado de autenticación pertenece a Redux. El store se conecta después
+// de crearse para no introducir un import circular con los slices.
+let leerTokens = () => ({ accessToken: null, refreshToken: null })
+let guardarTokensEnStore = () => {}
+let borrarTokensDelStore = () => {}
+
+export const configurarAlmacenTokens = ({ leer, guardar, borrar }) => {
+  leerTokens = leer
+  guardarTokensEnStore = guardar
+  borrarTokensDelStore = borrar
+}
 
 // El back responde { access_token, refresh_token, usuarioId, nombreUsuario, rol } (AuthenticationResponse)
 export const guardarTokens = (datos) => {
-  if (datos.access_token) localStorage.setItem(CLAVE_TOKEN, datos.access_token)
-  if (datos.refresh_token) localStorage.setItem(CLAVE_REFRESH, datos.refresh_token)
+  guardarTokensEnStore({
+    accessToken: datos.access_token,
+    refreshToken: datos.refresh_token,
+  })
 }
 export const borrarTokens = () => {
-  localStorage.removeItem(CLAVE_TOKEN)
-  localStorage.removeItem(CLAVE_REFRESH)
+  borrarTokensDelStore()
+  // Limpieza única de las claves usadas por versiones anteriores.
+  try {
+    localStorage.removeItem('token')
+    localStorage.removeItem('refresh_token')
+    localStorage.removeItem('persist:entrelibros')
+    localStorage.removeItem('persist:entrelibros-v2')
+  } catch { /* localStorage no disponible */ }
 }
 
 const api = axios.create({
@@ -33,7 +50,7 @@ const api = axios.create({
 })
 
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem(CLAVE_TOKEN)
+  const token = leerTokens().accessToken
   if (token) config.headers.Authorization = `Bearer ${token}`
   return config
 })
@@ -41,7 +58,7 @@ api.interceptors.request.use((config) => {
 // Un solo refresh a la vez, aunque fallen varias llamadas juntas
 let refrescando = null
 const refrescar = () => {
-  const refresh = localStorage.getItem(CLAVE_REFRESH)
+  const refresh = leerTokens().refreshToken
   if (!refresh) return Promise.reject(new Error('Sin refresh token'))
   if (!refrescando) {
     refrescando = axios
@@ -76,7 +93,7 @@ api.interceptors.response.use(
     const config = error.config || {}
     const url = config.url || ''
     const esAuth = /\/auth\//.test(url)
-    if (error.response && error.response.status === 401 && !esAuth && localStorage.getItem(CLAVE_TOKEN)) {
+    if (error.response && error.response.status === 401 && !esAuth && leerTokens().accessToken) {
       if (!config._reintento) {
         try {
           const nuevo = await refrescar()

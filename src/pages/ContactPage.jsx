@@ -1,7 +1,7 @@
 import { AYUDA, AYUDA_RAIZ } from '../data/ayuda'
-import InfoLayout from '../componentes/InfoLayout'
-import ContactForm from '../componentes/ContactForm'
-import ContactArt from '../componentes/ContactArt'
+import InfoLayout from '../componentes/layout/InfoLayout'
+import ContactForm from '../componentes/institucional/ContactForm'
+import ContactArt from '../componentes/institucional/ContactArt'
 
 const ContactPage = () => {
   const { label, sub } = AYUDA.contacto

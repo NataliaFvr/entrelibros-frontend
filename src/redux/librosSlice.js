@@ -119,6 +119,7 @@ const librosSlice = createSlice({
     items: [],
     categorias: {
       items: [],
+      cargada: false,
       todas: [],
       todasCargadas: false,
       cargandoTodas: false,
@@ -134,6 +135,7 @@ const librosSlice = createSlice({
       fotosPorId: {},
     },
     loading: true,
+    cargado: false,
     error: null,
     filtrosElegidos: { ...FILTROS_INICIALES },
     filtrosMontaje: null, // qué montaje del catálogo cargó los filtros de su URL (ver reiniciarFiltros)
@@ -188,6 +190,7 @@ const librosSlice = createSlice({
       .addCase(fetchLibros.fulfilled, (state, action) => {
         state.solicitudes.libros = false;
         state.loading = false;
+        state.cargado = true;
         state.items = action.payload;
       })
       .addCase(fetchLibros.rejected, (state, action) => {
@@ -225,6 +228,7 @@ const librosSlice = createSlice({
       .addCase(fetchCategorias.fulfilled, (state, action) => {
         state.solicitudes.categorias = false;
         state.categorias.loading = false;
+        state.categorias.cargada = true;
         state.categorias.items = action.payload;
       })
       .addCase(fetchCategorias.rejected, (state, action) => {

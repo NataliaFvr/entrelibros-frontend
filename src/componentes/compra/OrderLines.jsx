@@ -1,0 +1,26 @@
+import { Link } from 'react-router-dom'
+import { fmt } from '../../utils/format'
+import SummaryRow from '../comun/SummaryRow'
+
+// Los libros de un pedido, una fila por cada uno. Si el vendedor canceló su parte, el libro se ve tachado
+// y el back ya lo descontó del total. Con `conOpinion` (compra pagada) cada libro lleva el link para opinar:
+// la opinión se deja en la ficha del libro, y el link abre ahí el formulario.
+const OrderLines = ({ pedido, libros, conOpinion = false }) => {
+  return pedido.its.map((i) => {
+    const l = libros.find((x) => x.id === i.id)
+    const titulo = l ? l.t : i.t || `Libro #${i.id}`
+    const miniatura = i.img || l?.imgs?.[0] || undefined
+    if (i.cancelado) {
+      return <SummaryRow key={i.id} titulo={<s>{titulo}</s>} detalle="Cancelado por el vendedor" valor={<s>{fmt(i.p * i.q)}</s>} miniatura={miniatura} />
+    }
+    const detalle = (
+      <>
+        {l ? `${l.a} · ` : ''}x{i.q}
+        {conOpinion && <> · <Link className="opinar-lnk" to={`/libro/${i.id}?opinar=1`}>Opinar</Link></>}
+      </>
+    )
+    return <SummaryRow key={i.id} titulo={titulo} detalle={detalle} valor={fmt(i.p * i.q)} miniatura={miniatura} />
+  })
+}
+
+export default OrderLines

@@ -1,7 +1,7 @@
 import { NOSOTROS } from '../data/nosotros'
-import InfoLayout from '../componentes/InfoLayout'
-import AboutStory from '../componentes/AboutStory'
-import AboutArt from '../componentes/AboutArt'
+import InfoLayout from '../componentes/layout/InfoLayout'
+import AboutStory from '../componentes/institucional/AboutStory'
+import AboutArt from '../componentes/institucional/AboutArt'
 
 const AboutPage = () => {
   const { label, sub } = NOSOTROS

@@ -4,9 +4,9 @@ import { AYUDA, AYUDA_RAIZ } from '../data/ayuda'
 import useTarifasEnvio from '../hooks/useTarifasEnvio'
 import { fmt } from '../utils/format'
 import { TIPOS_ENVIO } from '../data/envios'
-import InfoLayout from '../componentes/InfoLayout'
-import ShipCard from '../componentes/ShipCard'
-import TruckLane from '../componentes/TruckLane'
+import InfoLayout from '../componentes/layout/InfoLayout'
+import ShipCard from '../componentes/compra/ShipCard'
+import TruckLane from '../componentes/compra/TruckLane'
 
 const precio = (n) => (n != null ? fmt(n) : '…')
 

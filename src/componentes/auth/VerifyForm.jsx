@@ -1,0 +1,55 @@
+import { useState } from 'react'
+import useCuentaRegresiva from '../../hooks/useCuentaRegresiva'
+import useFormulario from '../../hooks/useFormulario'
+import { enmascararMail } from '../../utils/format'
+import Aviso from '../comun/Aviso'
+import Field from '../comun/Field'
+
+// `onConfirmar(codigo)` devuelve { error, tipo } si falló (código inválido, vencido, demasiados intentos…) o {} si quedó confirmada
+const VerifyForm = ({ usuario, nota, onConfirmar, onReenviar, onVolver }) => {
+  const { valores, cambiar, errores, error, tipoError, setError, reiniciar } = useFormulario({ codigo: '' })
+  const [restante, reiniciarCuenta] = useCuentaRegresiva(30)
+  const [enviando, setEnviando] = useState(false)
+
+  const enviar = async (e) => {
+    e.preventDefault()
+    if (enviando) return
+    setError('')
+    setEnviando(true)
+    try {
+      const r = await onConfirmar(valores.codigo)
+      if (r && r.error) setError(r.error, r.tipo)
+    } finally {
+      setEnviando(false)
+    }
+  }
+
+  const reenviar = async () => {
+    const r = await onReenviar()
+    if (r && r.error) { setError(r.error, r.tipo); return }
+    reiniciarCuenta()
+    reiniciar()
+  }
+
+  return (
+    <form className="aform" noValidate onSubmit={enviar}>
+      <h3 className="fr">Ingresá el código</h3>
+      {nota && <div className="note">{nota}</div>}
+      <p className="sell-note">
+        Te enviamos un código de 6 dígitos a <b>{enmascararMail(usuario.email)}</b>. Revisá también la carpeta de spam.
+      </p>
+      <Field
+        label="Código de confirmación" name="codigo" className="code-in" value={valores.codigo}
+        onChange={cambiar} error={errores.codigo} inputMode="numeric" autoComplete="one-time-code" placeholder="000000"
+      />
+      <Aviso mensaje={error} tipo={tipoError} />
+      <button className="btn main" type="submit" disabled={enviando}>{enviando ? 'Confirmando…' : 'Confirmar cuenta'}</button>
+      <button className="btn alt" type="button" disabled={restante > 0} onClick={reenviar}>
+        {restante > 0 ? `Reenviar código (${restante} s)` : 'Reenviar código'}
+      </button>
+      <p className="alt-l"><a href="#" onClick={(e) => { e.preventDefault(); onVolver() }}>Volver a ingresar</a></p>
+    </form>
+  )
+}
+
+export default VerifyForm

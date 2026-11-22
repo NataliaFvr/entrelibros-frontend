@@ -1,6 +1,8 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { agregarItemApi, cambiarCantidadItemApi, cotizarEnvioApi, listarCarritoApi, quitarItemApi } from "../api/carritoApi";
 import { crearPedido } from "./pedidosSlice";
+import { logout } from "./userSlice";
+import { removeById, upsertById } from "./helpers";
 
 // Carrito: [{ id: idLibro, q: cantidad, idItem, maxCantidad }]. fetchCarrito lo lee entero; las demás acciones devuelven solo el ítem que cambió.
 // Los errores llegan con el mensaje claro desde api/axiosConfig.js: si una llamada falla, el `rejected` lo despacha createAsyncThunk.
@@ -42,28 +44,24 @@ export const fetchCotizacion = createAsyncThunk(
 );
 
 // El back devuelve el ítem ya actualizado: se reemplaza en la lista (o se agrega si es nuevo)
-const guardarItem = (state, item) => {
-  if (!item) return;
-  const i = state.items.findIndex((c) => c.id === item.id);
-  if (i >= 0) state.items[i] = item;
-  else state.items.push(item);
+const initialState = {
+  items: [],
+  cotizaciones: {},
+  pendientes: {},
+  errores: {},
+  solicitudes: {},
+  usuarioSolicitado: null,
+  loading: false,
+  error: null,
 };
 
 const carritoSlice = createSlice({
   name: "carrito",
-  initialState: {
-    items: [],
-    cotizaciones: {},
-    pendientes: {},
-    errores: {},
-    solicitudes: {},
-    usuarioSolicitado: null,
-    loading: false,
-    error: null,
-  },
+  initialState,
   reducers: {},
   extraReducers: (builder) => {
     builder
+      .addCase(logout.fulfilled, () => initialState)
       .addCase(fetchCarrito.pending, (state, action) => {
         state.solicitudes[action.meta.arg] = true;
         state.usuarioSolicitado = action.meta.arg;
@@ -88,7 +86,7 @@ const carritoSlice = createSlice({
         }
       })
       .addCase(agregarAlCarrito.fulfilled, (state, action) => {
-        guardarItem(state, action.payload);
+        if (action.payload) upsertById(state.items, action.payload);
         state.cotizaciones = {};
         state.pendientes = {};
         state.errores = {};
@@ -97,7 +95,7 @@ const carritoSlice = createSlice({
         state.error = action.error.message;
       })
       .addCase(cambiarCantidad.fulfilled, (state, action) => {
-        guardarItem(state, action.payload);
+        if (action.payload) upsertById(state.items, action.payload);
         state.cotizaciones = {};
         state.pendientes = {};
         state.errores = {};
@@ -106,7 +104,7 @@ const carritoSlice = createSlice({
         state.error = action.error.message;
       })
       .addCase(quitarDelCarrito.fulfilled, (state, action) => {
-        state.items = state.items.filter((c) => c.id !== action.payload);
+        state.items = removeById(state.items, action.payload);
         state.cotizaciones = {};
         state.pendientes = {};
         state.errores = {};

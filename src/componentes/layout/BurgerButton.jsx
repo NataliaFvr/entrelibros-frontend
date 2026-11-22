@@ -1,0 +1,16 @@
+import { MenuIcon, CloseIcon } from '../comun/Icons'
+
+// Botón del menú móvil: tres líneas (hamburguesa) cerrado, cruz abierto, en el celeste de la marca. Solo se ve en pantallas angostas (CSS).
+const BurgerButton = ({ abierto, onClick, controlsId = 'menu-movil', className = 'burger' }) => {
+  return (
+    <button
+      className={className} type="button" onClick={onClick}
+      aria-label={abierto ? 'Cerrar menú' : 'Abrir menú'}
+      aria-expanded={abierto} aria-controls={abierto ? controlsId : undefined}
+    >
+      {abierto ? <CloseIcon /> : <MenuIcon />}
+    </button>
+  )
+}
+
+export default BurgerButton

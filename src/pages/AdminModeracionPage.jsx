@@ -1,5 +1,5 @@
-import AdminHead from '../componentes/AdminHead'
-import AdminModeracionPanel from '../componentes/AdminModeracionPanel'
+import AdminHead from '../componentes/admin/AdminHead'
+import AdminModeracionPanel from '../componentes/admin/AdminModeracionPanel'
 
 // /admin/moderacion — el acceso solo para ADMIN y el marco (barra y pie) los pone AdminLayout
 const AdminModeracionPage = () => {

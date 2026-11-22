@@ -1,5 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { cancelarOrdenApi, checkoutApi, crearPagoApi, listarPedidosApi } from "../api/comprasApi";
+import { logout } from "./userSlice";
 
 // Cada orden ya incluye sus ítems. El número de pedido (`n`) es el id de la orden.
 export const fetchPedidos = createAsyncThunk("pedidos/fetchPedidos", async (idUsuario) => {
@@ -23,18 +24,21 @@ export const cancelarPedido = createAsyncThunk("pedidos/cancelarPedido", async (
   return cancelarOrdenApi(Number(n));
 });
 
+const initialState = {
+  items: [],
+  solicitudes: {},
+  usuarioSolicitado: null,
+  loading: false,
+  error: null,
+};
+
 const pedidosSlice = createSlice({
   name: "pedidos",
-  initialState: {
-    items: [],
-    solicitudes: {},
-    usuarioSolicitado: null,
-    loading: false,
-    error: null,
-  },
+  initialState,
   reducers: {},
   extraReducers: (builder) => {
     builder
+      .addCase(logout.fulfilled, () => initialState)
       .addCase(fetchPedidos.pending, (state, action) => {
         state.solicitudes[action.meta.arg] = true;
         state.usuarioSolicitado = action.meta.arg;

@@ -1,76 +1,81 @@
-import { Routes, Route } from 'react-router-dom'
-import Layout from '../componentes/Layout'
-import RutaComprador from '../componentes/RutaComprador'
-import AdminLayout from '../componentes/AdminLayout'
+import { lazy, Suspense } from 'react'
+import { Route, Routes } from 'react-router-dom'
+import AdminLayout from '../componentes/admin/AdminLayout'
+import Layout from '../componentes/layout/Layout'
+import RutaComprador from '../componentes/auth/RutaComprador'
 import { NOSOTROS } from '../data/nosotros'
 import HomePage from '../pages/HomePage'
-import CatalogPage from '../pages/CatalogPage'
-import BookDetailPage from '../pages/BookDetailPage'
-import AuthPage from '../pages/AuthPage'
-import AccountPage from '../pages/AccountPage'
-import VerifyPage from '../pages/VerifyPage'
-import RecoverPage from '../pages/RecoverPage'
-import CartPage from '../pages/CartPage'
-import PayPage from '../pages/PayPage'
-import SellerPage from '../pages/SellerPage'
-import AdminResumenPage from '../pages/AdminResumenPage'
-import AdminModeracionPage from '../pages/AdminModeracionPage'
-import AdminUsuariosPage from '../pages/AdminUsuariosPage'
-import AdminCategoriasPage from '../pages/AdminCategoriasPage'
-import AdminEnviosPage from '../pages/AdminEnviosPage'
-import AdminOrdenesPage from '../pages/AdminOrdenesPage'
-import AdminPagosPage from '../pages/AdminPagosPage'
-import AboutPage from '../pages/AboutPage'
-import HelpPage from '../pages/HelpPage'
-import FaqPage from '../pages/FaqPage'
-import ContactPage from '../pages/ContactPage'
-import ShippingPolicyPage from '../pages/ShippingPolicyPage'
-import PublicSellerProfile from '../pages/PublicSellerProfile'
 import NotFoundPage from '../pages/NotFoundPage'
+
+// Cada página se descarga recién cuando se entra a su ruta (HomePage y NotFoundPage vienen en el bundle principal)
+const CatalogPage = lazy(() => import('../pages/CatalogPage'))
+const BookDetailPage = lazy(() => import('../pages/BookDetailPage'))
+const AuthPage = lazy(() => import('../pages/AuthPage'))
+const AccountPage = lazy(() => import('../pages/AccountPage'))
+const VerifyPage = lazy(() => import('../pages/VerifyPage'))
+const RecoverPage = lazy(() => import('../pages/RecoverPage'))
+const CartPage = lazy(() => import('../pages/CartPage'))
+const PayPage = lazy(() => import('../pages/PayPage'))
+const SellerPage = lazy(() => import('../pages/SellerPage'))
+const AdminResumenPage = lazy(() => import('../pages/AdminResumenPage'))
+const AdminModeracionPage = lazy(() => import('../pages/AdminModeracionPage'))
+const AdminUsuariosPage = lazy(() => import('../pages/AdminUsuariosPage'))
+const AdminCategoriasPage = lazy(() => import('../pages/AdminCategoriasPage'))
+const AdminEnviosPage = lazy(() => import('../pages/AdminEnviosPage'))
+const AdminOrdenesPage = lazy(() => import('../pages/AdminOrdenesPage'))
+const AdminPagosPage = lazy(() => import('../pages/AdminPagosPage'))
+const AboutPage = lazy(() => import('../pages/AboutPage'))
+const HelpPage = lazy(() => import('../pages/HelpPage'))
+const FaqPage = lazy(() => import('../pages/FaqPage'))
+const ContactPage = lazy(() => import('../pages/ContactPage'))
+const ShippingPolicyPage = lazy(() => import('../pages/ShippingPolicyPage'))
+const PublicSellerProfile = lazy(() => import('../pages/PublicSellerProfile'))
 
 const AppRoutes = () => {
   return (
-    <Routes>
-      <Route path="/admin" element={<AdminLayout />}>
-        <Route index element={<AdminResumenPage />} />
-        <Route path="moderacion" element={<AdminModeracionPage />} />
-        <Route path="usuarios" element={<AdminUsuariosPage />} />
-        <Route path="categorias" element={<AdminCategoriasPage />} />
-        <Route path="envios" element={<AdminEnviosPage />} />
-        <Route path="ordenes" element={<AdminOrdenesPage />} />
-        <Route path="pagos" element={<AdminPagosPage />} />
-        <Route path="*" element={<NotFoundPage />} />
-      </Route>
-
-      <Route element={<Layout />}>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/libros" element={<CatalogPage />} />
-        <Route path="/libro/:id" element={<BookDetailPage />} />
-        <Route path="/vendedor/:id" element={<PublicSellerProfile />} />
-        <Route path="/ingresar" element={<AuthPage tab="login" />} />
-        <Route path="/registrarse" element={<AuthPage tab="register" />} />
-        <Route path="/confirmar" element={<VerifyPage />} />
-        <Route path="/recuperar" element={<RecoverPage />} />
-
-        {/* Solo compradores y vendedores: el administrador no tiene perfil de comprador y va a /admin */}
-        <Route element={<RutaComprador />}>
-          <Route path="/carrito" element={<CartPage />} />
-          <Route path="/pago/:n" element={<PayPage />} />
-          <Route path="/vender" element={<SellerPage />} />
-          <Route path="/vender/:tab" element={<SellerPage />} />
-          <Route path="/vender/:tab/:id" element={<SellerPage />} />
-          <Route path="/cuenta" element={<AccountPage />} />
-          <Route path="/cuenta/:tab" element={<AccountPage />} />
-          <Route path={NOSOTROS.to} element={<AboutPage />} />
-          <Route path="/ayuda" element={<HelpPage />} />
-          <Route path="/ayuda/preguntas-frecuentes" element={<FaqPage />} />
-          <Route path="/ayuda/contacto" element={<ContactPage />} />
-          <Route path="/ayuda/envios" element={<ShippingPolicyPage />} />
+    <Suspense fallback={<p role="status">Cargando…</p>}>
+      <Routes>
+        <Route path="/admin" element={<AdminLayout />}>
+          <Route index element={<AdminResumenPage />} />
+          <Route path="moderacion" element={<AdminModeracionPage />} />
+          <Route path="usuarios" element={<AdminUsuariosPage />} />
+          <Route path="categorias" element={<AdminCategoriasPage />} />
+          <Route path="envios" element={<AdminEnviosPage />} />
+          <Route path="ordenes" element={<AdminOrdenesPage />} />
+          <Route path="pagos" element={<AdminPagosPage />} />
+          <Route path="*" element={<NotFoundPage />} />
         </Route>
 
-        <Route path="*" element={<NotFoundPage />} />
-      </Route>
-    </Routes>
+        <Route element={<Layout />}>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/libros" element={<CatalogPage />} />
+          <Route path="/libro/:id" element={<BookDetailPage />} />
+          <Route path="/vendedor/:id" element={<PublicSellerProfile />} />
+          <Route path="/ingresar" element={<AuthPage tab="login" />} />
+          <Route path="/registrarse" element={<AuthPage tab="register" />} />
+          <Route path="/confirmar" element={<VerifyPage />} />
+          <Route path="/recuperar" element={<RecoverPage />} />
+
+          {/* Solo compradores y vendedores: el administrador no tiene perfil de comprador y va a /admin */}
+          <Route element={<RutaComprador />}>
+            <Route path="/carrito" element={<CartPage />} />
+            <Route path="/pago/:n" element={<PayPage />} />
+            <Route path="/vender" element={<SellerPage />} />
+            <Route path="/vender/:tab" element={<SellerPage />} />
+            <Route path="/vender/:tab/:id" element={<SellerPage />} />
+            <Route path="/cuenta" element={<AccountPage />} />
+            <Route path="/cuenta/:tab" element={<AccountPage />} />
+            <Route path={NOSOTROS.to} element={<AboutPage />} />
+            <Route path="/ayuda" element={<HelpPage />} />
+            <Route path="/ayuda/preguntas-frecuentes" element={<FaqPage />} />
+            <Route path="/ayuda/contacto" element={<ContactPage />} />
+            <Route path="/ayuda/envios" element={<ShippingPolicyPage />} />
+          </Route>
+
+          <Route path="*" element={<NotFoundPage />} />
+        </Route>
+      </Routes>
+    </Suspense>
   )
 }
 

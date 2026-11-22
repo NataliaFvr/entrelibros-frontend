@@ -2,11 +2,11 @@ import { useDispatch, useSelector } from 'react-redux'
 import { useState } from 'react'
 import useAdminOrdenes from '../hooks/useAdminOrdenes'
 import { ETIQUETAS_PAGO } from '../utils/pedidos'
-import AdminHead from '../componentes/AdminHead'
-import EmptyBlock from '../componentes/EmptyBlock'
-import OrdenDetalleModal from '../componentes/OrdenDetalleModal'
-import OrdenesTabla from '../componentes/OrdenesTabla'
-import Pager from '../componentes/Pager'
+import AdminHead from '../componentes/admin/AdminHead'
+import EmptyBlock from '../componentes/comun/EmptyBlock'
+import OrdenDetalleModal from '../componentes/admin/OrdenDetalleModal'
+import OrdenesTabla from '../componentes/admin/OrdenesTabla'
+import Pager from '../componentes/comun/Pager'
 
 // /admin/ordenes — todas las compras de la plataforma, solo lectura
 const AdminOrdenesPage = () => {

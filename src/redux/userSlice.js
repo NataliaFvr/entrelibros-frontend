@@ -1,7 +1,7 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { aUsuarioFront, dataUrlAFile } from "../api/adaptadores";
 import {
-  cambiarContraseniaApi, cerrarSesionApi, getSesionApi, loginApi, recuperarContraseniaApi,
+  cambiarContraseniaApi, cerrarSesionApi, loginApi, recuperarContraseniaApi,
   reenviarCodigoApi, registrarApi, traerUsuarioApi, verificarEmailApi,
 } from "../api/authApi";
 import { agregarMarcapaginaApi, listarMarcapaginasApi, quitarMarcapaginaApi } from "../api/cuentaApi";
@@ -14,26 +14,36 @@ import {
 } from "../api/usuariosApi";
 import { solicitarVendedor } from "./vendedorSlice";
 import { conDetalle } from "./conDetalle";
+import { removeById, replaceById } from "./helpers";
 
 export const NOTA_SIN_CONFIRMAR = "Tu cuenta todavía no está confirmada. Te mandamos un código nuevo.";
 
 // --- Datos de la cuenta (los pide App.jsx al tener sesión) ---
 export const fetchUsuario = createAsyncThunk("user/fetchUsuario", async (id) => traerUsuarioApi(id), {
-  condition: (id, { getState }) => !getState().user.solicitudes.usuario[id],
+  condition: (id, { getState }) => {
+    const { user, solicitudes } = getState().user;
+    return user?.id === id && !solicitudes.usuario[id];
+  },
 });
 
 export const fetchMarks = createAsyncThunk("user/fetchMarks", async (idUsuario) => ({
   idUsuario,
   ids: await listarMarcapaginasApi(),
 }), {
-  condition: (idUsuario, { getState }) => !getState().user.solicitudes.marks[idUsuario],
+  condition: (idUsuario, { getState }) => {
+    const { user, solicitudes } = getState().user;
+    return user?.id === idUsuario && !solicitudes.marks[idUsuario];
+  },
 });
 
 export const fetchDirecciones = createAsyncThunk("user/fetchDirecciones", async (idUsuario) => ({
   idUsuario,
   lista: await listarDireccionesApi(),
 }), {
-  condition: (idUsuario, { getState }) => !getState().user.solicitudes.direcciones[idUsuario],
+  condition: (idUsuario, { getState }) => {
+    const { user, solicitudes } = getState().user;
+    return user?.id === idUsuario && !solicitudes.direcciones[idUsuario];
+  },
 });
 
 // --- Sesión ---
@@ -128,14 +138,16 @@ export const resolverSolicitud = createAsyncThunk("user/resolverSolicitud", asyn
   aUsuarioFront(await resolverSolicitudApi(id, aprobada, comentario)));
 
 const reemplazar = (state, action) => {
-  const index = state.todos.items.findIndex((u) => u.id === action.payload.id);
-  if (index !== -1) state.todos.items[index] = aFila(action.payload);
+  replaceById(state.todos.items, aFila(action.payload));
 };
 
 const userSlice = createSlice({
   name: "user",
   initialState: {
-    user: getSesionApi(),
+    // La sesión se rehidrata con redux-persist; no se lee una segunda copia
+    // desde localStorage para evitar dos fuentes de verdad.
+    user: null,
+    tokens: { accessToken: null, refreshToken: null },
     marks: [],
     direcciones: [],
     solicitudes: {
@@ -143,6 +155,9 @@ const userSlice = createSlice({
       marks: {},
       direcciones: {},
     },
+    // Identifica a qué cuenta pertenecen los datos rehidratados por redux-persist.
+    // Así, al recargar no se vuelven a pedir si ya son de la sesión actual.
+    cargas: { perfil: null, marks: null, direcciones: null },
     gate: null,
     gateDestino: null,
     pendiente: null, // acción que quedó esperando el login: { tipo: 'cart' | 'buy' | 'fav', idLibro }
@@ -156,6 +171,14 @@ const userSlice = createSlice({
     },
   },
   reducers: {
+    establecerTokens: (state, action) => {
+      const { accessToken, refreshToken } = action.payload;
+      if (accessToken) state.tokens.accessToken = accessToken;
+      if (refreshToken) state.tokens.refreshToken = refreshToken;
+    },
+    limpiarTokens: (state) => {
+      state.tokens = { accessToken: null, refreshToken: null };
+    },
     abrirGate: (state, action) => {
       const { tipo, destino = null, accion = null } = action.payload;
       state.gate = tipo;
@@ -183,11 +206,19 @@ const userSlice = createSlice({
       state.user = user;
       state.marks = []; // los pide App.jsx al cambiar de usuario
       state.direcciones = [];
+      state.cargas = { perfil: user.id, marks: null, direcciones: null };
     };
     const salir = (state) => {
       state.user = null;
+      state.tokens = { accessToken: null, refreshToken: null };
       state.marks = [];
       state.direcciones = [];
+      state.cargas = { perfil: null, marks: null, direcciones: null };
+      state.solicitudes = { usuario: {}, marks: {}, direcciones: {} };
+      state.error = null;
+      state.gate = null;
+      state.gateDestino = null;
+      state.pendiente = null;
       // La lista de usuarios es del panel del admin: no queda en memoria para la próxima cuenta
       state.todos = { items: [], cargados: false, loading: false, error: null };
     };
@@ -197,33 +228,42 @@ const userSlice = createSlice({
       })
       .addCase(fetchUsuario.fulfilled, (state, action) => {
         delete state.solicitudes.usuario[action.meta.arg];
-        if (state.user && state.user.id === action.payload.id) state.user = action.payload; // si ya cambió de cuenta, se descarta
+        if (state.user && state.user.id === action.payload.id) {
+          state.user = action.payload; // si ya cambió de cuenta, se descarta
+          state.cargas.perfil = action.payload.id;
+        }
       })
       .addCase(fetchUsuario.rejected, (state, action) => {
         delete state.solicitudes.usuario[action.meta.arg];
-        state.error = action.error.message;
+        if (state.user?.id === action.meta.arg) state.error = action.error.message;
       })
       .addCase(fetchMarks.pending, (state, action) => {
         state.solicitudes.marks[action.meta.arg] = true;
       })
       .addCase(fetchMarks.fulfilled, (state, action) => {
         delete state.solicitudes.marks[action.meta.arg];
-        if (state.user && state.user.id === action.payload.idUsuario) state.marks = action.payload.ids;
+        if (state.user && state.user.id === action.payload.idUsuario) {
+          state.marks = action.payload.ids;
+          state.cargas.marks = action.payload.idUsuario;
+        }
       })
       .addCase(fetchMarks.rejected, (state, action) => {
         delete state.solicitudes.marks[action.meta.arg];
-        state.error = action.error.message;
+        if (state.user?.id === action.meta.arg) state.error = action.error.message;
       })
       .addCase(fetchDirecciones.pending, (state, action) => {
         state.solicitudes.direcciones[action.meta.arg] = true;
       })
       .addCase(fetchDirecciones.fulfilled, (state, action) => {
         delete state.solicitudes.direcciones[action.meta.arg];
-        if (state.user && state.user.id === action.payload.idUsuario) state.direcciones = action.payload.lista;
+        if (state.user && state.user.id === action.payload.idUsuario) {
+          state.direcciones = action.payload.lista;
+          state.cargas.direcciones = action.payload.idUsuario;
+        }
       })
       .addCase(fetchDirecciones.rejected, (state, action) => {
         delete state.solicitudes.direcciones[action.meta.arg];
-        state.error = action.error.message;
+        if (state.user?.id === action.meta.arg) state.error = action.error.message;
       })
       .addCase(login.fulfilled, (state, action) => {
         entrar(state, action.payload);
@@ -281,7 +321,7 @@ const userSlice = createSlice({
       })
       // Si se borra la principal, el back marca otra (la primera): acá se hace lo mismo
       .addCase(eliminarDireccion.fulfilled, (state, action) => {
-        state.direcciones = resolverPrincipal(state.direcciones.filter((d) => d.id !== action.payload));
+        state.direcciones = resolverPrincipal(removeById(state.direcciones, action.payload));
       })
       .addCase(marcarPrincipal.fulfilled, (state, action) => {
         state.direcciones = action.payload;
@@ -301,6 +341,6 @@ const userSlice = createSlice({
   },
 });
 
-export const { abrirGate, cerrarGate, limpiarPendiente, cancelarVerificacion } = userSlice.actions;
+export const { abrirGate, cerrarGate, limpiarPendiente, cancelarVerificacion, establecerTokens, limpiarTokens } = userSlice.actions;
 
 export default userSlice.reducer;

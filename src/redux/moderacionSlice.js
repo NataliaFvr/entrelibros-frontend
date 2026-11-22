@@ -2,6 +2,7 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { logout } from "./userSlice";
 import { aLibroFront } from "../api/adaptadores";
 import { fuenteModeracion } from "../api/moderacionApi";
+import { removeById } from "./helpers";
 
 export const POR_PAGINA_HISTORIAL = 10;
 
@@ -70,7 +71,7 @@ const moderacionSlice = createSlice({
         state.error = action.error.message;
       })
       .addCase(moderar.fulfilled, (state, action) => {
-        state.items = state.items.filter((s) => s.id !== action.meta.arg.id);
+        state.items = removeById(state.items, action.meta.arg.id);
         state.historial = {};
       })
       .addCase(fetchHistorial.pending, (state, action) => {

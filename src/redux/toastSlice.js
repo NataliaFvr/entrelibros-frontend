@@ -20,6 +20,13 @@ const toastSlice = createSlice({
       if (!action.payload || state.aviso?.id === action.payload) state.aviso = null;
     },
   },
+  extraReducers: (builder) => {
+    // Un aviso de una cuenta no debe sobrevivir al cierre de sesión, incluso si
+    // el store se está persistiendo en localStorage.
+    builder.addCase("user/logout/fulfilled", (state) => {
+      state.aviso = null;
+    });
+  },
 });
 
 export const { mostrarToast, cerrarToast } = toastSlice.actions;

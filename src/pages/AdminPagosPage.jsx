@@ -1,11 +1,11 @@
 import { useDispatch, useSelector } from 'react-redux'
 import useAdminPagos from '../hooks/useAdminPagos'
 import { fmt } from '../utils/format'
-import AdminHead from '../componentes/AdminHead'
-import AdminKpi from '../componentes/AdminKpi'
-import EmptyBlock from '../componentes/EmptyBlock'
-import Pager from '../componentes/Pager'
-import PagosTabla from '../componentes/PagosTabla'
+import AdminHead from '../componentes/admin/AdminHead'
+import AdminKpi from '../componentes/admin/AdminKpi'
+import EmptyBlock from '../componentes/comun/EmptyBlock'
+import Pager from '../componentes/comun/Pager'
+import PagosTabla from '../componentes/admin/PagosTabla'
 
 // /admin/pagos — pagos registrados (los cobros son simulados)
 const AdminPagosPage = () => {

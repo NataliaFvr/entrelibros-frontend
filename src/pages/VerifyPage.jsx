@@ -2,9 +2,9 @@ import { cancelarVerificacion,confirmarEmail,reenviarCodigo } from '../redux/use
 import {useDispatch,useSelector} from 'react-redux'
 import { selectUser } from '../redux/selectores'
 import { Navigate, useLocation } from 'react-router-dom'
-import AuthHero from '../componentes/AuthHero'
-import VerifyForm from '../componentes/VerifyForm'
-import MiniDeco from '../componentes/MiniDeco'
+import AuthHero from '../componentes/auth/AuthHero'
+import VerifyForm from '../componentes/auth/VerifyForm'
+import MiniDeco from '../componentes/comun/MiniDeco'
 
 // Confirmación del e-mail con código de 6 dígitos. Al confirmar, entra y vuelve a donde estaba.
 const VerifyPage = () => {

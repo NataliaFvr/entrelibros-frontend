@@ -6,6 +6,7 @@ import {
   modificarResenaLibroApi, modificarResenaVendedorApi,
 } from "../api/resenasApi";
 import { confirmarEmail, login, logout } from "./userSlice";
+import { removeById, upsertById } from "./helpers";
 
 // --- Reseñas de libros ---
 export const fetchResenasLibro = createAsyncThunk("resenas/fetchResenasLibro", async (idLibro) => getResenasLibroApi(idLibro), {
@@ -77,12 +78,10 @@ export const fetchTodasResenas = createAsyncThunk("resenas/fetchTodasResenas", a
 
 const reemplazarOAgregar = (lista, resena) => {
   if (!lista) return;
-  const index = lista.findIndex((r) => r.id === resena.id);
-  if (index !== -1) lista[index] = resena;
-  else lista.unshift(resena);
+  upsertById(lista, resena, { prepend: true });
 };
 
-const sacar = (lista, id) => (lista ? lista.filter((r) => r.id !== id) : lista);
+const sacar = (lista, id) => (lista ? removeById(lista, id) : lista);
 
 const resenasSlice = createSlice({
   name: "resenas",

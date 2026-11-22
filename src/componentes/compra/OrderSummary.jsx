@@ -1,0 +1,27 @@
+import { fmt } from '../../utils/format'
+import SummaryRow from '../comun/SummaryRow'
+import CargoServicioRow from '../admin/CargoServicioRow'
+import OrderLines from './OrderLines'
+import ReserveTimer from './ReserveTimer'
+import ConfirmLink from '../auth/ConfirmLink'
+
+const OrderSummary = ({ pedido, libros, error, puedePagar, onCancelar }) => {
+  return (
+    <div className="card csum">
+      <h3 className="fr">Tu pedido {pedido.n}</h3>
+      <OrderLines pedido={pedido} libros={libros} />
+      <SummaryRow titulo="Libros" valor={fmt(pedido.sub)} />
+      <SummaryRow titulo="Envío" valor={fmt(pedido.env)} />
+      <CargoServicioRow monto={pedido.cargo} porcentaje={pedido.pctCargo} />
+      <SummaryRow titulo="Total" valor={fmt(pedido.total)} total />
+      <small className="ord-a">Envío a: {pedido.addr}</small>
+      <ReserveTimer venceEn={pedido.venceEn} />
+      <p className="ferr" role="alert">{error}</p>
+      <button className="btn main" type="submit" form="fPay" disabled={!puedePagar}
+        title={puedePagar ? undefined : 'Completá los datos de la tarjeta'}>Pagar {fmt(pedido.total)}</button>
+      <ConfirmLink texto="Cancelar compra" onConfirmar={onCancelar} />
+    </div>
+  )
+}
+
+export default OrderSummary

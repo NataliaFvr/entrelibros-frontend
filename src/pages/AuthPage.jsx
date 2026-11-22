@@ -1,11 +1,11 @@
 import { useSelector } from 'react-redux'
 import { selectUser } from '../redux/selectores'
 import { Navigate, useLocation, useNavigate } from 'react-router-dom'
-import AuthHero from '../componentes/AuthHero'
-import AuthTabs from '../componentes/AuthTabs'
-import LoginForm from '../componentes/LoginForm'
-import MiniDeco from '../componentes/MiniDeco'
-import RegisterForm from '../componentes/RegisterForm'
+import AuthHero from '../componentes/auth/AuthHero'
+import AuthTabs from '../componentes/auth/AuthTabs'
+import LoginForm from '../componentes/auth/LoginForm'
+import MiniDeco from '../componentes/comun/MiniDeco'
+import RegisterForm from '../componentes/auth/RegisterForm'
 
 // tab: 'login' | 'register'. Al entrar vuelve a la página desde la que se pidió la sesión.
 const AuthPage = ({ tab }) => {

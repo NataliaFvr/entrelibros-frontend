@@ -1,11 +1,11 @@
 import { useDispatch, useSelector } from 'react-redux'
 import { useState } from 'react'
-import AdminHead from '../componentes/AdminHead'
-import AdminModal from '../componentes/AdminModal'
-import Aviso from '../componentes/Aviso'
-import CategoriaForm from '../componentes/CategoriaForm'
-import CategoriasActuales from '../componentes/CategoriasActuales'
-import NuevaCategoriaForm from '../componentes/NuevaCategoriaForm'
+import AdminHead from '../componentes/admin/AdminHead'
+import AdminModal from '../componentes/admin/AdminModal'
+import Aviso from '../componentes/comun/Aviso'
+import CategoriaForm from '../componentes/admin/CategoriaForm'
+import CategoriasActuales from '../componentes/admin/CategoriasActuales'
+import NuevaCategoriaForm from '../componentes/admin/NuevaCategoriaForm'
 import useAdminCategorias from '../hooks/useAdminCategorias'
 
 // /admin/categorias — las categorías organizan el catálogo: se crean con foto, se editan y se dan de baja (sin borrarlas)

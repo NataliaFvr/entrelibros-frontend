@@ -3,9 +3,9 @@ import { useState } from 'react'
 import useAdminEnvios from '../hooks/useAdminEnvios'
 import { TIPOS_ENVIO } from '../data/envios'
 import { fmt } from '../utils/format'
-import AdminHead from '../componentes/AdminHead'
-import CostoEnvioModal from '../componentes/CostoEnvioModal'
-import ShipCard from '../componentes/ShipCard'
+import AdminHead from '../componentes/admin/AdminHead'
+import CostoEnvioModal from '../componentes/compra/CostoEnvioModal'
+import ShipCard from '../componentes/compra/ShipCard'
 
 // Mientras carga muestra "…"; si el back ya respondió y no hay tarifa, "Sin definir"
 const precio = (n, cargada) => (n != null ? fmt(n) : cargada ? 'Sin definir' : '…')

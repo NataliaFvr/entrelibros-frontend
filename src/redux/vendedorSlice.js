@@ -70,17 +70,21 @@ export const cambiarEstadoLibro = createAsyncThunk("vendedor/cambiarEstadoLibro"
 // POST /usuarios/solicitud-vendedor: devuelve el usuario con la solicitud PENDIENTE (userSlice lo guarda en la sesión)
 export const solicitarVendedor = createAsyncThunk("vendedor/solicitarVendedor", async (datos) => solicitarVendedorApi(datos));
 
+const initialState = {
+  idUsuario: null,
+  items: [],
+  loading: false,
+  error: null,
+};
+
 const vendedorSlice = createSlice({
   name: "vendedor",
-  initialState: {
-    idUsuario: null,
-    items: [],
-    loading: false,
-    error: null,
-  },
+  initialState,
   reducers: {},
   extraReducers: (builder) => {
     builder
+      // `userSlice` importa `solicitarVendedor` de este módulo; referenciar el tipo evita un import circular.
+      .addCase("user/logout/fulfilled", () => initialState)
       .addCase(fetchMisLibros.pending, (state) => {
         state.loading = true;
         state.error = null;

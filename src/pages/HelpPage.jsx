@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { AYUDA_LINKS } from '../data/ayuda'
-import InfoLayout from '../componentes/InfoLayout'
+import InfoLayout from '../componentes/layout/InfoLayout'
 
 // Centro de ayuda: puerta de entrada a Contacto, Preguntas frecuentes y Envíos
 const HelpPage = () => {

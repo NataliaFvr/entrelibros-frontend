@@ -5,11 +5,11 @@ import { useEffect, useState } from 'react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { useCompra } from '../hooks/useCompra'
 import { fetchCotizacion } from '../redux/carritoSlice'
-import Stepper from '../componentes/Stepper'
-import EmptyBlock from '../componentes/EmptyBlock'
-import CartList from '../componentes/CartList'
-import CartSummary from '../componentes/CartSummary'
-import AvisoCompraPendiente from '../componentes/AvisoCompraPendiente'
+import Stepper from '../componentes/comun/Stepper'
+import EmptyBlock from '../componentes/comun/EmptyBlock'
+import CartList from '../componentes/compra/CartList'
+import CartSummary from '../componentes/compra/CartSummary'
+import AvisoCompraPendiente from '../componentes/compra/AvisoCompraPendiente'
 
 const CartPage = () => {
   const navigate = useNavigate()

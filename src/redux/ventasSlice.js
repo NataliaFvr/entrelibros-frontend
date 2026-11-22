@@ -1,6 +1,8 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { getEstadisticasVendedorApi } from "../api/estadisticasApi";
 import { cancelarVentaApi, listarVentasApi } from "../api/ventasApi";
+import { logout } from "./userSlice";
+import { replaceById } from "./helpers";
 
 // Ventas del vendedor (OrdenVendedorResponse tal cual llega del back; useVentas las adapta para la pantalla)
 // y sus estadísticas. `idUsuario` = de qué cuenta son (si se cambia de cuenta, se vuelven a pedir).
@@ -14,19 +16,22 @@ export const cancelarVenta = createAsyncThunk("ventas/cancelarVenta", async (idO
 
 export const fetchEstadisticas = createAsyncThunk("ventas/fetchEstadisticas", async () => getEstadisticasVendedorApi());
 
+const initialState = {
+  idUsuario: null,
+  items: [],
+  loading: false,
+  error: null,
+  estadisticas: null,
+  errorEstadisticas: null,
+};
+
 const ventasSlice = createSlice({
   name: "ventas",
-  initialState: {
-    idUsuario: null,
-    items: [],
-    loading: false,
-    error: null,
-    estadisticas: null,
-    errorEstadisticas: null,
-  },
+  initialState,
   reducers: {},
   extraReducers: (builder) => {
     builder
+      .addCase(logout.fulfilled, () => initialState)
       .addCase(fetchVentas.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -42,8 +47,7 @@ const ventasSlice = createSlice({
         state.error = action.error.message;
       })
       .addCase(cancelarVenta.fulfilled, (state, action) => {
-        const index = state.items.findIndex((v) => v.id === action.payload.id);
-        if (index !== -1) state.items[index] = action.payload;
+        replaceById(state.items, action.payload);
       })
       .addCase(fetchEstadisticas.pending, (state) => {
         state.errorEstadisticas = null;

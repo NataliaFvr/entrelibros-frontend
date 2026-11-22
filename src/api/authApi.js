@@ -2,28 +2,18 @@ import api, { RUTA_AUTH, borrarTokens, guardarTokens } from './axiosConfig'
 import { aUsuarioFront } from './adaptadores'
 
 // AuthenticationController (/api/v1/auth). Login por E-MAIL (el back no acepta nombre de usuario).
-const CLAVE_USUARIO = 'entrelibros_usuario_api'
-
-const guardarUsuario = (u) => { try { localStorage.setItem(CLAVE_USUARIO, JSON.stringify(u)) } catch { /* sin espacio: se vuelve a pedir al back */ } }
-
-// Sesión guardada de un visito anterior (hay token y usuario)
-export const getSesionApi = () => {
-  try {
-    const crudo = localStorage.getItem(CLAVE_USUARIO)
-    return crudo && localStorage.getItem('token') ? JSON.parse(crudo) : null
-  } catch { return null }
-}
+// El usuario se persiste mediante redux-persist; esta clave solo se elimina por
+// compatibilidad con instalaciones que usaban el mecanismo anterior.
+const CLAVE_USUARIO_ANTERIOR = 'entrelibros_usuario_api'
 
 export const cerrarSesionApi = () => {
   borrarTokens()
-  try { localStorage.removeItem(CLAVE_USUARIO) } catch { /* nada que borrar */ }
+  try { localStorage.removeItem(CLAVE_USUARIO_ANTERIOR) } catch { /* nada que borrar */ }
 }
 
 // GET /usuarios/{id}: el login solo devuelve { usuarioId, nombreUsuario, rol }; nombre, apellido, email y tienda salen de acá
 export const traerUsuarioApi = async (id) => {
-  const u = aUsuarioFront((await api.get(`/usuarios/${id}`)).data)
-  guardarUsuario(u)
-  return u
+  return aUsuarioFront((await api.get(`/usuarios/${id}`)).data)
 }
 
 const abrirSesion = async (datos) => {

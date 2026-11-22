@@ -2,6 +2,8 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import {
   cantidadNoLeidasApi, eliminarNotificacionApi, listarNotificacionesApi, marcarLeidaApi, marcarTodasLeidasApi,
 } from "../api/cuentaApi";
+import { logout } from "./userSlice";
+import { removeById, replaceById } from "./helpers";
 
 export const POR_PAGINA = 20;
 
@@ -40,20 +42,23 @@ export const descartarNotificacion = createAsyncThunk("notificaciones/descartarN
 
 export const marcarTodasLeidas = createAsyncThunk("notificaciones/marcarTodasLeidas", async () => marcarTodasLeidasApi());
 
+const initialState = {
+  idUsuario: null,
+  items: [],
+  noLeidas: 0,
+  hayMas: false, // quedan notificaciones más viejas sin cargar
+  cargandoMas: false,
+  loading: false,
+  error: null,
+};
+
 const notificacionesSlice = createSlice({
   name: "notificaciones",
-  initialState: {
-    idUsuario: null,
-    items: [],
-    noLeidas: 0,
-    hayMas: false, // quedan notificaciones más viejas sin cargar
-    cargandoMas: false,
-    loading: false,
-    error: null,
-  },
+  initialState,
   reducers: {},
   extraReducers: (builder) => {
     builder
+      .addCase(logout.fulfilled, () => initialState)
       .addCase(fetchNotificaciones.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -85,12 +90,12 @@ const notificacionesSlice = createSlice({
         const index = state.items.findIndex((n) => n.id === action.meta.arg);
         if (index === -1) return;
         if (!state.items[index].leida) state.noLeidas = Math.max(0, state.noLeidas - 1);
-        state.items[index] = action.payload;
+        replaceById(state.items, action.payload);
       })
       .addCase(descartarNotificacion.fulfilled, (state, action) => {
         const notificacion = state.items.find((n) => n.id === action.payload);
         if (notificacion && !notificacion.leida) state.noLeidas = Math.max(0, state.noLeidas - 1);
-        state.items = state.items.filter((n) => n.id !== action.payload);
+        state.items = removeById(state.items, action.payload);
       })
       .addCase(marcarTodasLeidas.fulfilled, (state) => {
         state.items.forEach((n) => {

@@ -4,9 +4,9 @@ import { useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useLibros } from '../hooks/useLibros'
 import { masVendidos } from '../utils/filtrarLibros'
-import BookCarousel from '../componentes/BookCarousel'
-import MiniDeco from '../componentes/MiniDeco'
-import NotFoundArt from '../componentes/NotFoundArt'
+import BookCarousel from '../componentes/catalogo/BookCarousel'
+import MiniDeco from '../componentes/comun/MiniDeco'
+import NotFoundArt from '../componentes/institucional/NotFoundArt'
 
 // Ruta comodín (path="*"): cualquier URL que no exista cae acá
 const NotFoundPage = () => {
