@@ -17,11 +17,13 @@ export const escucharSesionVencida = (fn) => { alVencerSesion.add(fn); return ()
 let leerTokens = () => ({ accessToken: null, refreshToken: null })
 let guardarTokensEnStore = () => {}
 let borrarTokensDelStore = () => {}
+let purgarSesionPersistida = () => {}
 
-export const configurarAlmacenTokens = ({ leer, guardar, borrar }) => {
+export const configurarAlmacenTokens = ({ leer, guardar, borrar, purgar = () => {} }) => {
   leerTokens = leer
   guardarTokensEnStore = guardar
   borrarTokensDelStore = borrar
+  purgarSesionPersistida = purgar
 }
 
 // El back responde { access_token, refresh_token, usuarioId, nombreUsuario, rol } (AuthenticationResponse)
@@ -33,6 +35,7 @@ export const guardarTokens = (datos) => {
 }
 export const borrarTokens = () => {
   borrarTokensDelStore()
+  purgarSesionPersistida()
   // Limpieza única de las claves usadas por versiones anteriores.
   try {
     localStorage.removeItem('token')

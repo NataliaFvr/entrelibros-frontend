@@ -62,10 +62,11 @@ export const store = configureStore({
   }),
 });
 
+export const persistor = persistStore(store);
+
 configurarAlmacenTokens({
   leer: () => store.getState().user.tokens,
   guardar: (tokens) => store.dispatch(establecerTokens(tokens)),
   borrar: () => store.dispatch(limpiarTokens()),
+  purgar: () => persistor.purge(),
 });
-
-export const persistor = persistStore(store);
