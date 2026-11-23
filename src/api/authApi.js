@@ -1,4 +1,4 @@
-import api, { RUTA_AUTH, borrarTokens, guardarTokens } from './axiosConfig'
+import api, { RUTA_AUTH, borrarTokens, guardarTokens, leerRefreshToken } from './axiosConfig'
 import { aUsuarioFront } from './adaptadores'
 
 // AuthenticationController (/api/v1/auth). Login por E-MAIL (el back no acepta nombre de usuario).
@@ -6,9 +6,13 @@ import { aUsuarioFront } from './adaptadores'
 // compatibilidad con instalaciones que usaban el mecanismo anterior.
 const CLAVE_USUARIO_ANTERIOR = 'entrelibros_usuario_api'
 
+// Borra la sesión al instante y después revoca el refresh en el back (si falla, la sesión local ya está cerrada)
 export const cerrarSesionApi = () => {
+  const refresh = leerRefreshToken()
   borrarTokens()
   try { localStorage.removeItem(CLAVE_USUARIO_ANTERIOR) } catch { /* nada que borrar */ }
+  if (!refresh) return Promise.resolve()
+  return api.post(`${RUTA_AUTH}/logout`, { refresh_token: refresh }, { timeout: 5000 }).then(() => {}, () => {})
 }
 
 // GET /usuarios/{id}: el login solo devuelve { usuarioId, nombreUsuario, rol }; nombre, apellido, email y tienda salen de acá
@@ -21,7 +25,7 @@ const abrirSesion = async (datos) => {
   try {
     return await traerUsuarioApi(datos.usuarioId)
   } catch (err) {
-    cerrarSesionApi()
+    await cerrarSesionApi()
     throw err
   }
 }

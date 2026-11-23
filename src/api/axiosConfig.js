@@ -33,6 +33,7 @@ export const guardarTokens = (datos) => {
     refreshToken: datos.refresh_token,
   })
 }
+export const leerRefreshToken = () => leerTokens().refreshToken
 export const borrarTokens = () => {
   borrarTokensDelStore()
   purgarSesionPersistida()
