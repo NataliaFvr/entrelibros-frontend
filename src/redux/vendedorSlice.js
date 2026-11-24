@@ -20,7 +20,9 @@ export const fetchMisLibros = createAsyncThunk("vendedor/fetchMisLibros", async 
 });
 
 // GET /imagenes-libro/libro/{id}: todas las fotos de un libro, en orden (solo hacen falta para editarlo)
-export const fetchFotosLibro = createAsyncThunk("vendedor/fetchFotosLibro", async (id) => getImagenesApi(id));
+export const fetchFotosLibro = createAsyncThunk("vendedor/fetchFotosLibro", async (id) => getImagenesApi(id), {
+  condition: (id, { getState }) => !getState().vendedor.solicitudesFotos[id],
+});
 
 // POST /libros (queda EN_REVISION) y después las fotos. Si las fotos fallan, el libro igual quedó creado: se avisa aparte.
 export const publicarLibro = createAsyncThunk("vendedor/publicarLibro", async (datos) => {
@@ -75,6 +77,7 @@ const initialState = {
   items: [],
   loading: false,
   error: null,
+  solicitudesFotos: {},
 };
 
 const vendedorSlice = createSlice({
@@ -98,7 +101,11 @@ const vendedorSlice = createSlice({
         state.loading = false;
         state.error = action.error.message;
       })
+      .addCase(fetchFotosLibro.pending, (state, action) => {
+        state.solicitudesFotos[action.meta.arg] = true;
+      })
       .addCase(fetchFotosLibro.fulfilled, (state, action) => {
+        delete state.solicitudesFotos[action.meta.arg];
         const libro = state.items.find((p) => p.id === action.meta.arg);
         if (libro) {
           libro.imgs = action.payload;
@@ -107,6 +114,7 @@ const vendedorSlice = createSlice({
       })
       // Si no se pudieron traer, se edita con la portada (el formulario no queda esperando)
       .addCase(fetchFotosLibro.rejected, (state, action) => {
+        delete state.solicitudesFotos[action.meta.arg];
         const libro = state.items.find((p) => p.id === action.meta.arg);
         if (libro) libro.fotosCompletas = true;
       })

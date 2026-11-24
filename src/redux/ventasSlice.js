@@ -14,7 +14,12 @@ export const fetchVentas = createAsyncThunk("ventas/fetchVentas", async () => li
 // PATCH /ordenes/vendedor/{id}/cancelar: devuelve la venta completa ya cancelada
 export const cancelarVenta = createAsyncThunk("ventas/cancelarVenta", async (idOrdenVendedor) => cancelarVentaApi(idOrdenVendedor));
 
-export const fetchEstadisticas = createAsyncThunk("ventas/fetchEstadisticas", async () => getEstadisticasVendedorApi());
+export const fetchEstadisticas = createAsyncThunk("ventas/fetchEstadisticas", async () => getEstadisticasVendedorApi(), {
+  condition: (_, { getState }) => {
+    const { estadisticas, loadingEstadisticas, errorEstadisticas } = getState().ventas;
+    return estadisticas === null && !loadingEstadisticas && !errorEstadisticas;
+  },
+});
 
 const initialState = {
   idUsuario: null,
@@ -22,6 +27,7 @@ const initialState = {
   loading: false,
   error: null,
   estadisticas: null,
+  loadingEstadisticas: false,
   errorEstadisticas: null,
 };
 
@@ -50,12 +56,15 @@ const ventasSlice = createSlice({
         replaceById(state.items, action.payload);
       })
       .addCase(fetchEstadisticas.pending, (state) => {
+        state.loadingEstadisticas = true;
         state.errorEstadisticas = null;
       })
       .addCase(fetchEstadisticas.fulfilled, (state, action) => {
+        state.loadingEstadisticas = false;
         state.estadisticas = action.payload;
       })
       .addCase(fetchEstadisticas.rejected, (state, action) => {
+        state.loadingEstadisticas = false;
         state.errorEstadisticas = action.error.message;
       });
   },
